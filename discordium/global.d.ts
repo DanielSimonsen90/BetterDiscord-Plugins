@@ -24,7 +24,7 @@ declare namespace BdApi {
         onConfirm?: () => void;
         onCancel?: () => void;
     }
-    function showConfirmationModal(title: string, content: string | JSX.Element, options?: ConfirmationModalOptions): void;
+    function showConfirmationModal(title: string, content: string | JSX.Element, options?: ConfirmationModalOptions): Promise<boolean>;
 
     interface ToastOptions {
         type?: "" | "info" | "success" | "danger" | "error" | "warning" | "warn";

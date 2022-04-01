@@ -1,0 +1,15 @@
+import { ActivityTypes, PermissionString, User, UserStatus } from "../../discord"
+
+type UserUtils = {
+    me: User,
+    is(user: any): user is User,
+    getStatus(id?: string): UserStatus,
+    getStatusColor(statis: UserStatus, useColor?: boolean): string,
+    getActivity(id?: string): ActivityTypes,
+    getCustomStatus(id?: string): ActivityTypes[4],
+    getAvatar(id?: string): string,
+    getBanner(id?: string): string,
+    can(permission: PermissionString, userId?: string, channelId?: string): boolean,
+    openMenu(user: User, guildId: string, e?: MouseEvent): void
+}
+export default UserUtils;
