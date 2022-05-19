@@ -1,4 +1,4 @@
-import { Component } from '../React';
+import { React } from 'discordium';
 
 type OnClickEventHandler = (event: MouseEvent) => void;
 type BaseContextMenuItemProps = {
@@ -20,7 +20,7 @@ type BaseContextMenuItemProps = {
 type ContextMenuProps = {
     group: BaseContextMenuItemProps & {
         type: "group"
-        items: Array<ContextMenuProps>
+        items: Array<ContextMenuProps[keyof ContextMenuProps]>
     },
     toggle: BaseContextMenuItemProps & {
         type: "toggle",
@@ -35,9 +35,9 @@ type ContextMenuProps = {
     },
     submenu: BaseContextMenuItemProps & {
         type: "submenu",
-        render?: Array<Component>,
-        items?: Array<ContextMenuProps>,
-        children?: Array<Component>,
+        render?: Array<React.Component>,
+        items?: Array<ContextMenuProps[keyof ContextMenuProps]>,
+        children?: Array<React.Component>,
     },
     custom: BaseContextMenuItemProps & {
         type: "custom",
@@ -47,17 +47,17 @@ type ContextMenuProps = {
     seperator: BaseContextMenuItemProps
 }
 
-type ContextMenuComponent<Props extends BaseContextMenuItemProps> = Component<Props>;
+type ContextMenuComponent<Props extends BaseContextMenuItemProps> = React.Component<Props>;
 
 export type ContextMenu = {
     buildMenuItem<Type extends keyof ContextMenuProps>(props: ContextMenuProps[Type]): ContextMenuComponent<ContextMenuProps[Type]>,
-    buildMenuWithChildren(...items: Array<ContextMenuProps[keyof ContextMenuProps]>): Array<ContextMenuProps[keyof ContextMenuProps]>,
+    buildMenuChildren(...items: Array<ContextMenuProps[keyof ContextMenuProps]>): Array<ContextMenuProps[keyof ContextMenuProps]>,
     buildMenu(...items: Array<BaseContextMenuItemProps>): ContextMenuComponent<{ items: Array<BaseContextMenuItemProps>, label: string }>,
     openContextMenu(event: MouseEvent, menuComponent: ContextMenuComponent<any>, config: {
         position?: 'top' | 'bottom' | 'left' | 'right',
         align?: 'top' | 'bottom',
         onClose?: () => void,
-        noBlueEvent?: boolean
+        noBlurEvent?: boolean
     }): void,
     getDiscordMenu(nameOrFilter: string | Function): Promise<ContextMenuComponent<any>>,
     forceUpdateMenus(): void

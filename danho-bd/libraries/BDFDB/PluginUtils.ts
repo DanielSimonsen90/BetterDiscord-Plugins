@@ -5,7 +5,7 @@ import LibraryComponents from "./LibraryComponents";
 type PluginUtils = {
     createSettingsPanel(plugin: IPlugin, props: {
         collapseStates: {},
-        children: Array<Component> | (() => Array<Component>)
+        children: Array<JSX.Element> | (() => Array<JSX.Element>)
     }): LibraryComponents["SettingsPanel"];
 }
 export default PluginUtils;

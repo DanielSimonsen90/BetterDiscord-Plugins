@@ -1,6 +1,6 @@
 import { PropertiesWithout, BetterOmit, Arrayable } from 'danholibraryjs';
 import React, { Component } from 'react';
-export { default as React, Component } from 'react';
+export { default as React, ComponentClass as Component } from 'react';
 export { default as ReactDOM } from 'react-dom';
 
 export type BaseProps = {
@@ -22,7 +22,7 @@ export type BaseProps = {
 //     render(): any;
 // }
 
-export type Children<Props = {}> = Arrayable<Component<Props>>
+export type Children = Arrayable<JSX.Element>
 export type ComponentInstance<Props = {}, RemoveChildren extends boolean = false> = BetterOmit<PropertiesWithout<Function, Component<Props>>, 'state'> & {
     props: BetterOmit<BaseProps, 'children'> & RemoveChildren extends true ? {} : {
         children: Arrayable<ComponentInstance>

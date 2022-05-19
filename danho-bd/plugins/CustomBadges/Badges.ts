@@ -1,13 +1,13 @@
 import { Component } from '../../libraries/React';
 
 export class CustomBadge {
-    constructor(public label: string, public weight: number, data: string | Component<any, any>) {
+    constructor(public label: string, public weight: number, data: string | JSX.Element) {
         if (typeof data === 'string') this.icon = data;
         else this.component = data;
     }
 
     public icon?: string
-    public component?: Component<any, any>
+    public component?: JSX.Element
 }
 
 

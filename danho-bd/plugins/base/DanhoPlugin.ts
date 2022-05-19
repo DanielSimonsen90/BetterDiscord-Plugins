@@ -7,12 +7,13 @@ import LoggerUtil from "./LoggerUtil";
 import CollapseContainer from "../../libraries/BDFDB/LibraryComponents/CollapseContainer";
 import SettingsSaveItem from "../../libraries/BDFDB/LibraryComponents/SettingsSaveItem";
 import { BDFDBPluginParams, PatchedModules } from '../../libraries/BDFDB';
-import { Component, ComponentInstance, ComponentFiber } from '../../libraries/React';
+import { ComponentInstance, ComponentFiber, Component } from '../../libraries/React';
 
 import { Setting } from "../../base";
-import * as ProcessEvents from '../base/ProcessEvent';
+import * as ProcessEvents from './ProcessEvent';
+import React, { Attributes, ComponentClass, FunctionComponent, ReactHTML } from "react";
 
-type SettingsSaveItemProps = BetterOmit<SettingsSaveItem['props'], 'plugin' | 'label' | 'value' | 'keys'>;
+type SettingsSaveItemProps = BetterOmit<SettingsSaveItem['defaultProps'], 'plugin' | 'label' | 'value' | 'keys'>;
 
 /**
  * @name DanhoPlugin
@@ -96,22 +97,24 @@ export function DanhoPlugin([Plugin, BDFDB, ZLibrary]: BDFDBPluginParams, config
         }
 
         //#region Settings
-        public createSettingsPanel(collapseStates: {}, children: Array<CollapseContainer>) {
+        public createSettingsPanel(collapseStates: {}, children: Array<ReturnType<typeof this.createCollapseContainer>>) {
             return BDFDB.PluginUtils.createSettingsPanel(this as any, { collapseStates, children });
         }
-        public createCollapseContainer(setting: keyof Settings, settingObj: any, props: (key: string, index: number, keys: Array<string>) => SettingsSaveItemProps): CollapseContainer {
+        public createCollapseContainer(setting: keyof Settings, settingObj: any, props: (key: string, index: number, keys: Array<string>) => SettingsSaveItemProps) {
             return this.createElement(BDFDB.LibraryComponents.CollapseContainer, {
                 title: `${(setting as string).substring(0, 1).toUpperCase() + (setting as string).substring(1)} Settings`,
                 collapseStates: {},
-                children: Object.keys(settingObj).map((key, index, keys) => {
-                return this.createElement(BDFDB.LibraryComponents.SettingsSaveItem, {
-                    plugin: this,
-                    keys: [setting as string, key],
-                    label: this.defaults[setting][key]?.description || "No description?",
-                    value: settingObj[key],
-                    ...props(key, index, keys)
-                });
-            })});
+                children: Object.keys(settingObj).map((key, index, keys) => (
+                    this.createElement(BDFDB.LibraryComponents.SettingsSaveItem, {
+                        key: index,
+                        plugin: this,
+                        keys: [setting as string, key],
+                        label: this.defaults[setting][key]?.description || "No description?",
+                        value: settingObj[key],
+                        ...props(key, index, keys)
+                    })
+                ))
+            });
         }
 
         public onSettingsClosed() {
@@ -124,18 +127,21 @@ export function DanhoPlugin([Plugin, BDFDB, ZLibrary]: BDFDBPluginParams, config
 
         //#region React
         public createElement<
-            Element extends (Component<any> | keyof HTMLElementTagNameMap | keyof SVGElementTagNameMap) = Component,
-            Props = Element extends keyof HTMLElementTagNameMap ? HTMLElementTagNameMap[Element] : 
-                    Element extends keyof SVGElementTagNameMap ? SVGElementTagNameMap[Element] : 
-                    Element extends Component<infer P> ? P : never,
-            ReturnComponent = Element extends Component<any> ? Element : Component<Props>
-        >(component: Element, props: Props): ReturnComponent {
-            return BDFDB.ReactUtils.createElement(component, props);
+            // Element extends (Component<any> | keyof HTMLElementTagNameMap | keyof SVGElementTagNameMap) = Component,
+            // Props = Element extends keyof HTMLElementTagNameMap ? HTMLElementTagNameMap[Element] : 
+            //         Element extends keyof SVGElementTagNameMap ? SVGElementTagNameMap[Element] : 
+            //         Element extends Component<infer P> ? P : never
+            Element extends ComponentClass<any> | keyof ReactHTML = ComponentClass<any>,
+            Props = Element extends ComponentClass<infer P> ? Attributes & P | null : 
+                    Element extends keyof ReactHTML ? ReactHTML[Element] | null : 
+                    never
+        >(component: Element, props?: Props) {
+            return BDFDB.ReactUtils.createElement(component as any, props);
         }
         public getReactInstance<Props = {}, State = null>(node: Node): ComponentFiber<Props, State> | null {
             return BDFDB.ReactUtils.getInstance(node);
         }
-        public render(component: Component, target: Node) {
+        public render<P>(component: React.ReactElement<P>, target: ReactDOM.Container) {
             return BDFDB.ReactUtils.render(component, target);
         }
 
@@ -145,7 +151,7 @@ export function DanhoPlugin([Plugin, BDFDB, ZLibrary]: BDFDBPluginParams, config
                     Element extends keyof SVGElementTagNameMap ? SVGElementTagNameMap[Element] : 
                     Element extends Component<infer P> ? P : never
         >(component: Element, props: Props, children: Arrayable<Element> = null): HTMLElement {
-            const parentTag: string = typeof component === "string" ? component : component.type;
+            const parentTag: string = typeof component === "string" ? component : component['type'];
             const element = document.createElement(parentTag);
 
             if ('children' in props || children) {

@@ -57,15 +57,23 @@ export interface Plugin<Settings extends Record<string, any>> {
     settingsPanel?: React.ComponentType<SettingsProps<Settings>>;
 }
 
+export type CreatePluginCallbackApi<
+    SettingsType extends Record<string, any>,
+    DataType extends {settings: SettingsType} = {settings: SettingsType}
+> = Api<SettingsType, DataType> & {
+    Config: Config<SettingsType>;
+}
+
 /** Creates a BetterDiscord plugin. */
 export const createPlugin = <
     SettingsType extends Record<string, any>,
     DataType extends {settings: SettingsType} = {settings: SettingsType}
 >(
-    {name, version, styles: css, settings}: Config<SettingsType>,
-    callback: (api: Api<SettingsType, DataType>) => Plugin<SettingsType>
+    config: Config<SettingsType>,
+    callback: (api: CreatePluginCallbackApi<SettingsType, DataType>) => Plugin<SettingsType>
 ): BdApi.PluginConstructor => {
     // create log
+    const { name, version, styles: css, settings } = config;
     const Logger = createLogger(name, "#3a71c1", version);
     const Patcher = createPatcher(name, Logger);
     const Styles = createStyles(name);
@@ -73,7 +81,7 @@ export const createPlugin = <
     const Settings = createSettings(Data, settings ?? {} as SettingsType);
 
     // get plugin info
-    const plugin = callback({Logger, Patcher, Styles, Data, Settings});
+    const plugin = callback({ Logger, Patcher, Styles, Data, Settings, Config: config });
 
     // construct wrapper
     class Wrapper implements BdApi.Plugin {

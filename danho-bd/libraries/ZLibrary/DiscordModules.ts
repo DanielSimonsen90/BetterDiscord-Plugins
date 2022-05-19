@@ -1,5 +1,5 @@
-import { Channel, Guild, User } from "../../discord"
-import ReactModule, { ReactDOMModule } from "../React"
+import { Channel, Guild, GuildMember, User } from "../../discord"
+import React, { ReactDOM } from '../React';
 
 type DiscordModules = {
     ChannelStore: {
@@ -27,12 +27,13 @@ type DiscordModules = {
 
     },
     GuildStore: {
-        getGuild(idOrName: string): {
-            discordObject: Guild
-        }
+        getGuild(idOrName: string): Guild
     },
-    React: ReactModule,
-    ReactDOM: ReactDOMModule,
+    GuildMemberStore: {
+        getMember(guildIdOrName: string, userIdOrName: string): GuildMember
+    },
+    React: typeof React,
+    ReactDOM: typeof ReactDOM,
     SelectedChannelStore: {
         getChannelId(): string,
         getLastChannelFollowingDestionation(): string,
@@ -41,9 +42,7 @@ type DiscordModules = {
         getVoiceChannelId(): string,
     }
     UserStore: {
-        getUser(idOrName: string): {
-            discordObject: User
-        }
+        getUser(idOrName: string): User
     },
 }
 export default DiscordModules;

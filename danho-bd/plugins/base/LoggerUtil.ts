@@ -1,4 +1,4 @@
-type LogMethods = Pick<Console, 'log' | 'warn' | 'error' | 'table' | 'debug' | 'group' | 'trace' | 'timeLog'>
+type LogMethods = Pick<Console, 'log' | 'warn' | 'error' | 'table' | 'debug' | 'group' | 'trace'>
 
 export default class LoggerUtil {
     constructor(

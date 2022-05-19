@@ -55,11 +55,13 @@ export interface Patcher {
      */
     after<
         Module extends Record<Key, (...args: any[]) => any>,
-        Key extends keyof Module
+        Key extends keyof Module,
+        Props extends any
     >(
         object: Module,
         method: Key,
-        callback: Callback<Module[Key]>,
+        // callback: Callback<Module[Key]>,
+        callback: (caller: undefined, data: [props: Props], returntype: any) => any,
         options?: Options
     ): Cancel;
 
@@ -79,7 +81,8 @@ export interface Patcher {
         object: Module,
         method: Key,
         arg: number,
-        callback: () => T
+        callback: () => T,
+        options?: { silent?: boolean }
     ): Promise<T>;
 
     /**
@@ -87,14 +90,14 @@ export interface Patcher {
      *
      * The patch is cancelled automatically once the callback returns something.
      */
-    waitForContextMenu<T>(callback: () => T): Promise<T>;
+    waitForContextMenu<T>(callback: () => T, options?: { silent?: boolean }): Promise<T>;
 
     /**
      * Listen for modal related lazy loads.
      *
      * The patch is cancelled automatically once the callback returns something.
      */
-    waitForModal<T>(callback: () => T): Promise<T>;
+    waitForModal<T>(callback: () => T, options?: { silent?: boolean }): Promise<T>;
 }
 
 const resolveName = <Module, Key extends keyof Module>(object: Module, method: Key) => {
@@ -139,7 +142,7 @@ export const createPatcher = (id: string, Logger: Logger): Patcher => {
             {silent: true}
         );
         if (!options.silent) {
-            Logger.log(`Patched ${method} of ${options.name ?? resolveName(object, method)}`);
+            // Logger.log(`Patched ${method} of ${options.name ?? resolveName(object, method)} and bound to ${callback.name}`, {callback});
         }
         return cancel;
     };
@@ -165,21 +168,22 @@ export const createPatcher = (id: string, Logger: Logger): Patcher => {
             rawPatcher.after,
             object,
             method,
-            callback,
+            callback as any,
             options
         ),
         unpatchAll: () => {
             rawPatcher.unpatchAll(id);
             Logger.log("Unpatched all");
         },
-        waitForLazy: (object, method, arg, callback) => new Promise<any>((resolve) => {
+        waitForLazy: (object, method, arg, callback, options) => new Promise<any>((resolve) => {
             // check load once before we patch
             const found = callback();
             if (found) {
+                if (!options.silent) Logger.log(`Lazy load in ${method} of ${resolveName(object, method)} found from callback`, {found});
                 resolve(found);
             } else {
                 // patch lazy load method
-                Logger.log(`Waiting for lazy load in ${method} of ${resolveName(object, method)}`);
+                if (!options.silent) Logger.log(`Waiting for lazy load in ${method} of ${resolveName(object, method)} ${(callback.name ? `and bound to ${callback.name}` : '')}`, {object, method, arg, callback, options});
                 patcher.before(object, method, ({args, cancel}) => {
                     // replace resolver function
                     const original = args[arg];
@@ -189,6 +193,7 @@ export const createPatcher = (id: string, Logger: Logger): Patcher => {
                         // check if loaded
                         const found = callback();
                         if (found) {
+                            if (!options.silent) Logger.log(`Lazy load in ${method} of ${resolveName(object, method)} found from callback`, {found});
                             resolve(found);
 
                             // we dont need the patch anymore
@@ -200,8 +205,8 @@ export const createPatcher = (id: string, Logger: Logger): Patcher => {
                 }, {silent: true});
             }
         }),
-        waitForContextMenu: (callback) => patcher.waitForLazy(Modules.ContextMenuActions, "openContextMenuLazy", 1, callback),
-        waitForModal: (callback) => patcher.waitForLazy(Modules.ModalActions, "openModalLazy", 0, callback)
+        waitForContextMenu: (callback, options = { silent: false }) => patcher.waitForLazy(Modules.ContextMenuActions, "openContextMenuLazy", 1, callback, options),
+        waitForModal: (callback, options = { silent: false }) => patcher.waitForLazy(Modules.ModalActions, "openModalLazy", 0, callback, options)
     };
 
     return patcher;

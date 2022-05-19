@@ -33,6 +33,7 @@
         "@types/react-dom": "^17.0.10",
         "@types/react-reconciler": "^0.26.4",
         "@types/semver": "^7.3.9",
+        "jsx-to-string": "^1.4.0",
         "simple-markdown": "^0.7.3"
     },
     "devDependencies": {

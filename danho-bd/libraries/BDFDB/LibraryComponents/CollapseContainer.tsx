@@ -14,7 +14,7 @@ type CollapseContainer = Component<{
 }>
 export default CollapseContainer;
 
-export function CollapseContianerComponent(props: CollapseContainer["props"]) {
+export function CollapseContianerComponent(props: CollapseContainer["defaultProps"]) {
     const BDFDB = useBDFDB();
 
     return (

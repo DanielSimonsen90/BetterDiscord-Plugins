@@ -1,7 +1,11 @@
-import { Component, MouseEventHandler } from "../../React";
+import { Children, Component, MouseEventHandler } from "../../React";
 
 type Clickable = Component<{
+    "aria-label"?: string,
     className?: string,
+    role?: string,
+    tabIndex?: number,
+    children: Children,
     onClick?: MouseEventHandler,
     onContextMenu?: MouseEventHandler,
     onMouseDown?: MouseEventHandler,

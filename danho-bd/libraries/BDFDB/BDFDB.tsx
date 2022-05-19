@@ -26,24 +26,30 @@ import FolderUtils from './FolderUtils';
 import ChannelUtils from './ChannelUtils';
 import DMUtils from './DMUtils';
 import ColorUtils from './ColorUtils';
+import DOMUtils from './DOMUtils';
+import { ModalUtils } from './ModalUtils';
 
 export type BDFDB = {
     ChannelUtils: ChannelUtils,
     ColorUtils: ColorUtils,
     DataUtils: DataUtils,
-    DiscordClassModules: Record<string, string>
+    DiscordClassModules: Record<string, string>,
+    disCN: any,
     DMUtils: DMUtils,
+    DOMUtils: DOMUtils
     FolderUtils: FolderUtils,
     GuilddUtils: GuildUtils,
     LibraryComponents: LibraryComponents,
     LibraryModules: LibraryModules
     MessageUtils: MessageUtils,
+    ModalUtils: ModalUtils,
     PatchUtils: PatchUtils,
     PluginUtils: PluginUtils,
     ReactUtils: ReactUtils,
     TooltipUtils: TooltipUtils,
     UserUtils: UserUtils,
 }
+export const BDFDB: BDFDB = (window as any).BDFDB;
 export default BDFDB;
 
 import { useEffect, useMemo, useState } from 'react';

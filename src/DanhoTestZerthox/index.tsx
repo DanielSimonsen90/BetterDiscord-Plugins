@@ -1,4 +1,5 @@
-import { React, createPlugin, Finder, Utils } from 'discordium';
+import { React, createPlugin, Finder } from 'discordium';
+import { forceRerender } from 'danho-bd';
 import config from './config.json';
 import styles from './styles.scss';
 
@@ -7,16 +8,8 @@ const HomeButton = Finder.byProps('HomeButton');
 const Tooltip = Finder.byProps("TooltipContainer");
 const Clickable = Finder.byName("Clickable");
 
-export default createPlugin({ ...config, styles }, ({ Data, Logger, Patcher, Settings, Styles }) => {
-    const triggerRerender = async () => {
-        const node = document.getElementsByClassName(guildStyles.guilds)?.[0];
-        const fiber = Utils.getFiber(node);
-        if (await Utils.forceFullRerender(fiber)) {
-            Logger.log("Rerendered guilds");
-        } else {
-            Logger.warn("Unable to rerender guilds");
-        }
-    };
+export default createPlugin({ ...config, styles }, ({ Data, Logger, Patcher, Settings, Styles, Config }) => {
+    const triggerRerender = () => forceRerender(document.getElementsByClassName(guildStyles.guilds)?.[0]);
 
     return {
         start() {

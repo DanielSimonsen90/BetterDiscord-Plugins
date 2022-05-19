@@ -8,6 +8,7 @@ import SettingsSaveItem from './SettingsSaveItem';
 import SettingsPanel from './SettingsPanel';
 import Switch from './Switch';
 import TextInput from './TextInput';
+import TooltipContainer from './TooltipContainer';
 
 export type LibraryComponents = {
     Clickable: Clickable,
@@ -21,5 +22,6 @@ export type LibraryComponents = {
     SettingsSaveItem: SettingsSaveItem,
     Switch: Switch,
     TextInput: TextInput,
+    TooltipContainer: TooltipContainer
 }
 export default LibraryComponents;

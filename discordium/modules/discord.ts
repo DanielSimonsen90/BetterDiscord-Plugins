@@ -46,7 +46,15 @@ export const RadioGroup = () => Finder.byName("RadioGroup");
 export const Slider = () => Finder.byName("Slider");
 export const TextInput = () => Finder.byName("TextInput");
 
-export const Menu = () => Finder.byProps("MenuGroup", "MenuItem", "MenuSeparator");
+export const Menu = (): {
+    MenuCheckboxItem: any;
+    MenuControlItem: any;
+    MenuGroup: any;
+    MenuItem: any;
+    MenuRadioItem: any;
+    MenuSeperator: any;
+    MenuSpinner: any;
+} => Finder.byProps("MenuGroup", "MenuItem", "MenuSeparator")
 export const Form = () => Finder.byProps("FormItem", "FormSection", "FormDivider");
 
 // STYLE MODULES
