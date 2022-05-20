@@ -1,6 +1,8 @@
 export type Output = (...data: any[]) => void;
 
 export interface Logger {
+    groupEnd(): void;
+    group(label: string, collapsed?: boolean): void;
     /** Prints data to a custom output. */
     print(output: Output, ...data: any[]): void;
 
@@ -25,6 +27,8 @@ export const createLogger = (name: string, color: string, version: string): Logg
         print,
         log: (...data) => print(console.log, ...data),
         warn: (...data) => print(console.warn, ...data),
-        error: (...data) => print(console.error, ...data)
+        error: (...data) => print(console.error, ...data),
+        group: (label, collapsed = true) => print(console[(collapsed ? 'groupCollapsed' : 'group')], label),
+        groupEnd: () => print(console.groupEnd),
     };
 };

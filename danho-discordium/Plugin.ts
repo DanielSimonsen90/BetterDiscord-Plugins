@@ -5,23 +5,16 @@ export { default as $ } from '@dquery';
 export { React, createPlugin } from 'discordium';
 export * as Discord from './Discord';
 
+export type MutationRecordCallback = (record: MutationRecord) => boolean;
+export type PluginConfig = PatcherConfig & MutationConfig;
+
 import { Config, CreatePluginCallbackApi, Logger, Patcher, Plugin, Styles, Data, Settings } from 'discordium';
 import { ObservationCallback, ObservationConfig } from './MutationManager';
-import MutationManager, { MutationConfigOptions, ObservationReturns } from './MutationManager/MutationManager';
+import MutationManager, { initializeMutations, MutationConfig, MutationConfigOptions, ObservationReturns } from './MutationManager/MutationManager';
 import ContextMenuProvider from './ContextMenuProvider';
 import initializePatches, { Patched, PatcherConfig } from './Patcher/Patcher';
 
-
-
-export type MutationConfig = Partial<Record<MutationConfigOptions, string>>;
-export type MutationRecordCallback = (record: MutationRecord) => boolean;
-
-
 type Layers = 'tooltip' | 'modal' | 'popout' | `create${'Channel' | 'Category'}`;
-/**
- * Options object or string for displayName or strings for props
- */
-
 export class DanhoPlugin<
     SettingsType extends Record<string, any>,
     DataType extends Record<"settings", SettingsType> = Record<"settings", SettingsType>
@@ -45,21 +38,15 @@ export class DanhoPlugin<
     protected mutationManager: MutationManager;
     protected contextMenus: ContextMenuProvider;
 
-    public async start(config?: PatcherConfig) {
+    public async start(config?: PluginConfig) {
         console.clear();
 
-        this.mutationManager = new MutationManager()
-            // .on('guild-change', (record, guild) => this.onGuildChange(record, guild))
-            // .on('channel-change', (record, { channel }) => this.onChannelUpdate(record, channel))
-
-        /*
-        for (const [key, value] of Object.entries(config)) {
-            this.mutationManager.observe(key, this[value].bind(this));
-        }
-        */
-
-        this.patches = await initializePatches(this, config);
+        this.logger.group("Patches");
+        const { mutations, ...patchConfig } = config;
+        this.mutationManager = initializeMutations(this, {mutations});
+        this.patches = await initializePatches(this, patchConfig);
         this.contextMenus = ContextMenuProvider.getInstance(this);
+        this.logger.groupEnd();
     }
     public stop() {
         this.mutationManager.clear();

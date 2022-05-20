@@ -157,6 +157,7 @@ function commitPatch(plugin: DumbPlugin, module: Module, { patchType, method, op
 
     const cancel = plugin.patcher[patchType as any](module, method, callback, option);
     const patched = { module, callback, method, patchType, option, cancel };
+    if (!optionIsArrayable(option) && !option.silent)
     plugin.logger.log(`Patched ${patchType} ${method} on ${
         module.displayName 
         || module.default?.displayName 

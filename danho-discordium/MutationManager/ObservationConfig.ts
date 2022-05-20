@@ -1,9 +1,10 @@
+import { Fiber } from "@react";
 import $, { DQuery, Selector } from "@dquery";
 import { Arrayable } from "danholibraryjs";
 import { MutationConfigOptions } from "./MutationManager";
 
 export type ConfigSelector = Exclude<Selector, DQuery | Node>;
-export type ObservationCallback<Arguments extends Array<any> = Array<any>> = (record: MutationRecord, ...args: Arguments) => boolean
+export type ObservationCallback<Arguments extends Array<any> = Array<any>> = (record: MutationRecord, fiber: Fiber, ...args: Arguments) => boolean
 export type ObservationConfigSetupCallback<
     Arguments extends Array<any> = Array<any>,
 > = (this: ObservationConfig<Arguments>, record: MutationRecord, callback:  ObservationCallback<Arguments>) => void;

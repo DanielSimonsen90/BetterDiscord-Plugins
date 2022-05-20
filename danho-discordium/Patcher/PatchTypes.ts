@@ -34,35 +34,3 @@ export type PatchProps = {
         user: User
     }
 }
-
-export type Message = {
-    channel: Channel,
-    compact: boolean,
-    forceAddreactions: undefined,
-    hasSpoilerEmbeds: boolean,
-    isInteracting: boolean,
-    message: Discord.Message,
-    onAttachmentContextMenu: (e: Event, t: any) => any,
-    renderComponentAccessory: undefined,
-    renderSuppressEmbeds: undefined,
-    renderThreadAccessory: undefined
-}
-
-export type Channel = {
-    channel: Discord.Channel,
-    chatInputType: ChannelInputType,
-    guild: Guild,
-    renderThreadNotice: boolean
-}
-
-export type UserPopout = {
-    channelId: string,
-    closePopout: () => void,
-    guildId?: string,
-    isPositioned: boolean,
-    nudge: number,
-    position: 'left' | 'right',
-    setPopoutRef: (e: any) => void,
-    updatePosition: () => void,
-    userId: string
-}

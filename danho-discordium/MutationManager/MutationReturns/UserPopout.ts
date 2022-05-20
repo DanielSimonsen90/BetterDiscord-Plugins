@@ -1,5 +1,16 @@
 import { UserPopoutManipulator } from "danho-discordium/DomManipulator/UserPopout";
-import { UserPopout } from "danho-discordium/Patcher";
 
-export type UserPopoutReturns = [props: UserPopout, manipulator: UserPopoutManipulator]
+export type UserPopoutReturns = [props: UserPopoutProps, manipulator: UserPopoutManipulator]
 export default UserPopoutReturns;
+
+export type UserPopoutProps = {
+    channelId: string,
+    closePopout: () => void,
+    guildId?: string,
+    isPositioned: boolean,
+    nudge: number,
+    position: 'left' | 'right',
+    setPopoutRef: (e: any) => void,
+    updatePosition: () => void,
+    userId: string
+}

@@ -49,5 +49,12 @@ export type BDFDB = {
     TooltipUtils: TooltipUtils,
     UserUtils: UserUtils,
 }
-export const BDFDB: BDFDB = (window as any).BDFDB;
+export let BDFDB: BDFDB = window.BDFDB;
+
+if (!window.BDFDB_Global.loaded) {
+    setTimeout(() => {
+        BDFDB = window.BDFDB
+    }, 100);
+}
+
 export default BDFDB;
