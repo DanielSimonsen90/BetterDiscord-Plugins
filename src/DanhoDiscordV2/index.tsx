@@ -10,16 +10,25 @@ class DanhoDiscordV2<
     DataType extends Record<"settings", SettingsType> = Record<"settings", SettingsType>
 > extends DanhoPlugin<SettingsType, DataType> {
     async start() {
-        // super.start();
-        super.start({
-            after: {
-                default: [{
-                    selector: "UserProfileBadgeList",
-                    isModal: true
-                }]
-            }
-        });
+        super.start();
+        // super.start({
+        //     after: {
+        //         default: [{
+        //             selector: "UserProfileBadgeList",
+        //             isModal: true
+        //         }]
+        //     }
+        // });
       
+        const UserProfileModalHeader = Finder.byName("UserProfileModalHeader");
+        console.log(UserProfileModalHeader);
+        const callback = () => {
+            this.logger.log('Hello there');
+            return <div>Hello</div>;
+        }
+
+        this.patcher.after(UserProfileModalHeader, "default", callback);
+
         // this.on(new ObservationConfig("chat-messages-content", this.$(`[data-list-id="chat-messages"]`).parent.element, 
         //     function(record, callback) {
         //         if (!MutationManager.isDirectChild(this.element, record.target)) return;
