@@ -1,4 +1,4 @@
-import { Component, Children } from "../../React"
+import { Component, Children } from "@lib/React"
 import LibraryComponents from "./LibraryComponents"
 
 type SettingsSaveItem<T = any> = Component<{

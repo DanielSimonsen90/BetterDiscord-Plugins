@@ -1,4 +1,4 @@
-import { ActivityTypes, PermissionString, User, UserStatus } from "../../discord"
+import { ActivityTypes, PermissionString, User, UserStatus } from "@discord"
 
 type UserUtils = {
     me: User,

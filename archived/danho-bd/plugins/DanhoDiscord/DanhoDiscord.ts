@@ -1,10 +1,9 @@
 import {} from 'danholibraryjs';
-import { Setting } from "../../base";
-import { BDFDBPluginParams } from "../../libraries/BDFDB";
+import { Setting } from "danho-bd/base";
+import { BDFDBPluginParams } from "@BDFDB";
 import DanhoPlugin from "../base/DanhoPlugin";
 import IConfigData from "../base/IConfigData";
-import IPlugin from "../base/IPlugin";
-import ProcessEvent, { AnalyticsContext } from "../base/ProcessEvent";
+import { AnalyticsContext } from "../base/ProcessEvent";
 import * as DanhoProcessEvent from "../base/DanhoProcessEvent";
 
 export class DanhoDiscordBuilder {

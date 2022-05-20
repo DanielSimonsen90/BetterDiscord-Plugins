@@ -7,7 +7,17 @@
         "resolveJsonModule": true,
         "baseUrl": ".",
         "paths": {
-            "dium/*": ["./dium/src/*"]
+            "@discord": ["./danho-discordium/Discord"],
+            "@BDFDB": ["./danho-bd/libraries/BDFDB/index"],
+            "@ZLibrary": ["./danho-bd/libraries/ZLibrary/index"],
+
+            "@dquery": ["./danho-discordium/dquery"],
+            "@lib/*": ["./danho-bd/libraries/*"],
+
+            "@discordium/*": ["./discordium/src/*"],
+            "@BDFDB/*": ["./danho-bd/libraries/BDFDB/*"],
+            "@ZLibrary/*": ["./danho-bd/libraries/ZLibrary/*"],
+            "@react": ["./discordium/src/api/react"]
         }
     },
     "ts-node": {

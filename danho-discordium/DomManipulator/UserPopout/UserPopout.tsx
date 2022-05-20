@@ -1,10 +1,11 @@
 import { UserPopoutReturns } from "danho-discordium/MutationManager/MutationReturns";
-import $, { DQuery } from 'danho-discordium/dquery';
-import BDFDB from "danho-bd/libraries/BDFDB";
-import ZLibrary from "danho-bd/libraries/ZLibrary";
-import { User, Channel, Guild, ActivityTypes, UserStatus, GuildMember, PermissionString, DiscordPermissionStrings } from "danho-bd/discord";
-import { classNames } from "discordium/modules";
-import { React } from 'discordium';
+import $, { DQuery } from '@dquery';
+import BDFDB from "@BDFDB";
+import ZLibrary from "@ZLibrary";
+import { User, GuildMember, Guild, UserStatus, ActivityTypes, PermissionString, DiscordPermissionStrings, Channel } from "@discord";
+
+import { React, classNames } from 'discordium';
+import { FocusEvent, MouseEvent, KeyboardEvent, ReactNode } from 'react';
 
 type Props = UserPopoutReturns[0] & {
     get user(): User;
@@ -26,13 +27,13 @@ export type BadgeProps = {
     clickable: {
         ariaLabel: string,
         className: string,
-        onBlur: (e: React.FocusEvent) => void,
-        onClick: (e: React.MouseEvent) => void,
-        onContextMenu: (e: React.MouseEvent) => void,
-        onFocus: (e: React.FocusEvent) => void,
-        onKeyPress: (e: React.KeyboardEvent) => void,
-        onMouseEnter: (e: React.MouseEvent) => void,
-        onMouseLeave: (e: React.MouseEvent) => void,
+        onBlur: (e: FocusEvent) => void,
+        onClick: (e: MouseEvent) => void,
+        onContextMenu: (e: MouseEvent) => void,
+        onFocus: (e: FocusEvent) => void,
+        onKeyPress: (e: KeyboardEvent) => void,
+        onMouseEnter: (e: MouseEvent) => void,
+        onMouseLeave: (e: MouseEvent) => void,
         role: "button",
         tabIndex: 0
     },
@@ -140,7 +141,7 @@ export class UserPopoutManipulator {
         const { clickable, img } = badge;
         const badgeList = this.rootNode.children(s => s.className("profileBadges"), true);
 
-        const Clickable = ({ children, ariaLabel, className, ...handlers }: AddBadgeProps['clickable'] & { children: React.ReactNode }) => (
+        const Clickable = ({ children, ariaLabel, className, ...handlers }: AddBadgeProps['clickable'] & { children: ReactNode }) => (
             <div className={classNames(badgeList.children(null, true).classes, className)} aria-label={ariaLabel}
                 role="button" tabIndex={0} {...handlers}
             >

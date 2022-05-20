@@ -1,4 +1,4 @@
-import { Children, Component } from '../../React';
+import { Children, Component } from '@lib/React';
 
 type TooltipContainer = Component<{
     allowOverflow?: boolean,

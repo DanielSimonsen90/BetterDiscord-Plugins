@@ -237,26 +237,27 @@ export const enum ChannelType {
 }
 
 /** A Member of a Guild. */
-export interface Member {
-    guildId: Snowflake;
-    userId: Snowflake;
+// Invalid member lmao
+// export interface Member {
+//     guildId: Snowflake;
+//     userId: Snowflake;
 
-    colorString: string;
-    nick?: any;
-    joinedAt: string;
-    guildMemberAvatar?: any;
-    guildMemberBanner?: any;
-    guildMemberBio: string;
+//     colorString: string;
+//     nick?: any;
+//     joinedAt: string;
+//     guildMemberAvatar?: any;
+//     guildMemberBanner?: any;
+//     guildMemberBio: string;
 
-    hoistRoleId: string;
-    iconRoleId?: any;
+//     hoistRoleId: string;
+//     iconRoleId?: any;
 
-    communicationDisabledUntil?: any;
-    isPending: boolean;
-    premiumSince?: any;
+//     communicationDisabledUntil?: any;
+//     isPending: boolean;
+//     premiumSince?: any;
 
-    roles: Snowflake[];
-}
+//     roles: Snowflake[];
+// }
 
 export const enum MessageType {
     Default = 0,

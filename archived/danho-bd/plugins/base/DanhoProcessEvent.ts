@@ -1,6 +1,6 @@
-import { Guild, Role, User } from "../../discord";
-import { ComponentFiber, ComponentInstance } from "../../libraries/React";
-import { BDMutationRecord } from "../../libraries/ZLibrary";
+import { Discord } from "discordium/src";
+import { ComponentFiber, ComponentInstance } from "@lib/React";
+import { BDMutationRecord } from "@ZLibrary";
 
 export type DanhoProcessChildListEvent<Props = {}, State = null> = {
     change: BDMutationRecord,
@@ -16,7 +16,7 @@ export type RoleInstance = ComponentInstance<{
     canRemove: boolean,
     guildId: string,
     onRemove: () => void,
-    role: Role,
+    role: Discord.Role,
 }, true> & {
     /** Role id */
     key: string,
@@ -31,9 +31,9 @@ export type RolesListComponent = ComponentInstance<{
         // Add Role button
         ComponentInstance<{
             className: string,
-            guild: Guild,
-            handleAddRole: (role: Role) => void,
-            user: User,
+            guild: Discord.Guild,
+            handleAddRole: (role: Discord.Role) => void,
+            user: Discord.User,
             userRoles: Array<string>
         }>
     ],

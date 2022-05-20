@@ -1,4 +1,4 @@
-import { Channel, Guild, GuildMember, User } from "../../discord"
+import { Channel, Guild, GuildMember, User } from "@discord"
 import React, { ReactDOM } from '../React';
 
 type DiscordModules = {

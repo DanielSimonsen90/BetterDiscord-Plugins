@@ -1,4 +1,4 @@
-import { Modules } from '../../plugins/base/ProcessEvent';
+import { Modules } from 'archived/danho-bd/plugins/base/ProcessEvent';
 import ZLibrary from '../ZLibrary';
 
 export type BDFDBPluginParams = [Plugin: any, BDFDB: BDFDB, ZLibrary: ZLibrary];
@@ -51,16 +51,3 @@ export type BDFDB = {
 }
 export const BDFDB: BDFDB = (window as any).BDFDB;
 export default BDFDB;
-
-import { useEffect, useMemo, useState } from 'react';
-
-export function useBDFDB() {
-    const loaded = useMemo<boolean>(() => (window as any).BDFDB_Global.loaded, [(window as any).BDFDB_Global.loaded]);
-    const [BDFDB, setBDFDB] = useState<BDFDB>();
-
-    useEffect(() => {
-        setBDFDB(loaded ? (window as any).BDFDB : null);
-    }, [loaded]);
-
-    return BDFDB;
-}

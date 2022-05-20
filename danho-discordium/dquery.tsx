@@ -1,16 +1,17 @@
-import { ComponentFiber } from 'danho-bd/libraries/React';
 import { Arrayable } from 'danholibraryjs';
 import { ReactDOM } from 'discordium'
-import { createElement } from './DanhoReact';
+import { Fiber } from '@react';
 import ElementSelector from './ElementSelector';
-import { If } from './Utils';
+import { If, PromisedReturn } from './Utils';
 
+export type SelectorCallback<Element extends Arrayable<HTMLElement> = HTMLElement> = 
+    ((selector: ElementSelector, _$: typeof $) => ElementSelector | string | DQuery<HTMLElement> | Element);
 export type Selector<Element extends Arrayable<HTMLElement> = HTMLElement> = 
     | string 
     | Element 
     | ElementSelector 
     | (Element extends HTMLElement ? DQuery<HTMLElement> : Array<DQuery<HTMLElement>>)
-    | ((selector: ElementSelector, _$: typeof $) => ElementSelector | string | DQuery<HTMLElement> | Element);
+    | SelectorCallback<Element>;
 
 export function $<
     Single extends boolean = true,
@@ -22,7 +23,6 @@ export function $<
     let elements = (() => {
         if (typeof selector === 'function') {
             selector = selector(new ElementSelector(), $) as Selector<El>;
-            console.log('Selector called', selector)
         }
         if (selector instanceof ElementSelector || typeof selector === 'string') 
             return [...document.querySelectorAll<T>(selector.toString()).values()] as Array<T>;
@@ -34,19 +34,45 @@ export function $<
 
     return elements.map(el => new DQuery<T>(el)) as any;
 }
+export async function $p<
+    Single extends boolean = true,
+    T extends HTMLElement = HTMLElement,
+    El extends Single extends true ? T : Array<T> = Single extends true ? T : Array<T>, 
+>(selector: PromisedReturn<SelectorCallback<El>>, single: Single = true as Single): Promise<If<Single, DQuery<T>, Array<DQuery<T>>>> {
+    const resolved = await selector(new ElementSelector(), $);
+
+    if (single) return new DQuery(resolved as T) as any;
+
+    let elements = (() => {
+        if (resolved instanceof ElementSelector || typeof resolved === 'string') 
+            return [...document.querySelectorAll<T>(resolved.toString()).values()] as Array<T>;
+        else if (resolved instanceof DQuery) {
+            return [resolved.element] as Array<T>;
+        }
+        return (Array.isArray(resolved) ? resolved : [resolved]) as Array<T>;
+    })()
+
+    return elements.map(el => new DQuery<T>(el)) as any;
+}
 
 export class DQuery<El extends HTMLElement = HTMLElement> {
     constructor(private selector: Selector<El>) {
-        const element = (
-            selector instanceof Node ? selector as El : 
-            selector instanceof DQuery ? selector.element as El :
-            document.querySelector<El>(
-                typeof selector === 'function' ? selector(new ElementSelector(), $).toString() : 
-                selector instanceof ElementSelector ? selector.toString() : selector
-            )
-        );
-        if (!element) console.trace(`%cCould not find element with selector: ${selector}`, "color: lightred; background-color: darkred;");
-        this.element = element;
+        if (selector) {
+            const element = (
+                selector instanceof HTMLElement ? selector as El : 
+                selector instanceof DQuery ? selector.element as El :
+                selector instanceof ElementSelector || typeof selector === 'string' ? document.querySelector<El>(selector.toString()) :
+                typeof selector === 'function' ? new DQuery<El>(selector(new ElementSelector(), $) as Selector<El>).element :
+                selector
+            );
+    
+            if (!element 
+                && selector
+                && !(typeof selector === 'function') // ElementSelector.getElementFromInstance(instance) might not find the element
+            ) console.trace(`%cCould not find element with selector: ${selector}`, "color: lightred; background-color: darkred;");
+
+            this.element = element;
+        }
     }
 
     public element: El | undefined;
@@ -112,7 +138,7 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     }
 
     public get fiber() {
-        return this.element['__reactFiber$'] as ComponentFiber<any, any>;
+        return this.element['__reactFiber$'] as Fiber;
     }
     public get props() {
         return this.fiber.memoizedProps as Record<string, any>;
@@ -208,3 +234,17 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
 
 }
 export default $;
+
+export function createElement(html: string | '<></>' | 'fragment', target?: Selector): Element {
+    if (html === "<></>" || html.toLowerCase() === "fragment") {
+        html = `<div class="fragment"></div>`;
+    }
+
+    const element = new DOMParser().parseFromString(html, "text/html").body.firstElementChild as Element;
+    if (!target) return element;
+
+    if (target instanceof Node) return target.appendChild(element);
+    else if (target instanceof DQuery) return target.element.appendChild(element);
+    else if (typeof target === "string" || target instanceof ElementSelector || typeof target === 'function') 
+        return document.querySelector(typeof target === 'function' ? target(new ElementSelector(), $).toString() : target.toString()).appendChild(element);
+}

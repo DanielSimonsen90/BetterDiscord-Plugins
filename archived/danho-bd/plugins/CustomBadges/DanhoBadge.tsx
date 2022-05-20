@@ -1,5 +1,5 @@
 import { CustomBadge } from './Badges';
-import BDFDB from '../../libraries/BDFDB';
+import BDFDB from '../../../../danho-bd/libraries/BDFDB';
 import React, { useEffect } from 'react';
 
 export type BadgeProps = BDFDB['LibraryComponents']['Clickable']['defaultProps'] & {

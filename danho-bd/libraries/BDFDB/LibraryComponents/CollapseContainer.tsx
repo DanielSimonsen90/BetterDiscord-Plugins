@@ -1,5 +1,5 @@
-import React, { Component, Children, MouseEventHandler } from "../../React";
-import { useBDFDB } from "../BDFDB";
+import React, { Component, Children, MouseEventHandler } from "@lib/React";
+import BDFDB from "../BDFDB";
 
 type CollapseContainer = Component<{
     title: string,
@@ -15,8 +15,6 @@ type CollapseContainer = Component<{
 export default CollapseContainer;
 
 export function CollapseContianerComponent(props: CollapseContainer["defaultProps"]) {
-    const BDFDB = useBDFDB();
-
     return (
         <div className={BDFDB.DOMUtils.formatClassName(
             props.collapsed && BDFDB.disCN.collapsecontainercollapsed, 

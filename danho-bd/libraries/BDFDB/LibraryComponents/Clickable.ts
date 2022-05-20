@@ -1,4 +1,4 @@
-import { Children, Component, MouseEventHandler } from "../../React";
+import { Children, Component, MouseEventHandler } from "@lib/React";
 
 type Clickable = Component<{
     "aria-label"?: string,

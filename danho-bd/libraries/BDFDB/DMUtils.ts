@@ -1,4 +1,4 @@
-import { Channel } from "../../discord";
+import { Channel } from "@discord";
 
 type DMUtils = {
     isDMChannel(channel: any): channel is Channel,

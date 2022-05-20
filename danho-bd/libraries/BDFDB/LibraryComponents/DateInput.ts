@@ -1,4 +1,4 @@
-import { Component } from "../../React";
+import { Component } from "@lib/React";
 
 type DateInput = Component<{
     className?: string,

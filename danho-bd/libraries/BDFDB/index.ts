@@ -1,3 +1,2 @@
 export * from './BDFDB';
-import BDFDB from './BDFDB';
-export default BDFDB;
+export { default } from './BDFDB';

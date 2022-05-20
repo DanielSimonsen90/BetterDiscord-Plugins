@@ -1,8 +1,6 @@
-import Clickable from 'danho-bd/libraries/BDFDB/LibraryComponents/Clickable';
-import TooltipContainer from 'danho-bd/libraries/BDFDB/LibraryComponents/TooltipContainer';
-import { BDFDB, DanhoPlugin, createPlugin, Discord, React, $, ZLibrary } from 'danho-discordium';
-import { Finder } from 'discordium/api';
-import { ReactProvider } from 'react-reconciler';
+import { BDFDB, DanhoPlugin, createPlugin, React, $ } from 'danho-discordium';
+import { PatchReturns } from 'danho-discordium/Patcher';
+import { Finder } from 'discordium/src';
 import config from './config.json';
 
 class DanhoDiscordV2<
@@ -10,24 +8,28 @@ class DanhoDiscordV2<
     DataType extends Record<"settings", SettingsType> = Record<"settings", SettingsType>
 > extends DanhoPlugin<SettingsType, DataType> {
     async start() {
-        super.start();
-        // super.start({
-        //     after: {
-        //         default: [{
-        //             selector: "UserProfileBadgeList",
-        //             isModal: true
-        //         }]
-        //     }
-        // });
-      
-        const UserProfileModalHeader = Finder.byName("UserProfileModalHeader");
-        console.log(UserProfileModalHeader);
-        const callback = () => {
-            this.logger.log('Hello there');
-            return <div>Hello</div>;
-        }
+        // super.start();
+        super.start({
+            after: {
+                default: [
+                    { selector: "UserProfileBadgeList", isModal: true },
+                    { selector: "UserPopoutBody", isModal: true },
+                    { selector: ["canRemove", "guildId", "onRemove", "role"], isModal: true, callback: 'patchRole' }
+                ]
+            }
+        });
 
-        this.patcher.after(UserProfileModalHeader, "default", callback);
+        // const Role = await this.patcher.waitForModal(() => Finder.query({ props: ["canRemove", "guildId", "onRemove", "role"] }));
+        // console.log('Role', Role);
+
+        // const UserProfileBadgeList = await this.patcher.waitForContextMenu(
+        //     () => Finder.query({name: "UserProfileBadgeList"}) as {default: (channel: Discord.Channel) => JSX.Element}
+        // );
+
+        // // add queue clear item
+        // this.patcher.after(UserProfileBadgeList, "default", ({result}) => {
+        //     console.log('I found you!')
+        // });
 
         // this.on(new ObservationConfig("chat-messages-content", this.$(`[data-list-id="chat-messages"]`).parent.element, 
         //     function(record, callback) {
@@ -89,22 +91,10 @@ class DanhoDiscordV2<
         // })
     }
 
-    async patchUserProfileBadgeList({ args: [props], result }: {
-        args: [{
-            className: string,
-            openPremiumSettings(): void,
-            premiumGuildSince: Date,
-            premiumSince: Date,
-            size: number,
-            user: Discord.User
-        }],
-        result: ReactProvider<null>
-    }) {
-        console.log('UserProfileBadgeList', props, result);
-        
-        if (!Array.isArray(result.props.children)) return;
+    patchUserProfileBadgeList({ args: [props], result }: PatchReturns["UserProfileBadgeList"]) {
+        if (!Array.isArray(result.props.children)) return this.logger.warn('UserProfileBadgeList children is not an array');
 
-        const ref = $(`.${props.className}`);
+        const ref = $(s => s.getElementFromInstance(result));
         if (!ref.element) return;
 
         const classes = {
@@ -112,17 +102,29 @@ class DanhoDiscordV2<
             img: ref.children(s => s.className("profileBadge", 'img'), true).classes
         }
 
-        result.props.children.splice(3, 0, (React.createElement<TooltipContainer['defaultProps']>(BDFDB.LibraryComponents.TooltipContainer, {
-            text: 'Crazy badge bro',
-            spacing: 24,
-            children: React.createElement<Clickable["defaultProps"]>(BDFDB.LibraryComponents.Clickable as any, {
-                "aria-label": 'Test badge',
-                className: `${classes.clickable} test-badge`,
-                role: 'button',
-                tabIndex: 0,
-                children: <img alt=' ' aria-hidden={true} src="https://media.discordapp.net/attachments/767713017274040350/768002085052088351/PinguDev.png" className={classes.img} />
-            }) as JSX.Element
-        })))
+        const { TooltipContainer, Clickable } = BDFDB.LibraryComponents;
+
+        const badge = (
+            <TooltipContainer text="Crazy badge bro" spacing={24} key="test-badge">
+                <Clickable aria-label='Test badge' className={`${classes.clickable} test-badge`} role="button" tabIndex={0}>
+                    <img alt=' ' aria-hidden={true} src="https://media.discordapp.net/attachments/767713017274040350/768002085052088351/PinguDev.png" className={classes.img} />
+                </Clickable>
+            </TooltipContainer>
+        );
+        result.props.children.splice(3, 0, badge);
+    }
+
+    patchUserPopoutBody({ args: [props], result }: PatchReturns["UserPopoutBody"]) {
+        console.log({
+            props,
+            result
+        })
+    }
+    patchRole({ args: [props], result }: PatchReturns["Role"]) {
+        console.log('Role', {
+            props,
+            result
+        })
     }
 }
 

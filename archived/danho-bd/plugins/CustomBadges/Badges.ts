@@ -1,5 +1,3 @@
-import { Component } from '../../libraries/React';
-
 export class CustomBadge {
     constructor(public label: string, public weight: number, data: string | JSX.Element) {
         if (typeof data === 'string') this.icon = data;
@@ -11,7 +9,7 @@ export class CustomBadge {
 }
 
 
-import ZLibrary from '../../libraries/ZLibrary';
+import ZLibrary from '../../../../danho-bd/libraries/ZLibrary';
 export const CustomBadges = (ZLibrary: ZLibrary) => new Array<CustomBadge>(
     new CustomBadge("Pingu Developer", 5684, "https://media.discordapp.net/attachments/767713017274040350/768002085052088351/PinguDev.png"),
     new CustomBadge("Nitro Gifter", 262143, NitroGifter(ZLibrary)),

@@ -1,7 +1,8 @@
-import { Channel, Message } from "danho-bd/discord";
 import { ChannelButtons } from ".";
-import $, { DQuery } from '../../dquery'
+import $, { DQuery } from '@dquery'
 import DOM from "./DOM";
+import { Message } from "@discord";
+import { Channel } from "danho-discordium/Patcher";
 
 export default class ChannelManipulator {
     constructor(record: MutationRecord, public readonly props: Channel) {
@@ -13,7 +14,7 @@ export default class ChannelManipulator {
     public readonly dom: DOM;
 
     public writeText(text: string) {
-        const chatInput = $<HTMLDivElement>(s => s.tagName('main').tagName("form").className("channelTextArea").className("textArea").role("textbox", 'div'));
+        const chatInput = $(s => s.tagName('main').tagName("form").className("channelTextArea").className("textArea").role("textbox", 'div'), true);
         const [insertText] = chatInput.prop<Function>("insertText", "node");
         insertText(text);
     }

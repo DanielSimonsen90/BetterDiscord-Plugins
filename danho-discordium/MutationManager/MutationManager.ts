@@ -1,10 +1,10 @@
-import { Guild } from 'danho-bd/discord';
 import ChannelManipulator from 'danho-discordium/DomManipulator/Channel';
 import { UserPopoutManipulator } from 'danho-discordium/DomManipulator/UserPopout';
 import ElementSelector from 'danho-discordium/ElementSelector';
-import $, { DQuery } from '../dquery';
+import $, { DQuery } from '@dquery';
 import { ChannelReturns, MessageReturns, UserPopoutReturns } from './MutationReturns';
 import ObservationConfig, { ObservationCallback } from './ObservationConfig';
+import { Guild } from '@discord';
 
 export type ChangeEvents = `${'guild' | 'channel' | 'category' | 'discord-content'}-change`;
 export type LifeCycle<T extends string> = `${T}-${'create' | 'update' | 'render' | 'delete'}`;
@@ -83,7 +83,7 @@ export class MutationManager {
                 ) return;
                 
                 const [props] = $(record.target as HTMLElement).propsWith<ObservationReturns['channel-change'][0]>("channel");
-                return callback(record, props, new ChannelManipulator(record, props.channel));
+                return callback(record, props, new ChannelManipulator(record, props));
             }, 'discord-content-change'
         ));
         // this.observations.set('category-change', new ObservationConfig('category-content', MutationManager.writeSelector

@@ -78,7 +78,7 @@ const byName$1 = (name) => {
     return (target) => target instanceof Object && target !== window && Object.values(target).some(byOwnName(name));
 };
 const byOwnName = (name) => {
-    return (target) => target?.displayName === name || target?.constructor?.displayName === name;
+    return (target) => (target?.displayName ?? target?.constructor?.displayName) === name;
 };
 const byProps$1 = (props) => {
     return (target) => target instanceof Object && props.every((prop) => prop in target);
@@ -138,12 +138,12 @@ const npm = {
 };
 
 const Flux$1 = () => byProps("Store", "useStateFromStores");
-const Events$1 = () => byProps("dirtyDispatch");
+const Dispatcher$1 = () => byProps("dirtyDispatch");
 
 const flux = {
     __proto__: null,
     Flux: Flux$1,
-    Events: Events$1
+    Dispatcher: Dispatcher$1
 };
 
 const Constants = () => byProps("Permissions", "RelationshipTypes");
@@ -225,9 +225,6 @@ const createPatcher = (id, Logger) => {
             cancel();
             return temp;
         } : (context, args, result) => callback({ cancel, original, context, args, result }), { silent: true });
-        if (!options.silent) {
-            Logger.log(`Patched ${method} of ${options.name ?? resolveName(object, method)}`);
-        }
         return cancel;
     };
     const rawPatcher = BdApi.Patcher;
@@ -239,13 +236,16 @@ const createPatcher = (id, Logger) => {
             rawPatcher.unpatchAll(id);
             Logger.log("Unpatched all");
         },
-        waitForLazy: (object, method, argIndex, callback) => new Promise((resolve) => {
+        waitForLazy: (object, method, argIndex, callback, options) => new Promise((resolve) => {
             const found = callback();
             if (found) {
+                if (!options.silent)
+                    Logger.log(`Lazy load in ${method} of ${resolveName(object, method)} found from callback`, { found });
                 resolve(found);
             }
             else {
-                Logger.log(`Waiting for lazy load in ${method} of ${resolveName(object, method)}`);
+                if (!options.silent)
+                    Logger.log(`Waiting for lazy load in ${method} of ${resolveName(object, method)} ${(callback.name ? `and bound to ${callback.name}` : '')}`, { object, method, arg: argIndex, callback, options });
                 patcher.before(object, method, ({ args, cancel }) => {
                     const original = args[argIndex];
                     args[argIndex] = async function (...args) {
@@ -253,6 +253,8 @@ const createPatcher = (id, Logger) => {
                         Promise.resolve().then(() => {
                             const found = callback();
                             if (found) {
+                                if (!options.silent)
+                                    Logger.log(`Lazy load in ${method} of ${resolveName(object, method)} found from callback`, { found });
                                 resolve(found);
                                 cancel();
                             }
@@ -262,8 +264,8 @@ const createPatcher = (id, Logger) => {
                 }, { silent: true });
             }
         }),
-        waitForContextMenu: (callback) => patcher.waitForLazy(Modules.ContextMenuActions, "openContextMenuLazy", 1, callback),
-        waitForModal: (callback) => patcher.waitForLazy(Modules.ModalActions, "openModalLazy", 0, callback)
+        waitForContextMenu: (callback, options = { silent: false }) => patcher.waitForLazy(Modules.ContextMenuActions, "openContextMenuLazy", 1, callback, options),
+        waitForModal: (callback, options = { silent: false }) => patcher.waitForLazy(Modules.ModalActions, "openModalLazy", 0, callback, options)
     };
     return patcher;
 };
@@ -347,8 +349,8 @@ class Settings extends Flux.Store {
 }
 const createSettings = (Data, defaults) => new Settings(Data, defaults);
 
-const alert = (title, content) => BdApi.alert(title, content);
 const confirm = (title, content, options = {}) => BdApi.showConfirmationModal(title, content, options);
+const alert = (title, content) => BdApi.alert(title, content);
 
 const { Flex: Flex$1, Button: Button$1, Form, margins: margins$1 } = Modules;
 const SettingsContainer = ({ name, children, onReset }) => (React.createElement(Form.FormSection, null,
@@ -359,17 +361,18 @@ const SettingsContainer = ({ name, children, onReset }) => (React.createElement(
                 onConfirm: () => onReset()
             }) }, "Reset"))));
 
-const createPlugin = ({ name, version, styles: css, settings }, callback) => {
+const createPlugin = (config, callback) => {
+    const { name, version, styles, settings } = config;
     const Logger = createLogger(name, "#3a71c1", version);
     const Patcher = createPatcher(name, Logger);
     const Styles = createStyles(name);
     const Data = createData(name);
     const Settings = createSettings(Data, settings ?? {});
-    const plugin = callback({ Logger, Patcher, Styles, Data, Settings });
+    const plugin = callback({ Logger, Patcher, Styles, Data, Settings, Config: config });
     class Wrapper {
         start() {
             Logger.log("Enabled");
-            Styles.inject(css);
+            Styles.inject(styles);
             plugin.start();
         }
         stop() {
@@ -517,7 +520,7 @@ const config = {
 	description: description
 };
 
-const { Events, Channels, SelectedChannel, Users, Members } = Modules;
+const { Dispatcher, Channels, SelectedChannel, Users, Members } = Modules;
 const { ActionTypes } = Modules.Constants;
 const Audio = byProps("isSelfMute", "isSelfDeaf");
 const VoiceStates = byProps("getVoiceStates", "hasVideo");
@@ -653,11 +656,11 @@ const index = createPlugin({ ...config, settings }, ({ Logger, Patcher, Settings
     return {
         async start() {
             saveStates();
-            Events.subscribe(ActionTypes.VOICE_STATE_UPDATES, voiceStateListener);
+            Dispatcher.subscribe(ActionTypes.VOICE_STATE_UPDATES, voiceStateListener);
             Logger.log("Subscribed to voice state events");
-            Events.subscribe(ActionTypes.AUDIO_TOGGLE_SELF_MUTE, selfMuteListener);
+            Dispatcher.subscribe(ActionTypes.AUDIO_TOGGLE_SELF_MUTE, selfMuteListener);
             Logger.log("Subscribed to self mute events");
-            Events.subscribe(ActionTypes.AUDIO_TOGGLE_SELF_DEAF, selfDeafListener);
+            Dispatcher.subscribe(ActionTypes.AUDIO_TOGGLE_SELF_DEAF, selfDeafListener);
             Logger.log("Subscribed to self deaf events");
             const useChannelHideNamesItem = await Patcher.waitForContextMenu(() => query({ name: "useChannelHideNamesItem" }));
             Patcher.after(useChannelHideNamesItem, "default", ({ result }) => {
@@ -670,11 +673,11 @@ const index = createPlugin({ ...config, settings }, ({ Logger, Patcher, Settings
         },
         stop() {
             prevStates = {};
-            Events.unsubscribe(ActionTypes.VOICE_STATE_UPDATES, voiceStateListener);
+            Dispatcher.unsubscribe(ActionTypes.VOICE_STATE_UPDATES, voiceStateListener);
             Logger.log("Unsubscribed from voice state events");
-            Events.unsubscribe(ActionTypes.AUDIO_TOGGLE_SELF_MUTE, selfMuteListener);
+            Dispatcher.unsubscribe(ActionTypes.AUDIO_TOGGLE_SELF_MUTE, selfMuteListener);
             Logger.log("Unsubscribed from self mute events");
-            Events.unsubscribe(ActionTypes.AUDIO_TOGGLE_SELF_DEAF, selfDeafListener);
+            Dispatcher.unsubscribe(ActionTypes.AUDIO_TOGGLE_SELF_DEAF, selfDeafListener);
             Logger.log("Unsubscribed from self deaf events");
         },
         settingsPanel: (props) => React.createElement(SettingsPanel, { speak: speak, ...props })

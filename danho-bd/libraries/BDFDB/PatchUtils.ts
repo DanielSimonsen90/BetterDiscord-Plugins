@@ -1,4 +1,4 @@
-import IPlugin from "../../plugins/base/IPlugin";
+import IPlugin from "archived/danho-bd/plugins/base/IPlugin";
 
 type PatchUtils = {
     forceAllUpdates(plugin: IPlugin): void;

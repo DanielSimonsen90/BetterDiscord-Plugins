@@ -1,4 +1,4 @@
-import IPlugin from "../../plugins/base/IPlugin";
+import IPlugin from "archived/danho-bd/plugins/base/IPlugin";
 
 type DataUtils = {
     get(plugin: IPlugin, key: string): any;

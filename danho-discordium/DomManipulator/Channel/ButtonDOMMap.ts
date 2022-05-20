@@ -1,4 +1,4 @@
-import { DQuery, Selector } from "danho-discordium/dquery";
+import { DQuery, Selector } from "@dquery";
 import { ChannelButtons } from ".";
 import DOM from "./DOM";
 

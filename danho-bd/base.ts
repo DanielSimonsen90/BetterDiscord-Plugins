@@ -1,4 +1,4 @@
-import { Selector } from 'danho-discordium/dquery';
+import $, { Selector } from 'danho-discordium/dquery';
 import { Utils } from 'discordium';
 
 export class Setting<T> {constructor(public value: T, public description: string) {}}
@@ -9,10 +9,8 @@ export class Item extends ItemObj {
     }
 }
 
-export function forceRerender(selectorOrNode: Selector) {
-    const element = selectorOrNode instanceof Node ? selectorOrNode : document.querySelector(selectorOrNode.toString());
-    if (!element) return;
-
-    const fiber = Utils.getFiber(element);
+export function forceRerender(selector: Selector) {
+    const fiber = $(selector).fiber;
+    if (!fiber) return false;
     return Utils.forceFullRerender(fiber);
 }

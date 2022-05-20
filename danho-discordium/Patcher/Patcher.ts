@@ -1,9 +1,9 @@
-import { Module } from "danho-bd/libraries/ZLibrary";
 import { Arrayable } from "danholibraryjs";
-import { Finder, Patcher } from "discordium/api";
-import { PartialRecord } from "./Utils";
-import Plugin from "./Plugin";
-import { PatchCallback } from "danho-bd/libraries/ZLibrary/Patcher";
+import { Finder, Patcher } from "discordium";
+import { Module } from "@ZLibrary";
+import { PatchCallback } from "@ZLibrary/Patcher";
+import { PartialRecord } from "../Utils";
+import Plugin from "../Plugin";
 
 export type PatcherConfig = PartialRecord<'before' | 'instead' | 'after', PartialRecord<'default' | 'render', Array<PatchOptions>>>
 export type PatchOptions = {
@@ -61,7 +61,7 @@ const defaultOption: Partial<PatchOptions> = {
     silent: false
 }
 
-export default function initializePatches(plugin: DumbPlugin, config: PatcherConfig = {} as any) {
+export function initializePatches(plugin: DumbPlugin, config: PatcherConfig = {} as any) {
     return configurePatches(plugin, config, async ({ patchType, method, option }) => {
         const patch = (module: Module) => commitPatch(plugin, module, { patchType, method, option });
 
@@ -70,6 +70,7 @@ export default function initializePatches(plugin: DumbPlugin, config: PatcherCon
             waitForModule(plugin.patcher, option).then(patch);
     });
 }
+export default initializePatches;
 
 type ConfigurationLoopData = {
     patchType: keyof PatcherConfig, 
@@ -115,8 +116,8 @@ function optionIsArrayable(option: PatchOptions): option is Arrayable<string> {
 function getModule(selector: Arrayable<string>): Module {
     return (
         // displayName && props ? Finder.query({ name: displayName, props, }) :
-        Array.isArray(selector) ? Finder.byProps(...selector) : 
-        typeof selector === 'string' ? Finder.byName(selector) : 
+        Array.isArray(selector) ? Finder.query({ props: selector }) :
+        typeof selector === 'string' ? Finder.query({ name: selector }) :
         undefined
     );
 }
@@ -132,7 +133,7 @@ function commitPatch(plugin: DumbPlugin, module: Module, { patchType, method, op
             callbackPathName(optionIsArrayable(option) ? selector : option.selector);
     })();
             
-    const resolvedCallback = plugin[callbackName];
+    const resolvedCallback = plugin[callbackName].bind(plugin);
     const warnings = [
         [module === undefined, `Could not find module $${typeof selector === 'string' ? `with name "${selector}"` : `with props [${selector.join(', ')}]`}`],
         [resolvedCallback === undefined, `Could not find ${
@@ -149,8 +150,13 @@ function commitPatch(plugin: DumbPlugin, module: Module, { patchType, method, op
         return previouslyPatched;
     }
 
-    const cancel = plugin.patcher[patchType as any](module, method, () => console.log('hello'), option);
-    const patched = { module, callback: resolvedCallback, method, patchType, option, cancel };
+    const callback = ((data) => {
+        try { resolvedCallback(data) }
+        catch (err) { plugin.logger.error(err, patched) }
+    }).bind(plugin);
+
+    const cancel = plugin.patcher[patchType as any](module, method, callback, option);
+    const patched = { module, callback, method, patchType, option, cancel };
     plugin.logger.log(`Patched ${patchType} ${method} on ${
         module.displayName 
         || module.default?.displayName 

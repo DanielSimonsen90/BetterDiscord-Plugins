@@ -60,8 +60,8 @@ export interface Patcher {
     >(
         object: Module,
         method: Key,
-        // callback: Callback<Module[Key]>,
-        callback: (caller: undefined, data: [props: Props], returntype: any) => any,
+        callback: Callback<Module[Key]>,
+        // callback: (caller: undefined, data: [props: Props], returntype: any) => any,
         options?: Options
     ): Cancel;
 

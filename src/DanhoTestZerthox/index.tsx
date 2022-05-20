@@ -9,7 +9,7 @@ const Tooltip = Finder.byProps("TooltipContainer");
 const Clickable = Finder.byName("Clickable");
 
 export default createPlugin({ ...config, styles }, ({ Data, Logger, Patcher, Settings, Styles, Config }) => {
-    const triggerRerender = () => forceRerender(document.getElementsByClassName(guildStyles.guilds)?.[0]);
+    const triggerRerender = () => forceRerender(s => s.className(guildStyles.guilds));
 
     return {
         start() {

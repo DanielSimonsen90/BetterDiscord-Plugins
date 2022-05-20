@@ -1,4 +1,4 @@
-import $ from 'danho-discordium/dquery';
+import $ from '@dquery';
 import ChannelManipulator from './Channel';
 
 export class MessageDOMArray extends Array<HTMLLIElement> {

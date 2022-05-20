@@ -1,7 +1,5 @@
-import ZLibrary, { Module } from 'danho-bd/libraries/ZLibrary';
-import $ from 'danho-discordium/dquery';
-import initializePatches, { Patched } from 'danho-discordium/Patcher';
-import { Logger, Patcher } from 'discordium/api';
+import initializePatches, { Patched } from 'danho-discordium/Patcher/Patcher';
+import { Logger, Patcher } from 'discordium';
 import Plugin from '../Plugin';
 
 export * from './MenuItems';

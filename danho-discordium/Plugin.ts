@@ -1,20 +1,21 @@
 export { forceRerender } from 'danho-bd';
-export { default as ZLibrary } from 'danho-bd/libraries/ZLibrary';
-export { default as BDFDB} from 'danho-bd/libraries/BDFDB';
-export { default as $ } from './dquery';
+export { default as ZLibrary } from '@ZLibrary';
+export { default as BDFDB} from '@BDFDB';
+export { default as $ } from '@dquery';
 export { React, createPlugin } from 'discordium';
-export { Discord } from 'discordium/api';
+export * as Discord from './Discord';
 
-import { Config, CreatePluginCallbackApi, Logger, Patcher, Plugin, Styles } from 'discordium';
-import { Settings, Data } from 'discordium/api';
-
+import { Config, CreatePluginCallbackApi, Logger, Patcher, Plugin, Styles, Data, Settings } from 'discordium';
 import { ObservationCallback, ObservationConfig } from './MutationManager';
 import MutationManager, { MutationConfigOptions, ObservationReturns } from './MutationManager/MutationManager';
 import ContextMenuProvider from './ContextMenuProvider';
-import initializePatches, { Patched, PatcherConfig } from './Patcher';
+import initializePatches, { Patched, PatcherConfig } from './Patcher/Patcher';
+
+
 
 export type MutationConfig = Partial<Record<MutationConfigOptions, string>>;
 export type MutationRecordCallback = (record: MutationRecord) => boolean;
+
 
 type Layers = 'tooltip' | 'modal' | 'popout' | `create${'Channel' | 'Category'}`;
 /**
@@ -58,11 +59,10 @@ export class DanhoPlugin<
         */
 
         this.patches = await initializePatches(this, config);
-        // this.contextMenus = ContextMenuProvider.getInstance(this);
+        this.contextMenus = ContextMenuProvider.getInstance(this);
     }
     public stop() {
         this.mutationManager.clear();
-        this.patcher.unpatchAll();
     }
 
     protected on<

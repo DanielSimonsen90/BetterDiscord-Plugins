@@ -1,5 +1,3 @@
-import { React } from 'discordium';
-
 type OnClickEventHandler = (event: MouseEvent) => void;
 type BaseContextMenuItemProps = {
     label: string,

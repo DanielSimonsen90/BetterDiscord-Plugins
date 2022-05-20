@@ -1,4 +1,5 @@
-import { Setting } from "../base";
+import { User, Guild, PermissionString, DiscordPermissionStrings } from '@discord';
+import { Setting } from "danho-bd/base";
 
 export class ExtraTag {
     constructor(id: string, guildID: string, type: number) {
@@ -28,7 +29,6 @@ export enum userTypes {
     CUSTOM
 }
 
-import { User, Guild, DiscordPermissionStrings, PermissionString } from '../discord';
 const MoreTags = {
     Marcus: new ExtraTag('285853150794219520', '384299534819262474', userTypes.OWNER),
     Maria: new ExtraTag('357534185604251650', '405763731079823380', userTypes.CREATOR),

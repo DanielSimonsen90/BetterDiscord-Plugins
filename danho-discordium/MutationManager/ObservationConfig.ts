@@ -1,4 +1,4 @@
-import $, { DQuery, Selector } from "danho-discordium/dquery";
+import $, { DQuery, Selector } from "@dquery";
 import { Arrayable } from "danholibraryjs";
 import { MutationConfigOptions } from "./MutationManager";
 

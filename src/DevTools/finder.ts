@@ -1,4 +1,4 @@
-import {Require, Filters, Module, WebpackId, Exports, ModuleFunction, Query} from "dium/api/finder";
+import {Require, Filters, Module, WebpackId, Exports, ModuleFunction, Query} from "discordium/src/api/finder";
 
 // finder extensions for development
 

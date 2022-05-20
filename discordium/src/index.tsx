@@ -69,10 +69,11 @@ export const createPlugin = <
     SettingsType extends Record<string, any>,
     DataType extends {settings: SettingsType} = {settings: SettingsType}
 >(
-    {name, version, styles, settings}: Config<SettingsType>,
-    callback: (api: Api<SettingsType, DataType>) => Plugin<SettingsType>
+    config: Config<SettingsType>,
+    callback: (api: CreatePluginCallbackApi<SettingsType, DataType>) => Plugin<SettingsType>
 ): BdApi.PluginConstructor => {
     // create log
+    const { name, version, styles, settings } = config;
     const Logger = createLogger(name, "#3a71c1", version);
     const Patcher = createPatcher(name, Logger);
     const Styles = createStyles(name);

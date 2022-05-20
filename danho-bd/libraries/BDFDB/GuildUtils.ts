@@ -1,4 +1,4 @@
-import { Guild, GuildFolder } from "../../discord"
+import { Guild, GuildFolder } from "@discord"
 
 type GuildUtils = {
     is(guild: any): guild is Guild,

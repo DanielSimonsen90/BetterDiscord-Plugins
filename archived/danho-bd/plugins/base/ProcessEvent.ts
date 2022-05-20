@@ -1,7 +1,6 @@
-import { BaseProps, ComponentInstance, Component, ComponentFiber } from '../../libraries/React';
-import { MethodNames, PatchTypes } from '../../libraries/BDFDB';
-import { User, Channel, ActivityTypes, UserStatus, Guild, GuildMember } from '../../discord';
-
+import { BaseProps, ComponentInstance, Component, ComponentFiber } from '@lib/React';
+import { MethodNames, PatchTypes } from '@BDFDB';
+import { ActivityTypes, Channel, Guild, GuildMember, User, UserStatus } from '@discord';
 export type Modules =
     | 'Shakeable'
     | 'PrivateChannel'

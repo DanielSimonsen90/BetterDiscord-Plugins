@@ -1,5 +1,5 @@
 import { React } from 'discordium';
-import { Menu } from "discordium/modules/discord";
+import { Menu } from "@discordium/modules/discord";
 
 const { MenuGroup, MenuItem } = Menu();
 

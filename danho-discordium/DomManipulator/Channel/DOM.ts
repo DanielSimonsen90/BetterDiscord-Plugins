@@ -1,5 +1,5 @@
 import ChannelManipulator from "./Channel";
-import $ from 'danho-discordium/dquery';
+import $ from '@dquery';
 import MessageDOMArray from "./MessageDOMArray";
 import ButtonDOMMap from "./ButtonDOMMap";
 
@@ -16,7 +16,7 @@ export class DOM {
         return this.channelList.children(s => s
             .className("containerDefault", 'li')
             .and
-            .data("dnd-name", this.source.props.name)
+            .data("dnd-name", this.source.props.channel.name)
         );
     }
     public get textArea() {

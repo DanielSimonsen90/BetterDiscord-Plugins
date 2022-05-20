@@ -1,4 +1,4 @@
-import { Item } from "../base";
+import { Item } from "danho-bd/base";
 
 //#region Classes
 export class DreamUser extends Item {

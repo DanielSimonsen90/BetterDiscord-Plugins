@@ -1,4 +1,4 @@
-import { Channel } from "../../discord";
+import { Channel } from "@discord";
 
 type ChannelResolable = Channel | string;
 type ChannelUtils = {

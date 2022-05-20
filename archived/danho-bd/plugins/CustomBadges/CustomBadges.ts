@@ -1,8 +1,8 @@
-import { BDFDBPluginParams } from '../../libraries/BDFDB';
+import { BDFDBPluginParams } from '../../../../danho-bd/libraries/BDFDB';
 import DanhoPlugin from '../base/DanhoPlugin';
 import IConfigData from '../base/IConfigData';
 import IPlugin from '../base/IPlugin';
-import ProcessEvent, { UserProfileBadgeList, MemberListItem } from '../base/ProcessEvent';
+import { UserProfileBadgeList } from '../base/ProcessEvent';
 
 export class CustomBadgesBuilder {
     static config: IConfigData = {

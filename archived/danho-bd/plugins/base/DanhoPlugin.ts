@@ -4,14 +4,13 @@ import IAuthor from "./IAuthor";
 import IConfigData, { ConfigInfo } from "./IConfigData";
 import LoggerUtil from "./LoggerUtil";
 
-import CollapseContainer from "../../libraries/BDFDB/LibraryComponents/CollapseContainer";
-import SettingsSaveItem from "../../libraries/BDFDB/LibraryComponents/SettingsSaveItem";
-import { BDFDBPluginParams, PatchedModules } from '../../libraries/BDFDB';
-import { ComponentInstance, ComponentFiber, Component } from '../../libraries/React';
+import SettingsSaveItem from "@BDFDB/LibraryComponents/SettingsSaveItem";
+import { BDFDBPluginParams, PatchedModules } from '@BDFDB';
+import { ComponentInstance, ComponentFiber, Component } from '@lib/React';
 
-import { Setting } from "../../base";
+import { Setting } from "danho-bd/base";
 import * as ProcessEvents from './ProcessEvent';
-import React, { Attributes, ComponentClass, FunctionComponent, ReactHTML } from "react";
+import React, { Attributes, ComponentClass, ReactHTML } from "react";
 
 type SettingsSaveItemProps = BetterOmit<SettingsSaveItem['defaultProps'], 'plugin' | 'label' | 'value' | 'keys'>;
 

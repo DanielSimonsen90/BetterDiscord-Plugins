@@ -1,5 +1,4 @@
-import IPlugin from "../../plugins/base/IPlugin";
-import { Component } from "../React";
+import IPlugin from "archived/danho-bd/plugins/base/IPlugin";
 import LibraryComponents from "./LibraryComponents";
 
 type PluginUtils = {

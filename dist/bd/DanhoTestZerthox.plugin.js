@@ -1,12 +1,12 @@
 /**
- * @name DiumDevTools
- * @author Zerthox
- * @version 0.2.3
- * @description Makes Dium available as global for development.
- * @authorLink https://github.com/Zerthox
+ * @name DanhoTestZerthox
+ * @author Danho#2105
+ * @description A plugin for testing Danho's code
+ * @version 0.0.1
+ * @authorLink https://github.com/Danho#2105
  * @website https://github.com/Zerthox/BetterDiscord-Plugins
- * @source https://github.com/Zerthox/BetterDiscord-Plugins/tree/master/src/DevTools
- * @updateUrl https://raw.githubusercontent.com/Zerthox/BetterDiscord-Plugins/master/dist/bd/DevTools.plugin.js
+ * @source https://github.com/Zerthox/BetterDiscord-Plugins/tree/master/src/DanhoTestZerthox
+ * @updateUrl https://raw.githubusercontent.com/Zerthox/BetterDiscord-Plugins/master/dist/bd/DanhoTestZerthox.plugin.js
 **/
 
 /*@cc_on @if (@_jscript)
@@ -67,42 +67,14 @@ const join = (filters) => {
     const apply = filters.filter((filter) => filter instanceof Function);
     return (exports) => apply.every((filter) => filter(exports));
 };
-const generate = ({ filter, name, props, protos, source }) => [
-    ...[filter].flat(),
-    typeof name === "string" ? byName$2(name) : null,
-    props instanceof Array ? byProps$2(props) : null,
-    protos instanceof Array ? byProtos$2(protos) : null,
-    source instanceof Array ? bySource$2(source) : null
-];
-const byExports$2 = (exported) => {
-    return (target) => target === exported || (target instanceof Object && Object.values(target).includes(exported));
-};
-const byName$2 = (name) => {
+const byName$1 = (name) => {
     return (target) => target instanceof Object && target !== window && Object.values(target).some(byOwnName(name));
 };
 const byOwnName = (name) => {
     return (target) => (target?.displayName ?? target?.constructor?.displayName) === name;
 };
-const byProps$2 = (props) => {
+const byProps$1 = (props) => {
     return (target) => target instanceof Object && props.every((prop) => prop in target);
-};
-const byProtos$2 = (protos) => {
-    return (target) => target instanceof Object && target.prototype instanceof Object && protos.every((proto) => proto in target.prototype);
-};
-const bySource$2 = (contents) => {
-    return (target) => target instanceof Function && contents.every((content) => target.toString().includes(content));
-};
-
-const Filters = {
-    __proto__: null,
-    join: join,
-    generate: generate,
-    byExports: byExports$2,
-    byName: byName$2,
-    byOwnName: byOwnName,
-    byProps: byProps$2,
-    byProtos: byProtos$2,
-    bySource: bySource$2
 };
 
 const raw = {
@@ -120,47 +92,21 @@ const resolveExports = (target, filter) => {
     }
     return target;
 };
-const find$1 = (...filters) => raw.single(join(filters));
-const query$1 = (options) => resolveExports(find$1(...generate(options)), options.export);
-const byExports$1 = (exported) => find$1(byExports$2(exported));
-const byName$1 = (name) => resolveExports(find$1(byName$2(name)), byOwnName(name));
-const byProps$1 = (...props) => find$1(byProps$2(props));
-const byProtos$1 = (...protos) => find$1(byProtos$2(protos));
-const bySource$1 = (...contents) => find$1(bySource$2(contents));
-const all$1 = {
-    find: (...filters) => raw.all(join(filters)),
-    query: (options) => all$1.find(...generate(options)).map((entry) => resolveExports(entry, options.export)),
-    byExports: (exported) => all$1.find(byExports$2(exported)),
-    byName: (name) => all$1.find(byName$2(name)).map((entry) => resolveExports(entry, byOwnName(name))),
-    byProps: (...props) => all$1.find(byProps$2(props)),
-    byProtos: (...protos) => all$1.find(byProtos$2(protos)),
-    bySource: (...contents) => all$1.find(bySource$2(contents))
-};
+const find = (...filters) => raw.single(join(filters));
+const byName = (name) => resolveExports(find(byName$1(name)), byOwnName(name));
+const byProps = (...props) => find(byProps$1(props));
 
-const index$2 = {
-    __proto__: null,
-    find: find$1,
-    query: query$1,
-    byExports: byExports$1,
-    byName: byName$1,
-    byProps: byProps$1,
-    byProtos: byProtos$1,
-    bySource: bySource$1,
-    all: all$1,
-    Filters: Filters
-};
-
-const EventEmitter = () => byProps$1("subscribe", "emit");
-const React$1 = () => byProps$1("createElement", "Component", "Fragment");
-const ReactDOM$1 = () => byProps$1("render", "findDOMNode", "createPortal");
-const classNames$1 = () => find$1((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
-const lodash$1 = () => byProps$1("cloneDeep", "flattenDeep");
-const semver = () => byProps$1("valid", "satifies");
-const moment = () => byProps$1("utc", "months");
-const SimpleMarkdown = () => byProps$1("parseBlock", "parseInline");
-const hljs = () => byProps$1("highlight", "highlightBlock");
-const Raven = () => byProps$1("captureBreadcrumb");
-const joi = () => byProps$1("assert", "validate", "object");
+const EventEmitter = () => byProps("subscribe", "emit");
+const React$1 = () => byProps("createElement", "Component", "Fragment");
+const ReactDOM$1 = () => byProps("render", "findDOMNode", "createPortal");
+const classNames$1 = () => find((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
+const lodash$1 = () => byProps("cloneDeep", "flattenDeep");
+const semver = () => byProps("valid", "satifies");
+const moment = () => byProps("utc", "months");
+const SimpleMarkdown = () => byProps("parseBlock", "parseInline");
+const hljs = () => byProps("highlight", "highlightBlock");
+const Raven = () => byProps("captureBreadcrumb");
+const joi = () => byProps("assert", "validate", "object");
 
 const npm = {
     __proto__: null,
@@ -177,8 +123,8 @@ const npm = {
     joi: joi
 };
 
-const Flux$1 = () => byProps$1("Store", "useStateFromStores");
-const Dispatcher = () => byProps$1("dirtyDispatch");
+const Flux$1 = () => byProps("Store", "useStateFromStores");
+const Dispatcher = () => byProps("dirtyDispatch");
 
 const flux = {
     __proto__: null,
@@ -186,26 +132,26 @@ const flux = {
     Dispatcher: Dispatcher
 };
 
-const Constants = () => byProps$1("Permissions", "RelationshipTypes");
-const i18n = () => byProps$1("languages", "getLocale");
-const Channels = () => byProps$1("getChannel", "hasChannel");
-const SelectedChannel = () => byProps$1("getChannelId", "getVoiceChannelId");
-const Users = () => byProps$1("getUser", "getCurrentUser");
-const Members = () => byProps$1("getMember", "isMember");
-const ContextMenuActions = () => byProps$1("openContextMenuLazy");
-const ModalActions = () => byProps$1("openModalLazy");
-const Flex$1 = () => byName$1("Flex");
-const Button$1 = () => byProps$1("Link", "Hovers");
-const Text = () => byName$1("Text");
-const Links = () => byProps$1("Link", "NavLink");
-const Switch = () => byName$1("Switch");
-const SwitchItem = () => byName$1("SwitchItem");
-const RadioGroup = () => byName$1("RadioGroup");
-const Slider = () => byName$1("Slider");
-const TextInput = () => byName$1("TextInput");
-const Menu = () => byProps$1("MenuGroup", "MenuItem", "MenuSeparator");
-const Form$1 = () => byProps$1("FormItem", "FormSection", "FormDivider");
-const margins$1 = () => byProps$1("marginLarge");
+const Constants = () => byProps("Permissions", "RelationshipTypes");
+const i18n = () => byProps("languages", "getLocale");
+const Channels = () => byProps("getChannel", "hasChannel");
+const SelectedChannel = () => byProps("getChannelId", "getVoiceChannelId");
+const Users = () => byProps("getUser", "getCurrentUser");
+const Members = () => byProps("getMember", "isMember");
+const ContextMenuActions = () => byProps("openContextMenuLazy");
+const ModalActions = () => byProps("openModalLazy");
+const Flex$1 = () => byName("Flex");
+const Button$1 = () => byProps("Link", "Hovers");
+const Text = () => byName("Text");
+const Links = () => byProps("Link", "NavLink");
+const Switch = () => byName("Switch");
+const SwitchItem = () => byName("SwitchItem");
+const RadioGroup = () => byName("RadioGroup");
+const Slider = () => byName("Slider");
+const TextInput = () => byName("TextInput");
+const Menu = () => byProps("MenuGroup", "MenuItem", "MenuSeparator");
+const Form$1 = () => byProps("FormItem", "FormSection", "FormDivider");
+const margins$1 = () => byProps("marginLarge");
 
 const discord = {
     __proto__: null,
@@ -251,7 +197,6 @@ const Modules = createProxy({
     ...flux,
     ...discord
 });
-const Modules$1 = Modules;
 const { React, ReactDOM, classNames, lodash, Flux } = Modules;
 
 const resolveName = (object, method) => {
@@ -305,8 +250,8 @@ const createPatcher = (id, Logger) => {
                 }, { silent: true });
             }
         }),
-        waitForContextMenu: (callback, options = { silent: false }) => patcher.waitForLazy(Modules$1.ContextMenuActions, "openContextMenuLazy", 1, callback, options),
-        waitForModal: (callback, options = { silent: false }) => patcher.waitForLazy(Modules$1.ModalActions, "openModalLazy", 0, callback, options)
+        waitForContextMenu: (callback, options = { silent: false }) => patcher.waitForLazy(Modules.ContextMenuActions, "openContextMenuLazy", 1, callback, options),
+        waitForModal: (callback, options = { silent: false }) => patcher.waitForLazy(Modules.ModalActions, "openModalLazy", 0, callback, options)
     };
     return patcher;
 };
@@ -390,7 +335,7 @@ class Settings extends Flux.Store {
 }
 const createSettings = (Data, defaults) => new Settings(Data, defaults);
 
-const ReactInternals = React?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+React?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
 const [getInstanceFromNode, getNodeFromInstance, getFiberCurrentPropsFromNode, enqueueStateRestore, restoreStateIfNeeded, batchedUpdates] = ReactDOM?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?.Events ?? [];
 const ReactDOMInternals = {
     getInstanceFromNode,
@@ -402,37 +347,7 @@ const ReactDOMInternals = {
 };
 
 const confirm = (title, content, options = {}) => BdApi.showConfirmationModal(title, content, options);
-const sleep = (duration) => new Promise((resolve) => setTimeout(resolve, duration));
-const alert = (title, content) => BdApi.alert(title, content);
-const toast = (content, options) => BdApi.showToast(content, options);
 
-const queryTree = (node, predicate) => {
-    const worklist = [node];
-    while (worklist.length !== 0) {
-        const node = worklist.shift();
-        if (predicate(node)) {
-            return node;
-        }
-        if (node?.props?.children) {
-            worklist.push(...[node.props.children].flat());
-        }
-    }
-    return null;
-};
-const queryTreeAll = (node, predicate) => {
-    const result = [];
-    const worklist = [node];
-    while (worklist.length !== 0) {
-        const node = worklist.shift();
-        if (predicate(node)) {
-            result.push(node);
-        }
-        if (node?.props?.children) {
-            worklist.push(...[node.props.children].flat());
-        }
-    }
-    return result;
-};
 const getFiber = (node) => ReactDOMInternals.getInstanceFromNode(node ?? {});
 const queryFiber = (fiber, predicate, direction = "up" , depth = 30, current = 0) => {
     if (current > depth) {
@@ -462,15 +377,6 @@ const queryFiber = (fiber, predicate, direction = "up" , depth = 30, current = 0
 const findOwner = (fiber) => {
     return queryFiber(fiber, (node) => node?.stateNode instanceof React.Component, "up" , 50);
 };
-const forceUpdateOwner = (fiber) => new Promise((resolve) => {
-    const owner = findOwner(fiber);
-    if (owner) {
-        owner.stateNode.forceUpdate(() => resolve(true));
-    }
-    else {
-        resolve(false);
-    }
-});
 const forceFullRerender = (fiber) => new Promise((resolve) => {
     const owner = findOwner(fiber);
     if (owner) {
@@ -488,22 +394,7 @@ const forceFullRerender = (fiber) => new Promise((resolve) => {
     }
 });
 
-const index$1 = {
-    __proto__: null,
-    confirm: confirm,
-    sleep: sleep,
-    alert: alert,
-    toast: toast,
-    queryTree: queryTree,
-    queryTreeAll: queryTreeAll,
-    getFiber: getFiber,
-    queryFiber: queryFiber,
-    findOwner: findOwner,
-    forceUpdateOwner: forceUpdateOwner,
-    forceFullRerender: forceFullRerender
-};
-
-const { Flex, Button, Form, margins } = Modules$1;
+const { Flex, Button, Form, margins } = Modules;
 const SettingsContainer = ({ name, children, onReset }) => (React.createElement(Form.FormSection, null,
     children,
     React.createElement(Form.FormDivider, { className: classNames(margins.marginTop20, margins.marginBottom20) }),
@@ -511,8 +402,6 @@ const SettingsContainer = ({ name, children, onReset }) => (React.createElement(
         React.createElement(Button, { size: Button.Sizes.SMALL, onClick: () => confirm(name, "Reset all settings?", {
                 onConfirm: () => onReset()
             }) }, "Reset"))));
-
-const version$1 = "0.2.7";
 
 const createPlugin = (config, callback) => {
     const { name, version, styles, settings } = config;
@@ -543,134 +432,52 @@ const createPlugin = (config, callback) => {
     return Wrapper;
 };
 
-const discordium = {
-    __proto__: null,
-    createPlugin: createPlugin,
-    Finder: index$2,
-    ReactInternals: ReactInternals,
-    ReactDOMInternals: ReactDOMInternals,
-    Utils: index$1,
-    Modules: Modules$1,
-    version: version$1,
-    React: React,
-    ReactDOM: ReactDOM,
-    classNames: classNames,
-    lodash: lodash,
-    Flux: Flux
-};
+function forceRerender(selectorOrNode) {
+    const element = selectorOrNode instanceof Node ? selectorOrNode : document.querySelector(selectorOrNode.toString());
+    if (!element)
+        return;
+    const fiber = getFiber(element);
+    return forceFullRerender(fiber);
+}
 
-const getWebpackRequire = () => {
-    const chunkName = Object.keys(window).find((key) => key.startsWith("webpackChunk"));
-    const chunk = window[chunkName];
-    let webpackRequire;
-    try {
-        chunk.push([["__DIUM__"], {}, (require) => {
-                webpackRequire = require;
-                throw Error();
-            }]);
-    }
-    catch {
-    }
-    return webpackRequire;
-};
-const webpackRequire = getWebpackRequire();
-const byModuleSourceFilter = (contents) => {
-    return (_, module) => {
-        const source = sourceOf(module.id).toString();
-        return contents.every((content) => source.includes(content));
-    };
-};
-const applyFilters = (filters) => (module) => {
-    const { exports } = module;
-    return (filters.every((filter) => filter(exports, module))
-        || exports?.__esModule && "default" in exports && filters.every((filter) => filter(exports.default, module)));
-};
-const modules = () => Object.values(webpackRequire.c);
-const sources = () => Object.values(webpackRequire.m);
-const sourceOf = (id) => webpackRequire.m[id] ?? null;
-const find = (...filters) => modules().find(applyFilters(filters)) ?? null;
-const query = (options) => find(...generate(options));
-const byId = (id) => webpackRequire.c[id] ?? null;
-const byExports = (exported) => find(byExports$2(exported));
-const byName = (name) => find(byName$2(name));
-const byProps = (...props) => find(byProps$2(props));
-const byProtos = (...protos) => find(byProtos$2(protos));
-const bySource = (...contents) => find(bySource$2(contents));
-const byModuleSource = (...contents) => find(byModuleSourceFilter(contents));
-const all = {
-    find: (...filters) => modules().filter(applyFilters(filters)),
-    query: (options) => all.find(...generate(options)),
-    byExports: (exported) => all.find(byExports$2(exported)),
-    byName: (name) => all.find(byName$2(name)),
-    byProps: (...props) => all.find(byProps$2(props)),
-    byProtos: (...protos) => all.find(byProtos$2(protos)),
-    bySource: (...contents) => all.find(bySource$2(contents)),
-    byModuleSource: (...contents) => all.find(byModuleSourceFilter(contents))
-};
-const resolveImportIds = (module) => {
-    const source = sourceOf(module.id).toString();
-    const match = source.match(/^(?:function)?\s*\(\w+,\w+,(\w+)\)\s*(?:=>)?\s*{/);
-    if (match) {
-        const requireName = match[1];
-        const calls = Array.from(source.matchAll(new RegExp(`\\W${requireName}\\((\\d+)\\)`, "g")));
-        return calls.map((call) => parseInt(call[1]));
-    }
-    else {
-        return [];
-    }
-};
-const resolveImports = (module) => resolveImportIds(module).map((id) => byId(id));
-const resolveStyles = (module) => resolveImports(module).filter((imported) => (imported instanceof Object
-    && "exports" in imported
-    && Object.values(imported.exports).every((value) => typeof value === "string")
-    && Object.entries(imported.exports).find(([key, value]) => (new RegExp(`^${key}-([a-zA-Z0-9-_]){6}(\\s.+)$`)).test(value))));
-const resolveUsersById = (id) => all.find((_, user) => resolveImportIds(user).includes(id));
-const resolveUsers = (module) => resolveUsersById(module.id);
-
-const DevFinder = {
-    __proto__: null,
-    require: webpackRequire,
-    modules: modules,
-    sources: sources,
-    sourceOf: sourceOf,
-    find: find,
-    query: query,
-    byId: byId,
-    byExports: byExports,
-    byName: byName,
-    byProps: byProps,
-    byProtos: byProtos,
-    bySource: bySource,
-    byModuleSource: byModuleSource,
-    all: all,
-    resolveImportIds: resolveImportIds,
-    resolveImports: resolveImports,
-    resolveStyles: resolveStyles,
-    resolveUsersById: resolveUsersById,
-    resolveUsers: resolveUsers
-};
-
-const name = "DiumDevTools";
-const author = "Zerthox";
-const version = "0.2.3";
-const description = "Makes Dium available as global for development.";
+const name = "DanhoTestZerthox";
+const author = "Danho#2105";
+const description = "A plugin for testing Danho's code";
+const version = "0.0.1";
 const config = {
 	name: name,
 	author: author,
-	version: version,
-	description: description
+	description: description,
+	version: version
 };
 
-const { Finder } = discordium;
-Finder.dev = DevFinder;
-const index = createPlugin(config, () => ({
-    start() {
-        window.dium = discordium;
-    },
-    stop() {
-        delete window.dium;
-    }
-}));
+const styles = ".hello-danho {\n  color: red;\n}";
+
+const guildStyles = byProps("guilds", "base");
+const HomeButton = byProps('HomeButton');
+const Tooltip = byProps("TooltipContainer");
+const Clickable = byName("Clickable");
+const index = createPlugin({ ...config, styles }, ({ Data, Logger, Patcher, Settings, Styles, Config }) => {
+    const triggerRerender = () => forceRerender(s => s.className(guildStyles.guilds));
+    return {
+        start() {
+            Logger.log('Started plugin');
+            Patcher.after(HomeButton, "HomeButton", ({ original: HomeButton, args, result }) => {
+                console.log('After HomeButton', { HomeButton, args, result, Tooltip, Clickable });
+                return result;
+            });
+            Patcher.before(Tooltip, "render", ({ args, result }) => {
+                console.log('Before Tooltip', { Tooltip, args, result });
+                return result;
+            });
+            triggerRerender();
+        },
+        stop() {
+            Logger.log('Stopped plugin');
+            triggerRerender();
+        },
+    };
+});
 
 module.exports = index;
 
