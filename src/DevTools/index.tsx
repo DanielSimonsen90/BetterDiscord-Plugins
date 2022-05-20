@@ -1,20 +1,24 @@
-import * as Discordium from "discordium";
+import * as dium from "dium";
 import * as DevFinder from "./finder";
 import config from "./config.json";
 
+declare global {
+    interface Window {
+        dium?: typeof dium;
+    }
+}
+
 // add finder extension
-const {Finder} = Discordium;
+const {Finder} = dium;
 (Finder as any).dev = DevFinder;
 
-export default Discordium.createPlugin(config, () => ({
+export default dium.createPlugin(config, () => ({
     start() {
-        // expose discordium as global
-        global.Discordium = Discordium;
-        global.dium = Discordium;
+        // expose as global
+        window.dium = dium;
     },
     stop() {
         // remove global
-        delete global.Discordium;
-        delete global.dium;
+        delete window.dium;
     }
 }));

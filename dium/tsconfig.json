@@ -5,13 +5,9 @@
         "moduleResolution": "node",
         "esModuleInterop": true,
         "resolveJsonModule": true,
-        "baseUrl": ".",
-        "paths": {
-            "dium/*": ["./dium/src/*"]
-        }
+        "baseUrl": "."
     },
     "ts-node": {
-        "files": true,
-        "require": ["tsconfig-paths/register"]
+        "files": true
     }
 }

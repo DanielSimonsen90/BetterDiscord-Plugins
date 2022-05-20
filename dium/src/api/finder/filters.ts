@@ -18,11 +18,11 @@ export const byExports = (exported: Exports): Filter => {
 };
 
 export const byName = (name: string): Filter => {
-    return (target) => target instanceof Object && Object.values(target).some(byOwnName(name));
+    return (target) => target instanceof Object && target !== window && Object.values(target).some(byOwnName(name));
 };
 
 export const byOwnName = (name: string): Filter => {
-    return (target: any) => target?.displayName === name || target?.constructor?.displayName === name;
+    return (target: any) => (target?.displayName ?? target?.constructor?.displayName) === name;
 };
 
 export const byProps = (props: string[]): Filter => {

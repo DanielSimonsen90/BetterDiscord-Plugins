@@ -1,21 +1,22 @@
-import {Filters, Require, Module, ModuleId, Exports, ModuleFunction, Query} from "discordium/api/finder";
+import {Require, Filters, Module, WebpackId, Exports, ModuleFunction, Query} from "dium/api/finder";
 
 // finder extensions for development
 
 const getWebpackRequire = (): Require => {
-    const moduleId = "discordium";
+    const chunkName = Object.keys(window).find((key) => key.startsWith("webpackChunk"));
+    const chunk = window[chunkName];
 
-    // TODO: use chunk instead of bd's jsonp polyfill
     let webpackRequire: Require;
-    global.webpackJsonp.push([[], {
-        [moduleId]: (_module: Module, _exports: Exports, require: Require) => {
+    try {
+        chunk.push([["__DIUM__"], {}, (require: Require) => {
             webpackRequire = require;
-        }
-    }, [[moduleId]]]);
 
-    // cleanup
-    delete webpackRequire.m[moduleId];
-    delete webpackRequire.c[moduleId];
+            // prevent webpack from updating anything by throwing an error
+            throw Error();
+        }]);
+    } catch {
+        // eslint-disable no-empty
+    }
 
     return webpackRequire;
 };
@@ -25,6 +26,13 @@ const webpackRequire = getWebpackRequire();
 export {webpackRequire as require};
 
 type RawFilter = (exports: Exports, module: Module) => boolean;
+
+const byModuleSourceFilter = (contents: string[]): RawFilter => {
+    return (_, module) => {
+        const source = sourceOf(module.id).toString();
+        return contents.every((content) => source.includes(content));
+    };
+};
 
 const applyFilters = (filters: RawFilter[]) => (module: Module) => {
     const {exports} = module;
@@ -41,7 +49,7 @@ export const modules = (): Module[] => Object.values(webpackRequire.c);
 export const sources = (): ModuleFunction[] => Object.values(webpackRequire.m);
 
 /** Returns the source function for a specific module.  */
-export const sourceOf = (id: ModuleId | string): ModuleFunction => webpackRequire.m[id] ?? null;
+export const sourceOf = (id: WebpackId | string): ModuleFunction => webpackRequire.m[id] ?? null;
 
 /** Finds a raw module using a set of filter functions. */
 export const find = (...filters: RawFilter[]): Module => modules().find(applyFilters(filters)) ?? null;
@@ -54,7 +62,7 @@ export const query = (options: Query): Module => find(...Filters.generate(option
  *
  * Module ids should be considered volatile across Discord updates.
  */
-export const byId = (id: ModuleId | string): Module => webpackRequire.c[id] ?? null;
+export const byId = (id: WebpackId | string): Module => webpackRequire.c[id] ?? null;
 
 /** Finds a module using its exports. */
 export const byExports = (exported: Exports): Module => find(Filters.byExports(exported));
@@ -71,32 +79,38 @@ export const byProtos = (...protos: string[]): Module => find(Filters.byProtos(p
 /** Finds a module using source code contents of its export entries. */
 export const bySource = (...contents: string[]): Module => find(Filters.bySource(contents));
 
+/** Finds a module using source code contents of its entire source code. */
+export const byModuleSource = (...contents: string[]): Module => find(byModuleSourceFilter(contents));
+
 /** Returns all module results. */
 export const all = {
-    /** Finds all raw modules using a set of filter functions. */
+    /** Finds all modules using a set of filter functions. */
     find: (...filters: RawFilter[]): Module[] => modules().filter(applyFilters(filters)),
 
-    /** Finds all raw modules using query options. */
+    /** Finds all modules using query options. */
     query: (options: Query): Module[] => all.find(...Filters.generate(options)),
 
-    /** Finds all raw modules using the exports. */
+    /** Finds all modules using the exports. */
     byExports: (exported: Exports): Module[] => all.find(Filters.byExports(exported)),
 
-    /** Finds all raw modules using the name of its export. */
+    /** Finds all modules using the name of its export. */
     byName: (name: string): Module[] => all.find(Filters.byName(name)),
 
-    /** Finds all raw modules using property names of its export. */
+    /** Finds all modules using property names of its export. */
     byProps: (...props: string[]): Module[] => all.find(Filters.byProps(props)),
 
-    /** Finds all raw modules using prototype names of it export. */
+    /** Finds all modules using prototype names of it export. */
     byProtos: (...protos: string[]): Module[] => all.find(Filters.byProtos(protos)),
 
-    /** Finds all raw modules using source code contents of its export entries. */
-    bySource: (...contents: string[]): Module[] => all.find(Filters.bySource(contents))
+    /** Finds all modules using source code contents of its export entries. */
+    bySource: (...contents: string[]): Module[] => all.find(Filters.bySource(contents)),
+
+    /** Finds all modules using source code contents of its entire source code. */
+    byModuleSource: (...contents: string[]): Module[] => all.find(byModuleSourceFilter(contents))
 };
 
 /** Returns module ids of all other modules imported in the module. */
-export const resolveImportIds = (module: Module): ModuleId[] => {
+export const resolveImportIds = (module: Module): WebpackId[] => {
     // get module as source code
     const source = sourceOf(module.id).toString();
 
@@ -124,7 +138,7 @@ export const resolveStyles = (module: Module): Module[] => resolveImports(module
 ));
 
 /** Returns the ids of all other modules importing the module. */
-export const resolveUsersById = (id: ModuleId): Module[] => all.find((_, user) => resolveImportIds(user).includes(id));
+export const resolveUsersById = (id: WebpackId): Module[] => all.find((_, user) => resolveImportIds(user).includes(id));
 
 /** Returns all other raw modules importing the module. */
 export const resolveUsers = (module: Module): Module[] => resolveUsersById(module.id);

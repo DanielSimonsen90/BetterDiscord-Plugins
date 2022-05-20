@@ -1,8 +1,8 @@
 /**
- * @name DiscordiumDevTools
+ * @name DiumDevTools
  * @author Zerthox
- * @version 0.2.0
- * @description Makes Discordium available as global for development.
+ * @version 0.2.3
+ * @description Makes Dium available as global for development.
  * @authorLink https://github.com/Zerthox
  * @website https://github.com/Zerthox/BetterDiscord-Plugins
  * @source https://github.com/Zerthox/BetterDiscord-Plugins/tree/master/src/DevTools
@@ -78,10 +78,10 @@ const byExports$2 = (exported) => {
     return (target) => target === exported || (target instanceof Object && Object.values(target).includes(exported));
 };
 const byName$2 = (name) => {
-    return (target) => target instanceof Object && Object.values(target).some(byOwnName(name));
+    return (target) => target instanceof Object && target !== window && Object.values(target).some(byOwnName(name));
 };
 const byOwnName = (name) => {
-    return (target) => target?.displayName === name || target?.constructor?.displayName === name;
+    return (target) => (target?.displayName ?? target?.constructor?.displayName) === name;
 };
 const byProps$2 = (props) => {
     return (target) => target instanceof Object && props.every((prop) => prop in target);
@@ -107,7 +107,7 @@ const Filters = {
 
 const raw = {
     single: (filter) => BdApi.findModule(filter),
-    all: (filter) => BdApi.findAllModules(filter)
+    all: (filter) => BdApi.findAllModules(filter) ?? []
 };
 const resolveExports = (target, filter) => {
     if (target) {
@@ -196,11 +196,18 @@ const ContextMenuActions = () => byProps$1("openContextMenuLazy");
 const ModalActions = () => byProps$1("openModalLazy");
 const Flex$1 = () => byName$1("Flex");
 const Button$1 = () => byProps$1("Link", "Hovers");
+const Text = () => byName$1("Text");
+const Links = () => byProps$1("Link", "NavLink");
+const Switch = () => byName$1("Switch");
+const SwitchItem = () => byName$1("SwitchItem");
+const RadioGroup = () => byName$1("RadioGroup");
+const Slider = () => byName$1("Slider");
+const TextInput = () => byName$1("TextInput");
 const Menu = () => byProps$1("MenuGroup", "MenuItem", "MenuSeparator");
 const Form$1 = () => byProps$1("FormItem", "FormSection", "FormDivider");
 const margins$1 = () => byProps$1("marginLarge");
 
-const discord$1 = {
+const discord = {
     __proto__: null,
     Constants: Constants,
     i18n: i18n,
@@ -212,6 +219,13 @@ const discord$1 = {
     ModalActions: ModalActions,
     Flex: Flex$1,
     Button: Button$1,
+    Text: Text,
+    Links: Links,
+    Switch: Switch,
+    SwitchItem: SwitchItem,
+    RadioGroup: RadioGroup,
+    Slider: Slider,
+    TextInput: TextInput,
     Menu: Menu,
     Form: Form$1,
     margins: margins$1
@@ -235,7 +249,7 @@ const createProxy = (entries) => {
 const Modules = createProxy({
     ...npm,
     ...flux,
-    ...discord$1
+    ...discord
 });
 const Modules$1 = Modules;
 const { React, ReactDOM, classNames, lodash, Flux } = Modules;
@@ -266,7 +280,7 @@ const createPatcher = (id, Logger) => {
             rawPatcher.unpatchAll(id);
             Logger.log("Unpatched all");
         },
-        waitForLazy: (object, method, arg, callback) => new Promise((resolve) => {
+        waitForLazy: (object, method, argIndex, callback) => new Promise((resolve) => {
             const found = callback();
             if (found) {
                 resolve(found);
@@ -274,14 +288,16 @@ const createPatcher = (id, Logger) => {
             else {
                 Logger.log(`Waiting for lazy load in ${method} of ${resolveName(object, method)}`);
                 patcher.before(object, method, ({ args, cancel }) => {
-                    const original = args[arg];
-                    args[arg] = async (...args) => {
-                        const result = await original(...args);
-                        const found = callback();
-                        if (found) {
-                            resolve(found);
-                            cancel();
-                        }
+                    const original = args[argIndex];
+                    args[argIndex] = async function (...args) {
+                        const result = await original.call(this, ...args);
+                        Promise.resolve().then(() => {
+                            const found = callback();
+                            if (found) {
+                                resolve(found);
+                                cancel();
+                            }
+                        });
                         return result;
                     };
                 }, { silent: true });
@@ -319,15 +335,24 @@ class Settings extends Flux.Store {
         this.defaults = defaults;
         this.current = { ...defaults, ...Data.load("settings") };
     }
+    dispatch() {
+        this._dispatcher.dirtyDispatch({ type: "update", current: this.current });
+    }
     get() {
         return { ...this.current };
     }
     set(settings) {
         Object.assign(this.current, settings instanceof Function ? settings(this.get()) : settings);
-        this._dispatcher.dispatch({ type: "update", current: this.current });
+        this.dispatch();
     }
     reset() {
         this.set({ ...this.defaults });
+    }
+    delete(...keys) {
+        for (const key of keys) {
+            delete this.current[key];
+        }
+        this.dispatch();
     }
     connect(component) {
         return Flux.default.connectStores([this], () => ({ ...this.get(), defaults: this.defaults, set: (settings) => this.set(settings) }))(component);
@@ -362,10 +387,6 @@ class Settings extends Flux.Store {
     }
 }
 const createSettings = (Data, defaults) => new Settings(Data, defaults);
-
-const discord = {
-    __proto__: null
-};
 
 const ReactInternals = React?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
 const [getInstanceFromNode, getNodeFromInstance, getFiberCurrentPropsFromNode, enqueueStateRestore, restoreStateIfNeeded, batchedUpdates] = ReactDOM?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?.Events ?? [];
@@ -489,27 +510,28 @@ const SettingsContainer = ({ name, children, onReset }) => (React.createElement(
                 onConfirm: () => onReset()
             }) }, "Reset"))));
 
-const version$1 = "0.2.3";
+const version$1 = "0.2.6";
 
-const createPlugin = ({ name, version, styles: css, settings }, callback) => {
+const createPlugin = ({ name, version, styles, settings }, callback) => {
     const Logger = createLogger(name, "#3a71c1", version);
     const Patcher = createPatcher(name, Logger);
     const Styles = createStyles(name);
     const Data = createData(name);
     const Settings = createSettings(Data, settings ?? {});
     const plugin = callback({ Logger, Patcher, Styles, Data, Settings });
-    function Wrapper() { }
-    Wrapper.prototype.start = () => {
-        Logger.log("Enabled");
-        Styles.inject(css);
-        plugin.start();
-    };
-    Wrapper.prototype.stop = () => {
-        Patcher.unpatchAll();
-        Styles.clear();
-        plugin.stop();
-        Logger.log("Disabled");
-    };
+    class Wrapper {
+        start() {
+            Logger.log("Enabled");
+            Styles.inject(styles);
+            plugin.start();
+        }
+        stop() {
+            Patcher.unpatchAll();
+            Styles.clear();
+            plugin.stop();
+            Logger.log("Disabled");
+        }
+    }
     if (plugin.settingsPanel) {
         const ConnectedSettings = Settings.connect(plugin.settingsPanel);
         Wrapper.prototype.getSettingsPanel = () => (React.createElement(SettingsContainer, { name: name, onReset: () => Settings.reset() },
@@ -518,17 +540,15 @@ const createPlugin = ({ name, version, styles: css, settings }, callback) => {
     return Wrapper;
 };
 
-const Discordium = {
+const dium = {
     __proto__: null,
     createPlugin: createPlugin,
     Finder: index$2,
-    Discord: discord,
     ReactInternals: ReactInternals,
     ReactDOMInternals: ReactDOMInternals,
     Utils: index$1,
     Modules: Modules$1,
     version: version$1,
-    Settings: Settings,
     React: React,
     ReactDOM: ReactDOM,
     classNames: classNames,
@@ -537,18 +557,26 @@ const Discordium = {
 };
 
 const getWebpackRequire = () => {
-    const moduleId = "discordium";
+    const chunkName = Object.keys(window).find((key) => key.startsWith("webpackChunk"));
+    const chunk = window[chunkName];
     let webpackRequire;
-    global.webpackJsonp.push([[], {
-            [moduleId]: (_module, _exports, require) => {
+    try {
+        chunk.push([["__DIUM__"], {}, (require) => {
                 webpackRequire = require;
-            }
-        }, [[moduleId]]]);
-    delete webpackRequire.m[moduleId];
-    delete webpackRequire.c[moduleId];
+                throw Error();
+            }]);
+    }
+    catch {
+    }
     return webpackRequire;
 };
 const webpackRequire = getWebpackRequire();
+const byModuleSourceFilter = (contents) => {
+    return (_, module) => {
+        const source = sourceOf(module.id).toString();
+        return contents.every((content) => source.includes(content));
+    };
+};
 const applyFilters = (filters) => (module) => {
     const { exports } = module;
     return (filters.every((filter) => filter(exports, module))
@@ -565,6 +593,7 @@ const byName = (name) => find(byName$2(name));
 const byProps = (...props) => find(byProps$2(props));
 const byProtos = (...protos) => find(byProtos$2(protos));
 const bySource = (...contents) => find(bySource$2(contents));
+const byModuleSource = (...contents) => find(byModuleSourceFilter(contents));
 const all = {
     find: (...filters) => modules().filter(applyFilters(filters)),
     query: (options) => all.find(...generate(options)),
@@ -572,7 +601,8 @@ const all = {
     byName: (name) => all.find(byName$2(name)),
     byProps: (...props) => all.find(byProps$2(props)),
     byProtos: (...protos) => all.find(byProtos$2(protos)),
-    bySource: (...contents) => all.find(bySource$2(contents))
+    bySource: (...contents) => all.find(bySource$2(contents)),
+    byModuleSource: (...contents) => all.find(byModuleSourceFilter(contents))
 };
 const resolveImportIds = (module) => {
     const source = sourceOf(module.id).toString();
@@ -608,6 +638,7 @@ const DevFinder = {
     byProps: byProps,
     byProtos: byProtos,
     bySource: bySource,
+    byModuleSource: byModuleSource,
     all: all,
     resolveImportIds: resolveImportIds,
     resolveImports: resolveImports,
@@ -616,10 +647,10 @@ const DevFinder = {
     resolveUsers: resolveUsers
 };
 
-const name = "DiscordiumDevTools";
+const name = "DiumDevTools";
 const author = "Zerthox";
-const version = "0.2.0";
-const description = "Makes Discordium available as global for development.";
+const version = "0.2.3";
+const description = "Makes Dium available as global for development.";
 const config = {
 	name: name,
 	author: author,
@@ -627,16 +658,14 @@ const config = {
 	description: description
 };
 
-const { Finder } = Discordium;
+const { Finder } = dium;
 Finder.dev = DevFinder;
 const index = createPlugin(config, () => ({
     start() {
-        global.Discordium = Discordium;
-        global.dium = Discordium;
+        window.dium = dium;
     },
     stop() {
-        delete global.Discordium;
-        delete global.dium;
+        delete window.dium;
     }
 }));
 
