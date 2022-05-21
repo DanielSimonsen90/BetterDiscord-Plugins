@@ -6,9 +6,9 @@ import { ChannelReturns, MessageReturns, UserPopoutReturns, RoleReturns } from '
 import ObservationConfig, { ObservationCallback } from './ObservationConfig';
 import { Guild } from '@discord';
 
-export type ChangeEvents = `${'guild' | 'channel' | 'category' | 'discord-content'}-change`;
+export type ChangeEvents = `${'guild' | 'channel' | 'category' | 'discord-content' | 'layer'}-change`;
 export type LifeCycle<T extends string> = `${T}-${'create' | 'update' | 'render' | 'delete'}`;
-export type MutationConfigOptions = ChangeEvents | LifeCycle<'message'> | LifeCycle<'user-popout'> | 'role'
+export type MutationConfigOptions = ChangeEvents | LifeCycle<'message'> | 'user-popout'
 
 function group(label: string, ...data: any[]) {
     console.groupCollapsed(`%c[${new Date().toLocaleTimeString()}] [${label}]%c`, "color: #3E70DD;", "color: #7898DA;", ...data);
@@ -19,11 +19,10 @@ export type ObservationReturns = {
     'channel-change': ChannelReturns,
     'category-change': [],
     'discord-content-change': [],
-    'role': RoleReturns
+    'layer-change': [{ className: string }],
+    'user-popout': UserPopoutReturns,
 } 
 & { [key in LifeCycle<'message'>]: MessageReturns }
-& { [key in LifeCycle<'user-popout'>]: UserPopoutReturns }
-& { [key in LifeCycle<'role'>]: UserPopoutReturns }
 
 export type MutationConfig = {
     mutations?: {
@@ -54,13 +53,24 @@ export class MutationManager {
     }
     
     constructor() {
+        this.observations.set('layer-change', new ObservationConfig<ObservationReturns['layer-change']>('layer-change', 
+        // () => $('#app-mount div[class*="app-"]').parent
+        MutationManager.writeSelector.id("app-mount").className("app-", 'div').sibling.className('layerContainer', 'div')
+        , function (record, callback) {
+            if (record.type !== 'childList'
+                || !record.addedNodes.length
+                || !(record.addedNodes[0] instanceof HTMLElement)
+                || !MutationManager.isDirectChild(this.element, record.addedNodes[0])
+            ) return; 
+
+            const props = $(record.addedNodes[0]).props as ObservationReturns['layer-change'][0];
+            return callback(record, $(record.addedNodes[0]).fiber, props);
+        }));
         this.observations.set('discord-content-change', new ObservationConfig<ObservationReturns['discord-content-change']>('discord-content', MutationManager.writeSelector
             .ariaLabel("Servers sidebar", 'nav')
             .sibling
             .className('base', 'div')
-            .directChild('div')
-            .className('content')
-            .toString()
+            .directChild('div').and.className('content')
         , function(record, callback) {
             if (!MutationManager.isDirectChild(this.element, record.target)) return;
 
@@ -68,7 +78,7 @@ export class MutationManager {
         }));
         this.observations.set('guild-change', new ObservationConfig('guild-list', MutationManager.writeSelector
             .ariaLabel("Servers sidebar", 'nav')
-            .ariaLabel('Servers', 'div').toString()
+            .ariaLabel('Servers', 'div')
         , function(record, callback) {
             if (!record.target 
                 || !(record.target instanceof Element) 
@@ -104,11 +114,12 @@ export class MutationManager {
         //         || !(record.target instanceof Element)
 
         // }, 'discord-content-change'));
-        this.observations.set('user-popout-render', new ObservationConfig<ObservationReturns['user-popout-render']>('user-popout-render', MutationManager.writeSelector
+        this.observations.set('user-popout', new ObservationConfig<ObservationReturns['user-popout']>('user-popout', MutationManager.writeSelector
             .id("app-mount", 'div')
             // .directChild('div').and.className("layerContainer")
             .directChild('div').and.className("appDevToolsWrapper")
             .className("layerContainer", 'div')
+            .id("popout", 'div')
         , function(record, callback) {
             if (record.type !== 'childList'
                 || record.addedNodes.length <= 0
@@ -120,25 +131,10 @@ export class MutationManager {
 
             console.log('user-popout')
 
-            const [props] = $(record.addedNodes[0] as HTMLElement).propsWith<ObservationReturns['user-popout-create'][0]>("closePopout");
+            const [props] = $(record.addedNodes[0] as HTMLElement).propsWith<ObservationReturns['user-popout'][0]>("closePopout");
             if (!props) return false;
             return callback(record, $(record.addedNodes[0] as HTMLElement).fiber, props, new UserPopoutManipulator(record, props));
-        }, 'discord-content-change'));
-        this.observations.set('role', new ObservationConfig<ObservationReturns['role']>('role-list', MutationManager.writeSelector
-            .className('rolesList', 'div')
-        , function(record, callback) {
-            console.log(record)
-            if (record.type !== 'childList'
-                || record.addedNodes.length <= 0
-                || !(record.addedNodes[0] instanceof Element)
-                || !MutationManager.isDirectChild(this.element, record.addedNodes[0])
-                || !record.addedNodes[0].classList.value.includes('role')
-            ) return;
-
-            const [props] = $(record.addedNodes[0] as HTMLElement).propsWith<ObservationReturns['role'][0]>("data-list-item-id");
-            if (!props) return false;
-            return callback(record, $(record.addedNodes[0] as HTMLElement).fiber, props);
-        }, 'user-popout-render'));
+        }, 'layer-change'));
 
         (window as any).observations = () => console.log(this.observations);
     }
@@ -157,105 +153,91 @@ export class MutationManager {
         console.log(`Observation found`, observation);
         if (observation.ready) return this; // Already listening
 
-        const observer = new MutationObserver(records => { group(`on(${key}, observer records)`); records.forEach(async (record, i) => {
-            console.log(`records[${i}]`, { record, observation });
-           
-            const shouldRun = await (async () => {
-                group(`on(${key}), observer records[${i}], shouldRun`);
-                // // Observation should only run once
-                // if (observation.dependency && observation.dependency === 'once') {
-                //     return !observation.hasRan;
-                // }
-                // Observation has dependency
-                if (observation.dependency) {
-                    console.log(`Observation has dependency`, observation.dependency);
-                    const dependency = this.observations.get(observation.dependency as MutationConfigOptions);
-                    
-                    try {
-                        const dependencyElement = dependency.element;
-                        console.log(`Element status`, dependencyElement ? 'exists - returning true' : 'does not exist - throwing error');
-                        if (!dependencyElement) throw new Error('Dependency element not in DOM');
-                        console.groupEnd();
-                        return true;
-                    } catch (err) {
-                        console.log(`Unable to find dependency element - awaiting promise`, err);
-                        return new Promise<boolean>((resolve, reject) => {
-                            try {
-                                console.log(`Awaiting promise`);
-                                // Wait for dependency element to be in DOM
-                                this.on(observation.dependency as MutationConfigOptions, record => {
-                                    // If record type is childList and addedNodes isn't empty and contains observation element, resolve
-                                    if (record.type === 'childList' 
-                                        && record.addedNodes.length > 0 
-                                        && [...record.addedNodes.values()].some(node => 
-                                            node instanceof HTMLElement 
-                                            && $(node).children(observation.discordSelector)
-                                    )) {
-                                        console.log(`Dependency element found in promise - resolving true`);
-                                        resolve(true);
-                                        return false; // Not sure if true or false
-                                    }
-                                })
-                            } catch (err) {
-                                console.log(`Unable to find dependency element - rejecting`, err);
-                                console.groupEnd();
-                                reject(err);
-                            }
+        const that = this;
+        function setObservation(element: HTMLElement, once = false) {
+            const observer = new MutationObserver(records => { 
+                let observation = that.observations.get(key as any);
+                if (once && observation.hasRan) return observer.disconnect();
+
+                if (!records.length) return;
+
+                group(`on(${key})`);
+                for (const record of records) {
+                    observation.setupCallback(record, (...args) => {
+                        var cached = that.observationCache.get(key)
+                        const [_, ...noRecord] = args;
+                        console.log(`Observation callback`, noRecord, cached);
+                        if (cached && cached[0] == noRecord[0]) return false;
+
+                        // @ts-ignore
+                        const successful = callback(...args);
+                        console.log({
+                            successful,
+                            callback,
+                            args,
+                            key
                         })
-                    }
+                        if (successful) observation.hasRan = true;
+                        if (successful && once) {
+                            observer.disconnect();
+                            that.observations.delete(key as any);
+                            that.observationCache.delete(key);
+                        }
+
+                        that.observations.set(key as MutationConfigOptions, observation);
+                        that.observationCache.set(key, noRecord);
+                        return successful;
+                    })
                 }
 
-                // Observation should run everytime
-                console.log(`Observation has no dependency - return true`);
-                console.groupEnd();
-                return true;
-            })();
-            if (!shouldRun) return;
-
-            observation.setupCallback(record, (...args) => {
-                var cached = this.observationCache.get(key)
-                const [_, ...noRecord] = args;
-
-                console.log(`Observation callback`, noRecord, cached);
-                if (cached && cached[0] == noRecord[0]) {
-                    console.log(`Doublicate observation`);
-                    return false;
-                }
-
-                const successful = callback(...args);
-                if (successful) observation.hasRan = true;
-                this.observations.set(key as MutationConfigOptions, observation);
-                this.observationCache.set(key, noRecord);
-                return successful;
+                console.groupEnd(); 
+                console.groupEnd(); 
             });
-        }); console.groupEnd(); });
 
-        console.log(`Observer constructed`, observer);
+            if (!element) {
+                console.error(`Observation ${key} could not find selector ${observation.preferredSelector}`);
+                return that;
+            }
 
-        const selected = $(observation.discordSelector);
-        if (!selected.element) {
-            console.error(`Observation ${key} could not find selector ${observation.preferredSelector}`);
-            return this;
+            $(element).attr('data-mutation-manager-id', observation.preferredSelector);
+            console.log(`Element selected`, element);
+            observer.observe(element, {
+                attributes: true,
+                subtree: true,
+                childList: true,
+            });
+
+            observation.ready = true;
+            that.observers.set(key as any, observer);
+
+            console.log(`Observer construction complete`, [
+                that.observers, 
+                observer, key, observation, element, 
+            ]);
+            console.groupEnd();
+            return that;
         }
-        selected.attr('data-mutation-manager-id', observation.preferredSelector);
 
-        console.log(`Element selected`, selected);
+        return !observation.dependency ? 
+            setObservation($(observation.discordSelector).element) : 
+            this.on(observation.dependency as any, record => {
+                const [addedNode] = record.addedNodes;
+                if (!addedNode || !(addedNode instanceof HTMLElement)) return false;
+                
+                const lookingFor = $(observation.discordSelector.toString()).element;
+                if (!lookingFor) return false;
 
-        observer.observe(selected.element, {
-            attributes: true,
-            subtree: true,
-            childList: true,
-        });
-
-        observation.ready = true;
-        this.observers.set(key as any, observer);
-
-        console.log(`Observer construction complete`, [
-            this.observers, 
-            observer, key, observation, selected, 
-        ]);
-        console.groupEnd();
-        return this;
+                const found = (
+                    addedNode === lookingFor || 
+                    addedNode.querySelector(observation.discordSelector.toString().split(' ').reverse().slice(1)[0]) === lookingFor
+                );
+                if (found) setObservation(addedNode, observation.dependency === 'once');
+                observation.setupCallback(record, callback);
+                
+                this.observers.get(observation.dependency as any).disconnect();
+                this.observations.delete(observation.dependency as any);
+                return true;
+            })
     }
     public off(key: MutationConfigOptions) {
         if (!this.observations[key]) {
@@ -295,6 +277,7 @@ export function initializeMutations(plugin: any, config: MutationConfig) {
     for (const key in config.mutations) {
         const callback = typeof config[key] === 'string' ? plugin[key] : config.mutations[key];
         mutationManager.on(key as MutationConfigOptions, callback.bind(plugin));
+        console.log(`Observing ${key} bound to ${callback.name}`);
     }
 
     return mutationManager;

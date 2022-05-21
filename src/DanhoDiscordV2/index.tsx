@@ -1,7 +1,12 @@
-import { BDFDB, DanhoPlugin, createPlugin, React, $ } from 'danho-discordium';
+import { BDFDB, DanhoPlugin, createPlugin, React, $, ZLibrary } from 'danho-discordium';
 import { MutationReturns, ObservationReturns } from 'danho-discordium/MutationManager';
 import { PatchReturns } from 'danho-discordium/Patcher';
+import { Role, Roles } from 'danho-discordium/Patcher/UserPopoutBody/roles';
 import config from './config.json';
+
+import { createBDD } from 'danho-discordium/Utils';
+import { classNames } from '@discordium/modules';
+createBDD();
 
 class DanhoDiscordV2<
     SettingsType extends Record<string, any>,
@@ -14,14 +19,12 @@ class DanhoDiscordV2<
                     { selector: "UserProfileBadgeList", isModal: true },
                     { selector: "UserPopoutBody", isModal: true },
                 ]
-            },
-            mutations: {
-                role: this.patchRole
             }
         });
     }
 
     patchUserProfileBadgeList({ args: [props], result }: PatchReturns["UserProfileBadgeList"]) {
+        console.log('userProfileBadgeList', result)
         if (!Array.isArray(result.props.children)) return this.logger.warn('UserProfileBadgeList children is not an array');
 
         const ref = $(s => s.getElementFromInstance(result));
@@ -45,16 +48,35 @@ class DanhoDiscordV2<
     }
 
     patchUserPopoutBody({ args: [props], result }: PatchReturns["UserPopoutBody"]) {
-        console.log({
-            props,
-            result
+        const userPopoutBody = $(`.${result.props.className}`);
+        const [rolesListProps] = userPopoutBody.propsWith<Roles>("userRoles");
+        if (!rolesListProps) return;
+
+        const rolesList = $(`.${rolesListProps.className}`);
+        const roleComponents = rolesList.children().map((role, i) => {
+            const {children, ...roleProps} = $(role).props as Role;
+            // const guildRole = props.guild.roles[props.guildMember.roles[i]];
+            if (roleProps.style) roleProps.style['backgroundColor'] = roleProps.style.borderColor?.replace('0.6', '0.09');
+            
+            return (
+                <div data-is-danho="true" {...roleProps} onClick={e => children[0].props.onClick(e)}>
+                    {children}
+                </div>
+            )
         })
+
+        const { className, ..._rolesListProps } = rolesListProps;
+        result.props.children[1].props.children.splice(1, 0, (
+            <div {..._rolesListProps} className={classNames(ZLibrary.DiscordClassModules.PopoutRoles.root, className)}>
+                {roleComponents}
+            </div>
+        ));
+        console.log(result);
+        return result;
     }
     
-    patchRole(...[record, fiber, props]: MutationReturns['role']) {
-        console.log({
-            record, fiber, props
-        })
+    patchRole(...[record, fiber, props]: MutationReturns['user-popout']) {
+        console.log({ record, fiber, props })
         
         return true;
     }

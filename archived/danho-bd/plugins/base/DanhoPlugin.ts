@@ -354,3 +354,5 @@ export function DanhoPlugin([Plugin, BDFDB, ZLibrary]: BDFDBPluginParams, config
 }
 
 export default DanhoPlugin;
+
+(window as any).BDD = DanhoPlugin;

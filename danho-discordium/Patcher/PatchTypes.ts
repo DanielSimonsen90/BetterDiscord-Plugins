@@ -1,15 +1,16 @@
 import { ActivityIndexes, ActivityTypes, ChannelInputType, Guild, GuildMember, Snowflake, User } from "@discord";
-import * as Discord from '@discord';
+import { UserPopoutBody } from "./UserPopoutBody";
+import UserProfileBadgeList from "./UserProfileBadgeList";
 
 export type PatchReturns = {
     [Key in keyof PatchProps]: {
         args: [moduleProps: PatchProps[Key]],
-        result: React.ReactElement
+        result: React.ReactElement<ResultProps[Key]>
     }
 } & {
     [key: string]: {
         args: [moduleProps: any],
-        result: React.ReactElement
+        result: Element
     }
 }
 export type PatchProps = {
@@ -33,4 +34,8 @@ export type PatchProps = {
         setNote: undefined,
         user: User
     }
+}
+export type ResultProps = {
+    UserProfileBadgeList: UserProfileBadgeList
+    UserPopoutBody: UserPopoutBody
 }

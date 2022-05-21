@@ -21,7 +21,7 @@ export class ObservationConfig<Arguments extends Array<any> = Array<any>> {
         public preferredSelector: string, 
         discordSelector: Arrayable<ConfigSelector>, 
         public setupCallback: ObservationConfigSetupCallback<Arguments>,
-        public dependency?: MutationConfigOptions
+        public dependency?: MutationConfigOptions | 'once'
     ) {
         this.discordSelector = Array.isArray(discordSelector) ? discordSelector.join(' ') : discordSelector;
     }
