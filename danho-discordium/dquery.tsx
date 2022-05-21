@@ -100,6 +100,14 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     public get classes() {
         return this.element.classList.value;
     }
+    public get style() {
+        return this.element.style;
+    }
+    public set style(value: CSSStyleDeclaration) {
+        for (const key in value) {
+            this.element.style[key] = value[key];
+        }
+    }
 
     public hasDirectChild(selector: Selector<El>): boolean {
         if (selector instanceof DQuery) selector = selector.element as El;
@@ -189,7 +197,11 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
         return [parent, path.slice(0, -1)]
     }
 
-    public attr<ValueExists extends boolean = false>(key: string, value?: string): If<ValueExists, string, this> {
+    public attr<
+        KeyExists extends boolean = true,
+        ValueExists extends boolean = false
+    >(key?: string, value?: string): If<KeyExists, If<ValueExists, string, this>, Array<Attr>> {
+        if (!key) return [...this.element.attributes] as any
         if (value === undefined) return this.element.getAttribute(key) as any;
         this.element.setAttribute(key, value);
         return this as any;
@@ -208,6 +220,18 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
         const fragment = this.element.lastChild as HTMLElement;
 
         ReactDOM.render(component, fragment, () => this.element.replaceChild(fragment.lastChild, fragment));
+        return this;
+    }
+
+    public replaceComponent(component: JSX.Element): DQuery<El> {
+        this.element.appendChild(createElement("<></>"));
+        const fragment = this.element.lastChild as HTMLElement;
+
+        ReactDOM.render(component, fragment, () => {
+            const children = [...this.element.children];
+            if (!children.includes(fragment) || !fragment.firstChild) return;
+            this.parent.element.replaceChild(fragment.firstChild, this.element);
+        });
         return this;
     }
     

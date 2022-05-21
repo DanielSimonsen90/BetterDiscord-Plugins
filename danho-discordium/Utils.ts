@@ -1,3 +1,7 @@
+import { Finder } from "@discordium/api";
+import { Module } from "@ZLibrary";
+import { Arrayable } from "danholibraryjs";
+
 export type If<Condition, Then, Else> = Condition extends true ? Then : Else;
 export type PartialRecord<Keys extends string, Values> = Partial<Record<Keys, Values>>;
 
@@ -47,5 +51,15 @@ export const createBDD = () => (window as any).BDD = {
             result[key] = value;
             return result;
         }, {} as any);
+    },
+    findModule(args: Arrayable<string>, returnDisplayNamesOnly = false) {
+        const module: Arrayable<Module> = typeof args === 'string' ? Finder.query({ name: args[0] }) : Finder.query({ props: args })
+        if (!module) return module;
+
+        return returnDisplayNamesOnly ? 
+            Array.isArray(module) ? 
+                module.map(m => m.default?.displayName || m.displayName) :
+                module.default?.displayName || module.displayName 
+            : module;
     }
 }

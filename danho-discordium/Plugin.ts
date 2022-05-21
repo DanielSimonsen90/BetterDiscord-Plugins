@@ -2,7 +2,7 @@ export { forceRerender } from 'danho-bd';
 export { default as ZLibrary } from '@ZLibrary';
 export { default as BDFDB} from '@BDFDB';
 export { default as $ } from '@dquery';
-export { React, createPlugin } from 'discordium';
+export { React, ReactDOM, createPlugin } from 'discordium';
 export * as Discord from './Discord';
 
 export type MutationRecordCallback = (record: MutationRecord) => boolean;
@@ -50,6 +50,10 @@ export class DanhoPlugin<
     }
     public stop() {
         this.mutationManager.clear();
+    }
+
+    protected get BDFDB() {
+        return window.BDFDB;
     }
 
     protected on<
