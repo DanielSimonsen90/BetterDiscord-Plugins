@@ -1,6 +1,8 @@
+import { User } from "@discord";
 import { Finder } from "@discordium/api";
 import { Module } from "@ZLibrary";
 import { Arrayable } from "danholibraryjs";
+import { BDFDB } from "./Plugin";
 
 export type If<Condition, Then, Else> = Condition extends true ? Then : Else;
 export type PartialRecord<Keys extends string, Values> = Partial<Record<Keys, Values>>;
@@ -61,5 +63,20 @@ export const createBDD = () => (window as any).BDD = {
                 module.map(m => m.default?.displayName || m.displayName) :
                 module.default?.displayName || module.displayName 
             : module;
+    },
+    async findUserByTag(tag: string, BDFDB: BDFDB): Promise<User> {
+        return new Promise((resolve, reject) => {
+            console.time(`Looking for ${tag}`);
+            for (let i = 0; i < 9999; i++) {
+                const discriminator = i < 9 ? `000${i}` : i < 99 ? `00${i}` : i < 999 ? `0${i}` : i.toString();
+                const user = BDFDB.LibraryModules.UserStore.findByTag(tag, discriminator);
+                if (user) {
+                    console.timeEnd(`Looking for ${tag}`);
+                    return resolve(user);
+                }
+            }
+            console.timeEnd(`Looking for ${tag}`);
+            reject(`Could not find user with tag ${tag}`);
+        })
     }
 }

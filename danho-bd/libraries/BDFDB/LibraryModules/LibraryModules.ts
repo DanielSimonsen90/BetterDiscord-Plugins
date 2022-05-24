@@ -1,4 +1,4 @@
-import { Channel } from "@discord"
+import { Channel, User } from "@discord"
 import LanguageStore from "./LanguageStore"
 
 type LibraryModules = {
@@ -11,6 +11,10 @@ type LibraryModules = {
     LanguageStore: LanguageStore,
     LastChannelStore: {
         getChannelId(guildId: string): string;
+    },
+    UserStore: {
+        getUser(userId: string): User,
+        findByTag(username: string, discriminator: string): User,
     }
 }
 export default LibraryModules;

@@ -59,6 +59,6 @@ export default class ContextMenuProvider {
     }
 
     private onMessageContextMenu(thisObject: any, props: PatchedProps['message'], ret: WeakFiber) {
-        this.events['message'](props, ret);
+        this.events['message']?.(props, ret);
     }
 }

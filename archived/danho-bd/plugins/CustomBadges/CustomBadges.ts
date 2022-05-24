@@ -29,32 +29,7 @@ export default function CustomBadges([Plugin, BDFDB, ZLibrary]: BDFDBPluginParam
             };
 
             this.css = `
-                .danho-badge {
-                    display: grid;
-                    place-items: center;
-                    box-sizing: border-box;
-                    position: relative;
-                }
-                .danho-badge img {
-                    width: 18px;
-                    height: 18px;
-                }
-                .danho-badge:hover::before {
-                    content: attr(aria-label);
-                    position: absolute;
-                    transform: translate(0%, -150%);
-                    width: max-content;
 
-                    -webkit-box-shadow: var(--elevation-high);
-                    box-shadow: var(--elevation-high);
-                    background-color: var(--background-floating);
-                    color: #dcddde;
-                    border-radius: 5px;
-                    font-size: 16px;
-                    line-height: 20px;
-                    padding: 8px 12px;
-                    overflow-wrap: break-word
-                }
             `;
 
         }

@@ -59,6 +59,6 @@ export type ObservationNode<Props = {}> = {
     __reactProps$?: Props,
 }
 
-export type MouseEventHandler = (e: MouseEvent) => void;
+export type MouseEventHandler = (e: React.MouseEvent) => void;
 
 export default React;

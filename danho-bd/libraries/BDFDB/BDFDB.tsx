@@ -33,7 +33,7 @@ export type BDFDB = {
     ChannelUtils: ChannelUtils,
     ColorUtils: ColorUtils,
     DataUtils: DataUtils,
-    DiscordClassModules: Record<string, string>,
+    DiscordClassModules: Record<string, Record<string, string>>,
     disCN: any,
     DMUtils: DMUtils,
     DOMUtils: DOMUtils
@@ -51,10 +51,14 @@ export type BDFDB = {
 }
 export let BDFDB: BDFDB = window.BDFDB;
 
-if (!window.BDFDB_Global.loaded) {
-    setTimeout(() => {
-        BDFDB = window.BDFDB
-    }, 100);
+const awaitBDFDB = () => {
+    if (!window.BDFDB_Global.loaded) {
+        return setTimeout(() => {
+            awaitBDFDB();
+        }, 100);
+    }
+
+    BDFDB = window.BDFDB;
 }
 
 export default BDFDB;

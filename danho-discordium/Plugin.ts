@@ -8,11 +8,12 @@ export * as Discord from './Discord';
 export type MutationRecordCallback = (record: MutationRecord) => boolean;
 export type PluginConfig = PatcherConfig & MutationConfig;
 
-import { Config, CreatePluginCallbackApi, Logger, Patcher, Plugin, Styles, Data, Settings } from 'discordium';
+import { Config, CreatePluginCallbackApi, Logger, Patcher, Plugin, Styles, Data, Settings, SettingsProps } from 'discordium';
 import { ObservationCallback, ObservationConfig } from './MutationManager';
 import MutationManager, { initializeMutations, MutationConfig, MutationConfigOptions, ObservationReturns } from './MutationManager/MutationManager';
 import ContextMenuProvider from './ContextMenuProvider';
 import initializePatches, { Patched, PatcherConfig } from './Patcher/Patcher';
+import { ComponentType } from 'react';
 
 type Layers = 'tooltip' | 'modal' | 'popout' | `create${'Channel' | 'Category'}`;
 export class DanhoPlugin<
@@ -39,7 +40,7 @@ export class DanhoPlugin<
     protected contextMenus: ContextMenuProvider;
 
     public async start(config?: PluginConfig) {
-        console.clear();
+        // console.clear();
 
         this.logger.group("Patches");
         const { mutations, ...patchConfig } = config;
@@ -65,5 +66,7 @@ export class DanhoPlugin<
     protected off(observation: MutationConfigOptions) {
         return this.mutationManager.off(observation);
     }
+
+    settingsPanel?: ComponentType<SettingsProps<SettingsType>>;
 }
 export default DanhoPlugin;

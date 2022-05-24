@@ -12,9 +12,9 @@
         "lint": "eslint . -f node_modules/eslint-friendly-formatter",
         "lint-fix": "eslint . -f node_modules/eslint-friendly-formatter --fix"
     },
-    "repository": "https://github.com/Zerthox/BetterDiscord-Plugins",
-    "bugs": "https://github.com/Zerthox/BetterDiscord-Plugins/issues",
-    "homepage": "https://github.com/Zerthox/BetterDiscord-Plugins#readme",
+    "repository": "https://github.com/DanielSimonsen90/BetterDiscord-Plugins",
+    "bugs": "https://github.com/DanielSimonsen90/BetterDiscord-Plugins/issues",
+    "homepage": "https://github.com/DanielSimonsen90/BetterDiscord-Plugins#readme",
     "workspaces": [
         "dium"
     ],
