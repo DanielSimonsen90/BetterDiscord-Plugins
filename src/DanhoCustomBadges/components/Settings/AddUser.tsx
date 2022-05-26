@@ -1,11 +1,14 @@
+import { React } from "discordium";
+import { Discord } from 'danho-discordium/components'
+import { ShakeableRef } from "danho-discordium/components/Discord/Shakeable";
+import { createBDD } from "danho-discordium/Utils";
+
 import BDFDB from "@BDFDB";
 import { User } from "@discord";
 import ZLibrary from "@ZLibrary";
-import { Finder, Modules, React } from "discordium";
-import { createBDD } from "danho-discordium/Utils";
-const BDD = createBDD();
 
-const { Flex, Button, Switch, SwitchItem, TextInput } = Modules;
+const BDD = createBDD();
+const { Button, TextInput, Shakeable } = Discord;
 const { useState, createRef, useEffect } = React;
 
 type AddUserProps = {
@@ -15,12 +18,7 @@ type AddUserProps = {
 export default function AddUser({ BDFDB, onSubmit }: AddUserProps) {
     const [userString, setUserString] = useState("");
     const [errorLabel, setErrorLabel] = useState(undefined);
-
-    const Shakeable = Finder.query({ name: "Shakeable" }).default;
-    const shakeable = createRef<{
-        shake(time: 300 | number, intensity: 5 | number): void,
-        stop(): void
-    }>();
+    const shakeable = createRef<ShakeableRef>();
 
     useEffect(() => {
         if (shakeable.current && errorLabel) shakeable.current.shake(300, 1);
@@ -38,14 +36,12 @@ export default function AddUser({ BDFDB, onSubmit }: AddUserProps) {
     }
 
     return (
-        <div>
-            <Shakeable ref={shakeable} className="add-user" {...{ "data-error": errorLabel }}>
-                <TextInput placeholder="Username, tag or id" onKeyDown={e => (e.key === 'Enter' || e.key === 'NumpadEnter') && onSend()} onChange={v => {
-                    setUserString(v);
-                    if (errorLabel) setErrorLabel(undefined);
-                }} value={userString} />
-                <Button color={Button.Colors.BRAND_NEW} onClick={onSend}>Add user</Button>
-            </Shakeable>
-        </div>
+        <Shakeable ref={shakeable} className="add-user" {...{ "data-error": errorLabel }}>
+            <TextInput placeholder="Username, tag or id" onKeyDown={e => (e.key === 'Enter' || e.key === 'NumpadEnter') && onSend()} onChange={v => {
+                setUserString(v);
+                if (errorLabel) setErrorLabel(undefined);
+            }} value={userString} />
+            <Button color={Button.Colors.BRAND_NEW} onClick={onSend}>Add user</Button>
+        </Shakeable>
     )
 }

@@ -4,13 +4,17 @@ import UserProfileBadgeList from "./UserProfileBadgeList";
 
 export type PatchReturns = {
     [Key in keyof PatchProps]: {
+        // original: React.FunctionComponent,
         args: [moduleProps: PatchProps[Key]],
         result: React.ReactElement<ResultProps[Key]>
     }
 } & {
     [key: string]: {
+        cancel: () => void;
+        original: React.FunctionComponent,
+        context: any;
         args: [moduleProps: any],
-        result: Element
+        result: React.ReactElement
     }
 }
 export type PatchProps = {
@@ -20,7 +24,7 @@ export type PatchProps = {
         premiumGuildSince: Date,
         premiumSince: Date,
         size: number,
-        user: User
+        user: User,
     },
     UserPopoutBody: {
         activity: ActivityTypes[number],

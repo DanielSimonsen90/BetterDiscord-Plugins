@@ -1,30 +1,30 @@
 import { Arrayable } from 'danholibraryjs';
-import { ReactDOM } from 'discordium'
+import { ReactDOM, Utils } from 'discordium'
 import { Fiber } from '@react';
 import ElementSelector from './ElementSelector';
 import { If, PromisedReturn } from './Utils';
 
-export type SelectorCallback<Element extends Arrayable<HTMLElement> = HTMLElement> = 
+export type SelectorCallback<Element extends Arrayable<HTMLElement> = HTMLElement> =
     ((selector: ElementSelector, _$: typeof $) => ElementSelector | string | DQuery<HTMLElement> | Element);
-export type Selector<Element extends Arrayable<HTMLElement> = HTMLElement> = 
-    | string 
-    | Element 
-    | ElementSelector 
+export type Selector<Element extends Arrayable<HTMLElement> = HTMLElement> =
+    | string
+    | Element
+    | ElementSelector
     | (Element extends HTMLElement ? DQuery<HTMLElement> : Array<DQuery<HTMLElement>>)
     | SelectorCallback<Element>;
 
 export function $<
     Single extends boolean = true,
     T extends HTMLElement = HTMLElement,
-    El extends Single extends true ? T : Array<T> = Single extends true ? T : Array<T>, 
->(selector: Selector<El>, single: Single = true as Single): If<Single, DQuery<T>, Array<DQuery<T>>> {
+    El extends Single extends true ? T : Array<T> = Single extends true ? T : Array<T>,
+    >(selector: Selector<El>, single: Single = true as Single): If<Single, DQuery<T>, Array<DQuery<T>>> {
     if (single) return new DQuery(selector as Selector<T>) as any;
 
     let elements = (() => {
         if (typeof selector === 'function') {
             selector = selector(new ElementSelector(), $) as Selector<El>;
         }
-        if (selector instanceof ElementSelector || typeof selector === 'string') 
+        if (selector instanceof ElementSelector || typeof selector === 'string')
             return [...document.querySelectorAll<T>(selector.toString()).values()] as Array<T>;
         else if (selector instanceof DQuery) {
             return [selector.element] as Array<T>;
@@ -37,14 +37,14 @@ export function $<
 export async function $p<
     Single extends boolean = true,
     T extends HTMLElement = HTMLElement,
-    El extends Single extends true ? T : Array<T> = Single extends true ? T : Array<T>, 
->(selector: PromisedReturn<SelectorCallback<El>>, single: Single = true as Single): Promise<If<Single, DQuery<T>, Array<DQuery<T>>>> {
+    El extends Single extends true ? T : Array<T> = Single extends true ? T : Array<T>,
+    >(selector: PromisedReturn<SelectorCallback<El>>, single: Single = true as Single): Promise<If<Single, DQuery<T>, Array<DQuery<T>>>> {
     const resolved = await selector(new ElementSelector(), $);
 
     if (single) return new DQuery(resolved as T) as any;
 
     let elements = (() => {
-        if (resolved instanceof ElementSelector || typeof resolved === 'string') 
+        if (resolved instanceof ElementSelector || typeof resolved === 'string')
             return [...document.querySelectorAll<T>(resolved.toString()).values()] as Array<T>;
         else if (resolved instanceof DQuery) {
             return [resolved.element] as Array<T>;
@@ -59,14 +59,14 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     constructor(private selector: Selector<El>) {
         if (selector) {
             const element = (
-                selector instanceof HTMLElement ? selector as El : 
-                selector instanceof DQuery ? selector.element as El :
-                selector instanceof ElementSelector || typeof selector === 'string' ? document.querySelector<El>(selector.toString()) :
-                typeof selector === 'function' ? new DQuery<El>(selector(new ElementSelector(), $) as Selector<El>).element :
-                selector
+                selector instanceof HTMLElement ? selector as El :
+                    selector instanceof DQuery ? selector.element as El :
+                        selector instanceof ElementSelector || typeof selector === 'string' ? document.querySelector<El>(selector.toString()) :
+                            typeof selector === 'function' ? new DQuery<El>(selector(new ElementSelector(), $) as Selector<El>).element :
+                                selector
             );
-    
-            if (!element 
+
+            if (!element
                 && selector
                 && !(typeof selector === 'function') // ElementSelector.getElementFromInstance(instance) might not find the element
             ) console.trace(`%cCould not find element with selector: ${selector}`, "color: lightred; background-color: darkred;");
@@ -234,7 +234,7 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
         });
         return this;
     }
-    
+
     public prependHtml(html: string): DQuery<El> {
         this.element.insertAdjacentHTML('afterbegin', html);
         return this;
@@ -256,6 +256,9 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
         return this;
     }
 
+    public async forceUpdate() {
+        return Utils.forceFullRerender(this.fiber);
+    }
 }
 export default $;
 
@@ -269,6 +272,6 @@ export function createElement(html: string | '<></>' | 'fragment', target?: Sele
 
     if (target instanceof Node) return target.appendChild(element);
     else if (target instanceof DQuery) return target.element.appendChild(element);
-    else if (typeof target === "string" || target instanceof ElementSelector || typeof target === 'function') 
+    else if (typeof target === "string" || target instanceof ElementSelector || typeof target === 'function')
         return document.querySelector(typeof target === 'function' ? target(new ElementSelector(), $).toString() : target.toString()).appendChild(element);
 }

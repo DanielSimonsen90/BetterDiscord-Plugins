@@ -13,6 +13,6 @@ export type UserProfileBadgeList = {
         text: string,
     }>>,
     className: string,
-    role: 'group'
+    role: 'group',
 }
 export default UserProfileBadgeList;

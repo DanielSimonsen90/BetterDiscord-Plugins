@@ -14,12 +14,18 @@ export type BadgeData = {
     href?: string
 }
 
+export type SettingsUser = {
+    badges: Array<BadgeData>
+    premiumSince?: string | null,
+    boosterSince?: string | null,
+}
+
 export type Settings = {
     allowVerified: boolean,
     allowVerifiedInvite: boolean,
     allowPartneredInvite: boolean,
     
     users: {
-        [userId: Snowflake]: Array<BadgeData>
+        [userId: Snowflake]: SettingsUser
     }
 }

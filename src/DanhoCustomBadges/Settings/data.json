@@ -4,20 +4,27 @@
     "allowPartneredInvite": false,
 
     "users": {
-        "245572699894710272": [
-            {
-                "tooltip": "Pingu Developer",
-                "index": 3,
-                "src": "https://media.discordapp.net/attachments/767713017274040350/768002085052088351/PinguDev.png",
-                "href": "https://google.com"
-            }
-        ],
-        "361815289278627851": [
-            {
-                "tooltip": "Sussie Baka",
-                "index": 0,
-                "src": "https://media.discordapp.net/attachments/911311077130776577/977273608823005234/IMG_1840.jpg"
-            }
-        ]
+        "245572699894710272": {
+            "premiumSince": null,
+            "boosterSince": null,
+            "badges": [
+                {
+                    "tooltip": "Pingu Developer",
+                    "index": 3,
+                    "src": "https://media.discordapp.net/attachments/767713017274040350/768002085052088351/PinguDev.png",
+                    "href": "https://google.com"
+                }
+            ]
+        },
+        "361815289278627851": {
+            "premiumSince": null,
+            "badges": [
+                {
+                    "tooltip": "Sussie Baka",
+                    "index": 0,
+                    "src": "https://media.discordapp.net/attachments/911311077130776577/977273608823005234/IMG_1840.jpg"
+                }
+            ]
+        }
     }
 }

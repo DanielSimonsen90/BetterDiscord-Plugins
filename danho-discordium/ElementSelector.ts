@@ -1,8 +1,9 @@
 import { AriaRole } from "react";
+import { If } from "./Utils";
 
 export class ElementSelector {
-    public getElementFromInstance<Element extends HTMLElement>(instance: React.ReactElement) {
-        return getElementFromInstance<Element>(instance);
+    public getElementFromInstance<Element extends HTMLElement, Multiple extends boolean = false>(instance: React.ReactElement, allowMultiple: Multiple = false as Multiple): If<Multiple, Array<Element>, Element> {
+        return getElementFromInstance<Element, Multiple>(instance, allowMultiple);
     }
 
     private result = "";
@@ -62,7 +63,7 @@ export class ElementSelector {
 }
 export default ElementSelector;
 
-export function getElementFromInstance<Element extends HTMLElement>(instance: React.ReactElement): Element {
+export function getElementFromInstance<Element extends HTMLElement, Multiple extends boolean = false>(instance: React.ReactElement, allowMultiple: Multiple = false as Multiple): If<Multiple, Array<Element>, Element> {
     const selector = new ElementSelector()
     if (instance.type) selector.tagName(instance.type.toString() as keyof HTMLElementTagNameMap).and;
     if (instance.props) {
@@ -79,10 +80,7 @@ export function getElementFromInstance<Element extends HTMLElement>(instance: Re
         }
     }
 
-    return (
-        document.querySelector<Element>(selector.toString()) 
-        // ?? 
-        // delay(() => getElementFromInstance(instance), 100)
-    );
-
+    return allowMultiple ? 
+        document.querySelectorAll(selector.toString()) as any : 
+        document.querySelector(selector.toString()) as any;
 }

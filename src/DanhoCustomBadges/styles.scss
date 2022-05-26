@@ -31,7 +31,8 @@
     .avatar {
         grid-area: avatar;
         display: grid;
-        
+        margin: unset;
+
         img {
             border-radius: 50%;
             height: 100%;
@@ -48,6 +49,12 @@
     button.delete {
         grid-area: tag;
         width: fit-content;
+    }
+
+    @include className(clickable) {
+        &:not(.danho-badge) {
+            opacity: .45;
+        }
     }
 }
 

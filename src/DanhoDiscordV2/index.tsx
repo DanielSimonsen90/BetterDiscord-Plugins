@@ -1,4 +1,5 @@
-import { DanhoPlugin, createPlugin, $ } from 'danho-discordium';
+import { Utils } from 'discordium';
+import { DanhoPlugin, createPlugin, $, React, forceRerender } from 'danho-discordium';
 import { PatchReturns } from 'danho-discordium/Patcher';
 import { Roles } from 'danho-discordium/Patcher/UserPopoutBody/roles';
 
@@ -14,7 +15,7 @@ class DanhoDiscordV2<
             after: {
                 default: [
                     { selector: "UserPopoutBody", isModal: true },
-                    { selector: "ViewAsRoleSelector", isContextMenu: true }
+                    // { selector: "ViewAsRoleSelector", isContextMenu: true }
                 ]
             }
         });

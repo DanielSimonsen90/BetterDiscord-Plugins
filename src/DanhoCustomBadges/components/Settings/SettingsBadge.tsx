@@ -1,11 +1,11 @@
+import { React } from 'discordium';
+import { Discord } from 'danho-discordium/components';
 import { User } from '@discord';
-import ZLibrary from '@ZLibrary';
-import { React, Modules } from 'discordium';
+
 import { BadgeData } from '../../Settings/types';
 
+const { Button, TextInput, Form: { FormItem }, Margins } = Discord;
 const { useState, useMemo, useCallback } = React;
-const { TextInput, Button } = Modules;
-const { FormItem } = Modules.Form;
 
 type SettingsBadgeProps = {
     badge: BadgeData,
@@ -22,8 +22,6 @@ export default function SettingsBadge({ badge, user, onUpdate, onDelete }: Setti
 
     const index = useMemo(() => badge.index, [badge]);
     const update = useMemo(() => ({ tooltip, index, src, href }), [tooltip, index, src, href]);
-
-    const { Margins } = ZLibrary.DiscordClassModules;
 
     const move = useCallback((offset: number) => {
         let newIndex = index + offset;

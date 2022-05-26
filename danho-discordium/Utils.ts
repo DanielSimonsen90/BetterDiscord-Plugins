@@ -32,30 +32,40 @@ export const createBDD = () => (window as any).BDD = {
         return modules.map(module => module.default.displayName).sort();
     },
     findClassModuleContainingClass(className: string) {
-        const DiscordClassModules = Object.assign({}, window.ZLibrary.DiscordClassModules, window.BDFDB.DiscordClassModules);
-        
-        return Object.keys(DiscordClassModules).map(key => {
-            const property = DiscordClassModules[key];
-            if (!property) return null;
+        type Lib = Record<string, Record<string, string>>;
 
-            const filtered = Object.keys(property).map(item => {
-                const value = property[item];
-                return value.toLowerCase().includes(className.toLowerCase()) && [item, value];
+        const DiscordClassModules: Array<[string, Lib]> = ["ZLibrary", "BDFDB"].map(name => [name, window[name].DiscordClassModules]);
+        const findModule = (key: string, lib: Lib): [moduleTitle: string, module: any] => {
+            const module = lib[key];
+            if (!module) return null;
+
+            const filtered = Object.entries(module).map(([moduleKey, value]) => {
+                return value.toLowerCase().includes(className.toLowerCase()) && [moduleKey, value];
             }).filter(v => v);
                 
             if (!filtered.length) return null;
-
+    
             return [key, filtered.reduce((result, [item, value]) => {
                 result[item] = value;
                 return result;
             }, {} as any)];
-        }).filter(v => v).reduce((result, [key, value]) => {
-            result[key] = value;
+        }
+
+        return DiscordClassModules.map(([name, lib]) => [name, Object
+            .keys(lib)
+            .map(k => findModule(k, lib))
+            .filter(v => v)
+            .reduce((result, [moduleTitle, module]) => {
+                result[moduleTitle] = module;
+                return result;
+            }, {} as any)]
+        ).reduce((result, [name, modules]) => {
+            result[name] = modules;
             return result;
         }, {} as any);
     },
     findModule(args: Arrayable<string>, returnDisplayNamesOnly = false) {
-        const module: Arrayable<Module> = typeof args === 'string' ? Finder.query({ name: args[0] }) : Finder.query({ props: args })
+        const module: Arrayable<Module> = typeof args === 'string' ? Finder.query({ name: args }) : Finder.query({ props: args })
         if (!module) return module;
 
         return returnDisplayNamesOnly ? 

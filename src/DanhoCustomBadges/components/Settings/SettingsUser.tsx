@@ -1,68 +1,83 @@
-import { React, Modules, classNames } from 'discordium';
+import { classNames, React } from 'discordium';
+import Discord from 'danho-discordium/components/Discord';
+import { useMemoedState, usePatcher } from 'danho-discordium/hooks';
 
+import { User } from '@discord';
 import ZLibrary from '@ZLibrary';
 import BDFDB from '@BDFDB';
 
-import DefaultIcon from '../DefaultIcon';
+import config from '../../config.json'
+import { BadgeData, SettingsUser } from '../../Settings/types';
 import Badge from '../Badge';
-import { BadgeData } from '../../Settings/types';
-import PlusIcon from './PlusIcon';
+import DefaultIcon from '../DefaultIcon';
 import SettingsBadge from './SettingsBadge';
-import { User } from '@discord';
+import PlusIcon from './PlusIcon';
+import { createPatcher, createLogger } from '@discordium/api';
+import SettingsBadgeList from './SettingsBadgeList';
 
-const { useMemo, useState, useCallback, useEffect } = React;
-const { margins, Button, TextInput } = Modules;
-const { FormItem } = Modules.Form;
+const { useMemo, useCallback, useEffect, useState } = React;
+const {
+    Avatar: { default: Avatar, Sizes },
+    DiscordTag,
+    UserProfileBadgeList,
+    Form: { FormItem },
+    Margins, ClassModules
+} = Discord;
+const { default: BadgeList } = UserProfileBadgeList
 
 type SettingsUserProps = {
     BDFDB: BDFDB,
     userId: string,
-    badges: Array<BadgeData>,
+    data: SettingsUser,
     onSave: (badges: Array<BadgeData>) => void,
     addBadge: () => void,
     deleteUser: () => void
 }
 
-export default function SettingsUser({ BDFDB, userId, badges, onSave, addBadge, deleteUser }: SettingsUserProps) {
+export default function SettingsUser({ BDFDB, userId, data, onSave, addBadge, deleteUser }: SettingsUserProps) {
+    const { badges } = data;
     const user = useMemo(() => ZLibrary.DiscordModules.UserStore.getUser(userId) ?? {
         username: 'Unknown',
         avatar: <DefaultIcon />,
         get tag() { return "Unknown#0000"; }
     }, [userId]);
-    const [selectedBadgeIndex, setSelectedBadgeIndex] = useState(-1);
-    const selectedBadge = useMemo(() => badges[selectedBadgeIndex], [selectedBadgeIndex, badges]);
-    const { Titles, AccountDetails } = ZLibrary.DiscordClassModules;
+    const [selectedBadge, setSelectedBadgeIndex, selectedBadgeIndex] = useMemoedState(-1, index => data[index], [data])
+    const { AccountDetails, Titles, UserProfileHeader } = ClassModules;
 
     const onSelecetedBadgeUpdate = useCallback((badge: BadgeData) => {
         BdApi.showToast("Badge updated", { type: 'info' });
         onSave(badges.map((b, i) => i === selectedBadgeIndex ? badge : b));
-    }, [selectedBadgeIndex, badges, onSave]);
+    }, [selectedBadgeIndex, data, onSave]);
     const onSelectedBadgeDelete = useCallback(() => {
         const newBadges = [...badges];
         newBadges.splice(selectedBadgeIndex, 1);
         setSelectedBadgeIndex(i => i - 1);
-        onSave(newBadges);
-    }, [badges, onSave, selectedBadgeIndex]);
+
+        newBadges.length === 0 ? deleteUser() : onSave(newBadges);
+    }, [data, onSave, selectedBadgeIndex]);
 
     return (
-        <FormItem data-setting-for={userId} className={classNames(margins.marginBottom20, 'settings-user')}>
+        <FormItem data-setting-for={userId} className={classNames(Margins.marginBottom20, 'settings-user')}>
             <div className="user-presentation">
-                <div className={classNames(AccountDetails.avatarWrapper, 'avatar')}>
-                    {typeof user.avatar === 'string' ? <img src={BDFDB.UserUtils.getAvatar(userId)} className={AccountDetails.avatar} /> : user.avatar}
-                </div>
-                <div className="tag">
-                    <h1 className={classNames(Titles.h1, AccountDetails.nameTag, Titles.defaultColor)}>{user.tag}</h1>
-                    <Button className='delete' borderColor={Button.Colors.RED} look={Button.Looks.OUTLINED} size={Button.Sizes.TINY} onClick={deleteUser}>Delete</Button>
-                </div>
-                {/* <BadgeList user={user as User} className={ZLibrary.DiscordClassModules.UserModal.container} premiumSince={null} /> */}
-                <div className="badgeList">
+                <figure className={classNames(AccountDetails.avatarWrapper, 'avatar')}>
+                    <Avatar src={BDFDB.UserUtils.getAvatar(userId)} className={classNames(AccountDetails.avatar, 'avatar')} size={Sizes.SIZE_56} />
+                </figure>
+                <DiscordTag user={user as User} className={classNames(Titles.h1, AccountDetails.nameTag, Titles.defaultColor)} discriminatorClassName={UserProfileHeader.discriminator} />
+                <SettingsBadgeList user={user as User} data={data} onAddBadgeClick={addBadge} onBadgeClick={i => (
+                    i === selectedBadgeIndex ? setSelectedBadgeIndex(-1) : setSelectedBadgeIndex(i)
+                )} />
+                {/* <div className="badgeList">
                     {badges.sort((a, b) => b.index - a.index).map((badge, i) => (
-                        <Badge BDFDB={BDFDB} src={badge.src} tooltipText={badge.tooltip} onClick={() => setSelectedBadgeIndex(i)} key={badge.src} />
+                        <Badge BDFDB={BDFDB} src={badge.src} tooltipText={badge.tooltip} onClick={() => {
+                            i === selectedBadgeIndex ? setSelectedBadgeIndex(-1) : setSelectedBadgeIndex(i)
+                        }} key={badge.src} />
                     ))}
-                    <Badge BDFDB={BDFDB} src={<PlusIcon />} tooltipText="Add badge" onClick={addBadge} />
-                </div>
+                </div> */}
             </div>
-            {selectedBadge && <SettingsBadge badge={selectedBadge} user={user as User} length={badges.length} onUpdate={onSelecetedBadgeUpdate} onDelete={onSelectedBadgeDelete} />}
+            {selectedBadge && <SettingsBadge badge={selectedBadge} user={user as User} length={badges.length}
+                onUpdate={onSelecetedBadgeUpdate}
+                onDelete={onSelectedBadgeDelete}
+            />}
         </FormItem>
     )
 }
