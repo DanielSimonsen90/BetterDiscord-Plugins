@@ -51,8 +51,9 @@
         width: fit-content;
     }
 
+
     @include className(clickable) {
-        &:not(.danho-badge) {
+        &:not(.danho-badge.custom) {
             opacity: .45;
         }
     }
@@ -109,14 +110,6 @@ section.settings {
     }
 }
 
-.badgeList {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(10px, 22px));
-    grid-gap: .25rem;
-    place-items: center;
-    margin-bottom: 1rem;
-}
-
 .add-user {
     position: relative;
     display: flex;
@@ -137,4 +130,8 @@ section.settings {
     position: absolute;
     top: -1.1em;
     z-index: 1010;
+}
+
+.hidden {
+    display: none;
 }

@@ -144,6 +144,13 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
         }
         return getElement(this.element) ? new DQuery<El>(getElement(this.element) as El) as any : undefined;
     }
+    public get firstChild() {
+        return this.children()[0];
+    }
+    public get lastChild() {
+        const children = this.children();
+        return children[children.length - 1];
+    }
 
     public get fiber() {
         return this.element['__reactFiber$'] as Fiber;
@@ -200,7 +207,7 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     public attr<
         KeyExists extends boolean = true,
         ValueExists extends boolean = false
-    >(key?: string, value?: string): If<KeyExists, If<ValueExists, string, this>, Array<Attr>> {
+    >(key?: string, value?: string): If<KeyExists, If<ValueExists, this, string>, Array<Attr>> {
         if (!key) return [...this.element.attributes] as any
         if (value === undefined) return this.element.getAttribute(key) as any;
         this.element.setAttribute(key, value);

@@ -1,29 +1,24 @@
 import { classNames, React } from 'discordium';
 import Discord from 'danho-discordium/components/Discord';
-import { useMemoedState, usePatcher } from 'danho-discordium/hooks';
+import { useMemoedState } from 'danho-discordium/hooks';
 
 import { User } from '@discord';
 import ZLibrary from '@ZLibrary';
 import BDFDB from '@BDFDB';
 
-import config from '../../config.json'
 import { BadgeData, SettingsUser } from '../../Settings/types';
-import Badge from '../Badge';
 import DefaultIcon from '../DefaultIcon';
 import SettingsBadge from './SettingsBadge';
-import PlusIcon from './PlusIcon';
-import { createPatcher, createLogger } from '@discordium/api';
 import SettingsBadgeList from './SettingsBadgeList';
+import useSelectedBadge from './useSelectedBadge';
 
 const { useMemo, useCallback, useEffect, useState } = React;
 const {
     Avatar: { default: Avatar, Sizes },
     DiscordTag,
-    UserProfileBadgeList,
     Form: { FormItem },
     Margins, ClassModules
 } = Discord;
-const { default: BadgeList } = UserProfileBadgeList
 
 type SettingsUserProps = {
     BDFDB: BDFDB,
@@ -41,20 +36,23 @@ export default function SettingsUser({ BDFDB, userId, data, onSave, addBadge, de
         avatar: <DefaultIcon />,
         get tag() { return "Unknown#0000"; }
     }, [userId]);
-    const [selectedBadge, setSelectedBadgeIndex, selectedBadgeIndex] = useMemoedState(-1, index => data[index], [data])
+    const [selectedBadge, setSelectedBadge] = useSelectedBadge(badges);
     const { AccountDetails, Titles, UserProfileHeader } = ClassModules;
 
+    const onBadgeClicked = useCallback((badge: BadgeData) => {
+        return setSelectedBadge(badge === selectedBadge ? null : badge);
+    }, [selectedBadge, data]);
     const onSelecetedBadgeUpdate = useCallback((badge: BadgeData) => {
         BdApi.showToast("Badge updated", { type: 'info' });
-        onSave(badges.map((b, i) => i === selectedBadgeIndex ? badge : b));
-    }, [selectedBadgeIndex, data, onSave]);
+        onSave(badges.map((b, i) => i === selectedBadge.index ? badge : b));
+    }, [selectedBadge, data, onSave]);
     const onSelectedBadgeDelete = useCallback(() => {
         const newBadges = [...badges];
-        newBadges.splice(selectedBadgeIndex, 1);
-        setSelectedBadgeIndex(i => i - 1);
+        newBadges.splice(selectedBadge.index, 1);
+        setSelectedBadge(b => badges[b.index - 1] ?? badges[badges.length - 1]);
 
         newBadges.length === 0 ? deleteUser() : onSave(newBadges);
-    }, [data, onSave, selectedBadgeIndex]);
+    }, [data, onSave, selectedBadge]);
 
     return (
         <FormItem data-setting-for={userId} className={classNames(Margins.marginBottom20, 'settings-user')}>
@@ -63,16 +61,10 @@ export default function SettingsUser({ BDFDB, userId, data, onSave, addBadge, de
                     <Avatar src={BDFDB.UserUtils.getAvatar(userId)} className={classNames(AccountDetails.avatar, 'avatar')} size={Sizes.SIZE_56} />
                 </figure>
                 <DiscordTag user={user as User} className={classNames(Titles.h1, AccountDetails.nameTag, Titles.defaultColor)} discriminatorClassName={UserProfileHeader.discriminator} />
-                <SettingsBadgeList user={user as User} data={data} onAddBadgeClick={addBadge} onBadgeClick={i => (
-                    i === selectedBadgeIndex ? setSelectedBadgeIndex(-1) : setSelectedBadgeIndex(i)
-                )} />
-                {/* <div className="badgeList">
-                    {badges.sort((a, b) => b.index - a.index).map((badge, i) => (
-                        <Badge BDFDB={BDFDB} src={badge.src} tooltipText={badge.tooltip} onClick={() => {
-                            i === selectedBadgeIndex ? setSelectedBadgeIndex(-1) : setSelectedBadgeIndex(i)
-                        }} key={badge.src} />
-                    ))}
-                </div> */}
+                <SettingsBadgeList BDFDB={BDFDB} user={user as User} data={data}
+                    onAddBadgeClick={addBadge}
+                    onBadgeClick={onBadgeClicked}
+                />
             </div>
             {selectedBadge && <SettingsBadge badge={selectedBadge} user={user as User} length={badges.length}
                 onUpdate={onSelecetedBadgeUpdate}

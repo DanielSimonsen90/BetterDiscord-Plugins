@@ -1,7 +1,8 @@
 import { User } from "@discord";
+import Component from "../Component";
 
 type BadgeSize = Record<`SIZE_${18  | 22 | 24}`, number>
-type UserProfileBadgeListComponent = React.FunctionComponent<{
+type UserProfileBadgeListComponent = Component<{
     className?: string,
     user: User,
     premiumSince?: Date,

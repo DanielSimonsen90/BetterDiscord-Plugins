@@ -16,6 +16,7 @@ type SettingsBadgeProps = {
     onDelete: () => void,
 }
 export default function SettingsBadge({ badge, user, onUpdate, onDelete }: SettingsBadgeProps) {
+    console.log('SettingsBadge badge', badge);
     const [tooltip, setTooltip] = useState(badge.tooltip);
     const [src, setSrc] = useState(badge.src);
     const [href, setHref] = useState(badge.href);

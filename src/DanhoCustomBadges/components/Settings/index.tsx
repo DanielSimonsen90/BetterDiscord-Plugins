@@ -28,7 +28,6 @@ const getNewBadge = (badges: Array<BadgeData>, userId: string): BadgeData => ({
 export const SettingsPanel = ({ BDFDB, defaults, set, ...settings }: SettingsPanelProps) => {
     const [allowVerified, setAllowVerified] = useState(settings.allowVerified ?? defaults.allowVerified);
     const users = useMemo(() => settings.users || defaults.users, [settings.users, defaults.users]);
-    const patcher = useMemo(() => createPatcher(`${name}-settings`, createLogger(`${name}-settings`, "#777", version)), [])
     const userComponents = useMemo(() => Object.entries(users).map(([userId, data]) => (
         <SettingsUser {...{ userId, data, BDFDB }}
             onSave={badges => set({ users: { ...users, [userId]: { ...data, badges } } })}
@@ -63,7 +62,7 @@ export const SettingsPanel = ({ BDFDB, defaults, set, ...settings }: SettingsPan
             </Section>
             <Section className={classNames('custom-badges')} title="Cusom Badges">
                 {userComponents}
-                <AddUser BDFDB={BDFDB} onSubmit={user => set({ users: { ...users, [user.id]: { badges: [getNewBadge(users[user.id].badges ?? [], user.id)] } } })} />
+                <AddUser BDFDB={BDFDB} onSubmit={user => set({ users: { ...users, [user.id]: { badges: [getNewBadge(users[user.id]?.badges ?? [], user.id)] } } })} />
             </Section>
         </section>
     )

@@ -1,4 +1,4 @@
-import { React, ZLibrary, BDFDB, Components } from 'danho-discordium';
+import { React, ZLibrary, BDFDB } from 'danho-discordium';
 import { classNames } from '@discordium/modules';
 
 type BadgeProps = {
@@ -29,7 +29,7 @@ export default function Badge(props: BadgeProps) {
 
     return (
         <TooltipContainer {...tooltip}>
-            <Clickable {...clickable} role="button" tabIndex={0} onClick={onClickableClick}>
+            <Clickable {...clickable} role="button" tabIndex={0} onClick={onClickableClick} {...{ "data-href": props.href }}>
                 {icon}
             </Clickable>
         </TooltipContainer>
