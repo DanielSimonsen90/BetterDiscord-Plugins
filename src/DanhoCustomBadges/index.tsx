@@ -92,9 +92,8 @@ class DanhoCustomBadge extends DanhoPlugin<Settings> {
 }
 
 import config from './config.json';
-import styles from './styles.scss';
+import styles from './styles/index.scss';
 import settings from './Settings/data.json';
-import PlusIcon from "./components/Settings/PlusIcon";
 export default createPlugin<Settings>({ ...config, styles, settings }, api => new DanhoCustomBadge(api));
 
 /*
