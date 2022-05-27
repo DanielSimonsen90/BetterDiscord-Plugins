@@ -21,7 +21,7 @@ type SettingsPanelProps = SettingsProps<Settings> & {
 
 const getNewBadge = (badges: Array<BadgeData>, userId: string): BadgeData => ({
     id: Date.now().toString(),
-    index: badges.length,
+    index: 0,
     tooltip: `${ZLibrary.DiscordModules.UserStore.getUser(userId).tag}'s Badge`,
     src: "https://c.tenor.com/CHc0B6gKHqUAAAAi/deadserver.gif",
 })

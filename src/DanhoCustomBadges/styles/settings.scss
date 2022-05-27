@@ -1,34 +1,5 @@
 @import './utils';
 
-.settings-badge-list {
-    counter-set: badge-counter -1;
-    
-    .danho-badge::after {
-        counter-increment: badge-counter;
-        content: counter(badge-counter) !important;
-
-        position: relative !important;
-        color: var(--text-muted, #a3a6aa) !important;
-        top: .25em;
-        transform: unset !important;
-        font-size: initial !important;
-    }
-}
-
-.add-user {
-    position: relative;
-    display: flex;
-    flex-direction: row;
-    gap: .5rem;
-
-    @include className(inputWrapper) {
-        flex: 1;
-    }
-    button {
-        margin-left: auto;
-    }
-}
-
 section.settings {
     @include className(container, div, ">") {
         @include className(labelRow, div, "+") {
@@ -56,6 +27,8 @@ section.settings {
 
     .add-badge {
         margin-left: 1rem;
+        cursor: pointer;
+        z-index: 2000;
     }
 }
 
@@ -96,6 +69,20 @@ section.settings {
     }
 }
 
+.add-user {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    gap: .5rem;
+
+    @include className(inputWrapper) {
+        flex: 1;
+    }
+    button {
+        margin-left: auto;
+    }
+}
+
 .settings-user {
     padding: 1em;
     border-radius: .25em;
@@ -105,5 +92,20 @@ section.settings {
     &:nth-child(2n) {
         --modal-background-secondary: var(--modal-footer-background);
         background-color: var(--modal-background-secondary);
+    }
+}
+
+.settings-badge-list {
+    counter-set: badge-counter -1;
+    
+    .danho-badge::after {
+        counter-increment: badge-counter;
+        content: counter(badge-counter) !important;
+
+        position: relative !important;
+        color: var(--text-muted, #a3a6aa) !important;
+        top: .25em;
+        transform: unset !important;
+        font-size: initial !important;
     }
 }
