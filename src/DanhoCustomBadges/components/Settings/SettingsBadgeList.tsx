@@ -31,14 +31,20 @@ export default function SettingsBadgeList({ user, BDFDB, data: { premiumSince, b
             tooltipText: badge.element.ariaLabel,
             src: badge.firstChild.attr<true, false>('src'),
             href: badge.firstChild.attr("data-href"),
-            isDanhoBadge: badge.classes.includes("danho-badge")
+            id: badge.attr("data-id"),
+            isDanhoBadge: badge.classes.includes("danho-badge"),
         })).map(({ isDanhoBadge, ...data }, index) => (
             <Badge key={index} BDFDB={BDFDB} {...data} classNameClickable={isDanhoBadge && "custom"}
-                onClick={() => isDanhoBadge && onBadgeClick(badges.find(b => b?.tooltip === data.tooltipText && b.src === data.src))}
+                onClick={() => isDanhoBadge && onBadgeClick(badges.find(b => b.id === data.id))}
             />
         ));
 
-        ReactDOM.render(children, containerRef.current.lastElementChild);
+        ReactDOM.render((
+            <>
+                {children}
+                <PlusIcon onClick={onAddBadgeClick} />
+            </>
+        ), containerRef.current.lastElementChild);
     }, [badges, onBadgeClick, BDFDB]);
 
     return (

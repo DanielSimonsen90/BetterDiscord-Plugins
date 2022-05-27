@@ -1,10 +1,14 @@
 import ZLibrary from '@ZLibrary';
-import { React } from 'discordium';
+import { classNames, React } from 'discordium';
 
-export default function PlusIcon() {
+type Props = {
+    onClick: () => void
+}
+
+export default function PlusIcon({ onClick }: Props) {
     const { profileBadge22 } = ZLibrary.DiscordClassModules.UserModal
 
-    return <svg xmlns="http://www.w3.org/2000/svg" version="1.1" id="Capa_1" x="0px" y="0px" className={profileBadge22}
+    return <svg className={classNames(profileBadge22, 'add-badge')} xmlns="http://www.w3.org/2000/svg" version="1.1" id="Capa_1" x="0px" y="0px" onClick={onClick}
         viewBox="0 0 490.2 490.2" style={{
             fill: 'var(--text-muted)'
         }}>

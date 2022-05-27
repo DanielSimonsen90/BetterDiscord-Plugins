@@ -10,7 +10,7 @@ export default function useSelectedBadge(badges: Array<BadgeData>): UseSelectedB
         const resolvedBadge = typeof badge === 'function' ? badge(_badge) : badge;
         if (!resolvedBadge) return _setBadge(undefined);
 
-        const foundBadge = badges.find(b => b.tooltip === resolvedBadge.tooltip && b.src === resolvedBadge.src);
+        const foundBadge = badges.find(b => b.id === resolvedBadge.id);
         _setBadge(foundBadge);
     }, [badges]);
 

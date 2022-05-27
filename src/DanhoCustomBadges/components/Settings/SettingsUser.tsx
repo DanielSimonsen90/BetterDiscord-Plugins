@@ -40,13 +40,16 @@ export default function SettingsUser({ BDFDB, userId, data, onSave, addBadge, de
     const { AccountDetails, Titles, UserProfileHeader } = ClassModules;
 
     const onBadgeClicked = useCallback((badge: BadgeData) => {
-        return setSelectedBadge(badge === selectedBadge ? null : badge);
+        return setSelectedBadge(selectedBadge && badge.id === selectedBadge.id ? null : badge);
     }, [selectedBadge, data]);
-    const onSelecetedBadgeUpdate = useCallback((badge: BadgeData) => {
+    const onBadgeUpdate = useCallback((badge: BadgeData) => {
         BdApi.showToast("Badge updated", { type: 'info' });
-        onSave(badges.map((b, i) => i === selectedBadge.index ? badge : b));
+        const newBadges = badges.map(b => b.id === selectedBadge.id ? badge : b);
+        console.log('Saving new badges', newBadges);
+        onSave(newBadges);
+        setSelectedBadge(undefined);
     }, [selectedBadge, data, onSave]);
-    const onSelectedBadgeDelete = useCallback(() => {
+    const onBadgeDelete = useCallback(() => {
         const newBadges = [...badges];
         newBadges.splice(selectedBadge.index, 1);
         setSelectedBadge(b => badges[b.index - 1] ?? badges[badges.length - 1]);
@@ -66,9 +69,9 @@ export default function SettingsUser({ BDFDB, userId, data, onSave, addBadge, de
                     onBadgeClick={onBadgeClicked}
                 />
             </div>
-            {selectedBadge && <SettingsBadge badge={selectedBadge} user={user as User} length={badges.length}
-                onUpdate={onSelecetedBadgeUpdate}
-                onDelete={onSelectedBadgeDelete}
+            {selectedBadge && <SettingsBadge badge={selectedBadge} user={user as User}
+                onUpdate={onBadgeUpdate}
+                onDelete={onBadgeDelete}
             />}
         </FormItem>
     )

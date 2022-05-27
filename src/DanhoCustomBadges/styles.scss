@@ -5,6 +5,7 @@
 }
 
 .danho-badge {
+    position: relative;
     display: grid;
     place-items: center;
     box-sizing: border-box;
@@ -25,7 +26,8 @@
 .user-presentation {
     display: grid;
     grid-template-areas: "avatar tag" "avatar badgeList";
-    grid-template-rows: auto 1.5rem;
+    // grid-template-rows: auto 1.5rem;
+    grid-template-rows: auto 3rem;
     grid-template-columns: 4em 1fr;
 
     .avatar {
@@ -82,6 +84,10 @@
     button {
         margin-inline: .25rem;
     }
+
+    .text-input-container input {
+        padding: 7px;
+    }
 }
 
 section.settings {
@@ -107,6 +113,10 @@ section.settings {
             font-size: 1.25em;
             font-weight: bolder;
         }
+    }
+
+    .add-badge {
+        margin-left: 1rem;
     }
 }
 
@@ -134,4 +144,19 @@ section.settings {
 
 .hidden {
     display: none;
+}
+
+.settings-badge-list {
+    counter-set: badge-counter -1;
+    
+    .danho-badge::after {
+        counter-increment: badge-counter;
+        content: counter(badge-counter) !important;
+
+        position: relative !important;
+        color: var(--text-muted, #a3a6aa) !important;
+        top: .25em;
+        transform: unset !important;
+        font-size: initial !important;
+    }
 }

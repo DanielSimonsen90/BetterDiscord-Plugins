@@ -13,6 +13,7 @@ type BadgeProps = {
 
     classNameImg?: string,
     src: JSX.Element | string,
+    id: string,
 }
 
 export default function Badge(props: BadgeProps) {
@@ -29,7 +30,10 @@ export default function Badge(props: BadgeProps) {
 
     return (
         <TooltipContainer {...tooltip}>
-            <Clickable {...clickable} role="button" tabIndex={0} onClick={onClickableClick} {...{ "data-href": props.href }}>
+            <Clickable {...clickable} role="button" tabIndex={0} onClick={onClickableClick} {...{
+                "data-href": props.href,
+                "data-id": props.id
+            }}>
                 {icon}
             </Clickable>
         </TooltipContainer>

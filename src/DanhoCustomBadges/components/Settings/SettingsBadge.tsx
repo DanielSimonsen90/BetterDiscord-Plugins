@@ -10,27 +10,32 @@ const { useState, useMemo, useCallback } = React;
 type SettingsBadgeProps = {
     badge: BadgeData,
     user: User,
-    length: number,
 
     onUpdate: (badge: BadgeData) => void,
     onDelete: () => void,
 }
 export default function SettingsBadge({ badge, user, onUpdate, onDelete }: SettingsBadgeProps) {
-    console.log('SettingsBadge badge', badge);
     const [tooltip, setTooltip] = useState(badge.tooltip);
     const [src, setSrc] = useState(badge.src);
     const [href, setHref] = useState(badge.href);
 
-    const index = useMemo(() => badge.index, [badge]);
-    const update = useMemo(() => ({ tooltip, index, src, href }), [tooltip, index, src, href]);
+    const [index, setIndex] = useState(badge.index.toString() ?? "0");
+    const update = useMemo<BadgeData>(() => ({ ...badge, tooltip, index: parseInt(index), src, href }), [tooltip, index, src, href]);
 
     const move = useCallback((offset: number) => {
-        let newIndex = index + offset;
-        if (newIndex < 0) newIndex = length - 1;
-        else if (newIndex >= length) newIndex = 0;
+        let newIndex = parseInt(index) + offset;
+        if (newIndex < 0) newIndex = 0;
 
         onUpdate({ ...update, index: newIndex });
     }, [index, length, onUpdate, update]);
+    const onTextChange = useCallback((value: string) => {
+        if (!value) return setIndex("");
+
+        let timeout: NodeJS.Timeout;
+        setIndex(value);
+        clearTimeout(timeout);
+        timeout = setTimeout(() => onUpdate({ ...update, index: parseInt(value) }), 500);
+    }, [index]);
 
     return (
         <div className="settings-badge">
@@ -45,6 +50,7 @@ export default function SettingsBadge({ badge, user, onUpdate, onDelete }: Setti
                 <Button size={Button.Sizes.SMALL} onClick={() => onUpdate(update)} color={Button.Colors.GREEN}>Update badge</Button>
                 <Button size={Button.Sizes.SMALL} onClick={onDelete} color={Button.Colors.RED} >Delete</Button>
                 <Button size={Button.Sizes.SMALL} onClick={() => move(-1)} color={Button.Colors.BRAND_NEW}>◀</Button>
+                <TextInput className='text-input-container' placeholder='Index' value={index.toString()} onChange={onTextChange} />
                 <Button size={Button.Sizes.SMALL} onClick={() => move(1)} color={Button.Colors.BRAND_NEW}>▶</Button>
             </div>
         </div>

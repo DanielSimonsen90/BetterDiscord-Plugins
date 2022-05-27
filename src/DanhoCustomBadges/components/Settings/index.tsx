@@ -20,6 +20,7 @@ type SettingsPanelProps = SettingsProps<Settings> & {
 };
 
 const getNewBadge = (badges: Array<BadgeData>, userId: string): BadgeData => ({
+    id: Date.now().toString(),
     index: badges.length,
     tooltip: `${ZLibrary.DiscordModules.UserStore.getUser(userId).tag}'s Badge`,
     src: "https://c.tenor.com/CHc0B6gKHqUAAAAi/deadserver.gif",
@@ -27,7 +28,7 @@ const getNewBadge = (badges: Array<BadgeData>, userId: string): BadgeData => ({
 
 export const SettingsPanel = ({ BDFDB, defaults, set, ...settings }: SettingsPanelProps) => {
     const [allowVerified, setAllowVerified] = useState(settings.allowVerified ?? defaults.allowVerified);
-    const users = useMemo(() => settings.users || defaults.users, [settings.users, defaults.users]);
+    const users = useMemo(() => settings.users || defaults.users, [settings, settings.users, defaults.users]);
     const userComponents = useMemo(() => Object.entries(users).map(([userId, data]) => (
         <SettingsUser {...{ userId, data, BDFDB }}
             onSave={badges => set({ users: { ...users, [userId]: { ...data, badges } } })}
@@ -38,7 +39,7 @@ export const SettingsPanel = ({ BDFDB, defaults, set, ...settings }: SettingsPan
                 set({ users: newUsers });
             }}
         />
-    )), [users, set]);
+    )), [settings, users, set]);
 
     return (
         <section id={`${name}-settings`} className="settings">

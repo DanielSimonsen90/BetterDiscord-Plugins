@@ -8,6 +8,7 @@ export const titles: Record<keyof Settings, string> = {
 }
 
 export type BadgeData = {
+    id: string,
     tooltip: string,
     index: number,
     src: string,
