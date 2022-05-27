@@ -1,16 +1,27 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import * as Finder from "../api/finder";
+import type {Store} from "./flux";
 
 // GENERAL
 export const Constants = () => Finder.byProps("Permissions", "RelationshipTypes");
 export const i18n = () => Finder.byProps("languages", "getLocale");
+export const Platforms = () => Finder.byProps("getPlatform", "isWindows", "isWeb", "PlatformTypes");
 
 // STORES/ACTIONS
-// TODO: rename to actual names (store suffix)
-export const Channels = () => Finder.byProps("getChannel", "hasChannel");
-export const SelectedChannel = () => Finder.byProps("getChannelId", "getVoiceChannelId");
-export const Users = () => Finder.byProps("getUser", "getCurrentUser");
-export const Members = () => Finder.byProps("getMember", "isMember");
+type UntypedStore = Store & Record<string, any>;
+
+export const ClientActions = () => Finder.byProps("toggleGuildFolderExpand");
+
+export const ChannelStore = (): UntypedStore => Finder.byProps("getChannel", "hasChannel");
+export const SelectedChannelStore = (): UntypedStore => Finder.byProps("getChannelId", "getVoiceChannelId");
+
+export const UserStore = (): UntypedStore => Finder.byProps("getUser", "getCurrentUser");
+export const GuildMemberStore = (): UntypedStore => Finder.byProps("getMember", "isMember");
+export const PresenceStore = (): UntypedStore => Finder.byProps("getState", "getStatus", "isMobileOnline");
+export const RelationshipStore = (): UntypedStore => Finder.byProps("isFriend", "getRelationshipCount");
+
+export const MediaEngineStore = (): UntypedStore => Finder.byProps("getLocalVolume");
+export const MediaEngineActions = (): UntypedStore => Finder.byProps("setLocalVolume");
 
 export interface ContextMenuActions {
     openContextMenu(e, t, n, r);
@@ -36,30 +47,23 @@ export interface ModalActions {
 export const ModalActions = (): ModalActions => Finder.byProps("openModalLazy");
 
 // COMPONENTS
-export const Flex = () => Finder.byName("Flex");
+type UntypedComponent = React.ComponentType<any> & Record<string, any>;
 
-export const Button = () => Finder.byProps("Link", "Hovers");
+export const Flex = (): UntypedComponent => Finder.byName("Flex");
+export const Button = (): UntypedComponent => Finder.byProps("Link", "Hovers");
+export const Text = (): UntypedComponent => Finder.byName("Text");
+export const Links = (): UntypedComponent => Finder.byProps("Link", "NavLink");
 
-export const Text = () => Finder.byName("Text");
-export const Links = () => Finder.byProps("Link", "NavLink");
+export const Switch = (): UntypedComponent => Finder.byName("Switch");
+export const SwitchItem = (): UntypedComponent => Finder.byName("SwitchItem");
+export const RadioGroup = (): UntypedComponent => Finder.byName("RadioGroup");
+export const Slider = (): UntypedComponent => Finder.byName("Slider");
+export const TextInput = (): UntypedComponent => Finder.byName("TextInput");
 
-export const Switch = () => Finder.byName("Switch");
-export const SwitchItem = () => Finder.byName("SwitchItem");
-export const RadioGroup = () => Finder.byName("RadioGroup");
-export const Slider = () => Finder.byName("Slider");
-export const TextInput = () => Finder.byName("TextInput");
-
-export const Menu = (): {
-    MenuCheckboxItem: any;
-    MenuControlItem: any;
-    MenuGroup: any;
-    MenuItem: any;
-    MenuRadioItem: any;
-    MenuSeperator: any;
-    MenuSpinner: any;
-} => Finder.byProps("MenuGroup", "MenuItem", "MenuSeparator");
-
-export const Form = () => Finder.byProps("FormItem", "FormSection", "FormDivider")
+export const Menu = (): Record<string, UntypedComponent> => Finder.byProps("MenuGroup", "MenuItem", "MenuSeparator");
+export const Form = (): Record<string, UntypedComponent> => Finder.byProps("FormItem", "FormSection", "FormDivider");
 
 // STYLE MODULES
-export const margins = () => Finder.byProps("marginLarge");
+type StyleModule = Record<string, string>;
+
+export const margins = (): StyleModule => Finder.byProps("marginLarge");

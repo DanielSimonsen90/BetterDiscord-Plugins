@@ -2,10 +2,9 @@ import {createPlugin, Finder, Utils, React, Modules, Discord} from "discordium";
 import {settings, SettingsPanel, NotificationType} from "./settings";
 import config from "./config.json";
 
-const {Dispatcher, Channels, SelectedChannel, Users, Members} = Modules;
+const {Dispatcher, ChannelStore, SelectedChannelStore, UserStore, GuildMemberStore, MediaEngineStore} = Modules;
 const {ActionTypes} = Modules.Constants;
-const Audio = Finder.byProps("isSelfMute", "isSelfDeaf");
-const VoiceStates = Finder.byProps("getVoiceStates", "hasVideo");
+const VoiceStateStore = Finder.byProps("getVoiceStates", "hasVideo");
 
 const {Text} = Modules;
 const {MenuItem} = Modules.Menu;
@@ -26,7 +25,7 @@ interface VoiceState {
 
 let prevStates: Record<string, VoiceState> = {};
 const saveStates = () => {
-    prevStates = {...VoiceStates.getVoiceStatesForChannel(SelectedChannel.getVoiceChannelId())};
+    prevStates = {...VoiceStateStore.getVoiceStatesForChannel(SelectedChannelStore.getVoiceChannelId())};
 };
 
 export default createPlugin({...config, settings}, ({Logger, Patcher, Settings}) => {
@@ -105,8 +104,8 @@ export default createPlugin({...config, settings}, ({Logger, Patcher, Settings})
             return;
         }
 
-        const user = Users.getUser(userId) as Discord.User;
-        const channel = Channels.getChannel(channelId) as Discord.Channel;
+        const user = UserStore.getUser(userId) as Discord.User;
+        const channel = ChannelStore.getChannel(channelId) as Discord.Channel;
 
         // check for filters
         if (
@@ -117,7 +116,7 @@ export default createPlugin({...config, settings}, ({Logger, Patcher, Settings})
         }
 
         // resolve names
-        const nick = Members.getMember(channel?.getGuildId(), userId)?.nick ?? user.username;
+        const nick = GuildMemberStore.getMember(channel?.getGuildId(), userId)?.nick ?? user.username;
         const channelName = (!channel || channel.isDM() || channel.isGroupDM()) ? settings.unknownChannel : channel.name;
 
         // speak message
@@ -129,15 +128,15 @@ export default createPlugin({...config, settings}, ({Logger, Patcher, Settings})
     };
 
     const selfMuteListener = () => {
-        const userId = Users.getCurrentUser().id;
-        const channelId = SelectedChannel.getVoiceChannelId();
-        notify(Audio.isSelfMute() ? "mute" : "unmute", userId, channelId);
+        const userId = UserStore.getCurrentUser().id;
+        const channelId = SelectedChannelStore.getVoiceChannelId();
+        notify(MediaEngineStore.isSelfMute() ? "mute" : "unmute", userId, channelId);
     };
 
     const selfDeafListener = () => {
-        const userId = Users.getCurrentUser().id;
-        const channelId = SelectedChannel.getVoiceChannelId();
-        notify(Audio.isSelfDeaf() ? "deafen" : "undeafen", userId, channelId);
+        const userId = UserStore.getCurrentUser().id;
+        const channelId = SelectedChannelStore.getVoiceChannelId();
+        notify(MediaEngineStore.isSelfDeaf() ? "deafen" : "undeafen", userId, channelId);
     };
 
     const voiceStateListener = (event) => {
@@ -145,7 +144,7 @@ export default createPlugin({...config, settings}, ({Logger, Patcher, Settings})
             try {
                 const prev = prevStates[userId];
 
-                if (userId === Users.getCurrentUser().id) {
+                if (userId === UserStore.getCurrentUser().id) {
                     // user is self
                     if (!channelId) {
                         // no channel is leave
@@ -162,7 +161,7 @@ export default createPlugin({...config, settings}, ({Logger, Patcher, Settings})
                     }
                 } else {
                     // check for current channel
-                    const selectedChannelId = SelectedChannel.getVoiceChannelId();
+                    const selectedChannelId = SelectedChannelStore.getVoiceChannelId();
                     if (!selectedChannelId) {
                         // user is not in voice
                         return;
@@ -172,7 +171,7 @@ export default createPlugin({...config, settings}, ({Logger, Patcher, Settings})
                         // no previous state & same channel is join
                         notify("join", userId, channelId);
                         saveStates();
-                    } else if (prev && !VoiceStates.getVoiceStatesForChannel(selectedChannelId)[userId]) {
+                    } else if (prev && !VoiceStateStore.getVoiceStatesForChannel(selectedChannelId)[userId]) {
                         // previous state & no current state is leave
                         notify("leave", userId, selectedChannelId);
                         saveStates();
@@ -235,6 +234,9 @@ export default createPlugin({...config, settings}, ({Logger, Patcher, Settings})
             Dispatcher.unsubscribe(ActionTypes.AUDIO_TOGGLE_SELF_DEAF, selfDeafListener);
             Logger.log("Unsubscribed from self deaf events");
         },
-        settingsPanel: (props) => <SettingsPanel speak={speak} {...props}/>
+        SettingsPanel: () => {
+            const [current, defaults, setSettings] = Settings.useStateWithDefaults();
+            return <SettingsPanel current={current} defaults={defaults} onChange={setSettings} speak={speak}/>;
+        }
     };
 });

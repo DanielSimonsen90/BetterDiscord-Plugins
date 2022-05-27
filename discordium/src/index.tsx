@@ -8,24 +8,23 @@ import {
     createData,
     Data,
     createSettings,
-    Settings,
-    SettingsProps
+    Settings
 } from "./api";
-import {React} from "./modules";
-import {SettingsContainer} from "./components";
+import { React } from "./modules";
+import { SettingsContainer } from "./components";
 
-export {Finder, type Discord, ReactInternals, ReactDOMInternals} from "./api";
+export { Finder, type Discord, ReactInternals, ReactDOMInternals } from "./api";
 export * as Utils from "./utils";
-export {default as Modules} from "./modules";
+export { default as Modules } from "./modules";
 export * from "./modules";
-export {version} from "../package.json";
+export { version } from "../package.json";
 
-export {Logger, Patcher, Styles, Data, Settings, SettingsProps} from "./api";
+export { Logger, Patcher, Styles, Data, Settings } from "./api";
 
 export interface Api<
     SettingsType extends Record<string, any>,
-    DataType extends {settings: SettingsType}
-> {
+    DataType extends { settings: SettingsType }
+    > {
     Logger: Logger;
     Patcher: Patcher;
     Styles: Styles;
@@ -42,7 +41,7 @@ export interface Config<Settings extends Record<string, any>> {
     settings?: Settings;
 }
 
-export interface Plugin<Settings extends Record<string, any>> {
+export interface Plugin<> {
     /** Called on plugin start. */
     start(): void | Promise<void>;
 
@@ -54,23 +53,23 @@ export interface Plugin<Settings extends Record<string, any>> {
     stop(): void;
 
     /** Settings UI as React component. */
-    settingsPanel?: React.ComponentType<SettingsProps<Settings>>;
+    SettingsPanel?: React.ComponentType;
 }
 
 export type CreatePluginCallbackApi<
     SettingsType extends Record<string, any>,
-    DataType extends {settings: SettingsType} = {settings: SettingsType}
-> = Api<SettingsType, DataType> & {
-    Config: Config<SettingsType>;
-}
+    DataType extends { settings: SettingsType } = { settings: SettingsType }
+    > = Api<SettingsType, DataType> & {
+        Config: Config<SettingsType>;
+    }
 
 /** Creates a BetterDiscord plugin. */
 export const createPlugin = <
     SettingsType extends Record<string, any>,
-    DataType extends {settings: SettingsType} = {settings: SettingsType}
+    DataType extends { settings: SettingsType } = { settings: SettingsType }
 >(
     config: Config<SettingsType>,
-    callback: (api: CreatePluginCallbackApi<SettingsType, DataType>) => Plugin<SettingsType>
+    callback: (api: CreatePluginCallbackApi<SettingsType, DataType>) => Plugin
 ): BdApi.PluginConstructor => {
     // create log
     const { name, version, styles, settings } = config;
@@ -100,12 +99,10 @@ export const createPlugin = <
     }
 
     // add settings panel
-    if (plugin.settingsPanel) {
-        // TODO: use via hook instead?
-        const ConnectedSettings = Settings.connect(plugin.settingsPanel);
+    if (plugin.SettingsPanel) {
         Wrapper.prototype.getSettingsPanel = () => (
             <SettingsContainer name={name} onReset={() => Settings.reset()}>
-                <ConnectedSettings/>
+                <plugin.SettingsPanel />
             </SettingsContainer>
         );
     }

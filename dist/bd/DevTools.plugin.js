@@ -188,10 +188,16 @@ const flux = {
 
 const Constants = () => byProps$1("Permissions", "RelationshipTypes");
 const i18n = () => byProps$1("languages", "getLocale");
-const Channels = () => byProps$1("getChannel", "hasChannel");
-const SelectedChannel = () => byProps$1("getChannelId", "getVoiceChannelId");
-const Users = () => byProps$1("getUser", "getCurrentUser");
-const Members = () => byProps$1("getMember", "isMember");
+const Platforms = () => byProps$1("getPlatform", "isWindows", "isWeb", "PlatformTypes");
+const ClientActions = () => byProps$1("toggleGuildFolderExpand");
+const ChannelStore = () => byProps$1("getChannel", "hasChannel");
+const SelectedChannelStore = () => byProps$1("getChannelId", "getVoiceChannelId");
+const UserStore = () => byProps$1("getUser", "getCurrentUser");
+const GuildMemberStore = () => byProps$1("getMember", "isMember");
+const PresenceStore = () => byProps$1("getState", "getStatus", "isMobileOnline");
+const RelationshipStore = () => byProps$1("isFriend", "getRelationshipCount");
+const MediaEngineStore = () => byProps$1("getLocalVolume");
+const MediaEngineActions = () => byProps$1("setLocalVolume");
 const ContextMenuActions = () => byProps$1("openContextMenuLazy");
 const ModalActions = () => byProps$1("openModalLazy");
 const Flex$1 = () => byName$1("Flex");
@@ -211,10 +217,16 @@ const discord = {
     __proto__: null,
     Constants: Constants,
     i18n: i18n,
-    Channels: Channels,
-    SelectedChannel: SelectedChannel,
-    Users: Users,
-    Members: Members,
+    Platforms: Platforms,
+    ClientActions: ClientActions,
+    ChannelStore: ChannelStore,
+    SelectedChannelStore: SelectedChannelStore,
+    UserStore: UserStore,
+    GuildMemberStore: GuildMemberStore,
+    PresenceStore: PresenceStore,
+    RelationshipStore: RelationshipStore,
+    MediaEngineStore: MediaEngineStore,
+    MediaEngineActions: MediaEngineActions,
     ContextMenuActions: ContextMenuActions,
     ModalActions: ModalActions,
     Flex: Flex$1,
@@ -266,6 +278,9 @@ const createPatcher = (id, Logger) => {
             cancel();
             return temp;
         } : (context, args, result) => callback({ cancel, original, context, args, result }), { silent: true });
+        if (!options.silent) {
+            Logger.log(`Patched ${method} of ${options.name ?? resolveName(object, method)}`);
+        }
         return cancel;
     };
     const rawPatcher = BdApi.Patcher;
@@ -277,16 +292,13 @@ const createPatcher = (id, Logger) => {
             rawPatcher.unpatchAll(id);
             Logger.log("Unpatched all");
         },
-        waitForLazy: (object, method, argIndex, callback, options) => new Promise((resolve) => {
+        waitForLazy: (object, method, argIndex, callback) => new Promise((resolve) => {
             const found = callback();
             if (found) {
-                if (!options.silent)
-                    Logger.log(`Lazy load in ${method} of ${resolveName(object, method)} found from callback`, { found });
                 resolve(found);
             }
             else {
-                if (!options.silent)
-                    Logger.log(`Waiting for lazy load in ${method} of ${resolveName(object, method)} ${(callback.name ? `and bound to ${callback.name}` : '')}`, { object, method, arg: argIndex, callback, options });
+                Logger.log(`Waiting for lazy load in ${method} of ${resolveName(object, method)}`);
                 patcher.before(object, method, ({ args, cancel }) => {
                     const original = args[argIndex];
                     args[argIndex] = async function (...args) {
@@ -294,8 +306,6 @@ const createPatcher = (id, Logger) => {
                         Promise.resolve().then(() => {
                             const found = callback();
                             if (found) {
-                                if (!options.silent)
-                                    Logger.log(`Lazy load in ${method} of ${resolveName(object, method)} found from callback`, { found });
                                 resolve(found);
                                 cancel();
                             }
@@ -305,8 +315,8 @@ const createPatcher = (id, Logger) => {
                 }, { silent: true });
             }
         }),
-        waitForContextMenu: (callback, options = { silent: false }) => patcher.waitForLazy(Modules$1.ContextMenuActions, "openContextMenuLazy", 1, callback, options),
-        waitForModal: (callback, options = { silent: false }) => patcher.waitForLazy(Modules$1.ModalActions, "openModalLazy", 0, callback, options)
+        waitForContextMenu: (callback) => patcher.waitForLazy(Modules$1.ContextMenuActions, "openContextMenuLazy", 1, callback),
+        waitForModal: (callback) => patcher.waitForLazy(Modules$1.ModalActions, "openModalLazy", 0, callback)
     };
     return patcher;
 };
@@ -356,9 +366,6 @@ class Settings extends Flux.Store {
         }
         this.dispatch();
     }
-    connect(component) {
-        return Flux.default.connectStores([this], () => ({ ...this.get(), defaults: this.defaults, set: (settings) => this.set(settings) }))(component);
-    }
     useCurrent() {
         return Flux.useStateFromStores([this], () => this.get());
     }
@@ -401,9 +408,9 @@ const ReactDOMInternals = {
     batchedUpdates
 };
 
-const confirm = (title, content, options = {}) => BdApi.showConfirmationModal(title, content, options);
 const sleep = (duration) => new Promise((resolve) => setTimeout(resolve, duration));
 const alert = (title, content) => BdApi.alert(title, content);
+const confirm = (title, content, options = {}) => BdApi.showConfirmationModal(title, content, options);
 const toast = (content, options) => BdApi.showToast(content, options);
 
 const queryTree = (node, predicate) => {
@@ -490,9 +497,9 @@ const forceFullRerender = (fiber) => new Promise((resolve) => {
 
 const index$1 = {
     __proto__: null,
-    confirm: confirm,
     sleep: sleep,
     alert: alert,
+    confirm: confirm,
     toast: toast,
     queryTree: queryTree,
     queryTreeAll: queryTreeAll,
@@ -512,16 +519,15 @@ const SettingsContainer = ({ name, children, onReset }) => (React.createElement(
                 onConfirm: () => onReset()
             }) }, "Reset"))));
 
-const version$1 = "0.2.7";
+const version$1 = "0.2.8";
 
-const createPlugin = (config, callback) => {
-    const { name, version, styles, settings } = config;
+const createPlugin = ({ name, version, styles, settings }, callback) => {
     const Logger = createLogger(name, "#3a71c1", version);
     const Patcher = createPatcher(name, Logger);
     const Styles = createStyles(name);
     const Data = createData(name);
     const Settings = createSettings(Data, settings ?? {});
-    const plugin = callback({ Logger, Patcher, Styles, Data, Settings, Config: config });
+    const plugin = callback({ Logger, Patcher, Styles, Data, Settings });
     class Wrapper {
         start() {
             Logger.log("Enabled");
@@ -535,15 +541,14 @@ const createPlugin = (config, callback) => {
             Logger.log("Disabled");
         }
     }
-    if (plugin.settingsPanel) {
-        const ConnectedSettings = Settings.connect(plugin.settingsPanel);
+    if (plugin.SettingsPanel) {
         Wrapper.prototype.getSettingsPanel = () => (React.createElement(SettingsContainer, { name: name, onReset: () => Settings.reset() },
-            React.createElement(ConnectedSettings, null)));
+            React.createElement(plugin.SettingsPanel, null)));
     }
     return Wrapper;
 };
 
-const discordium = {
+const dium = {
     __proto__: null,
     createPlugin: createPlugin,
     Finder: index$2,
@@ -661,11 +666,11 @@ const config = {
 	description: description
 };
 
-const { Finder } = discordium;
+const { Finder } = dium;
 Finder.dev = DevFinder;
 const index = createPlugin(config, () => ({
     start() {
-        window.dium = discordium;
+        window.dium = dium;
     },
     stop() {
         delete window.dium;

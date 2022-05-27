@@ -3,9 +3,9 @@ import {BetterFolderIcon, BetterFolderUploader, FolderData} from "./components";
 import config from "./config.json";
 import styles from "./styles.scss";
 
-const ClientActions = Finder.byProps("toggleGuildFolderExpand");
-const GuildsTree = Finder.byProps("getGuildsTree");
-const FolderState = Finder.byProps("getExpandedFolders");
+const {ClientActions} = Modules;
+const SortedGuildStore = Finder.byProps("getGuildsTree");
+const ExpandedGuildFolderStore = Finder.byProps("getExpandedFolders");
 
 const {RadioGroup, SwitchItem} = Modules;
 const {FormItem} = Modules.Form;
@@ -79,7 +79,7 @@ export default createPlugin({...config, styles, settings}, ({Logger, Patcher, Da
             // patch folder expand
             Patcher.after(ClientActions, "toggleGuildFolderExpand", ({original, args: [folderId]}) => {
                 if (Settings.get().closeOnOpen) {
-                    for (const id of FolderState.getExpandedFolders()) {
+                    for (const id of ExpandedGuildFolderStore.getExpandedFolders()) {
                         if (id !== folderId) {
                             original(id);
                         }
@@ -132,7 +132,7 @@ export default createPlugin({...config, styles, settings}, ({Logger, Patcher, Da
 
                 if (state.iconType === "custom") {
                     // render custom icon options
-                    const tree = GuildsTree.getGuildsTree();
+                    const tree = SortedGuildStore.getGuildsTree();
                     children.push(
                         <FormItem title="Custom Icon" className={className}>
                             <BetterFolderUploader
@@ -167,21 +167,25 @@ export default createPlugin({...config, styles, settings}, ({Logger, Patcher, Da
         stop() {
             triggerRerender();
         },
-        settingsPanel: ({closeOnOpen, set}) => (
-            <SwitchItem
-                note="Close other folders when opening a new folder"
-                hideBorder
-                value={closeOnOpen}
-                onChange={(checked: boolean) => {
-                    if (checked) {
-                        // close all folders except one
-                        for (const id of Array.from(FolderState.getExpandedFolders()).slice(1)) {
-                            ClientActions.toggleGuildFolderExpand(id);
+        SettingsPanel: () => {
+            const [{closeOnOpen}, setSettings] = Settings.useState();
+
+            return (
+                <SwitchItem
+                    note="Close other folders when opening a new folder"
+                    hideBorder
+                    value={closeOnOpen}
+                    onChange={(checked: boolean) => {
+                        if (checked) {
+                            // close all folders except one
+                            for (const id of Array.from(ExpandedGuildFolderStore.getExpandedFolders()).slice(1)) {
+                                ClientActions.toggleGuildFolderExpand(id);
+                            }
                         }
-                    }
-                    set({closeOnOpen: checked});
-                }}
-            >Close on open</SwitchItem>
-        )
+                        setSettings({closeOnOpen: checked});
+                    }}
+                >Close on open</SwitchItem>
+            );
+        }
     };
 });

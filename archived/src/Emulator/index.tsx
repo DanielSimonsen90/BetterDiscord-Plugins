@@ -1,9 +1,9 @@
-import {createPlugin, Finder, Utils, React} from "discordium";
+import { createPlugin, Finder, Utils, React, Modules } from "discordium";
 import config from "./config.json";
 
-const Platforms = Finder.byProps("getPlatform", "isWindows", "isWeb", "PlatformTypes");
-const {PlatformTypes} = Platforms;
-const Overlay = Finder.byProps("initialize", "isSupported", "getFocusedPID");
+const { Platforms } = Modules;
+const { PlatformTypes } = Platforms;
+const OverlayBridgeStore = Finder.byProps("initialize", "isSupported", "getFocusedPID");
 
 const RadioGroup = Finder.byName("RadioGroup");
 
@@ -14,7 +14,7 @@ const settings = {
                 : PlatformTypes.WEB
 };
 
-export default createPlugin({...config, settings}, ({Logger, Patcher, Settings}) => {
+export default createPlugin({ ...config, settings }, ({ Logger, Patcher, Settings }) => {
     const notify = (message: string, options: Utils.ToastOptions) => {
         Logger.log(message);
         Utils.toast(message, options);
@@ -25,10 +25,10 @@ export default createPlugin({...config, settings}, ({Logger, Patcher, Settings})
     };
 
     const changePlatform = async (platform: any) => {
-        Settings.set({platform});
+        Settings.set({ platform });
         await triggerRerender();
         const platformName = Platforms.isWindows() ? "Windows" : Platforms.isOSX() ? "MacOS" : Platforms.isLinux() ? "Linux" : "Browser";
-        notify(`Emulating ${platformName}`, {type: Utils.ToastType.Info, timeout: 5000});
+        notify(`Emulating ${platformName}`, { type: Utils.ToastType.Info, timeout: 5000 });
     };
 
     return {
@@ -39,23 +39,27 @@ export default createPlugin({...config, settings}, ({Logger, Patcher, Settings})
             }
 
             // patch overlay requirement
-            Patcher.instead(Overlay, "isSupported", () => Platforms.isWindows());
+            Patcher.instead(OverlayBridgeStore, "isSupported", () => Platforms.isWindows());
         },
         async stop() {
             await triggerRerender();
-            notify("Stopped emulating", {type: Utils.ToastType.Info, timeout: 5000});
+            notify("Stopped emulating", { type: Utils.ToastType.Info, timeout: 5000 });
         },
-        settingsPanel: ({platform}) => (
-            <RadioGroup
-                value={platform}
-                onChange={({value}) => changePlatform(value)}
-                options={[
-                    {value: PlatformTypes.WINDOWS, name: "Windows"},
-                    {value: PlatformTypes.OSX, name: "MacOS"},
-                    {value: PlatformTypes.LINUX, name: "Linux"},
-                    {value: PlatformTypes.WEB, name: "Browser"}
-                ]}
-            />
-        )
+        SettingsPanel: () => {
+            const { platform } = Settings.useCurrent();
+
+            return (
+                <RadioGroup
+                    value={platform}
+                    onChange={({ value }) => changePlatform(value)}
+                    options={[
+                        { value: PlatformTypes.WINDOWS, name: "Windows" },
+                        { value: PlatformTypes.OSX, name: "MacOS" },
+                        { value: PlatformTypes.LINUX, name: "Linux" },
+                        { value: PlatformTypes.WEB, name: "Browser" }
+                    ]}
+                />
+            );
+        }
     };
 });

@@ -3,8 +3,7 @@ import config from "./config.json";
 import styles from "./styles.scss";
 
 const {RelationshipTypes, StatusTypes} = Modules.Constants;
-const Status = Finder.byProps("getState", "getStatus", "isMobileOnline");
-const Relationships = Finder.byProps("isFriend", "getRelationshipCount");
+const {PresenceStore, RelationshipStore} = Modules;
 
 const HomeButton = Finder.byProps("HomeButton");
 const {Link} = Modules.Links;
@@ -14,9 +13,9 @@ const listStyles = Finder.byProps("listItem");
 const friendsOnline = "friendsOnline-2JkivW";
 
 const OnlineCount = () => {
-    const online = Flux.useStateFromStores([Status, Relationships], () => (
-        Object.entries(Relationships.getRelationships())
-            .filter(([id, type]) => type === RelationshipTypes.FRIEND && Status.getStatus(id) !== StatusTypes.OFFLINE)
+    const online = Flux.useStateFromStores([PresenceStore, RelationshipStore], () => (
+        Object.entries(RelationshipStore.getRelationships())
+            .filter(([id, type]) => type === RelationshipTypes.FRIEND && PresenceStore.getStatus(id) !== StatusTypes.OFFLINE)
             .length
     ));
 

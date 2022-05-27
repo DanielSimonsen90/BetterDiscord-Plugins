@@ -19,7 +19,7 @@ type Layers = 'tooltip' | 'modal' | 'popout' | `create${'Channel' | 'Category'}`
 export class DanhoPlugin<
     SettingsType extends Record<string, any>,
     DataType extends Record<"settings", SettingsType> = Record<"settings", SettingsType>
-> implements Omit<Plugin<SettingsType>, 'start'> {
+> implements Omit<Plugin, 'start'> {
     constructor({ Config, Data, Logger, Patcher, Settings, Styles }: CreatePluginCallbackApi<SettingsType, DataType>) {
         this.config = Config;
         this.data = Data;
@@ -41,7 +41,6 @@ export class DanhoPlugin<
 
     public async start(config?: PluginConfig) {
         // console.clear();
-
         this.logger.group("Patches");
         const { mutations, ...patchConfig } = config;
         this.mutationManager = initializeMutations(this, {mutations});
