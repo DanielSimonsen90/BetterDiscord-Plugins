@@ -51,8 +51,8 @@ export default function SettingsUser({ BDFDB, userId, data, onSave, addBadge, de
     }, [selectedBadge, data, onSave]);
     const onBadgeDelete = useCallback(() => {
         const newBadges = [...badges];
-        newBadges.splice(selectedBadge.index, 1);
-        setSelectedBadge(b => badges[b.index - 1] ?? badges[badges.length - 1]);
+        newBadges.splice(newBadges.findIndex(b => b.id === selectedBadge.id), 1);
+        setSelectedBadge(b => (b && badges[b.index - 1]) ?? badges[badges.length - 1]);
 
         newBadges.length === 0 ? deleteUser() : onSave(newBadges);
     }, [data, onSave, selectedBadge]);
