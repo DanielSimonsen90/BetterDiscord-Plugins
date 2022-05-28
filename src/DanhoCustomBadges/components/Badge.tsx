@@ -1,15 +1,17 @@
-import { React, ZLibrary, BDFDB } from 'danho-discordium';
-import { classNames } from '@discordium/modules';
+const { Libraries, Modules } = window.BDD;
+const { BDFDB, ZLibrary } = Libraries;
+const { React, DanhoModules } = Modules;
+const { classNames } = DanhoModules.CompiledReact;
 
 type BadgeProps = {
-    BDFDB: BDFDB,
+    BDFDB: typeof BDFDB,
 
     tooltipText: string,
     spacing?: number,
 
     classNameClickable?: string,
     href?: string,
-    onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void,
+    onClick?: (e: React.MouseEvent<HTMLDivElement>) => void,
 
     classNameImg?: string,
     src: JSX.Element | string,

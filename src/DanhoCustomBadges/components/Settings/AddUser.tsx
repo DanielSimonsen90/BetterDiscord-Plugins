@@ -1,15 +1,15 @@
-import { React } from "discordium";
-import { Discord } from 'danho-discordium/components'
 import { ShakeableRef } from "danho-discordium/components/Discord/Shakeable";
-import { createBDD } from "danho-discordium/Utils";
-
-import BDFDB from "@BDFDB";
 import { User } from "@discord";
-import ZLibrary from "@ZLibrary";
+import BDFDB from '@BDFDB';
 
-const BDD = createBDD();
-const { Button, TextInput, Shakeable } = Discord;
+const { Libraries, Modules, Utils } = window.BDD;
+const { BDFDB, ZLibrary } = Libraries;
+
+const { React, DanhoModules } = Modules;
 const { useState, createRef, useEffect } = React;
+const { Button, TextInput, Shakeable } = DanhoModules.CompiledReact.Components.Discord;
+
+const { findUserByTag } = Utils;
 
 type AddUserProps = {
     BDFDB: BDFDB,
@@ -28,7 +28,7 @@ export default function AddUser({ BDFDB, onSubmit }: AddUserProps) {
         const user = (
             /.+#[0-9]{4}/.test(userString) ? BDFDB.LibraryModules.UserStore.findByTag(userString.split("#").slice(0, -1).join("#"), userString.split("#").pop()) :
                 /\d{18}/.test(userString) ? ZLibrary.DiscordModules.UserStore.getUser(userString) :
-                    await BDD.findUserByTag(userString, BDFDB)
+                    await findUserByTag(userString, BDFDB)
         );
 
         if (!user) return setErrorLabel("User not found");

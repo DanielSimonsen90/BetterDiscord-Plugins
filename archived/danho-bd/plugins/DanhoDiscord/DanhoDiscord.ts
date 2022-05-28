@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import {} from 'danholibraryjs';
 import { Setting } from "danho-bd/base";
 import { BDFDBPluginParams } from "@BDFDB";

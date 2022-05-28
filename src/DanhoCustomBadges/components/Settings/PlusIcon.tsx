@@ -1,13 +1,11 @@
-import ZLibrary from '@ZLibrary';
-import { classNames, React } from 'discordium';
+const { Libraries, Modules: { React } } = window.BDD;
+const { profileBadge22 } = Libraries.ZLibrary.DiscordClassModules.UserModal;
 
 type Props = {
     onClick: () => void
 }
 
 export default function PlusIcon({ onClick }: Props) {
-    const { profileBadge22 } = ZLibrary.DiscordClassModules.UserModal
-
     return (
         <div className="add-badge" onClick={onClick}>
             <svg className={profileBadge22} xmlns="http://www.w3.org/2000/svg" version="1.1" id="Capa_1" x="0px" y="0px"

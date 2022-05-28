@@ -8,7 +8,7 @@ type PluginUtils = {
         collapseStates: {},
         children: Array<JSX.Element> | (() => Array<JSX.Element>)
     }): LibraryComponents["SettingsPanel"];
-    buildPlugin(config: Config<any>): [plugin: Plugin<any>, BDFDB: BDFDB],
-    cleanUp(plugin: Plugin<any>): void,
+    buildPlugin(config: Config<any>): [plugin: Plugin, BDFDB: BDFDB],
+    cleanUp(plugin: Plugin): void,
 }
 export default PluginUtils;

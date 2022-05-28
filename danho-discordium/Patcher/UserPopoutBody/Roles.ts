@@ -1,5 +1,4 @@
 import { Guild, User, Snowflake } from "@discord"
-import { RoleReturns } from "danho-discordium/MutationManager/MutationReturns"
 
 export type RolesSection = {
     children: [
@@ -21,4 +20,3 @@ export type Roles = {
     user: User,
     userRoles: Array<Snowflake>
 }
-export type Role = RoleReturns[0]

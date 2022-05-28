@@ -1,11 +1,9 @@
-import { React } from 'discordium';
-import { Discord } from 'danho-discordium/components';
 import { User } from '@discord';
-
 import { BadgeData } from '../../Settings/types';
 
-const { Button, TextInput, Form: { FormItem }, Margins } = Discord;
+const { React, DanhoModules } = window.BDD.Modules;
 const { useState, useMemo, useCallback } = React;
+const { Button, TextInput, Form: { FormItem }, Margins } = DanhoModules.CompiledReact.Components.Discord;
 
 type SettingsBadgeProps = {
     badge: BadgeData,

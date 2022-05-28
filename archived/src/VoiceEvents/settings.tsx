@@ -1,10 +1,10 @@
-import {Finder, React, Modules, classNames} from "dium";
+import { Finder, React, Modules, classNames } from "discordium";
 
-const {Flex, Button, Text, Switch, SwitchItem, TextInput, Slider} = Modules;
-const {FormSection, FormTitle, FormItem, FormText, FormDivider} = Modules.Form;
+const { Flex, Button, Text, Switch, SwitchItem, TextInput, Slider } = Modules;
+const { FormSection, FormTitle, FormItem, FormText, FormDivider } = Modules.Form;
 const SingleSelect = Finder.byName("SingleSelect");
 
-const {margins} = Modules;
+const { margins } = Modules;
 
 export const settings = {
     voice: null as string,
@@ -75,14 +75,14 @@ interface VoiceLabelProps {
     lang: string;
 }
 
-const VoiceLabel = ({name, lang}: VoiceLabelProps): JSX.Element => (
+const VoiceLabel = ({ name, lang }: VoiceLabelProps): JSX.Element => (
     <Flex direction={Flex.Direction.HORIZONTAL} align={Flex.Align.CENTER}>
         <Text
             variant="text-md/normal"
         >{name}</Text>
         <Text
             variant="text-xs/semibold"
-            style={{marginLeft: 8}}
+            style={{ marginLeft: 8 }}
         >{lang}</Text>
     </Flex>
 );
@@ -100,8 +100,8 @@ export interface SettingsPanelProps {
     speak(msg: string): void;
 }
 
-export const SettingsPanel = ({current, defaults, onChange, speak}: SettingsPanelProps): JSX.Element => {
-    const {voice, volume, speed, filterNames, filterBots, filterStages, ...settings} = current;
+export const SettingsPanel = ({ current, defaults, onChange, speak }: SettingsPanelProps): JSX.Element => {
+    const { voice, volume, speed, filterNames, filterBots, filterStages, ...settings } = current;
 
     return (
         <>
@@ -109,14 +109,14 @@ export const SettingsPanel = ({current, defaults, onChange, speak}: SettingsPane
                 <FormTitle>TTS Voice</FormTitle>
                 <SingleSelect
                     value={voice}
-                    onChange={(value: string) => onChange({voice: value})}
-                    options={speechSynthesis.getVoices().map(({name, lang, voiceURI}) => ({
+                    onChange={(value: string) => onChange({ voice: value })}
+                    options={speechSynthesis.getVoices().map(({ name, lang, voiceURI }) => ({
                         value: voiceURI,
                         label: name,
                         lang
                     })) as VoiceSelectOption[]}
-                    renderOptionLabel={({label, lang}: VoiceSelectOption) => <VoiceLabel name={label} lang={lang}/>}
-                    renderOptionValue={([{label, lang}]: VoiceSelectOption[]) => <VoiceLabel name={label} lang={lang}/>}
+                    renderOptionLabel={({ label, lang }: VoiceSelectOption) => <VoiceLabel name={label} lang={lang} />}
+                    renderOptionValue={([{ label, lang }]: VoiceSelectOption[]) => <VoiceLabel name={label} lang={lang} />}
                 />
             </FormItem>
             <FormItem className={margins.marginBottom20}>
@@ -125,7 +125,7 @@ export const SettingsPanel = ({current, defaults, onChange, speak}: SettingsPane
                     initialValue={volume}
                     maxValue={100}
                     minValue={0}
-                    asValueChanges={(value: number) => onChange({volume: value})}
+                    asValueChanges={(value: number) => onChange({ volume: value })}
                 />
             </FormItem>
             <FormItem className={margins.marginBottom20}>
@@ -134,31 +134,31 @@ export const SettingsPanel = ({current, defaults, onChange, speak}: SettingsPane
                     initialValue={speed}
                     maxValue={10}
                     minValue={0.1}
-                    asValueChanges={(value: number) => onChange({speed: value})}
+                    asValueChanges={(value: number) => onChange({ speed: value })}
                     onValueRender={(value: number) => `${value.toFixed(2)}x`}
                     markers={[0.1, 1, 2, 5, 10]}
                     onMarkerRender={(value: number) => `${value.toFixed(2)}x`}
                 />
             </FormItem>
-            <FormDivider className={classNames(margins.marginTop20, margins.marginBottom20)}/>
+            <FormDivider className={classNames(margins.marginTop20, margins.marginBottom20)} />
             <FormItem>
                 <SwitchItem
                     value={filterNames}
-                    onChange={(checked: boolean) => onChange({filterNames: checked})}
+                    onChange={(checked: boolean) => onChange({ filterNames: checked })}
                     note="Limit user & channel names to alphanumeric characters."
                 >Enable Name Filter</SwitchItem>
             </FormItem>
             <FormItem>
                 <SwitchItem
                     value={filterBots}
-                    onChange={(checked: boolean) => onChange({filterBots: checked})}
+                    onChange={(checked: boolean) => onChange({ filterBots: checked })}
                     note="Disable notifications for bot users in voice."
                 >Enable Bot Filter</SwitchItem>
             </FormItem>
             <FormItem>
                 <SwitchItem
                     value={filterStages}
-                    onChange={(checked: boolean) => onChange({filterStages: checked})}
+                    onChange={(checked: boolean) => onChange({ filterStages: checked })}
                     note="Disable notifications for stage voice channels."
                 >Enable Stage Filter</SwitchItem>
             </FormItem>
@@ -178,9 +178,9 @@ export const SettingsPanel = ({current, defaults, onChange, speak}: SettingsPane
                                     value={settings.notifs[key].message}
                                     placeholder={defaults.notifs[key].message}
                                     onChange={(value: string) => {
-                                        const {notifs} = settings;
+                                        const { notifs } = settings;
                                         notifs[key].message = value;
-                                        onChange({notifs});
+                                        onChange({ notifs });
                                     }}
                                 />
                             </div>
@@ -190,9 +190,9 @@ export const SettingsPanel = ({current, defaults, onChange, speak}: SettingsPane
                                 className={margins.marginRight20}
                                 checked={settings.notifs[key].enabled}
                                 onChange={(value: boolean) => {
-                                    const {notifs} = settings;
+                                    const { notifs } = settings;
                                     notifs[key].enabled = value;
-                                    onChange({notifs});
+                                    onChange({ notifs });
                                 }}
                             />
                         </Flex.Child>
@@ -217,7 +217,7 @@ export const SettingsPanel = ({current, defaults, onChange, speak}: SettingsPane
                             <TextInput
                                 value={settings.unknownChannel}
                                 placeholder={defaults.unknownChannel}
-                                onChange={(value: string) => onChange({unknownChannel: value})}
+                                onChange={(value: string) => onChange({ unknownChannel: value })}
                             />
                         </div>
                     </Flex.Child>

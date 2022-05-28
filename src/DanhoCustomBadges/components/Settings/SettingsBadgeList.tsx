@@ -1,16 +1,15 @@
-import { React, ReactDOM, classNames } from 'discordium';
 import { User } from '@discord';
-import Discord from 'danho-discordium/components/Discord';
 import Badge from '../Badge';
 import PlusIcon from './PlusIcon';
 import BDFDB from '@BDFDB';
-import $ from '@dquery';
-import ZLibrary from '@ZLibrary';
 import { BadgeData, SettingsUser } from 'src/DanhoCustomBadges/Settings/types';
 
-const { UserProfileBadgeList, ClassModules } = Discord;
-const { default: BadgeList } = UserProfileBadgeList;
+const { React, ReactDOM, DanhoModules } = window.BDD.Modules;
 const { useEffect, createRef } = React;
+const { $, CompiledReact } = DanhoModules;
+const { classNames, Components } = CompiledReact;
+const { UserProfileBadgeList } = Components.Discord;
+const { default: BadgeList } = UserProfileBadgeList;
 
 type SettingsBadgeListProps = {
     user: User,

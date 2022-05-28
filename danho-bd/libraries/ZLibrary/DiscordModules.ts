@@ -1,5 +1,5 @@
 import { Channel, Guild, GuildMember, User } from "@discord"
-import React, { ReactDOM } from '../React';
+const { React, ReactDOM } = window.BDD.Modules;
 
 type DiscordModules = {
     ChannelStore: {

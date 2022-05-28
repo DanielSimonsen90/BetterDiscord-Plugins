@@ -1,4 +1,4 @@
-import { Component } from "@lib/React";
+import Component from "danho-discordium/components/Component";
 
 type SettingsPanel = Component<{
     addon?: {

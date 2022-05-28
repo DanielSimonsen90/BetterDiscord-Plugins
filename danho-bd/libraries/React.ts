@@ -1,29 +1,14 @@
 import { PropertiesWithout, BetterOmit, Arrayable } from 'danholibraryjs';
-import React, { Component } from 'react';
-export { default as React, ComponentClass as Component } from 'react';
-export { default as ReactDOM } from 'react-dom';
+import Component from "danho-discordium/components/Component";
+import { React } from 'discordium';
 
 export type BaseProps = {
     className?: string,
     children?: Children
 }
 
-// export type Component<P = BaseProps, S = {}> = {
-//     props: P;
-//     state: S;
-//     type: keyof HTMLElementTagNameMap;
-//     key: string;
-//     ref: { current: HTMLElement };
-
-//     setState(state: S): void
-//     componentDidMount(): void
-//     componentDidUpdate(): void
-//     componentWillUnmount(): void
-//     render(): any;
-// }
-
 export type Children = Arrayable<JSX.Element>
-export type ComponentInstance<Props = {}, RemoveChildren extends boolean = false> = BetterOmit<PropertiesWithout<Function, Component<Props>>, 'state'> & {
+export type ComponentInstance<Props = {}, RemoveChildren extends boolean = false> = PropertiesWithout<Function, Component<Props>> & {
     props: BetterOmit<BaseProps, 'children'> & RemoveChildren extends true ? {} : {
         children: Arrayable<ComponentInstance>
     }
@@ -59,6 +44,6 @@ export type ObservationNode<Props = {}> = {
     __reactProps$?: Props,
 }
 
-export type MouseEventHandler = (e: React.MouseEvent) => void;
+export type MouseEventHandler<Element extends HTMLElement> = (e: React.MouseEvent<Element>) => void;
 
 export default React;

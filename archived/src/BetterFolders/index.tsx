@@ -1,15 +1,17 @@
-import {createPlugin, Finder, Utils, React, Flux, Modules} from "discordium";
-import {BetterFolderIcon, BetterFolderUploader, FolderData} from "./components";
+// @ts-nocheck
+
+import { createPlugin, Finder, Utils, React, Flux, Modules } from "discordium";
+import { BetterFolderIcon, BetterFolderUploader, FolderData } from "./components";
 import config from "./config.json";
 import styles from "./styles.scss";
 
-const {ClientActions} = Modules;
+const { ClientActions } = Modules;
 const SortedGuildStore = Finder.byProps("getGuildsTree");
 const ExpandedGuildFolderStore = Finder.byProps("getExpandedFolders");
 
-const {RadioGroup, SwitchItem} = Modules;
-const {FormItem} = Modules.Form;
-const FolderHeader = Finder.query({name: "FolderHeader"});
+const { RadioGroup, SwitchItem } = Modules;
+const { FormItem } = Modules.Form;
+const FolderHeader = Finder.query({ name: "FolderHeader" });
 
 let FolderIcon = null;
 
@@ -20,12 +22,12 @@ const settings = {
     folders: {} as Record<number, FolderData>
 };
 
-export default createPlugin({...config, styles, settings}, ({Logger, Patcher, Data, Settings}) => {
+export default createPlugin({ ...config, styles, settings }, ({ Logger, Patcher, Data, Settings }) => {
     // backwards compatibility for old bd version
     const oldFolders = Data.load("folders");
     if (oldFolders) {
         Data.delete("folders");
-        Settings.set({folders: oldFolders as Record<number, FolderData>});
+        Settings.set({ folders: oldFolders as Record<number, FolderData> });
     }
 
     const getFolder = (id: number) => Settings.get().folders[id];
@@ -38,7 +40,7 @@ export default createPlugin({...config, styles, settings}, ({Logger, Patcher, Da
 
     const ConnectedBetterFolderIcon = Flux.default.connectStores(
         [Settings],
-        ({folderId}: OuterIconProps) => ({...getFolder(folderId)})
+        ({ folderId }: OuterIconProps) => ({ ...getFolder(folderId) })
     )(BetterFolderIcon);
 
     const triggerRerender = async () => {
@@ -54,7 +56,7 @@ export default createPlugin({...config, styles, settings}, ({Logger, Patcher, Da
     return {
         async start() {
             // patch folder icon render
-            Patcher.after(FolderHeader as {default: (props: any) => JSX.Element}, "default", ({args: [props], result}) => {
+            Patcher.after(FolderHeader as { default: (props: any) => JSX.Element }, "default", ({ args: [props], result }) => {
                 // find icon container
                 const iconContainer = Utils.queryTree(result, (node) => node?.props?.children?.type?.displayName === "FolderIconContent");
                 if (!iconContainer) {
@@ -77,7 +79,7 @@ export default createPlugin({...config, styles, settings}, ({Logger, Patcher, Da
             });
 
             // patch folder expand
-            Patcher.after(ClientActions, "toggleGuildFolderExpand", ({original, args: [folderId]}) => {
+            Patcher.after(ClientActions, "toggleGuildFolderExpand", ({ original, args: [folderId] }) => {
                 if (Settings.get().closeOnOpen) {
                     for (const id of ExpandedGuildFolderStore.getExpandedFolders()) {
                         if (id !== folderId) {
@@ -93,9 +95,9 @@ export default createPlugin({...config, styles, settings}, ({Logger, Patcher, Da
             const GuildFolderSettingsModal = await Patcher.waitForModal(() => Finder.byName("GuildFolderSettingsModal"));
 
             // patch folder settings render
-            Patcher.after(GuildFolderSettingsModal.prototype, "render", ({context, result}) => {
-                const {folderId} = context.props;
-                const {state} = context;
+            Patcher.after(GuildFolderSettingsModal.prototype, "render", ({ context, result }) => {
+                const { folderId } = context.props;
+                const { state } = context;
 
                 // find form
                 const form = Utils.queryTree(result, (node) => node?.type === "form");
@@ -106,7 +108,7 @@ export default createPlugin({...config, styles, settings}, ({Logger, Patcher, Da
 
                 // add custom state
                 if (!state.iconType) {
-                    const {icon = null, always = false} = getFolder(folderId) ?? {};
+                    const { icon = null, always = false } = getFolder(folderId) ?? {};
                     Object.assign(state, {
                         iconType: icon ? "custom" : "default",
                         icon,
@@ -115,17 +117,17 @@ export default createPlugin({...config, styles, settings}, ({Logger, Patcher, Da
                 }
 
                 // render icon select
-                const {children} = form.props;
-                const {className} = children[0].props;
+                const { children } = form.props;
+                const { className } = children[0].props;
                 children.push(
                     <FormItem title="Icon" className={className}>
                         <RadioGroup
                             value={state.iconType}
                             options={[
-                                {value: "default", name: "Default Icon"},
-                                {value: "custom", name: "Custom Icon"}
+                                { value: "default", name: "Default Icon" },
+                                { value: "custom", name: "Custom Icon" }
                             ]}
-                            onChange={({value}) => context.setState({iconType: value})}
+                            onChange={({ value }) => context.setState({ iconType: value })}
                         />
                     </FormItem>
                 );
@@ -139,7 +141,7 @@ export default createPlugin({...config, styles, settings}, ({Logger, Patcher, Da
                                 icon={state.icon}
                                 always={state.always}
                                 folderNode={tree.nodes[folderId]}
-                                onChange={({icon, always}) => context.setState({icon, always})}
+                                onChange={({ icon, always }) => context.setState({ icon, always })}
                                 FolderIcon={FolderIcon}
                             />
                         </FormItem>
@@ -153,13 +155,13 @@ export default createPlugin({...config, styles, settings}, ({Logger, Patcher, Da
                     original(...args);
 
                     // update folders if necessary
-                    const {folders} = Settings.get();
+                    const { folders } = Settings.get();
                     if (state.iconType === "custom" && state.icon) {
-                        folders[folderId] = {icon: state.icon, always: state.always};
-                        Settings.set({folders});
+                        folders[folderId] = { icon: state.icon, always: state.always };
+                        Settings.set({ folders });
                     } else if ((state.iconType === "default" || !state.icon) && folders[folderId]) {
                         delete folders[folderId];
-                        Settings.set({folders});
+                        Settings.set({ folders });
                     }
                 };
             });
@@ -168,7 +170,7 @@ export default createPlugin({...config, styles, settings}, ({Logger, Patcher, Da
             triggerRerender();
         },
         SettingsPanel: () => {
-            const [{closeOnOpen}, setSettings] = Settings.useState();
+            const [{ closeOnOpen }, setSettings] = Settings.useState();
 
             return (
                 <SwitchItem
@@ -182,7 +184,7 @@ export default createPlugin({...config, styles, settings}, ({Logger, Patcher, Da
                                 ClientActions.toggleGuildFolderExpand(id);
                             }
                         }
-                        setSettings({closeOnOpen: checked});
+                        setSettings({ closeOnOpen: checked });
                     }}
                 >Close on open</SwitchItem>
             );

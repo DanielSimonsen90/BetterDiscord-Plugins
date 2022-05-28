@@ -1,9 +1,4 @@
-import { classNames, React } from 'discordium';
-import Discord from 'danho-discordium/components/Discord';
-import { useMemoedState } from 'danho-discordium/hooks';
-
 import { User } from '@discord';
-import ZLibrary from '@ZLibrary';
 import BDFDB from '@BDFDB';
 
 import { BadgeData, SettingsUser } from '../../Settings/types';
@@ -12,13 +7,18 @@ import SettingsBadge from './SettingsBadge';
 import SettingsBadgeList from './SettingsBadgeList';
 import useSelectedBadge from './useSelectedBadge';
 
-const { useMemo, useCallback, useEffect, useState } = React;
+const { Libraries, Modules } = window.BDD;
+const { ZLibrary } = Libraries;
+const { React, DanhoModules } = Modules;
+const { useMemo, useCallback } = React;
+const { classNames, Components } = DanhoModules.CompiledReact;
 const {
     Avatar: { default: Avatar, Sizes },
     DiscordTag,
     Form: { FormItem },
     Margins, ClassModules
-} = Discord;
+} = Components.Discord;
+
 
 type SettingsUserProps = {
     BDFDB: BDFDB,

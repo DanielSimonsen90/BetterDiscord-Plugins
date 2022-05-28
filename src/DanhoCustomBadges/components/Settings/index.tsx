@@ -1,19 +1,19 @@
-import { User } from '@discord';
-import { React, SettingsProps, classNames } from 'discordium';
-import { Discord, Form, Setting } from 'danho-discordium/components';
-
-const { FormTitle } = Discord.Form;
-const { Section, Item } = Form;
-const { useState, useMemo } = React;
-
 import { BadgeData, Settings, titles } from '../../Settings/types';
-import { name, version } from '../../config.json';
+import { name } from '../../config.json';
 
-import SettingsUser from './SettingsUser';
-import ZLibrary from '@ZLibrary';
 import BDFDB from '@BDFDB';
+import SettingsUser from './SettingsUser';
 import AddUser from './AddUser';
-import { createLogger, createPatcher } from '@discordium/api';
+import SettingsProps from 'danho-discordium/SettingsProps';
+
+const { Libraries, Modules } = window.BDD;
+const { BDFDB, ZLibrary } = Libraries;
+const { React, DanhoModules } = Modules;
+const { useState, useMemo } = React;
+const { classNames, Components } = DanhoModules.CompiledReact;
+const { Discord, Form, Setting } = Components;
+const { Form: { FormTitle } } = Discord;
+const { Section, Item } = Form;
 
 type SettingsPanelProps = SettingsProps<Settings> & {
     BDFDB: BDFDB,

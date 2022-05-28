@@ -1,7 +1,6 @@
-import { React } from 'discordium';
 import { BadgeData } from '../../Settings/types';
- 
-const { useState, useCallback } = React;
+
+const { useState, useCallback } = window.BDD.Modules.React;
 
 type UseSelectedBadgeReturn = [badge: BadgeData, setBadge: (badge: BadgeData | ((badge: BadgeData) => BadgeData)) => void];
 export default function useSelectedBadge(badges: Array<BadgeData>): UseSelectedBadgeReturn {

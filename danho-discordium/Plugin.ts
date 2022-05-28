@@ -2,22 +2,18 @@ export { forceRerender } from 'danho-bd';
 export { default as ZLibrary } from '@ZLibrary';
 export { default as BDFDB} from '@BDFDB';
 export { default as $ } from '@dquery';
-export { React, ReactDOM, createPlugin } from 'discordium';
 export * as Discord from './Discord';
 
 export type MutationRecordCallback = (record: MutationRecord) => boolean;
-export type PluginConfig = PatcherConfig & MutationConfig;
+export type PluginConfig = PatcherConfig;
 
-import { Config, CreatePluginCallbackApi, Logger, Patcher, Plugin, Styles, Data, Settings, SettingsProps } from 'discordium';
-import { ObservationCallback, ObservationConfig } from './MutationManager';
-import MutationManager, { initializeMutations, MutationConfig, MutationConfigOptions, ObservationReturns } from './MutationManager/MutationManager';
+import { Config, CreatePluginCallbackApi, Logger, Patcher, Plugin, Styles, Data, Settings } from 'discordium';
 import ContextMenuProvider from './ContextMenuProvider';
 import initializePatches, { Patched, PatcherConfig } from './Patcher/Patcher';
 import { ComponentType } from 'react';
 
-type Layers = 'tooltip' | 'modal' | 'popout' | `create${'Channel' | 'Category'}`;
 export class DanhoPlugin<
-    SettingsType extends Record<string, any>,
+    SettingsType extends Record<string, any> = Record<string, any>,
     DataType extends Record<"settings", SettingsType> = Record<"settings", SettingsType>
 > implements Omit<Plugin, 'start'> {
     constructor({ Config, Data, Logger, Patcher, Settings, Styles }: CreatePluginCallbackApi<SettingsType, DataType>) {
@@ -28,6 +24,7 @@ export class DanhoPlugin<
         this.settings = Settings;
         this.styles = Styles;
     }
+    
     public config: Config<SettingsType>;
     public data: Data<DataType>;
     public logger: Logger;
@@ -36,36 +33,39 @@ export class DanhoPlugin<
     public styles: Styles;
 
     public patches: Array<Patched>;
-    protected mutationManager: MutationManager;
     protected contextMenus: ContextMenuProvider;
 
     public async start(config?: PluginConfig) {
-        // console.clear();
         this.logger.group("Patches");
-        const { mutations, ...patchConfig } = config;
-        this.mutationManager = initializeMutations(this, {mutations});
-        this.patches = await initializePatches(this, patchConfig);
+        this.patches = await initializePatches(this, config);
         this.contextMenus = ContextMenuProvider.getInstance(this);
         this.logger.groupEnd();
     }
     public stop() {
-        this.mutationManager.clear();
+
     }
 
     protected get BDFDB() {
         return window.BDFDB;
     }
-
-    protected on<
-        Observation extends MutationConfigOptions | ObservationConfig<any> = MutationConfigOptions,
-        Arguments extends Observation extends MutationConfigOptions ? ObservationReturns[Observation] : never = Observation extends MutationConfigOptions ? ObservationReturns[Observation] : never,
-    >(observation: Observation, callback: ObservationCallback<Arguments>) {
-        return this.mutationManager.on(observation, callback);
+    protected get ZLibrary() {
+        return window.ZLibrary;
     }
-    protected off(observation: MutationConfigOptions) {
-        return this.mutationManager.off(observation);
+    protected get BDD() {
+        return window.BDD;
     }
 
-    settingsPanel?: ComponentType<SettingsProps<SettingsType>>;
+    settingsPanel?: ComponentType<SettingsType>;
+
+    private events = new Map<string, Array<(...args: any[]) => void>>();
+    protected on(event: string, callback: (...args: any[]) => void) {
+        this.events.set(event, [...this.events.get(event) || [], callback]);
+    }
+    protected off(event: string, callback: (...args: any[]) => void) {
+        this.events.set(event, this.events.get(event)?.filter(e => e !== callback));
+    }
+    protected emit(event: string, ...args: any[]) {
+        this.events.get(event)?.forEach(e => e(...args));
+    }
 }
 export default DanhoPlugin;

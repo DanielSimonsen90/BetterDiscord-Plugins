@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { Arrayable, BetterOmit } from "danholibraryjs";
 
 import IAuthor from "./IAuthor";
@@ -6,11 +8,11 @@ import LoggerUtil from "./LoggerUtil";
 
 import SettingsSaveItem from "@BDFDB/LibraryComponents/SettingsSaveItem";
 import { BDFDBPluginParams, PatchedModules } from '@BDFDB';
-import { ComponentInstance, ComponentFiber, Component } from '@lib/React';
+import { ComponentInstance, ComponentFiber } from '@lib/React';
 
 import { Setting } from "danho-bd/base";
 import * as ProcessEvents from './ProcessEvent';
-import React, { Attributes, ComponentClass, ReactHTML } from "react";
+import React, { Attributes, ComponentClass, ReactHTML, Component } from "react";
 
 type SettingsSaveItemProps = BetterOmit<SettingsSaveItem['defaultProps'], 'plugin' | 'label' | 'value' | 'keys'>;
 
