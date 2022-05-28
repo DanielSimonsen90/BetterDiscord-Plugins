@@ -1,22 +1,7 @@
 import config from './config.json';
-import Settings, { settings } from './Settings';
-import { DanhoPlugin } from 'danho-discordium';
+import { settings } from './Settings';
 import { createPlugin } from 'discordium';
-
-import {
-    DiscordModules,
-    Libraries,
-    PluginUtils,
-
-    Utils,
-} from './src';
-
-export class DanhoLibrary extends DanhoPlugin<Settings> {
-    Modules = DiscordModules
-    Libraries = Libraries
-    PluginUtils = PluginUtils
-    Utils = Utils
-}
+import DanhoLibrary from './src';
 
 class DanhoLibraryGlobal extends DanhoLibrary {
     async start() {
