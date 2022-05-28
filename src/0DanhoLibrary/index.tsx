@@ -19,8 +19,4 @@ declare global {
     interface Window { BDD: DanhoLibrary; }
 }
 
-// @ts-ignore
-const Plugin = createPlugin({ ...config, settings }, api => new DanhoLibraryGlobal(api));
-window.BDD = new Plugin() as DanhoLibraryGlobal;
-
-export default Plugin;
+export default createPlugin({ ...config, settings }, api => window.BDD = new DanhoLibraryGlobal(api));

@@ -4,7 +4,7 @@ import DanhoLibrary from ".";
 
 class PluginReturn extends DanhoPlugin {}
 
-export type PluginUtils = {
+export interface IPluginUtils {
     queue: Array<string>;
 
     startPlugins(): void
@@ -18,25 +18,32 @@ export type PluginUtils = {
     stopPlugins(): void;
 }
 
-export const PluginUtils = {
-    queue: new Array<string>(),
+export const PluginUtils = new class PluginUtils implements IPluginUtils {
+    constructor() {
+        this.startPlugins = this.startPlugins.bind(this);
+        this.buildPlugin = this.buildPlugin.bind(this);
+        this.stopPlugins = this.stopPlugins.bind(this);
+    }
 
-    startPlugins(this: PluginUtils) {
+    queue = new Array<string>()
+
+    startPlugins() {
+        console.log('Starting Danho plugins')
         const { queue } = this;
-
+    
         for (const pluginName of queue) {
             try {
                 BdApi.Plugins.enable(pluginName);
             }
             catch (err) {
                 console.error(`[PluginUtils]: Failed to start plugin ${pluginName}`, err);
-                return false;
             }
         }
-        return true;
-    },
+    
+        console.log('Started Danho plugins')
+    }
 
-    buildPlugin<Settings>(this: PluginUtils, config: Config<Settings>, pluginBuilder: (
+    buildPlugin<Settings>(config: Config<Settings>, pluginBuilder: (
         Plugin: typeof DanhoPlugin, 
         Library: DanhoLibrary
     ) => typeof PluginReturn): BdApi.PluginConstructor {
@@ -47,11 +54,12 @@ export const PluginUtils = {
         // @ts-ignore
         window.BDD.PluginUtils.startPlugins();
         return plugin;
-    },
-
-    stopPlugins(this: PluginUtils) {
+    }
+    
+    stopPlugins() {
+        console.log('Stopping Danho plugins')
         const { queue } = this;
-
+    
         for (const pluginName of queue) {
             try {
                 BdApi.Plugins.disable(pluginName);
@@ -60,5 +68,7 @@ export const PluginUtils = {
                 console.error(`[PluginUtils]: Failed to stop plugin ${pluginName}`, err);
             }
         }
+    
+        console.log('Danho plugins stopped')
     }
 }

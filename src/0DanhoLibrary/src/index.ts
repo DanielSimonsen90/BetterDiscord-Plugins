@@ -7,8 +7,8 @@ import { DanhoPlugin } from 'danho-discordium';
 import Settings from '../Settings';
 
 export default class DanhoLibrary extends DanhoPlugin<Settings> {
-    Modules = DiscordModules
-    Libraries = Libraries
-    PluginUtils = PluginUtils
-    Utils = Utils
+    public Modules = DiscordModules
+    public Libraries = Libraries
+    public PluginUtils = PluginUtils
+    public Utils = Utils
 }
