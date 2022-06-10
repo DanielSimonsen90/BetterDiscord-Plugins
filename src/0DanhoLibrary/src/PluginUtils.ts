@@ -25,7 +25,7 @@ export const PluginUtils = new class PluginUtils implements IPluginUtils {
         this.stopPlugins = this.stopPlugins.bind(this);
     }
 
-    queue = new Array<string>()
+    queue = window.BDD_PluginQueue ?? new Array<string>();
 
     startPlugins() {
         console.log('Starting Danho plugins')

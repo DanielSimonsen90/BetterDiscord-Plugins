@@ -3,7 +3,7 @@ import { Finder } from 'discordium';
 import * as DiumModules from '@discordium/modules/discord'
 import ZLibrary from '@ZLibrary';
 import BDFDB from '@BDFDB';
-const { BDFDB } = window.BDD.Libraries ?? window;
+const { BDFDB } = window.BDD?.Libraries ?? window;
 
 import Avatar from './Avatar';
 import Button from './Button';

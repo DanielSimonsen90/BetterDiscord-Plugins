@@ -1,4 +1,4 @@
-import React from 'react';
+const { React } = window.ZLibrary.DiscordModules;
 
 export default function DefaultIcon() {
     return (

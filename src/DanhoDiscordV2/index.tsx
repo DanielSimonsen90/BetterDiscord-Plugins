@@ -39,4 +39,4 @@ export default window.BDD.PluginUtils.buildPlugin(config, (BasePlugin, Lib) => {
             });
         }
     }
-})
+});

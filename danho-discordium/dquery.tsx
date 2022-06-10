@@ -66,10 +66,10 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
                                 selector
             );
 
-            if (!element
-                && selector
-                && !(typeof selector === 'function') // ElementSelector.getElementFromInstance(instance) might not find the element
-            ) console.trace(`%cCould not find element with selector: ${selector}`, "color: lightred; background-color: darkred;");
+            // if (!element
+            //     && selector
+            //     && !(typeof selector === 'function') // ElementSelector.getElementFromInstance(instance) might not find the element
+            // ) console.trace(`%cCould not find element with selector: ${selector}`, "color: lightred; background-color: darkred;");
 
             this.element = element;
         }

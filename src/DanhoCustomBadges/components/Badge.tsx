@@ -1,10 +1,12 @@
+import BDFDB from "@BDFDB";
+
 const { Libraries, Modules } = window.BDD;
-const { BDFDB, ZLibrary } = Libraries;
+const { ZLibrary } = Libraries;
 const { React, DanhoModules } = Modules;
 const { classNames } = DanhoModules.CompiledReact;
 
 type BadgeProps = {
-    BDFDB: typeof BDFDB,
+    BDFDB: BDFDB,
 
     tooltipText: string,
     spacing?: number,

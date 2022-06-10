@@ -1,4 +1,4 @@
-import React from 'react';
+const { React } = window.ZLibrary.DiscordModules;
 import { PatchReturns } from "danho-discordium/Patcher";
 
 import Badge from "./components/Badge";

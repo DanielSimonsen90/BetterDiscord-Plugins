@@ -6,7 +6,7 @@ import * as rollup from "rollup";
 import rollupConfig from "../rollup.config";
 import {Config} from "discordium";
 
-const repo = "Zerthox/BetterDiscord-Plugins";
+const repo = "DanielSimonsen90/BetterDiscord-Plugins";
 
 const success = (msg: string) => console.log(chalk.green(msg));
 const warn = (msg: string) => console.warn(chalk.yellow(`Warn: ${msg}`));
@@ -163,7 +163,32 @@ function toMeta(config: Meta): string {
 function genOutputOptions(config: Meta, output: string) {
     return {
         file: output,
-        banner: toMeta(config) + `\n/*@cc_on @if (@_jscript)\n${wscript}\n@else @*/\n`,
-        footer: "\n/*@end @*/"
+        banner: toMeta(config) + 
+            `\n/*@cc_on @if (@_jscript)\n${wscript}\n@else @*/\n\n` + 
+            `try {\n`,
+        footer: "\n} catch (err) {\n" +
+            `\tconsole.error(err);\n` +
+            `\tif (window.BDD) console.error(err)\n` +
+            `\telse module.exports = class NoPlugin {\n` +
+            // `\tstart() { BdApi.Alert("${config.name} could not be loaded!") }\n` +
+            `\t\tstart() {\n`+ 
+            `\t\t\twindow.BDD_PluginQueue ??= []\n` + 
+            `\t\t\twindow.BDD_PluginQueue.push('${config.name}')\n` + 
+            `\t\t}\n` +
+            `\t\tstop() {}\n` +
+            `\t}\n` +
+            `}\n` + 
+            "/*@end @*/"
     };
 }
+
+
+/**
+ 
+try {
+
+} catch (e) {
+    console.error(e);
+    BdApi.alert(`${config.name} errored`, e.message);
+}
+*/
