@@ -161,38 +161,30 @@ function toMeta(config: Meta): string {
 }
 
 function genOutputOptions(config: Meta, output: string) {
-    return {
-        file: output,
-        banner: toMeta(config) + 
-            `\n/*@cc_on @if (@_jscript)\n${wscript}\n@else @*/\n\n` + 
-            `module.exports = (() => {\n` + 
-            `const module = { exports: null }\n` +
-            `try {\n`,
-        footer: "\n} catch (err) {\n" +
-            `\tconsole.error(err);\n` +
-            `\tif (window.BDD) console.error(err)\n` +
-            `\telse module.exports = class NoPlugin {\n` +
-            // `\tstart() { BdApi.Alert("${config.name} could not be loaded!") }\n` +
-            `\t\tstart() {\n`+ 
-            `\t\t\twindow.BDD_PluginQueue ??= []\n` + 
-            `\t\t\twindow.BDD_PluginQueue.push('${config.name}')\n` + 
-            `\t\t}\n` +
-            `\t\tstop() {}\n` +
-            `\t}\n` +
-            `}\n` + 
-            `return module.exports\n` + 
-            `})()\n` + 
-            "/*@end @*/"
-    };
+return {
+    file: output,
+    banner: toMeta(config) + `
+/*@cc_on @if (@_jscript)\n${wscript}\n@else @*/
+
+module.exports = (() => {
+    const module = { exports: null };
+    try {`,
+    footer: `
+    } catch (err) {
+        console.error(err);
+        if (window.BDD) console.error(err);
+        else module.exports = class NoPlugin {
+             //start() { BdApi.Alert("${config.name} could not be loaded!") }
+             start() {
+                 window.BDD_PluginQueue ??= [];
+                 window.BDD_PluginQueue.push('${config.name}');
+             }
+             stop() {}
+         }
+     }
+
+    return module.exports;
+})();
+/*@end @*/
+`};
 }
-
-
-/**
- 
-try {
-
-} catch (e) {
-    console.error(e);
-    BdApi.alert(`${config.name} errored`, e.message);
-}
-*/
