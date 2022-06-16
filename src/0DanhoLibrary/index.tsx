@@ -7,12 +7,25 @@ import { delay } from 'danho-discordium/Utils';
 class DanhoLibraryGlobal extends DanhoLibrary {
     async start() {
         this.on('plugin-start', this.PluginUtils.startPlugins);
+        this.on('plugin-restart', this.PluginUtils.restartPlugins);
         this.on('plugin-stop', this.PluginUtils.stopPlugins);
 
-        this.emit('plugin-start');
+        this.emit('plugin-restart');
 
         if (!window.BDFDB || !window.BDFDB_Global.loaded) {
-            delay(() => this.stop(), 500).then(() => delay(() => this.start(), 100));
+            this.logger.log('Waiting for BDFDB to load...');
+
+            const waitForBDFDB = async () => {
+                if (!window.BDFDB || !window.BDFDB_Global.loaded) {
+                    return delay(waitForBDFDB, 1000);
+                }
+
+                this.logger.log('BDFDB loaded.');
+                this.stop();
+                await delay(this.start, 100);
+            };
+
+            waitForBDFDB();
         }
     }
     stop() {

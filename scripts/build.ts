@@ -165,6 +165,8 @@ function genOutputOptions(config: Meta, output: string) {
         file: output,
         banner: toMeta(config) + 
             `\n/*@cc_on @if (@_jscript)\n${wscript}\n@else @*/\n\n` + 
+            `module.exports = (() => {\n` + 
+            `const module = { exports: null }\n` +
             `try {\n`,
         footer: "\n} catch (err) {\n" +
             `\tconsole.error(err);\n` +
@@ -178,6 +180,8 @@ function genOutputOptions(config: Meta, output: string) {
             `\t\tstop() {}\n` +
             `\t}\n` +
             `}\n` + 
+            `return module.exports\n` + 
+            `})()\n` + 
             "/*@end @*/"
     };
 }

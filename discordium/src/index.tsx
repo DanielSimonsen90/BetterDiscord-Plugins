@@ -19,7 +19,7 @@ export { default as Modules } from "./modules";
 export * from "./modules";
 export { version } from "../package.json";
 
-export { Logger, Patcher, Styles, Data, Settings } from "./api";
+export { Logger, Patcher, Styles, Data, Settings, createStyles } from "./api";
 
 export interface Api<
     SettingsType extends Record<string, any>,
