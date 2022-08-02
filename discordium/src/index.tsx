@@ -96,13 +96,14 @@ export const createPlugin = <
             Logger.log("Disabled");
         }
         getSettingsPanel?: () => JSX.Element;
+        plugin = plugin;
     }
 
     // add settings panel
     if (plugin.SettingsPanel) {
         Wrapper.prototype.getSettingsPanel = () => (
             <SettingsContainer name={name} onReset={() => Settings.reset()}>
-                <plugin.SettingsPanel />
+                <plugin.SettingsPanel {...settings} />
             </SettingsContainer>
         );
     }

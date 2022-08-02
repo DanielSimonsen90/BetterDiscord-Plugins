@@ -2,8 +2,8 @@ import { PatchReturns } from 'danho-discordium/Patcher';
 import { Roles } from 'danho-discordium/Patcher/UserPopoutBody/roles';
 import config from './config.json';
 
-export default window.BDD.PluginUtils.buildPlugin(config, (BasePlugin, Lib) => {
-    const Plugin = BasePlugin;
+export default window.BDD.PluginUtils.buildPlugin(config, Lib => {
+    const Plugin = Lib.GetPlugin();
     const { $ } = Lib.Modules.DanhoModules;
 
     return class DanhoDiscordV2 extends Plugin {
@@ -34,9 +34,7 @@ export default window.BDD.PluginUtils.buildPlugin(config, (BasePlugin, Lib) => {
 
             rolesList.children('* > div[class*="role"]:not(div[class*="addButton"])').forEach((role, i) => {
                 if (role.style?.borderColor) role.style.backgroundColor = role.style.borderColor?.replace('0.6', '0.09');
-
-                role.on('click', () => role.children('div[class*="roleCircle"]', true).element.click());
             });
         }
-    }
+    } as any;
 });

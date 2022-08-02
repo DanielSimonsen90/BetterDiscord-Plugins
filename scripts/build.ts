@@ -145,7 +145,7 @@ async function readConfig(input: string): Promise<Meta> {
     const config = JSON.parse(await fs.readFile(resolveConfig(input), "utf8")) as Config<unknown>;
     return {
         ...config,
-        authorLink: `https://github.com/${config.author}`,
+        authorLink: `https://github.com/DanielSimonsen90`,
         website: `https://github.com/${repo}`,
         source: `https://github.com/${repo}/tree/master/src/${path.basename(input)}`,
         updateUrl: `https://raw.githubusercontent.com/${repo}/master/dist/bd/${path.basename(input)}.plugin.js`
@@ -171,17 +171,31 @@ module.exports = (() => {
     try {`,
     footer: `
     } catch (err) {
-        console.error(err);
+        if ('${config.name}' === 'DanhoLibrary') console.error(err);
+        
         if (window.BDD) console.error(err);
         else module.exports = class NoPlugin {
-             //start() { BdApi.Alert("${config.name} could not be loaded!") }
-             start() {
-                 window.BDD_PluginQueue ??= [];
-                 window.BDD_PluginQueue.push('${config.name}');
-             }
-             stop() {}
-         }
-     }
+            //start() { BdApi.Alert("this.name could not be loaded!") }
+            start() {
+                window.BDD_PluginQueue ??= [];
+
+                if (!this.isLib) {
+                    if (window.BDD_PluginQueue.includes(this.name)) return console.log(\`\${this.name} is already in plugin queue\`, err);
+                    window.BDD_PluginQueue.push(this.name); 
+                } else {
+                    setTimeout(() => {
+                        BdApi.Plugins.reload(this.name);
+
+                        setTimeout(() => window.BDD?.PluginUtils.restartPlugins(), 500);
+                    }, 1000);
+                }
+            }
+            stop() {}
+
+            name = '${config.name}';
+            isLib = '${config.name}' === 'DanhoLibrary'
+        }
+    }
 
     return module.exports;
 })();

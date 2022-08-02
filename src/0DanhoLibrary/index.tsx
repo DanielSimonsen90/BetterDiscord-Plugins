@@ -10,8 +10,6 @@ class DanhoLibraryGlobal extends DanhoLibrary {
         this.on('plugin-restart', this.PluginUtils.restartPlugins);
         this.on('plugin-stop', this.PluginUtils.stopPlugins);
 
-        this.emit('plugin-restart');
-
         if (!window.BDFDB || !window.BDFDB_Global.loaded) {
             this.logger.log('Waiting for BDFDB to load...');
 
@@ -21,8 +19,7 @@ class DanhoLibraryGlobal extends DanhoLibrary {
                 }
 
                 this.logger.log('BDFDB loaded.');
-                this.stop();
-                await delay(this.start, 100);
+                if (window.BDD) this.emit('plugin-restart');
             };
 
             waitForBDFDB();
@@ -43,5 +40,6 @@ declare global {
 export default createPlugin({ ...config, settings }, api => {
     const plugin = new DanhoLibraryGlobal(api);
     window.BDD ??= plugin;
+    window.BDD.PluginUtils?.restartPlugins();
     return plugin;
 });

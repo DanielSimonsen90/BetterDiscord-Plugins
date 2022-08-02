@@ -65,6 +65,7 @@ export class DanhoPlugin<
         this.events.set(event, this.events.get(event)?.filter(e => e !== callback));
     }
     protected emit(event: string, ...args: any[]) {
+        // console.trace(`[${this.config.name}] Emitting event ${event}`, ...args);
         this.events.get(event)?.forEach(e => e(...args));
     }
 }

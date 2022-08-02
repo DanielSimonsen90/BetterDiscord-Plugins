@@ -13,7 +13,7 @@ declare namespace BdApi {
         isEnabled(pluginName: string): boolean
 
         get folder(): string
-        get(pluginName: string): Plugin
-        getAll(): Array<Plugin>
+        get(pluginName: string): PluginData
+        getAll(): Array<PluginData>
     }
 }

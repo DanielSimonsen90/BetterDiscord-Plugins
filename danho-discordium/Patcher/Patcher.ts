@@ -150,10 +150,11 @@ function commitPatch(plugin: DumbPlugin, module: Module, { patchType, method, op
         return previouslyPatched;
     }
 
-    const callback = ((data) => {
+    const callback = (data: any) => {
+        console.log(`Running callback for module`, module)
         try { resolvedCallback(data) }
-        catch (err) { plugin.logger.error(err, patched) }
-    }).bind(plugin);
+        catch (err) { plugin.logger.error(`Error in patched method for ${module.default?.displayName || module.displayName || 'module'}`, err, patched) }
+    }
 
     const cancel = plugin.patcher[patchType as any](module, method, callback, option);
     const patched = { module, callback, method, patchType, option, cancel };

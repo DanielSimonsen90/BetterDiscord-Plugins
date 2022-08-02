@@ -9,34 +9,39 @@ import config from './config.json';
 import styles from './styles/index.scss';
 import settings from './Settings/data.json';
 
-export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config, styles, settings }, (BasePlugin, Lib) => {
-    const Plugin = BasePlugin;
+export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config, styles, settings }, (Lib) => {
     const { $ } = Lib.Modules.DanhoModules;
+    const Plugin = Lib.GetPlugin<Settings>();
 
     return class DanhoCustomBadge extends Plugin<Settings> {
         async start() {
             await super.start({
                 after: {
-                    default: [
-                        { selector: "UserProfileBadgeList", isModal: true },
-                    ]
+                    default: [{
+                        selector: "UserProfileBadgeList", isModal: true
+                    }]
                 }
-            })
+            });
+
+            this.patcher.after(Lib.Libraries.Discordium.Finder.byName("UserProfileBadgeList"), "default", (props: PatchReturns["UserProfileBadgeList"] & any) => {
+                console.log('test');
+            });
         }
 
-        settingsPanel = (props: Settings) => {
+        SettingsPanel = (props: Settings) => {
             const [current, defaults, set] = this.settings.useStateWithDefaults();
             return <SettingsPanel {...props} {...{ ...current, defaults, set }} BDFDB={this.BDFDB} />
         }
 
         patchUserProfileBadgeList({ args: [props], result }: PatchReturns["UserProfileBadgeList"]) {
+            this.logger.log("Hello");
             if (!Array.isArray(result.props.children)) return this.logger.warn('UserProfileBadgeList children is not an array');
 
             const ref = $(s => s.getElementFromInstance(result, true), false);
             if (!ref.length) return console.log("No ref element");
 
             const userSettings = this.getUserSettings(props.user.id);
-            if (!userSettings) return;
+            if (!userSettings) return this.logger.log("User has no settings");
 
             for (const { index, tooltip, ...props } of userSettings.badges) {
                 const badge = (() => {
@@ -95,5 +100,5 @@ export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config, styles,
             this.logger.log(`Saving user settings for ${userId}`, data);
             this.data.save("settings", { ...settings, users: { ...users, [userId]: data } });
         }
-    }
+    } as any;
 });

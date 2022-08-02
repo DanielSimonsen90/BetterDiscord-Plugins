@@ -11,4 +11,7 @@ export default class DanhoLibrary extends DanhoPlugin<Settings> {
     public Libraries = Libraries
     public PluginUtils = PluginUtils
     public Utils = Utils
+    public GetPlugin<Settings>() {
+        return DanhoPlugin;
+    }
 }

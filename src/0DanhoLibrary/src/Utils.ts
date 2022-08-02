@@ -3,6 +3,7 @@ import BDFDB from '@BDFDB';
 import { User } from '@discord';
 import { Module } from "@ZLibrary";
 import { Finder } from "@discordium/api";
+import { If } from "danho-discordium/Utils";
 
 function findNodeByIncludingClassName<NodeType = Element>(className: string, node = document.body): NodeType | null {
     return node.querySelector(`[class*="${className}"]`) as any;
@@ -70,11 +71,19 @@ async function findUserByTag(tag: string, BDFDB: BDFDB): Promise<User> {
         reject(`Could not find user with tag ${tag}`);
     })
 }
+function getPlugin<IsArray extends boolean = false>(...pluginNames: Array<string>): If<IsArray, Array<BdApi.Plugin>, BdApi.Plugin> {
+    return pluginNames.length === 1 ? 
+        BdApi.Plugins.get(pluginNames[0]).instance.plugin as any :
+        BdApi.Plugins.getAll().filter(plugin => pluginNames.includes((
+            plugin['name'] || plugin['getName']?.()
+        ))).map(plugin => plugin.instance.plugin as any);
+}
 
 export const Utils = {
     findNodeByIncludingClassName,
     findModuleByIncludes,
     findClassModuleContainingClass,
     findModule,
-    findUserByTag
+    findUserByTag,
+    getPlugin
 }

@@ -3,9 +3,31 @@ declare namespace BdApi {
         start(): void;
         stop(): void;
         getSettingsPanel?: () => JSX.Element;
+
     }
     interface PluginConstructor {
         new(): Plugin;
+    }
+    interface PluginData {
+        added: number,
+        author: string,
+        autohrLink: string,
+        description: string,
+        exports: Plugin,
+        filename: string,
+        format: string,
+        id: string,
+        instance: Plugin & { 
+            __proto__: { constructor: { name: string } },
+            plugin: Plugin,
+        },
+        modified: number,
+        name: string,
+        size: number,
+        source: string,
+        updateUrl: string,
+        version: string,
+        website: string
     }
 
     const Patcher: any;
