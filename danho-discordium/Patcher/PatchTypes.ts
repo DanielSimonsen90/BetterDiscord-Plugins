@@ -1,11 +1,11 @@
-import { ActivityIndexes, ActivityTypes, ChannelInputType, Guild, GuildMember, Snowflake, User } from "@discord";
+import { ActivityIndexes, ActivityTypes, ChannelInputType, Guild, GuildMember, Message, Snowflake, User } from "@discord";
 import { UserPopoutBody } from "./UserPopoutBody";
 import UserProfileBadgeList from "./UserProfileBadgeList";
 
 export type PatchReturns = {
     [Key in keyof PatchProps]: {
-        // original: React.FunctionComponent,
-        args: [moduleProps: PatchProps[Key]],
+        original: OriginalType[Key],
+        args: PatchProps[Key] extends Array<any> ? PatchProps[Key] : [moduleProps: PatchProps[Key]],
         result: React.ReactElement<ResultProps[Key]>
     }
 } & {
@@ -37,9 +37,24 @@ export type PatchProps = {
         onClose: () => void,
         setNote: undefined,
         user: User
-    }
+    },
+    Message: [
+        messageId: string,
+        props: {
+            content: string,
+            invalidEmojis: Array<string>,
+            tts: boolean,
+            validNonShortcutEmojis: Array<string>,
+        },
+        arg3: undefined,
+        arg4: {}
+    ]
+}
+export type OriginalType = {
+    [Key in keyof PatchProps]: (...args: any[]) => any
 }
 export type ResultProps = {
     UserProfileBadgeList: UserProfileBadgeList
-    UserPopoutBody: UserPopoutBody
+    UserPopoutBody: UserPopoutBody,
+    Message: Message
 }

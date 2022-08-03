@@ -3,7 +3,7 @@
  * @description Preferred Discord styles
  * @author Danho#2105
  * @version 0.0.1
- * @authorLink https://github.com/Danho#2105
+ * @authorLink https://github.com/DanielSimonsen90
  * @website https://github.com/DanielSimonsen90/BetterDiscord-Plugins
  * @source https://github.com/DanielSimonsen90/BetterDiscord-Plugins/tree/master/src/DanhoGlasses
  * @updateUrl https://raw.githubusercontent.com/DanielSimonsen90/BetterDiscord-Plugins/master/dist/bd/DanhoGlasses.plugin.js
@@ -69,8 +69,8 @@ const config = {
 	version: version
 };
 
-const index = window.BDD.PluginUtils.buildPlugin({ ...config, styles }, (BasePlugin, Lib) => {
-    const Plugin = BasePlugin;
+const index = window.BDD.PluginUtils.buildPlugin({ ...config, styles }, (Lib) => {
+    const Plugin = Lib.GetPlugin();
     return class DanhoGlasses extends Plugin {
     };
 });
@@ -78,7 +78,8 @@ const index = window.BDD.PluginUtils.buildPlugin({ ...config, styles }, (BasePlu
 module.exports = index;
 
     } catch (err) {
-        console.error(err);
+        if ('DanhoGlasses' === 'DanhoLibrary') console.error(err);
+        
         if (window.BDD) console.error(err);
         else module.exports = class NoPlugin {
             //start() { BdApi.Alert("this.name could not be loaded!") }
@@ -88,24 +89,18 @@ module.exports = index;
                 if (!this.isLib) {
                     if (window.BDD_PluginQueue.includes(this.name)) return console.log(`${this.name} is already in plugin queue`, err);
                     window.BDD_PluginQueue.push(this.name); 
+                } else {
+                    setTimeout(() => {
+                        BdApi.Plugins.reload(this.name);
+
+                        setTimeout(() => window.BDD?.PluginUtils.restartPlugins(), 500);
+                    }, 1000);
                 }
             }
-            stop() {
-                /*
-                if (!this.isLib || this.reloading) return;
-                this.reloading = true;
-                BdApi.Plugins.reload(this.name);
-                */
-            }
+            stop() {}
 
             name = 'DanhoGlasses';
             isLib = 'DanhoGlasses' === 'DanhoLibrary'
-            reload() { BdApi.Plugins.reload(this.name) }
-            get reloading() { return window.BDD_Reloading ??= false; }
-            set reloading(value) { 
-                window.BDD_Reloading = value; 
-                if (value) BdApi.Plugins.reload(this.name);
-            }
         }
     }
 

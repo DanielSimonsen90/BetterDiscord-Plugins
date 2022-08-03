@@ -40,6 +40,7 @@ export class DanhoPlugin<
         this.patches = await initializePatches(this, config);
         this.contextMenus = ContextMenuProvider.getInstance(this);
         this.logger.groupEnd();
+        this.logger.groupEnd();
     }
     public stop() {
 

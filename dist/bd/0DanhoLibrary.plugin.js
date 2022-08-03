@@ -3,7 +3,7 @@
  * @description Library for Danho#2105's plugins
  * @author Danho#2105
  * @version 1.0.0
- * @authorLink https://github.com/Danho#2105
+ * @authorLink https://github.com/DanielSimonsen90
  * @website https://github.com/DanielSimonsen90/BetterDiscord-Plugins
  * @source https://github.com/DanielSimonsen90/BetterDiscord-Plugins/tree/master/src/0DanhoLibrary
  * @updateUrl https://raw.githubusercontent.com/DanielSimonsen90/BetterDiscord-Plugins/master/dist/bd/0DanhoLibrary.plugin.js
@@ -550,6 +550,9 @@ const createPlugin = (config, callback) => {
     const Settings = createSettings(Data, settings ?? {});
     const plugin = callback({ Logger, Patcher, Styles, Data, Settings, Config: config });
     class Wrapper {
+        constructor() {
+            this.plugin = plugin;
+        }
         start() {
             Logger.log("Enabled");
             Styles.inject(styles);
@@ -564,7 +567,7 @@ const createPlugin = (config, callback) => {
     }
     if (plugin.SettingsPanel) {
         Wrapper.prototype.getSettingsPanel = () => (React$1.createElement(SettingsContainer, { name: name, onReset: () => Settings.reset() },
-            React$1.createElement(plugin.SettingsPanel, null)));
+            React$1.createElement(plugin.SettingsPanel, { ...settings })));
     }
     return Wrapper;
 };
@@ -1093,181 +1096,24 @@ const Libraries = {
     Discordium,
 };
 
-const defaultOption = {
-    isContextMenu: false,
-    isModal: false,
-    once: false,
-    override: false,
-    silent: false
-};
-function initializePatches(plugin, config = {}) {
-    return configurePatches(plugin, config, async ({ patchType, method, option }) => {
-        const patch = (module) => commitPatch(plugin, module, { patchType, method, option });
-        return optionIsArrayable(option) ?
-            patch(getModule(option)) :
-            waitForModule(plugin.patcher, option).then(patch);
-    });
-}
-async function configurePatches(plugin, config, callback) {
-    const patches = plugin.patches ?? (plugin.patches = new Array());
-    for (const pt in config) {
-        const patchType = pt;
-        const methods = config[patchType];
-        for (const m in methods) {
-            const method = m;
-            const options = config[patchType][method];
-            for (const o of options) {
-                const option = Object.assign({}, defaultOption, o);
-                const patch = await callback({ patchType, method, option });
-                if (!patch)
-                    continue;
-                const previouslyPatched = patches.find(p => p.module === patch.module && p.method === patch.method && p.patchType === patch.patchType);
-                if (previouslyPatched) {
-                    if (optionIsArrayable(option) || !option.override)
-                        continue;
-                    patches.splice(patches.indexOf(previouslyPatched), 1);
-                    continue;
-                }
-                patches.push(patch);
-            }
-        }
+const delay = (callback, time) => new Promise((resolve, reject) => {
+    try {
+        setTimeout(() => resolve(callback()), time);
     }
-    return patches;
-}
-function optionIsArrayable(option) {
-    return Array.isArray(option) || typeof option === 'string';
-}
-function getModule(selector) {
-    return (
-    Array.isArray(selector) ? query({ props: selector }) :
-        typeof selector === 'string' ? query({ name: selector }) :
-            undefined);
-}
-function commitPatch(plugin, module, { patchType, method, option }) {
-    const selector = optionIsArrayable(option) ? option : option.selector;
-    const callbackName = (() => {
-        const moduleName = module.default?.displayName ? `patch${module.default.displayName}` : undefined;
-        const callbackPathName = (name) => typeof name === 'string' ? `patch${name}` : moduleName;
-        const callbackExists = (callback) => typeof callback === 'function' ? callback.name : callback;
-        return !optionIsArrayable(option) && option.callback ?
-            callbackExists(option.callback) :
-            callbackPathName(optionIsArrayable(option) ? selector : option.selector);
-    })();
-    const resolvedCallback = plugin[callbackName].bind(plugin);
-    [
-        [module === undefined, `Could not find module $${typeof selector === 'string' ? `with name "${selector}"` : `with props [${selector.join(', ')}]`}`],
-        [resolvedCallback === undefined, `Could not find ${optionIsArrayable(option) ? `"patch${selector}"` :
-                typeof option.callback === 'function' ? `callback for "${selector}"` :
-                    typeof option.callback === 'string' ? `"${option.callback}"` : 'callback'}`],
-    ].forEach(([condition, message]) => {
-        if (condition)
-            plugin.logger.error(message, option);
-    });
-    const previouslyPatched = plugin.patches.find(p => p.module === module && p.method === method && p.patchType === patchType);
-    if (previouslyPatched && (optionIsArrayable(option) || !option.override)) {
-        return previouslyPatched;
+    catch (err) {
+        reject(err);
     }
-    const callback = ((data) => {
-        try {
-            resolvedCallback(data);
-        }
-        catch (err) {
-            plugin.logger.error(err, patched);
-        }
-    }).bind(plugin);
-    const cancel = plugin.patcher[patchType](module, method, callback, option);
-    const patched = { module, callback, method, patchType, option, cancel };
-    if (!optionIsArrayable(option) && !option.silent)
-        plugin.logger.log(`Patched ${patchType} ${method} on ${module.displayName
-            || module.default?.displayName
-            || (optionIsArrayable(option) ? typeof option === 'string' ? option : `[${option.join(', ')}]` :
-                optionIsArrayable(option.selector) ? typeof option.selector === 'string' ? option.selector : `[${option.selector.join(', ')}]` :
-                    callbackName)} and bound to ${callbackName}`, patched);
-    return patched;
-}
-function waitForModule(patcher, option) {
-    const { selector, isContextMenu, isModal } = option;
-    return (isContextMenu ? patcher.waitForContextMenu(() => getModule(selector), { silent: option.silent }) :
-        isModal ? patcher.waitForModal(() => getModule(selector), { silent: option.silent }) :
-            new Promise(resolve => resolve(getModule(selector))));
-}
+});
 
-class ContextMenuProvider {
-    constructor(plugin) {
-        this.plugin = plugin;
-        this.events = {};
-        initializePatches(this, {
-            after: {
-                default: [
-                    { selector: 'MessageContextMenu', isContextMenu: true, override: true, callback: this.onMessageContextMenu, silent: true },
-                ]
-            }
-        });
-    }
-    static getInstance(plugin) {
-        if (!ContextMenuProvider.instance) {
-            ContextMenuProvider.instance = new ContextMenuProvider(plugin);
-        }
-        return ContextMenuProvider.instance;
-    }
-    get logger() {
-        return this.plugin.logger;
-    }
-    get patcher() {
-        return this.plugin.patcher;
-    }
-    on(event, callback) {
-        this.events[event] = callback;
-    }
-    off(event) {
-        this.events[event] = null;
-    }
-    onMessageContextMenu(thisObject, props, ret) {
-        this.events['message']?.(props, ret);
+class PluginsCollection extends Array {
+    get names() {
+        return this.map(plugin => plugin.config.name);
     }
 }
-
-class DanhoPlugin {
-    constructor({ Config, Data, Logger, Patcher, Settings, Styles }) {
-        this.events = new Map();
-        this.config = Config;
-        this.data = Data;
-        this.logger = Logger;
-        this.patcher = Patcher;
-        this.settings = Settings;
-        this.styles = Styles;
-    }
-    async start(config) {
-        this.logger.group("Patches");
-        this.patches = await initializePatches(this, config);
-        this.contextMenus = ContextMenuProvider.getInstance(this);
-        this.logger.groupEnd();
-    }
-    stop() {
-    }
-    get BDFDB() {
-        return window.BDFDB;
-    }
-    get ZLibrary() {
-        return window.ZLibrary;
-    }
-    get BDD() {
-        return window.BDD;
-    }
-    on(event, callback) {
-        this.events.set(event, [...this.events.get(event) || [], callback]);
-    }
-    off(event, callback) {
-        this.events.set(event, this.events.get(event)?.filter(e => e !== callback));
-    }
-    emit(event, ...args) {
-        this.events.get(event)?.forEach(e => e(...args));
-    }
-}
-
 const PluginUtils = new class PluginUtils {
     constructor() {
         this._queue = window.BDD_PluginQueue ?? new Array();
+        this.plugins = new PluginsCollection();
         this.startPlugins = this.startPlugins.bind(this);
         this.restartPlugins = this.restartPlugins.bind(this);
         this.buildPlugin = this.buildPlugin.bind(this);
@@ -1276,6 +1122,7 @@ const PluginUtils = new class PluginUtils {
     }
     get queue() {
         if (this._queue.includes('DanhoLibrary')) {
+            console.warn("[PluginUtils]: DanhoLibrary was found in Plugin queue, which is not intended");
             this._queue.splice(this._queue.indexOf('DanhoLibrary'), 1);
         }
         return this._queue;
@@ -1283,9 +1130,25 @@ const PluginUtils = new class PluginUtils {
     startPlugins() {
         console.log('Starting Danho plugins');
         const { queue } = this;
-        for (const pluginName of queue) {
+        while (queue.length > 0) {
+            const pluginName = queue.shift();
             try {
+                console.log(`[PluginUtils]: Starting plugin ${pluginName}`, BdApi.Plugins.get(pluginName));
                 BdApi.Plugins.enable(pluginName);
+                const timeout = 100;
+                if (!BdApi.Plugins.get(pluginName))
+                    setTimeout(() => {
+                        const plugin = BdApi.Plugins.get(pluginName);
+                        if (!plugin)
+                            return console.warn("[PluginUtils]: Plugin not found", pluginName);
+                        if (plugin.instance?.__proto__.constructor.name === 'NoPlugin') {
+                            console.warn(`[PluginUtils]: Plugin ${pluginName} is not a valid plugin, reloading...`);
+                            BdApi.Plugins.reload(pluginName);
+                            delay(() => this.plugins.push(BdApi.Plugins.get(pluginName).instance.plugin), timeout);
+                        }
+                        else
+                            this.plugins.push(plugin.instance.plugin);
+                    }, timeout);
             }
             catch (err) {
                 console.error(`[PluginUtils]: Failed to start plugin ${pluginName}`, err);
@@ -1295,9 +1158,12 @@ const PluginUtils = new class PluginUtils {
     }
     restartPlugins() {
         console.log('Restarting Danho plugins');
-        const { queue } = this;
+        const queue = BdApi.Plugins.getAll()
+            .filter(p => p.author === "Danho#2105")
+            .map(p => p.name);
         for (const pluginName of queue) {
             try {
+                console.log(`[PluginUtils]: Restarting plugin ${pluginName}`);
                 BdApi.Plugins.reload(pluginName);
             }
             catch (err) {
@@ -1306,9 +1172,7 @@ const PluginUtils = new class PluginUtils {
         }
     }
     buildPlugin(config, pluginBuilder) {
-        class Wrapper extends DanhoPlugin {
-        }
-        const plugin = createPlugin(config, api => new (pluginBuilder(Wrapper, window.BDD))(api));
+        const plugin = createPlugin(config, api => new (pluginBuilder(window.BDD))(api));
         window.BDD.PluginUtils.queue.push(config.name);
         window.BDD.PluginUtils.startPlugins();
         return plugin;
@@ -1395,8 +1259,8 @@ async function findUserByTag(tag, BDFDB) {
 }
 function getPlugin(...pluginNames) {
     return pluginNames.length === 1 ?
-        BdApi.Plugins.get(pluginNames[0]) :
-        BdApi.Plugins.getAll().filter(plugin => pluginNames.includes((plugin['name'] || plugin['getName']?.())));
+        BdApi.Plugins.get(pluginNames[0]).instance.plugin :
+        BdApi.Plugins.getAll().filter(plugin => pluginNames.includes((plugin['name'] || plugin['getName']?.()))).map(plugin => plugin.instance.plugin);
 }
 const Utils = {
     findNodeByIncludingClassName,
@@ -1407,6 +1271,187 @@ const Utils = {
     getPlugin
 };
 
+const defaultOption = {
+    isContextMenu: false,
+    isModal: false,
+    once: false,
+    override: false,
+    silent: false
+};
+function initializePatches(plugin, config = {}) {
+    return configurePatches(plugin, config, async ({ patchType, method, option }) => {
+        const patch = (module) => commitPatch(plugin, module, { patchType, method, option });
+        return optionIsArrayable(option) ?
+            patch(getModule(option)) :
+            waitForModule(plugin.patcher, option).then(patch);
+    });
+}
+async function configurePatches(plugin, config, callback) {
+    const patches = plugin.patches ?? (plugin.patches = new Array());
+    const commitPatch = async ({ patchType, method, option }) => {
+        const patch = await callback({ patchType, method, option });
+        if (!patch)
+            return;
+        const previouslyPatched = patches.find(p => p.module === patch.module && p.method === patch.method && p.patchType === patch.patchType);
+        if (previouslyPatched) {
+            if (optionIsArrayable(option) || !option.override)
+                return;
+            patches.splice(patches.indexOf(previouslyPatched), 1);
+            return;
+        }
+        patches.push(patch);
+    };
+    for (const pt in config) {
+        const patchType = pt;
+        const methods = config[patchType];
+        for (const m in methods) {
+            const method = m;
+            const options = config[patchType][method];
+            if (typeof options[0] === 'string') {
+                const option = Object.assign({}, defaultOption, { selector: options });
+                await commitPatch({ patchType, method, option });
+                continue;
+            }
+            for (const o of options) {
+                const option = Object.assign({}, defaultOption, o);
+                await commitPatch({ patchType, method, option });
+            }
+        }
+    }
+    return patches;
+}
+function optionIsArrayable(option) {
+    return Array.isArray(option) || typeof option === 'string';
+}
+function getModule(selector) {
+    return (
+    Array.isArray(selector) ? query({ props: selector }) :
+        typeof selector === 'string' ? query({ name: selector }) :
+            undefined);
+}
+function commitPatch(plugin, module, { patchType, method, option }) {
+    const selector = optionIsArrayable(option) ? option : option.selector;
+    const callbackName = (() => {
+        const moduleName = module.default?.displayName ? `patch${module.default.displayName}` : selector.toString();
+        const callbackPathName = (name) => typeof name === 'string' ? `patch${name}` : moduleName;
+        const callbackExists = (callback) => typeof callback === 'function' ? callback.name : callback;
+        return !optionIsArrayable(option) && option.callback ?
+            callbackExists(option.callback) :
+            callbackPathName(optionIsArrayable(option) ? selector : option.selector);
+    })();
+    const resolvedCallback = plugin[callbackName].bind(plugin);
+    [
+        [module === undefined, `Could not find module $${typeof selector === 'string' ? `with name "${selector}"` : `with props [${selector.join(', ')}]`}`],
+        [resolvedCallback === undefined, `Could not find ${optionIsArrayable(option) ? `"patch${selector}"` :
+                typeof option.callback === 'function' ? `callback for "${selector}"` :
+                    typeof option.callback === 'string' ? `"${option.callback}"` : 'callback'}`],
+    ].forEach(([condition, message]) => {
+        if (condition)
+            plugin.logger.error(message, option);
+    });
+    const previouslyPatched = plugin.patches.find(p => p.module === module && p.method === method && p.patchType === patchType);
+    if (previouslyPatched && (optionIsArrayable(option) || !option.override)) {
+        return previouslyPatched;
+    }
+    const callback = (data) => {
+        try {
+            resolvedCallback(data);
+        }
+        catch (err) {
+            plugin.logger.error(`Error in patched method for ${module.default?.displayName || module.displayName || 'module'}`, err, patched);
+        }
+    };
+    const cancel = plugin.patcher[patchType](module, method, callback, option);
+    const patched = { module, callback, method, patchType, option, cancel };
+    if (!optionIsArrayable(option) && !option.silent)
+        plugin.logger.log(`Patched ${patchType} ${method} on ${module.displayName
+            || module.default?.displayName
+            || (optionIsArrayable(option) ? typeof option === 'string' ? option : `[${option.join(', ')}]` :
+                optionIsArrayable(option.selector) ? typeof option.selector === 'string' ? option.selector : `[${option.selector.join(', ')}]` :
+                    callbackName)} and bound to ${callbackName}`, patched);
+    return patched;
+}
+function waitForModule(patcher, option) {
+    const { selector, isContextMenu, isModal } = option;
+    return (isContextMenu ? patcher.waitForContextMenu(() => getModule(selector), { silent: option.silent }) :
+        isModal ? patcher.waitForModal(() => getModule(selector), { silent: option.silent }) :
+            new Promise(resolve => resolve(getModule(selector))));
+}
+
+class ContextMenuProvider {
+    constructor(plugin) {
+        this.plugin = plugin;
+        this.events = {};
+        initializePatches(this, {
+            after: {
+                default: [
+                    { selector: 'MessageContextMenu', isContextMenu: true, override: true, callback: this.onMessageContextMenu, silent: true },
+                ]
+            }
+        });
+    }
+    static getInstance(plugin) {
+        if (!ContextMenuProvider.instance) {
+            ContextMenuProvider.instance = new ContextMenuProvider(plugin);
+        }
+        return ContextMenuProvider.instance;
+    }
+    get logger() {
+        return this.plugin.logger;
+    }
+    get patcher() {
+        return this.plugin.patcher;
+    }
+    on(event, callback) {
+        this.events[event] = callback;
+    }
+    off(event) {
+        this.events[event] = null;
+    }
+    onMessageContextMenu(thisObject, props, ret) {
+        this.events['message']?.(props, ret);
+    }
+}
+
+class DanhoPlugin {
+    constructor({ Config, Data, Logger, Patcher, Settings, Styles }) {
+        this.events = new Map();
+        this.config = Config;
+        this.data = Data;
+        this.logger = Logger;
+        this.patcher = Patcher;
+        this.settings = Settings;
+        this.styles = Styles;
+    }
+    async start(config) {
+        this.logger.group("Patches");
+        this.patches = await initializePatches(this, config);
+        this.contextMenus = ContextMenuProvider.getInstance(this);
+        this.logger.groupEnd();
+        this.logger.groupEnd();
+    }
+    stop() {
+    }
+    get BDFDB() {
+        return window.BDFDB;
+    }
+    get ZLibrary() {
+        return window.ZLibrary;
+    }
+    get BDD() {
+        return window.BDD;
+    }
+    on(event, callback) {
+        this.events.set(event, [...this.events.get(event) || [], callback]);
+    }
+    off(event, callback) {
+        this.events.set(event, this.events.get(event)?.filter(e => e !== callback));
+    }
+    emit(event, ...args) {
+        this.events.get(event)?.forEach(e => e(...args));
+    }
+}
+
 class DanhoLibrary extends DanhoPlugin {
     constructor() {
         super(...arguments);
@@ -1415,16 +1460,10 @@ class DanhoLibrary extends DanhoPlugin {
         this.PluginUtils = PluginUtils;
         this.Utils = Utils;
     }
+    GetPlugin() {
+        return DanhoPlugin;
+    }
 }
-
-const delay = (callback, time) => new Promise((resolve, reject) => {
-    try {
-        setTimeout(() => resolve(callback()), time);
-    }
-    catch (err) {
-        reject(err);
-    }
-});
 
 class DanhoLibraryGlobal extends DanhoLibrary {
     async start() {
@@ -1438,7 +1477,8 @@ class DanhoLibraryGlobal extends DanhoLibrary {
                     return delay(waitForBDFDB, 1000);
                 }
                 this.logger.log('BDFDB loaded.');
-                this.emit('plugin-restart');
+                if (window.BDD)
+                    this.emit('plugin-restart');
             };
             waitForBDFDB();
         }
@@ -1457,7 +1497,8 @@ const index = createPlugin({ ...config, settings }, api => {
 module.exports = index;
 
     } catch (err) {
-        console.error(err);
+        if ('DanhoLibrary' === 'DanhoLibrary') console.error(err);
+        
         if (window.BDD) console.error(err);
         else module.exports = class NoPlugin {
             //start() { BdApi.Alert("this.name could not be loaded!") }
@@ -1467,24 +1508,18 @@ module.exports = index;
                 if (!this.isLib) {
                     if (window.BDD_PluginQueue.includes(this.name)) return console.log(`${this.name} is already in plugin queue`, err);
                     window.BDD_PluginQueue.push(this.name); 
+                } else {
+                    setTimeout(() => {
+                        BdApi.Plugins.reload(this.name);
+
+                        setTimeout(() => window.BDD?.PluginUtils.restartPlugins(), 500);
+                    }, 1000);
                 }
             }
-            stop() {
-                /*
-                if (!this.isLib || this.reloading) return;
-                this.reloading = true;
-                BdApi.Plugins.reload(this.name);
-                */
-            }
+            stop() {}
 
             name = 'DanhoLibrary';
             isLib = 'DanhoLibrary' === 'DanhoLibrary'
-            reload() { BdApi.Plugins.reload(this.name) }
-            get reloading() { return window.BDD_Reloading ??= false; }
-            set reloading(value) { 
-                window.BDD_Reloading = value; 
-                if (value) BdApi.Plugins.reload(this.name);
-            }
         }
     }
 

@@ -30,7 +30,8 @@ type DiscordModules = {
         getGuild(idOrName: string): Guild
     },
     GuildMemberStore: {
-        getMember(guildIdOrName: string, userIdOrName: string): GuildMember
+        getMember(guildIdOrName: string, userIdOrName: string): GuildMember,
+        getMembers(guildIdOrName: string): Array<GuildMember>,
     },
     React: typeof React,
     ReactDOM: typeof ReactDOM,
@@ -40,6 +41,9 @@ type DiscordModules = {
         getLastSelectedChannelid(): string,
         getMostRecentSelectedtextChannelId(): string,
         getVoiceChannelId(): string,
+    },
+    SelectedGuildStore: {
+        getGuildId(): string
     }
     UserStore: {
         getUser(idOrName: string): User

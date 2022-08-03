@@ -1,12 +1,12 @@
 /**
- * @name DanhoDiscordV2
- * @description Rework of the original DanhoDiscord plugin
+ * @name DanhoBetterChat
+ * @description Personal chat features
  * @author Danho#2105
- * @version 0.0.1
+ * @version 1.0.0
  * @authorLink https://github.com/DanielSimonsen90
  * @website https://github.com/DanielSimonsen90/BetterDiscord-Plugins
- * @source https://github.com/DanielSimonsen90/BetterDiscord-Plugins/tree/master/src/DanhoDiscordV2
- * @updateUrl https://raw.githubusercontent.com/DanielSimonsen90/BetterDiscord-Plugins/master/dist/bd/DanhoDiscordV2.plugin.js
+ * @source https://github.com/DanielSimonsen90/BetterDiscord-Plugins/tree/master/src/DanhoBetterChat
+ * @updateUrl https://raw.githubusercontent.com/DanielSimonsen90/BetterDiscord-Plugins/master/dist/bd/DanhoBetterChat.plugin.js
 **/
 
 /*@cc_on @if (@_jscript)
@@ -56,10 +56,10 @@ module.exports = (() => {
     try {
 'use strict';
 
-const name = "DanhoDiscordV2";
-const description = "Rework of the original DanhoDiscord plugin";
+const name = "DanhoBetterChat";
+const description = "Personal chat features";
 const author = "Danho#2105";
-const version = "0.0.1";
+const version = "1.0.0";
 const config = {
 	name: name,
 	description: description,
@@ -67,36 +67,30 @@ const config = {
 	version: version
 };
 
-const index = window.BDD.PluginUtils.buildPlugin(config, Lib => {
+const index = window.BDD.PluginUtils.buildPlugin({ ...config }, (Lib) => {
     const Plugin = Lib.GetPlugin();
-    const { $ } = Lib.Modules.DanhoModules;
-    return class DanhoDiscordV2 extends Plugin {
+    const { GuildMemberStore, SelectedGuildStore } = Lib.Libraries.ZLibrary.DiscordModules;
+    return class DanhoBetterChat extends Plugin {
         async start() {
             super.start({
-                after: {
-                    default: [
-                        { selector: "UserPopoutBody", isModal: true },
-                    ]
+                instead: {
+                    sendMessage: [{
+                            selector: ["sendMessage"],
+                            callback: this.patchSendMessage
+                        }]
                 }
             });
         }
-        patchViewAsRoleSelector({ args: [props], result }) {
-            this.logger.log('viewAsRoleSelector', props, result);
-        }
-        patchUserPopoutBody({ args: [props], result }) {
-            const userPopoutBody = $(`.${result.props.className}`);
-            if (!userPopoutBody.element)
+        patchSendMessage({ args: [messageId, { content, ...props }, ...args], original: sendMessage }) {
+            if (!content?.includes("@someone"))
                 return;
-            const [rolesListProps] = userPopoutBody.propsWith("userRoles");
-            if (!rolesListProps)
-                return;
-            const rolesList = $(`.${rolesListProps.className}`);
-            if (!rolesList.element)
-                return;
-            rolesList.children('* > div[class*="role"]:not(div[class*="addButton"])').forEach((role, i) => {
-                if (role.style?.borderColor)
-                    role.style.backgroundColor = role.style.borderColor?.replace('0.6', '0.09');
-            });
+            const members = GuildMemberStore.getMembers(SelectedGuildStore.getGuildId());
+            const matches = /@someone/g.exec(content);
+            for (const match of matches) {
+                const member = members[Math.floor(Math.random() * members.length)];
+                content = content.replace(match, `<@${member.userId}>`);
+            }
+            return sendMessage(messageId, { content, ...props }, ...args);
         }
     };
 });
@@ -104,7 +98,7 @@ const index = window.BDD.PluginUtils.buildPlugin(config, Lib => {
 module.exports = index;
 
     } catch (err) {
-        if ('DanhoDiscordV2' === 'DanhoLibrary') console.error(err);
+        if ('DanhoBetterChat' === 'DanhoLibrary') console.error(err);
         
         if (window.BDD) console.error(err);
         else module.exports = class NoPlugin {
@@ -125,8 +119,8 @@ module.exports = index;
             }
             stop() {}
 
-            name = 'DanhoDiscordV2';
-            isLib = 'DanhoDiscordV2' === 'DanhoLibrary'
+            name = 'DanhoBetterChat';
+            isLib = 'DanhoBetterChat' === 'DanhoLibrary'
         }
     }
 

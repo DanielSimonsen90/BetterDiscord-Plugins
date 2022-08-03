@@ -5,7 +5,7 @@ import { PatchCallback } from "@ZLibrary/Patcher";
 import { PartialRecord } from "../Utils";
 import Plugin from "../Plugin";
 
-export type PatcherConfig = PartialRecord<'before' | 'instead' | 'after', PartialRecord<'default' | 'render', Array<PatchOptions>>>
+export type PatcherConfig = PartialRecord<'before' | 'instead' | 'after', PartialRecord<'default' | 'render' | string, Array<PatchOptions>>>
 export type PatchOptions = {
     /**
      * @type {string} - displayName of the module
@@ -64,7 +64,6 @@ const defaultOption: Partial<PatchOptions> = {
 export function initializePatches(plugin: DumbPlugin, config: PatcherConfig = {} as any) {
     return configurePatches(plugin, config, async ({ patchType, method, option }) => {
         const patch = (module: Module) => commitPatch(plugin, module, { patchType, method, option });
-
         return optionIsArrayable(option) ? 
             patch(getModule(option)) : 
             waitForModule(plugin.patcher, option).then(patch);
@@ -81,6 +80,19 @@ type ConfigurationLoopData = {
 type ConfigurationCallback = (data: ConfigurationLoopData) => Promise<Patched | undefined>;
 async function configurePatches(plugin: DumbPlugin, config: PatcherConfig, callback: ConfigurationCallback) {
     const patches = plugin.patches ??= new Array<Patched>();
+    const commitPatch = async ({ patchType, method, option }: Parameters<ConfigurationCallback>[0]) => {
+        const patch = await callback({ patchType, method, option });
+        if (!patch) return;
+
+        const previouslyPatched = patches.find(p => p.module === patch.module && p.method === patch.method && p.patchType === patch.patchType);
+        if (previouslyPatched) {
+            if (optionIsArrayable(option) || !option.override) return;
+            patches.splice(patches.indexOf(previouslyPatched), 1);
+            return;
+        }
+
+        patches.push(patch);
+    }
 
     for (const pt in config) {
         const patchType = pt as keyof PatcherConfig;
@@ -89,20 +101,15 @@ async function configurePatches(plugin: DumbPlugin, config: PatcherConfig, callb
         for (const m in methods) {
             const method = m as keyof PatcherConfig[keyof PatcherConfig];
             const options = config[patchType][method];
+            if (typeof options[0] === 'string') {
+                const option: PatchOptions = Object.assign({}, defaultOption, { selector: options });
+                await commitPatch({ patchType, method, option });
+                continue;
+            }
         
             for (const o of options) {
                 const option: PatchOptions = Object.assign({}, defaultOption, o);
-                const patch = await callback({ patchType, method, option });
-                if (!patch) continue;
-
-                const previouslyPatched = patches.find(p => p.module === patch.module && p.method === patch.method && p.patchType === patch.patchType);
-                if (previouslyPatched) {
-                    if (optionIsArrayable(option) || !option.override) continue;
-                    patches.splice(patches.indexOf(previouslyPatched), 1);
-                    continue;
-                }
-
-                patches.push(patch);
+                await commitPatch({ patchType, method, option });
             }
         }
     }
@@ -124,7 +131,7 @@ function getModule(selector: Arrayable<string>): Module {
 function commitPatch(plugin: DumbPlugin, module: Module, { patchType, method, option }: ConfigurationLoopData): Patched {
     const selector = optionIsArrayable(option) ? option : option.selector;
     const callbackName = (() => {
-        const moduleName = module.default?.displayName ? `patch${module.default.displayName}` : undefined;
+        const moduleName = module.default?.displayName ? `patch${module.default.displayName}` : selector.toString();
         const callbackPathName = (name: Arrayable<string>) => typeof name === 'string' ? `patch${name}` : moduleName;
         const callbackExists = (callback: string | Function) => typeof callback === 'function' ? callback.name : callback;
 
@@ -151,7 +158,6 @@ function commitPatch(plugin: DumbPlugin, module: Module, { patchType, method, op
     }
 
     const callback = (data: any) => {
-        console.log(`Running callback for module`, module)
         try { resolvedCallback(data) }
         catch (err) { plugin.logger.error(`Error in patched method for ${module.default?.displayName || module.displayName || 'module'}`, err, patched) }
     }

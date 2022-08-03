@@ -3,7 +3,7 @@
  * @description Add custom badges >:)
  * @author Danho#2105
  * @version 0.0.2
- * @authorLink https://github.com/Danho#2105
+ * @authorLink https://github.com/DanielSimonsen90
  * @website https://github.com/DanielSimonsen90/BetterDiscord-Plugins
  * @source https://github.com/DanielSimonsen90/BetterDiscord-Plugins/tree/master/src/DanhoCustomBadges
  * @updateUrl https://raw.githubusercontent.com/DanielSimonsen90/BetterDiscord-Plugins/master/dist/bd/DanhoCustomBadges.plugin.js
@@ -366,13 +366,13 @@ const settings = {
 };
 
 const { React } = window.ZLibrary.DiscordModules;
-const index = window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings }, (BasePlugin, Lib) => {
-    const Plugin = BasePlugin;
+const index = window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings }, (Lib) => {
     const { $ } = Lib.Modules.DanhoModules;
+    const Plugin = Lib.GetPlugin();
     return class DanhoCustomBadge extends Plugin {
         constructor() {
             super(...arguments);
-            this.settingsPanel = (props) => {
+            this.SettingsPanel = (props) => {
                 const [current, defaults, set] = this.settings.useStateWithDefaults();
                 return React.createElement(SettingsPanel, { ...props, ...{ ...current, defaults, set }, BDFDB: this.BDFDB });
             };
@@ -380,13 +380,17 @@ const index = window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings }
         async start() {
             await super.start({
                 after: {
-                    default: [
-                        { selector: "UserProfileBadgeList", isModal: true },
-                    ]
+                    default: [{
+                            selector: "UserProfileBadgeList", isModal: true
+                        }]
                 }
+            });
+            this.patcher.after(Lib.Libraries.Discordium.Finder.byName("UserProfileBadgeList"), "default", (props) => {
+                console.log('test');
             });
         }
         patchUserProfileBadgeList({ args: [props], result }) {
+            this.logger.log("Hello");
             if (!Array.isArray(result.props.children))
                 return this.logger.warn('UserProfileBadgeList children is not an array');
             const ref = $(s => s.getElementFromInstance(result, true), false);
@@ -394,7 +398,7 @@ const index = window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings }
                 return console.log("No ref element");
             const userSettings = this.getUserSettings(props.user.id);
             if (!userSettings)
-                return;
+                return this.logger.log("User has no settings");
             for (const { index, tooltip, ...props } of userSettings.badges) {
                 const badge = (() => {
                     try {
@@ -453,7 +457,8 @@ const index = window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings }
 module.exports = index;
 
     } catch (err) {
-        console.error(err);
+        if ('DanhoCustomBadges' === 'DanhoLibrary') console.error(err);
+        
         if (window.BDD) console.error(err);
         else module.exports = class NoPlugin {
             //start() { BdApi.Alert("this.name could not be loaded!") }
@@ -463,24 +468,18 @@ module.exports = index;
                 if (!this.isLib) {
                     if (window.BDD_PluginQueue.includes(this.name)) return console.log(`${this.name} is already in plugin queue`, err);
                     window.BDD_PluginQueue.push(this.name); 
+                } else {
+                    setTimeout(() => {
+                        BdApi.Plugins.reload(this.name);
+
+                        setTimeout(() => window.BDD?.PluginUtils.restartPlugins(), 500);
+                    }, 1000);
                 }
             }
-            stop() {
-                /*
-                if (!this.isLib || this.reloading) return;
-                this.reloading = true;
-                BdApi.Plugins.reload(this.name);
-                */
-            }
+            stop() {}
 
             name = 'DanhoCustomBadges';
             isLib = 'DanhoCustomBadges' === 'DanhoLibrary'
-            reload() { BdApi.Plugins.reload(this.name) }
-            get reloading() { return window.BDD_Reloading ??= false; }
-            set reloading(value) { 
-                window.BDD_Reloading = value; 
-                if (value) BdApi.Plugins.reload(this.name);
-            }
         }
     }
 
