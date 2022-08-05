@@ -21,7 +21,7 @@ export type Module = {
     }
     render?: (props: any) => JSX.Element,
     displayName?: string
-}
+} & { [key: string]: any }
 
 export type BDMutationRecord = TransformType<MutationRecord, NodeList, Array<ObservationNode>>;
 

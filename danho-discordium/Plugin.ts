@@ -36,11 +36,8 @@ export class DanhoPlugin<
     protected contextMenus: ContextMenuProvider;
 
     public async start(config?: PluginConfig) {
-        this.logger.group("Patches");
         this.patches = await initializePatches(this, config);
         this.contextMenus = ContextMenuProvider.getInstance(this);
-        this.logger.groupEnd();
-        this.logger.groupEnd();
     }
     public stop() {
 

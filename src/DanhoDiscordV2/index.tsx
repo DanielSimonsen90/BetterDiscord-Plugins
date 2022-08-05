@@ -10,17 +10,12 @@ export default window.BDD.PluginUtils.buildPlugin(config, Lib => {
         async start() {
             super.start({
                 after: {
-                    default: [
-                        { selector: "UserPopoutBody", isModal: true },
-                    ]
+                    default: {
+                        UserPopoutBody: { isModal: true }
+                    },
                 }
             });
         }
-
-        patchViewAsRoleSelector({ args: [props], result }: PatchReturns["ViewAsRoleSelector"]) {
-            this.logger.log('viewAsRoleSelector', props, result);
-        }
-
 
         patchUserPopoutBody({ args: [props], result }: PatchReturns["UserPopoutBody"]) {
             const userPopoutBody = $(`.${result.props.className}`);

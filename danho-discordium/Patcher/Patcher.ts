@@ -1,24 +1,28 @@
 import { Arrayable } from "danholibraryjs";
 import { Finder, Patcher } from "discordium";
 import { Module } from "@ZLibrary";
-import { PatchCallback } from "@ZLibrary/Patcher";
-import { PartialRecord } from "../Utils";
+import { If, PartialRecord } from "../Utils";
 import Plugin from "../Plugin";
 
-export type PatcherConfig = PartialRecord<'before' | 'instead' | 'after', PartialRecord<'default' | 'render' | string, Array<PatchOptions>>>
-export type PatchOptions = {
+export type PatcherConfig = PartialRecord<
+    'before' | 'instead' | 'after', 
+    PartialRecord<
+        'default' | 'render' | string, 
+        Array<PatchOptions> | Record<string, PatchOptions>
+    >
+>
+export type PatchOption<ForceCbIsFunc = false> = {
     /**
      * @type {string} - displayName of the module
      * @type {Array<string>} - Properties from module
      */
-    selector: Arrayable<string>,
+    selector?: Arrayable<string>,
     /**
      * @type {string} - Name of the callback function
      * @type {Function} - Callback function instead of callback method
      * @default this[`patch${displayName}`] - this.patchUserPopout
      */
-    callback?: string | PatchCallback,
-
+    callback?: If<ForceCbIsFunc, Function, string | Function>,
     /**
      * Module triggered by context menu
      */
@@ -32,7 +36,6 @@ export type PatchOptions = {
      * If already patched, should override?
      */
     override?: boolean,
-
     /**
      * Don't log in conosle
      */
@@ -41,7 +44,13 @@ export type PatchOptions = {
      * Run this patch once, then cancel
      */
     once?: boolean
-} | Arrayable<string>
+}
+export type PatchOptions<ForceCbIsFunc = false> = PatchOption<ForceCbIsFunc> | Arrayable<string>
+export type PatchOptionAndMethod<
+    ForceCbIsFunc = false,
+    IncludeModule extends boolean = false
+> = PatchOption<ForceCbIsFunc> & Pick<Patched, "method"> & If<IncludeModule, { module: Module }, {}>
+export type PatchOptionAndCallbackName = PatchOption<true> & { callbackName?: string }
 export type Patched = {
     module: Module,
     callback: Function,
@@ -53,7 +62,7 @@ export type Patched = {
 
 type DumbPlugin = Pick<Plugin<any>, 'patcher' | 'logger' | 'patches'>
 
-const defaultOption: Partial<PatchOptions> = {
+const defaultOptions: Partial<PatchOptions> = {
     isContextMenu: false,
     isModal: false,
     once: false,
@@ -61,124 +70,199 @@ const defaultOption: Partial<PatchOptions> = {
     silent: false
 }
 
-export function initializePatches(plugin: DumbPlugin, config: PatcherConfig = {} as any) {
-    return configurePatches(plugin, config, async ({ patchType, method, option }) => {
-        const patch = (module: Module) => commitPatch(plugin, module, { patchType, method, option });
-        return optionIsArrayable(option) ? 
-            patch(getModule(option)) : 
-            waitForModule(plugin.patcher, option).then(patch);
-    });
-}
-export default initializePatches;
+export default async function initializePatches(plugin: DumbPlugin, config: PatcherConfig = {} as any) {
+    const patches = [];
+    let patchTypes = Object.keys(config); //["before", "instead", "after"];
 
-type ConfigurationLoopData = {
-    patchType: keyof PatcherConfig, 
-    method: keyof PatcherConfig[keyof PatcherConfig], 
-    option: PatchOptions 
-}
+    // If config != {}
+    for (const patchTypeKey of patchTypes) { // "before" | "instead" "after"
+        const patchType: Object = config[patchTypeKey] // { default, render }
+        for (const methodKey of Object.keys(patchType)) { // "default" | "render"
+            const method: Object | Array<PatchOption | string> = patchType[methodKey];
 
-type ConfigurationCallback = (data: ConfigurationLoopData) => Promise<Patched | undefined>;
-async function configurePatches(plugin: DumbPlugin, config: PatcherConfig, callback: ConfigurationCallback) {
-    const patches = plugin.patches ??= new Array<Patched>();
-    const commitPatch = async ({ patchType, method, option }: Parameters<ConfigurationCallback>[0]) => {
-        const patch = await callback({ patchType, method, option });
-        if (!patch) return;
-
-        const previouslyPatched = patches.find(p => p.module === patch.module && p.method === patch.method && p.patchType === patch.patchType);
-        if (previouslyPatched) {
-            if (optionIsArrayable(option) || !option.override) return;
-            patches.splice(patches.indexOf(previouslyPatched), 1);
-            return;
-        }
-
-        patches.push(patch);
-    }
-
-    for (const pt in config) {
-        const patchType = pt as keyof PatcherConfig;
-        const methods = config[patchType];
-
-        for (const m in methods) {
-            const method = m as keyof PatcherConfig[keyof PatcherConfig];
-            const options = config[patchType][method];
-            if (typeof options[0] === 'string') {
-                const option: PatchOptions = Object.assign({}, defaultOption, { selector: options });
-                await commitPatch({ patchType, method, option });
-                continue;
+            // method is Array<PatchOption | string | Array<string>> && after
+            if (method instanceof Array) {
+                // PatchOption | string | Array<string>
+                for (const methodProp of method) {
+                    const option = getPatchOption(plugin, methodProp);
+                    patches.push(await patch(plugin, option, patchTypeKey, methodKey))
+                }
             }
-        
-            for (const o of options) {
-                const option: PatchOptions = Object.assign({}, defaultOption, o);
-                await commitPatch({ patchType, method, option });
+            // method is Object && before/instead
+            else {
+                // "MessageContextMenu", "GuildsList", "HomeButton"
+                for (const methodPropKey in method) {
+                    const methodProp: Object | string | PatchOption | Array<string> = method[methodPropKey];
+                    const option = getPatchOption(plugin, methodProp, methodPropKey);
+                    patches.push(await patch(plugin, option, patchTypeKey, methodKey))
+                }
             }
         }
     }
 
-    return patches;
+    // Set patchTypes, if config is {}
+    patchTypes = ["before", "instead", "after"];
+
+    // properties in plugin that starts with "before" | "instead" | "after" - case sensitive
+    const pluginPropKeys = Object.keys(plugin).filter(key => patchTypes.some(type => key.startsWith(type)));
+
+    for (const pluginPropKey of pluginPropKeys) {
+        const pluginProp: Function | any = plugin[pluginPropKey];
+        if (!(pluginProp instanceof Function)) {
+            plugin.logger.log(`[Patcher] ${pluginPropKey} is not a function`);
+            continue;
+        }; // property is not intended for module patching
+
+        const patchType = (() => {
+            for (const type of patchTypes) {
+                if (pluginPropKey.startsWith(type)) return type;
+            }
+            return "after";
+        })();
+        const pluginPropName = pluginPropKey.replace(/^before|instead|after/, '');
+        const moduleGuesses = await findModuleByGuessing(pluginProp, pluginPropName);
+
+        // Found 0 or too many modules
+        if (moduleGuesses.length != 1) {
+            if (!moduleGuesses.length) plugin.logger.warn("No module guesses for", pluginPropKey);
+            else if (moduleGuesses.length > 1) plugin.logger.warn("Multiple module guesses for", pluginPropKey, moduleGuesses);
+            continue;
+        }
+
+        const { module, method, ...option } = moduleGuesses[0];
+        patches.push(await patch(plugin, option, patchType, method, module));
+    }
+
+    return patches.filter(patch => patch);
 }
 
-function optionIsArrayable(option: PatchOptions): option is Arrayable<string> {
-    return Array.isArray(option) || typeof option === 'string';
+function getSelector(methodProp: {} | string | Array<string> | PatchOption, propName: string): string | Array<string> {
+    if (typeof methodProp === 'string' || methodProp instanceof Array) return methodProp; // UserBanner || [crosspostMessage], [FormItem, FormTextInput]
+    else if ('selector' in methodProp) return methodProp.selector; // UserPopout
+    return propName; // HomeButton
 }
-function getModule(selector: Arrayable<string>): Module {
-    return (
-        // displayName && props ? Finder.query({ name: displayName, props, }) :
-        Array.isArray(selector) ? Finder.query({ props: selector }) :
-        typeof selector === 'string' ? Finder.query({ name: selector }) :
-        undefined
-    );
+/**
+ * @returns patchPropName ?? patchMethodProp ?? patchMethodProp[0]Module - patchTextChannel ?? patchMessageContextMenu ?? patchFormItemModule
+ */
+function getCallback(plugin: DumbPlugin, selector: Arrayable<string>, methodProp: Object | string | Array<string> | PatchOption, propName?: string): [Function, string] {
+    let callbackName = "";
+    if (methodProp instanceof Array || selector instanceof Array) {
+        callbackName = `patch${
+            propName ?? typeof methodProp === 'string' ? 
+            methodProp : 
+            (methodProp[0] ??= selector[0]).charAt(0).toUpperCase() + methodProp[0].slice(1)}Module`; // patchTextChannel ?? patchFormItemModule
+        return [plugin[callbackName], callbackName];
+    }
+    else if (typeof methodProp === 'string' // patchGuildsList ?? patchUserBanner
+        || !('callback' in methodProp)) { // patchGuildMember ?? patchMemberItem
+        callbackName = `patch${propName ?? selector}`;
+        return [plugin[callbackName], callbackName];
+    } 
+
+    const callbackResolvable = methodProp.callback;
+    return callbackResolvable instanceof Function ? [callbackResolvable, methodProp.callback['name']] : // (...args) => { ... } | plugin.onMessageContext
+        [plugin[callbackResolvable], callbackResolvable]; // plugin.popout
 }
-function commitPatch(plugin: DumbPlugin, module: Module, { patchType, method, option }: ConfigurationLoopData): Patched {
-    const selector = optionIsArrayable(option) ? option : option.selector;
-    const callbackName = (() => {
-        const moduleName = module.default?.displayName ? `patch${module.default.displayName}` : selector.toString();
-        const callbackPathName = (name: Arrayable<string>) => typeof name === 'string' ? `patch${name}` : moduleName;
-        const callbackExists = (callback: string | Function) => typeof callback === 'function' ? callback.name : callback;
+function getPatchOption(plugin: DumbPlugin,  methodProp: {} | string | Array<string> | PatchOption, methodPropKey?: string): PatchOptionAndCallbackName {
+    const selector = getSelector(methodProp, methodPropKey);
+    let [callback, callbackName] = getCallback(plugin, selector, methodProp, methodPropKey);
+    callback = callback.bind(plugin);
+    const options = methodProp instanceof Object ? methodProp : {};
 
-        return !optionIsArrayable(option) && option.callback ? 
-            callbackExists(option.callback) : 
-            callbackPathName(optionIsArrayable(option) ? selector : option.selector);
-    })();
-            
-    const resolvedCallback = plugin[callbackName].bind(plugin);
-    const warnings = [
-        [module === undefined, `Could not find module $${typeof selector === 'string' ? `with name "${selector}"` : `with props [${selector.join(', ')}]`}`],
-        [resolvedCallback === undefined, `Could not find ${
-            optionIsArrayable(option) ? `"patch${selector}"` :
-            typeof option.callback === 'function' ? `callback for "${selector}"` : 
-            typeof option.callback === 'string' ? `"${option.callback}"` : 'callback'
-        }`],
-    ].forEach(([condition, message]) => {
-        if (condition) plugin.logger.error(message, option);
-    });
+    if (!callback) {
+        console.error("No callback for", {plugin, methodPropKey, methodProp});
+        return {};
+    }
 
-    const previouslyPatched = plugin.patches.find(p => p.module === module && p.method === method && p.patchType === patchType);
-    if (previouslyPatched && (optionIsArrayable(option) || !option.override)) {
+    return {
+        selector,
+        callback,
+        callbackName,
+        ...defaultOptions as any,
+        ...options
+    }
+}
+
+async function patch(plugin: DumbPlugin, option: PatchOptionAndCallbackName, patchType: string, methodType: string, module?: Module) {
+    module ??= await findModule(plugin, option);
+    if (!module) {
+        plugin.logger.error("Module not found for", option.selector);
+        return null;
+    }
+
+    const previouslyPatched = (plugin.patches ??= []).find(p => p.module === module && p.method === methodType && p.patchType === patchType);
+    if (previouslyPatched && !option.override) {
         return previouslyPatched;
     }
 
     const callback = (data: any) => {
-        try { resolvedCallback(data) }
-        catch (err) { plugin.logger.error(`Error in patched method for ${module.default?.displayName || module.displayName || 'module'}`, err, patched) }
+        try { option.callback(data) }
+        catch (e) { console.error(e) }
     }
 
-    const cancel = plugin.patcher[patchType as any](module, method, callback, option);
-    const patched = { module, callback, method, patchType, option, cancel };
-    if (!optionIsArrayable(option) && !option.silent)
-    plugin.logger.log(`Patched ${patchType} ${method} on ${
-        module.displayName 
-        || module.default?.displayName 
-        || (optionIsArrayable(option) ? typeof option === 'string' ? option : `[${option.join(', ')}]` : 
-            optionIsArrayable(option.selector) ? typeof option.selector === 'string' ? option.selector : `[${option.selector.join(', ')}]` :
-            callbackName)
-    } and bound to ${callbackName}`, patched);
+    const cancel = plugin.patcher[patchType](module, methodType, callback, option);
+    const patched = { module, callback, method: methodType, patch: patchType, option, cancel };
+    // Patched after render UserPopout bound to plugin.afterUserPopout.
+    if (!option.silent) plugin.logger.log(`Patched ${patchType} ${methodType} ${option.selector} bound to ${option.callbackName}.`, option);
     return patched;
 }
-function waitForModule(patcher: Patcher, option: Exclude<PatchOptions, Arrayable<string>>) {
-    const { selector, isContextMenu, isModal } = option;
+
+async function waitForModule(patcher: Patcher, option: Exclude<PatchOptions<true>, Arrayable<string>>) {
+    const { isContextMenu, isModal } = option;
     return (
-        isContextMenu ? patcher.waitForContextMenu(() => getModule(selector), { silent: option.silent }) : 
-        isModal ? patcher.waitForModal(() => getModule(selector), { silent: option.silent }) : 
-        new Promise<Module>(resolve => resolve(getModule(selector)))
+        isContextMenu ? patcher.waitForContextMenu(() => getModule(option), { silent: option.silent }) : 
+        isModal ? patcher.waitForModal(() => getModule(option), { silent: option.silent }) : 
+        new Promise<Module>(resolve => resolve(getModule(option)))
     )
+}
+async function getModule(option: PatchOption<true>): Promise<Module> {
+    return Finder.query({ [option.selector instanceof Array ? "props" : "name"]: option.selector }) ??
+        Finder.query({ props: option.selector instanceof Array ? option.selector : [option.selector] });
+}
+async function findModuleByGuessing(pluginProp: Function, pluginPropName: string): Promise<Array<PatchOptionAndMethod<true, true>>> {
+    const guesses = await Promise.all((() => {
+        const sharedOption: PatchOptionAndCallbackName = {
+            callback: pluginProp,
+            callbackName: `${pluginPropName}`, // remove reference to pluginPropName
+            isModal: pluginPropName.includes("Modal"), 
+            isContextMenu: pluginPropName.includes("ContextMenu") 
+        }
+        const camelCase = (val: string) => val.charAt(0).toLowerCase() + val.slice(1);
+
+        if (pluginPropName.includes("Module")) {
+            const method = camelCase(pluginPropName.replace('Module', '')); // HomeButtonModule => HomeButton
+            return [{ ...sharedOption, method, selector: [method] }];
+        }
+
+        // after default UserPopout
+        const defaultModule: PatchOptionAndMethod<true> = {
+            ...sharedOption,
+            method: "default",
+            selector: pluginPropName,
+        }
+        // Is it possible to have a module with camelCase displayName?
+        // before default sendMessage
+        const defaultModuleProps: PatchOptionAndMethod<true> = {
+            ...sharedOption,
+            method: "default",
+            selector: [camelCase(pluginPropName)],
+        }
+        // after render UserProfileBadgeList
+        // define method as last sequence of letters after a capital letter
+        const renderModule = pluginPropName.match(/[A-Z]{1}[a-z]+$/).reduce((_, method) => ({
+            ...sharedOption,
+            method,
+            selector: pluginPropName.replace(method, ''),
+        }), {} as PatchOptionAndMethod<true>);
+
+        return [defaultModule, defaultModuleProps, renderModule];
+    })().map(({ method, ...option }) => getModule(option)
+    .then<PatchOptionAndMethod<true, true>>(module => ({ 
+        module, method, ...option 
+    }) as PatchOptionAndMethod<true, true>)));
+
+    return guesses.filter(result => result.module && result.method !== 'invalid');
+}
+async function findModule(plugin: DumbPlugin, option: PatchOption<true>): Promise<Module> {
+    return option.isModal || option.isContextMenu ? waitForModule(plugin.patcher, option) : getModule(option);
 }

@@ -26,6 +26,7 @@ class DanhoLibraryGlobal extends DanhoLibrary {
         }
     }
     stop() {
+        delete window.BDD;
         this.emit('plugin-stop');
     }
 }

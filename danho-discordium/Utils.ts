@@ -14,12 +14,3 @@ export type NewReturnType<
 export type PromisedReturn<
     Function extends (...args: any[]) => any,
 > = NewReturnType<Function, Promise<ReturnType<Function>>>;
-
-export function NoPlugin(pluginName: string) {
-    return class NoLibraryPlugin {
-        start() {
-            BdApi.alert(`${pluginName} - Library not found`, `The library DanhoLibrary was not found. Please install it to use this plugin.`);
-        }
-        stop() {}
-    };
-}

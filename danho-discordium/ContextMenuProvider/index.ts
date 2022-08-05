@@ -4,9 +4,6 @@ import Plugin from '../Plugin';
 
 export * from './MenuItems';
 
-type PatchedMessageProps = {
-
-}
 type WeakFiber = {
     props: {
         children: any;
@@ -34,12 +31,13 @@ export default class ContextMenuProvider {
         initializePatches(this, {
             after: {
                 default: [
+                    // These modules don't exist anymore?
                     // { selector: 'GuildContextMenu', isContextMenu: true, override: true }
-                    { selector: 'MessageContextMenu', isContextMenu: true, override: true, callback: this.onMessageContextMenu, silent: true },
+                    // { selector: 'MessageContextMenu', isContextMenu: true, override: true, callback: this.onMessageContextMenu, silent: true },
                     // { selector: 'GuildUserContextMenu', isContextMenu: true, override: true },
                 ]
             }
-        })
+        }).then(patches => this.patches = patches);
     }
 
     public get logger(): Logger {
@@ -58,7 +56,8 @@ export default class ContextMenuProvider {
         this.events[event] = null;
     }
 
-    private onMessageContextMenu(thisObject: any, props: PatchedProps['message'], ret: WeakFiber) {
+    private onMessageContextMenu({ args: [props], result: ret }) {
+        console.log('onMessageContextMenu', { this: this, props, ret });
         this.events['message']?.(props, ret);
     }
 }
