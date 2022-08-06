@@ -2,7 +2,7 @@
  * @name DanhoCustomBadges
  * @description Add custom badges >:)
  * @author Danho#2105
- * @version 0.0.2
+ * @version 0.0.3
  * @authorLink https://github.com/DanielSimonsen90
  * @website https://github.com/DanielSimonsen90/BetterDiscord-Plugins
  * @source https://github.com/DanielSimonsen90/BetterDiscord-Plugins/tree/master/src/DanhoCustomBadges
@@ -74,10 +74,10 @@ function Badge(props) {
                 "data-id": props.id
             } }, icon)));
 }
-function getProps(props) {
+function getProps({ size = 22, ...props }) {
     const classes = {
         clickable: ZLibrary$3.DiscordClassModules.UserModal.clickable,
-        img: ZLibrary$3.DiscordClassModules.UserModal.profileBadge22,
+        img: ZLibrary$3.DiscordClassModules.UserModal[`profileBadge${size}`],
     };
     const tooltip = {
         text: props.tooltipText,
@@ -105,7 +105,7 @@ const titles = {
 const name = "DanhoCustomBadges";
 const description = "Add custom badges >:)";
 const author = "Danho#2105";
-const version = "0.0.2";
+const version = "0.0.3";
 const config = {
 	name: name,
 	description: description,
@@ -327,7 +327,7 @@ const SettingsPanel = ({ BDFDB, defaults, set, ...settings }) => {
             React$1.createElement(AddUser, { BDFDB: BDFDB, onSubmit: user => set({ users: { ...users, [user.id]: { badges: [getNewBadge(users[user.id]?.badges ?? [], user.id)] } } }) }))));
 };
 
-const styles = ".hidden {\n  display: none;\n}\n\n.vertical {\n  flex-direction: column;\n  gap: 1rem;\n}\n.vertical .center {\n  place-items: center;\n}\n\n.horizontal {\n  flex-direction: row;\n}\n.horizontal .center {\n  place-content: center;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container {\n  display: flex;\n  flex-direction: row;\n}\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}\n\nsection.settings div[class*=container] > div[class*=labelRow] + div[class*=divider] {\n  display: none;\n}\nsection.settings div[class*=container] {\n  margin-bottom: 0;\n}\nsection.settings h5 {\n  margin-bottom: 0;\n}\nsection.settings div[class*=sectionTitle] {\n  margin-bottom: 1rem;\n}\nsection.settings div[class*=sectionTitle] h5 {\n  font-size: 1.25em;\n  font-weight: bolder;\n}\nsection.settings .add-badge {\n  margin-left: 1rem;\n  cursor: pointer;\n  z-index: 2000;\n}\n\n.user-presentation {\n  display: grid;\n  grid-template-areas: \"avatar tag\" \"avatar badgeList\";\n  grid-template-rows: auto 3rem;\n  grid-template-columns: 4em 1fr;\n}\n.user-presentation .avatar {\n  grid-area: avatar;\n  display: grid;\n  margin: unset;\n}\n.user-presentation .avatar img {\n  border-radius: 50%;\n  height: 100%;\n  width: 100%;\n  object-fit: contain;\n}\n.user-presentation .tag {\n  grid-area: tag;\n  display: flex;\n}\n.user-presentation button.delete {\n  grid-area: tag;\n  width: fit-content;\n}\n.user-presentation div[class*=clickable]:not(.danho-badge.custom) {\n  opacity: 0.45;\n}\n\n.add-user {\n  position: relative;\n  display: flex;\n  flex-direction: row;\n  gap: 0.5rem;\n}\n.add-user div[class*=inputWrapper] {\n  flex: 1;\n}\n.add-user button {\n  margin-left: auto;\n}\n\n.settings-user {\n  padding: 1em;\n  border-radius: 0.25em;\n  display: grid;\n  gap: 1em;\n}\n.settings-user:nth-child(2n) {\n  --modal-background-secondary: var(--modal-footer-background);\n  background-color: var(--modal-background-secondary);\n}\n\n.settings-badge-list {\n  counter-set: badge-counter -1;\n}\n.settings-badge-list .danho-badge::after {\n  counter-increment: badge-counter;\n  content: counter(badge-counter) !important;\n  position: relative !important;\n  color: var(--text-muted, #a3a6aa) !important;\n  top: 0.25em;\n  transform: unset !important;\n  font-size: initial !important;\n}\n\n.danho-badge {\n  position: relative;\n  display: grid;\n  place-items: center;\n  box-sizing: border-box;\n}";
+const styles = ".hidden {\n  display: none;\n}\n\n.vertical {\n  flex-direction: column;\n  gap: 1rem;\n}\n.vertical .center {\n  place-items: center;\n}\n\n.horizontal {\n  flex-direction: row;\n}\n.horizontal .center {\n  place-content: center;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container {\n  display: flex;\n  flex-direction: row;\n}\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}\n\nsection.settings div[class*=container] > div[class*=labelRow] + div[class*=divider] {\n  display: none;\n}\nsection.settings div[class*=container] {\n  margin-bottom: 0;\n}\nsection.settings h5 {\n  margin-bottom: 0;\n}\nsection.settings div[class*=sectionTitle] {\n  margin-bottom: 1rem;\n}\nsection.settings div[class*=sectionTitle] h5 {\n  font-size: 1.25em;\n  font-weight: bolder;\n}\nsection.settings .add-badge {\n  margin-left: 1rem;\n  cursor: pointer;\n  z-index: 2000;\n}\n\n.user-presentation {\n  display: grid;\n  grid-template-areas: \"avatar tag\" \"avatar badgeList\";\n  grid-template-rows: auto 3rem;\n  grid-template-columns: 4em 1fr;\n}\n.user-presentation .avatar {\n  grid-area: avatar;\n  display: grid;\n  margin: unset;\n}\n.user-presentation .avatar img {\n  border-radius: 50%;\n  height: 100%;\n  width: 100%;\n  object-fit: contain;\n}\n.user-presentation .tag {\n  grid-area: tag;\n  display: flex;\n}\n.user-presentation button.delete {\n  grid-area: tag;\n  width: fit-content;\n}\n.user-presentation div[class*=clickable]:not(.danho-badge.custom) {\n  opacity: 0.45;\n}\n\n.add-user {\n  position: relative;\n  display: flex;\n  flex-direction: row;\n  gap: 0.5rem;\n}\n.add-user div[class*=inputWrapper] {\n  flex: 1;\n}\n.add-user button {\n  margin-left: auto;\n}\n\n.settings-user {\n  padding: 1em;\n  border-radius: 0.25em;\n  display: grid;\n  gap: 1em;\n}\n.settings-user:nth-child(2n) {\n  --modal-background-secondary: var(--modal-footer-background);\n  background-color: var(--modal-background-secondary);\n}\n\n.settings-badge-list {\n  counter-set: badge-counter -1;\n}\n.settings-badge-list .danho-badge::after {\n  counter-increment: badge-counter;\n  content: counter(badge-counter) !important;\n  position: relative !important;\n  color: var(--text-muted, #a3a6aa) !important;\n  top: 0.25em;\n  transform: unset !important;\n  font-size: initial !important;\n}\n\n.danho-badge {\n  position: relative;\n  display: grid;\n  place-items: center;\n  box-sizing: border-box;\n  position: relative;\n  top: -2px;\n  left: -2px;\n}";
 
 const allowVerified = false;
 const allowVerifiedInvite = false;
@@ -380,44 +380,67 @@ const index = window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings }
         async start() {
             await super.start({
                 after: {
-                    default: [{
-                            selector: "UserProfileBadgeList", isModal: true
-                        }]
+                    default: {
+                        UserProfileBadgeList: { isModal: true },
+                        UserProfileModalHeader: { isModal: true },
+                        AccountBadges: { selector: "UserSettingsAccountProfileCard" },
+                    },
+                    UserPopoutInfo: {
+                        UserPopoutInfo: { selector: ["UserPopoutInfo"], isModal: true },
+                    }
                 }
-            });
-            this.patcher.after(Lib.Libraries.Discordium.Finder.byName("UserProfileBadgeList"), "default", (props) => {
-                console.log('test');
             });
         }
         patchUserProfileBadgeList({ args: [props], result }) {
-            this.logger.log("Hello");
-            if (!Array.isArray(result.props.children))
-                return this.logger.warn('UserProfileBadgeList children is not an array');
-            const ref = $(s => s.getElementFromInstance(result, true), false);
-            if (!ref.length)
-                return console.log("No ref element");
-            const userSettings = this.getUserSettings(props.user.id);
+            this.logger.log("Hello from UserProfileBadgeList");
+        }
+        patchUserProfileModalHeader({ args: [props], result }) {
+            const ref = $(s => s.getElementFromInstance(result.props.children[1], false), true);
+            if (!ref || !ref.element || !ref.fiber)
+                return this.logger.log("No ref element");
+            const [{ className }] = ref.propsWith("openPremiumSettings");
+            const badgeList = $(`.${className}`, true);
+            this.modifyBadges(badgeList, props.user.id, 24);
+        }
+        patchUserPopoutInfo({ args: [props], result }) {
+            const ref = $(s => s.getElementFromInstance(result.props.children[1], false), true);
+            if (!ref || !ref.element || !ref.fiber)
+                return this.logger.log("No ref element");
+            this.modifyBadges(ref, props.user.id);
+        }
+        patchAccountBadges({ args: [props], result }) {
+            this.logger.log("Hello from AccountBadges", { props, result });
+        }
+        modifyBadges(badgeList, userId, size = 22) {
+            const userSettings = this.getUserSettings(userId);
             if (!userSettings)
                 return this.logger.log("User has no settings");
-            for (const { index, tooltip, ...props } of userSettings.badges) {
+            const props = badgeList.props;
+            for (const { index, tooltip, ...badgeProps } of userSettings.badges) {
                 const badge = (() => {
                     try {
-                        return React.createElement(Badge, { BDFDB: this.BDFDB, tooltipText: tooltip, ...props });
+                        return React.createElement(Badge, { key: index, BDFDB: this.BDFDB, tooltipText: tooltip, ...badgeProps, size: size });
                     }
                     catch (err) {
                         this.logger.error(err);
                         return null;
                     }
                 })();
-                if (badge)
-                    result.props.children.splice(index, 0, badge);
+                if (badge) {
+                    const badgeAtPos = badgeList.children()[index];
+                    if (badgeAtPos.classes === "bdd-wrapper"
+                        && badgeAtPos.firstChild.classes.includes("danho-badge")
+                        && badgeAtPos.firstChild.attr("data-id") === badgeProps.id)
+                        continue;
+                    badgeAtPos.insertComponent("beforebegin", badge);
+                }
             }
-            this.storePremiumData(props.user.id, result);
+            this.storePremiumData(userId, props);
         }
-        storePremiumData(userId, badgeList) {
+        storePremiumData(userId, badgeListProps) {
             const userSettings = this.getUserSettings(userId);
             const isPremiumBadge = (text) => text?.includes("Subscriber since") || text?.includes("Server boosting since");
-            const premiumBadges = badgeList.props.children.filter(child => isPremiumBadge(child.props.text)).map(child => child.props.text);
+            const premiumBadges = badgeListProps.children.filter(child => isPremiumBadge(child.props.text)).map(child => child.props.text);
             if (!premiumBadges.length) {
                 if (!userSettings.premiumSince && !userSettings.boosterSince)
                     return;
@@ -457,10 +480,8 @@ const index = window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings }
 module.exports = index;
 
     } catch (err) {
-        if ('DanhoCustomBadges' === 'DanhoLibrary') console.error(err);
-        
         if (window.BDD) console.error(err);
-        else module.exports = class NoPlugin {
+        module.exports = class NoPlugin {
             //start() { BdApi.Alert("this.name could not be loaded!") }
             start() {
                 window.BDD_PluginQueue ??= [];

@@ -77,7 +77,11 @@ const createLogger = (name, color, version) => {
         warn: (...data) => print(console.warn, ...data),
         error: (...data) => print(console.error, ...data),
         group: (label, collapsed = true) => print(console[(collapsed ? 'groupCollapsed' : 'group')], label),
-        groupEnd: () => print(console.groupEnd),
+        groupEnd: (...data) => {
+            if (data.length)
+                print(console.log, ...data);
+            print(console.groupEnd);
+        }
     };
 };
 
@@ -155,7 +159,7 @@ const all = {
     bySource: (...contents) => all.find(bySource$1(contents))
 };
 
-const index$3 = {
+const Finder = {
     __proto__: null,
     find: find,
     query: query,
@@ -169,7 +173,7 @@ const index$3 = {
 };
 
 const EventEmitter = () => byProps("subscribe", "emit");
-const React$2 = () => byProps("createElement", "Component", "Fragment");
+const React$7 = () => byProps("createElement", "Component", "Fragment");
 const ReactDOM$2 = () => byProps("render", "findDOMNode", "createPortal");
 const classNames$1 = () => find((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
 const lodash$2 = () => byProps("cloneDeep", "flattenDeep");
@@ -183,7 +187,7 @@ const joi$1 = () => byProps("assert", "validate", "object");
 const npm = {
     __proto__: null,
     EventEmitter: EventEmitter,
-    React: React$2,
+    React: React$7,
     ReactDOM: ReactDOM$2,
     classNames: classNames$1,
     lodash: lodash$2,
@@ -219,14 +223,14 @@ const MediaEngineActions = () => byProps("setLocalVolume");
 const ContextMenuActions = () => byProps("openContextMenuLazy");
 const ModalActions = () => byProps("openModalLazy");
 const Flex$1 = () => byName("Flex");
-const Button$1 = () => byProps("Link", "Hovers");
+const Button$2 = () => byProps("Link", "Hovers");
 const Text = () => byName("Text");
 const Links = () => byProps("Link", "NavLink");
 const Switch = () => byName("Switch");
 const SwitchItem$1 = () => byName("SwitchItem");
 const RadioGroup = () => byName("RadioGroup");
 const Slider = () => byName("Slider");
-const TextInput$1 = () => byName("TextInput");
+const TextInput$2 = () => byName("TextInput");
 const Menu = () => byProps("MenuGroup", "MenuItem", "MenuSeparator");
 const Form$1 = () => byProps("FormItem", "FormSection", "FormDivider");
 const margins$1 = () => byProps("marginLarge");
@@ -248,14 +252,14 @@ const DiumModules = {
     ContextMenuActions: ContextMenuActions,
     ModalActions: ModalActions,
     Flex: Flex$1,
-    Button: Button$1,
+    Button: Button$2,
     Text: Text,
     Links: Links,
     Switch: Switch,
     SwitchItem: SwitchItem$1,
     RadioGroup: RadioGroup,
     Slider: Slider,
-    TextInput: TextInput$1,
+    TextInput: TextInput$2,
     Menu: Menu,
     Form: Form$1,
     margins: margins$1
@@ -282,7 +286,7 @@ const Modules = createProxy({
     ...DiumModules
 });
 const Modules$1 = Modules;
-const { React: React$1, ReactDOM: ReactDOM$1, classNames, lodash: lodash$1, Flux } = Modules;
+const { React: React$6, ReactDOM: ReactDOM$1, classNames, lodash: lodash$1, Flux } = Modules;
 
 const resolveName = (object, method) => {
     const target = method === "default" ? object[method] : {};
@@ -417,7 +421,7 @@ class Settings extends Flux.Store {
 }
 const createSettings = (Data, defaults) => new Settings(Data, defaults);
 
-const ReactInternals = React$1?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+const ReactInternals = React$6?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
 const [getInstanceFromNode, getNodeFromInstance, getFiberCurrentPropsFromNode, enqueueStateRestore, restoreStateIfNeeded, batchedUpdates] = ReactDOM$1?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?.Events ?? [];
 const ReactDOMInternals = {
     getInstanceFromNode,
@@ -487,7 +491,7 @@ const queryFiber = (fiber, predicate, direction = "up" , depth = 30, current = 0
     return null;
 };
 const findOwner = (fiber) => {
-    return queryFiber(fiber, (node) => node?.stateNode instanceof React$1.Component, "up" , 50);
+    return queryFiber(fiber, (node) => node?.stateNode instanceof React$6.Component, "up" , 50);
 };
 const forceUpdateOwner = (fiber) => new Promise((resolve) => {
     const owner = findOwner(fiber);
@@ -515,7 +519,7 @@ const forceFullRerender = (fiber) => new Promise((resolve) => {
     }
 });
 
-const index$2 = {
+const index$3 = {
     __proto__: null,
     confirm: confirm,
     sleep: sleep,
@@ -530,12 +534,12 @@ const index$2 = {
     forceFullRerender: forceFullRerender
 };
 
-const { Flex, Button, Form, margins } = Modules$1;
-const SettingsContainer = ({ name, children, onReset }) => (React$1.createElement(Form.FormSection, null,
+const { Flex, Button: Button$1, Form, margins } = Modules$1;
+const SettingsContainer = ({ name, children, onReset }) => (React$6.createElement(Form.FormSection, null,
     children,
-    React$1.createElement(Form.FormDivider, { className: classNames(margins.marginTop20, margins.marginBottom20) }),
-    React$1.createElement(Flex, { justify: Flex.Justify.END },
-        React$1.createElement(Button, { size: Button.Sizes.SMALL, onClick: () => confirm(name, "Reset all settings?", {
+    React$6.createElement(Form.FormDivider, { className: classNames(margins.marginTop20, margins.marginBottom20) }),
+    React$6.createElement(Flex, { justify: Flex.Justify.END },
+        React$6.createElement(Button$1, { size: Button$1.Sizes.SMALL, onClick: () => confirm(name, "Reset all settings?", {
                 onConfirm: () => onReset()
             }) }, "Reset"))));
 
@@ -566,8 +570,8 @@ const createPlugin = (config, callback) => {
         }
     }
     if (plugin.SettingsPanel) {
-        Wrapper.prototype.getSettingsPanel = () => (React$1.createElement(SettingsContainer, { name: name, onReset: () => Settings.reset() },
-            React$1.createElement(plugin.SettingsPanel, { ...settings })));
+        Wrapper.prototype.getSettingsPanel = () => (React$6.createElement(SettingsContainer, { name: name, onReset: () => Settings.reset() },
+            React$6.createElement(plugin.SettingsPanel, { ...settings })));
     }
     return Wrapper;
 };
@@ -575,14 +579,14 @@ const createPlugin = (config, callback) => {
 const Discordium = {
     __proto__: null,
     createPlugin: createPlugin,
-    Finder: index$3,
+    Finder: Finder,
     ReactInternals: ReactInternals,
     ReactDOMInternals: ReactDOMInternals,
-    Utils: index$2,
+    Utils: index$3,
     Modules: Modules$1,
     version: version,
     createStyles: createStyles,
-    React: React$1,
+    React: React$6,
     ReactDOM: ReactDOM$1,
     classNames: classNames,
     lodash: lodash$1,
@@ -604,104 +608,52 @@ var Discord$1;
     Discord.DiscordTag = query({ name: "DiscordTag" }).default;
     Discord.Form = query({ props: ["FormItem", "FormSection", "FormDivider"] });
     Discord.Shakeable = query({ name: "Shakeable" }).default;
+    Discord.GetSelectMenu = () => query({ props: ["Select"] });
+    Discord.SystemMessage = query({ name: "SystemMessage" });
     Discord.SwitchItem = query({ name: "SwitchItem" }).default;
     Discord.TextInput = query({ name: "TextInput" }).default;
     Discord.Tooltip = query({ props: ['TooltipContainer'] });
     Discord.UserProfileBadgeList = query({ name: "UserProfileBadgeList" });
 })(Discord$1 || (Discord$1 = {}));
-const Discord$2 = Discord$1;
+const DiscordComponents = Discord$1;
 
-const { Form: { FormSection }, Margins } = Discord$2;
-const Section = ({ title, children, className }) => (React$1.createElement(FormSection, { tag: 'h1', title: title, className: classNames(Margins.marginBottom20, 'settings', className) }, children));
+const { Form: { FormSection }, Margins } = DiscordComponents;
+const Section = ({ title, children, className }) => (React$6.createElement(FormSection, { tag: 'h1', title: title, className: classNames(Margins.marginBottom20, 'settings', className) }, children));
 
-const { Form: { FormItem } } = Discord$2;
+const { Form: { FormItem } } = DiscordComponents;
 const { PopoutRoles } = ZLibrary$1.DiscordClassModules;
-const Item = ({ direction, children, className, ...props }) => (React$1.createElement(FormItem, { className: classNames(PopoutRoles.flex, direction, 'center', className), ...props }, children));
+const Item = ({ direction, children, className, ...props }) => (React$6.createElement(FormItem, { className: classNames(PopoutRoles.flex, direction, 'center', className), ...props }, children));
 
-const index$1 = {
+const index$2 = {
     __proto__: null,
     Section: Section,
     Item: Item
 };
 
-const { SwitchItem, TextInput } = Discord$2;
-const { useState: useState$2 } = React$1;
+const { SwitchItem, TextInput: TextInput$1 } = DiscordComponents;
+const { useState: useState$3 } = React$6;
 function Setting({ key, value, set, onChange, titles }) {
-    const [v, setV] = useState$2(value);
+    const [v, setV] = useState$3(value);
     switch (typeof value) {
-        case 'boolean': return React$1.createElement(SwitchItem, { key: key, title: titles[key], value: v, onChange: checked => {
+        case 'boolean': return React$6.createElement(SwitchItem, { key: key, title: titles[key], value: v, onChange: checked => {
                 set({ [key]: checked });
                 onChange?.(checked);
                 setV(checked);
             } });
         case 'number':
-        case 'string': return React$1.createElement(TextInput, { key: key, title: titles[key], value: v, onChange: value => {
+        case 'string': return React$6.createElement(TextInput$1, { key: key, title: titles[key], value: v, onChange: value => {
                 set({ [key]: value });
                 onChange?.(value);
                 setV(value);
             } });
-        default: return (React$1.createElement("div", { className: 'settings-error' },
-            React$1.createElement("h1", null, "Unknown value type"),
-            React$1.createElement("h3", null,
+        default: return (React$6.createElement("div", { className: 'settings-error' },
+            React$6.createElement("h1", null, "Unknown value type"),
+            React$6.createElement("h3", null,
                 "Recieved ",
                 typeof value),
-            React$1.createElement("h5", null, JSON.stringify(value))));
+            React$6.createElement("h5", null, JSON.stringify(value))));
     }
 }
-
-const BDFDB = window.BDFDB.LibraryComponents;
-
-const Components = {
-    __proto__: null,
-    BDFDB: BDFDB,
-    get Discord () { return Discord$1; },
-    Form: index$1,
-    Setting: Setting
-};
-
-const { useMemo: useMemo$1, useEffect, useState: useState$1 } = React$1;
-function usePatcher(module, type, patch, callback, config) {
-    const { name, version, once } = config;
-    const color = config.color ?? "#777";
-    const repatchDeps = config.repatchDeps ?? [];
-    const patcher = useMemo$1(() => createPatcher(`${name}-settings`, createLogger(`${name}-settings`, color, version)), []);
-    const [patched, setPatched] = useState$1(false);
-    const [cancel, setCancel] = useState$1(() => () => { });
-    useEffect(() => {
-        setCancel(patcher[type](module, patch, callback, { once }));
-        setPatched(true);
-        return cancel;
-    }, repatchDeps);
-    return [patched, cancel];
-}
-
-const { useState, useMemo } = React$1;
-function useMemoedState(initialState, factory, dependencies = []) {
-    const [state, setState] = useState(initialState);
-    const memo = useMemo(() => factory(state), [state, ...dependencies]);
-    return [memo, setState, state];
-}
-
-const Hooks = {
-    __proto__: null,
-    usePatcher: usePatcher,
-    useMemoedState: useMemoedState
-};
-
-const BadReact = {
-    __proto__: null,
-    'default': React$1
-};
-
-const CompiledReact = {
-    ...React$1,
-    ...ReactDOM$1,
-    Components,
-    Hooks,
-    classNames,
-    BadReact
-};
-const CompiledReact$1 = CompiledReact;
 
 class ElementSelector {
     constructor() {
@@ -747,7 +699,7 @@ class ElementSelector {
         return this;
     }
     data(prop, value) {
-        this.result += `[data-${prop}"${value ? `="${value}"` : ''}"] `;
+        this.result += `[data-${prop}${value ? `="${value}"` : ''}] `;
         return this;
     }
     role(role, tagName) {
@@ -761,7 +713,7 @@ class ElementSelector {
 const ElementSelector$1 = ElementSelector;
 function getElementFromInstance(instance, allowMultiple = false) {
     const selector = new ElementSelector();
-    if (instance.type)
+    if (instance.type && !instance.type.toString().includes("function"))
         selector.tagName(instance.type.toString()).and;
     if (instance.props) {
         const { props } = instance;
@@ -773,8 +725,6 @@ function getElementFromInstance(instance, allowMultiple = false) {
             selector.ariaLabel(props.ariaLabel).and;
         if (props.role)
             selector.role(props.role).and;
-        if (props.dataMutationManagerId)
-            selector.mutationManagerId(props.dataMutationManagerId).and;
         if (props.data) {
             for (const prop in props.data) {
                 selector.data(prop, props.data[prop]).and;
@@ -847,6 +797,14 @@ class DQuery {
             this.element.style[key] = value[key];
         }
     }
+    addClass(className) {
+        this.element.classList.add(className);
+        return this;
+    }
+    removeClass(className) {
+        this.element.classList.remove(className);
+        return this;
+    }
     hasDirectChild(selector) {
         if (selector instanceof DQuery)
             selector = selector.element;
@@ -892,6 +850,9 @@ class DQuery {
     get props() {
         return this.fiber.memoizedProps;
     }
+    set props(value) {
+        this.fiber.pendingProps = value;
+    }
     prop(key, ...cycleThrough) {
         const getProp = (obj, path) => {
             if (obj === undefined || obj === null)
@@ -926,7 +887,13 @@ class DQuery {
             }
             return undefined;
         };
-        return getProp(this.fiber.memoizedProps, []) ?? [undefined, undefined];
+        try {
+            return getProp(this.fiber.memoizedProps, []) ?? [undefined, undefined];
+        }
+        catch (err) {
+            console.error(err, this);
+            return [undefined, undefined];
+        }
     }
     propsWith(key, ...cycleThrough) {
         const [prop, path] = this.prop(key, ...cycleThrough);
@@ -954,19 +921,18 @@ class DQuery {
     }
     appendComponent(component) {
         this.element.appendChild(createElement("<></>"));
-        const fragment = this.element.lastChild;
-        ReactDOM$1.render(component, fragment, () => this.element.replaceChild(fragment.lastChild, fragment));
+        const wrapper = this.element.lastChild;
+        ReactDOM$1.render(component, wrapper);
         return this;
     }
     replaceComponent(component) {
-        this.element.appendChild(createElement("<></>"));
-        const fragment = this.element.lastChild;
-        ReactDOM$1.render(component, fragment, () => {
-            const children = [...this.element.children];
-            if (!children.includes(fragment) || !fragment.firstChild)
-                return;
-            this.parent.element.replaceChild(fragment.firstChild, this.element);
-        });
+        ReactDOM$1.render(component, this.element);
+        return this;
+    }
+    insertComponent(position, component) {
+        this.element.insertAdjacentElement(position, createElement("<></>"));
+        const wrapper = this.parent.children(".bdd-wrapper", true).element;
+        ReactDOM$1.render(component, wrapper);
         return this;
     }
     prependHtml(html) {
@@ -974,9 +940,9 @@ class DQuery {
         return this;
     }
     prependComponent(component) {
-        this.element.insertAdjacentHTML('afterbegin', `<div class="fragment"></div>`);
-        const fragment = this.element.firstChild;
-        ReactDOM$1.render(component, fragment, () => this.element.replaceChild(fragment.firstChild, fragment));
+        this.element.insertAdjacentElement('afterbegin', createElement("<></>"));
+        const wrapper = this.element.firstChild;
+        ReactDOM$1.render(component, wrapper);
         return this;
     }
     on(event, listener) {
@@ -993,7 +959,7 @@ class DQuery {
 }
 function createElement(html, target) {
     if (html === "<></>" || html.toLowerCase() === "fragment") {
-        html = `<div class="fragment"></div>`;
+        html = `<div class="bdd-wrapper"></div>`;
     }
     const element = new DOMParser().parseFromString(html, "text/html").body.firstElementChild;
     if (!target)
@@ -1006,13 +972,24 @@ function createElement(html, target) {
         return document.querySelector(typeof target === 'function' ? target(new ElementSelector$1(), $).toString() : target.toString()).appendChild(element);
 }
 
-const DanhoModules = {
-    CompiledReact: CompiledReact$1,
-    $,
-    DQuery,
-    ElementSelector: ElementSelector$1
-};
-const DanhoModules$1 = DanhoModules;
+const { React: React$5 } = Modules$1;
+function Checkmark({ tooltip }) {
+    return (React$5.createElement("svg", { "aria-label": tooltip, className: window.BDFDB.DiscordClassModules.BotTag.botTagVerified, "aria-hidden": false, width: "16", height: "16", viewBox: "0 0 16 15.2" },
+        React$5.createElement("path", { d: "M7.4,11.17,4,8.62,5,7.26l2,1.53L10.64,4l1.36,1Z", fill: "currentColor" })));
+}
+
+const { React: React$4 } = Modules$1;
+function CloseButton() {
+    return (React$4.createElement("svg", { "aria-hidden": false, width: "16", height: "16", viewBox: "0 0 24 24" },
+        React$4.createElement("path", { fill: "currentColor", d: "M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" })));
+}
+
+const { React: React$3 } = Modules$1;
+function EphemeralEye() {
+    return (React$3.createElement("svg", { className: window.BDFDB.DiscordClassModules.MessageLocalBot.icon, "aria-hidden": false, width: "16", height: "16", viewBox: "0 0 24 24" },
+        React$3.createElement("path", { fill: "currentColor", d: "M12 5C5.648 5 1 12 1 12C1 12 5.648 19 12 19C18.352 19 23 12 23 12C23 12 18.352 5 12 5ZM12 16C9.791 16 8 14.21 8 12C8 9.79 9.791 8 12 8C14.209 8 16 9.79 16 12C16 14.21 14.209 16 12 16Z" }),
+        React$3.createElement("path", { fill: "currentColor", d: "M12 14C13.1046 14 14 13.1046 14 12C14 10.8954 13.1046 10 12 10C10.8954 10 10 10.8954 10 12C10 13.1046 10.8954 14 12 14Z" })));
+}
 
 const DiscordPermissionStrings = {
     ADD_REACTIONS: "Reactions",
@@ -1069,6 +1046,13 @@ var TextInputStyles;
     TextInputStyles[TextInputStyles["Short"] = 1] = "Short";
     TextInputStyles[TextInputStyles["Paragraph"] = 2] = "Paragraph";
 })(TextInputStyles || (TextInputStyles = {}));
+var Components$1;
+(function (Components) {
+    Components[Components["ActionRow"] = 1] = "ActionRow";
+    Components[Components["Button"] = 2] = "Button";
+    Components[Components["SelectMenu"] = 3] = "SelectMenu";
+    Components[Components["TextInput"] = 4] = "TextInput";
+})(Components$1 || (Components$1 = {}));
 var PremiumTypes;
 (function (PremiumTypes) {
     PremiumTypes[PremiumTypes["User"] = 0] = "User";
@@ -1080,8 +1064,176 @@ const Discord = {
     __proto__: null,
     DiscordPermissionStrings: DiscordPermissionStrings,
     get ActivityIndexes () { return ActivityIndexes; },
+    get Components () { return Components$1; },
     get PremiumTypes () { return PremiumTypes; }
 };
+
+const { React: React$2 } = Modules$1;
+const { Button, GetSelectMenu, TextInput } = DiscordComponents;
+GetSelectMenu();
+function ActionRow({ components, ...props }) {
+    return (React$2.createElement("div", { className: "container-3Sqbyb" },
+        React$2.createElement("div", { className: "children-2XdE_I" }, components.map(({ type, ...component }) => {
+            switch (type) {
+                case Components$1.Button: return React$2.createElement(Button, { ...component });
+                case Components$1.TextInput: return React$2.createElement(TextInput, { ...component });
+                default: return React$2.createElement(ActionRow, { ...component });
+            }
+        }))));
+}
+
+const { React: React$1 } = Modules$1;
+const { useMemo: useMemo$2, useState: useState$2, createRef } = React$1;
+const defaultMessageAuthor = {
+    displayName: "Danho Better Chat",
+    id: window.BDFDB.UserUtils.me.id,
+    avatarURL: window.BDFDB.UserUtils.me.getAvatarURL(),
+    isBot: false,
+    isVerifiedBot: true,
+};
+function useGenerateMessageId(el, snowflake) {
+    const result = el.attr("id").split('-').reverse();
+    result[0] = snowflake;
+    return result.reverse().join('-');
+}
+function Message(props) {
+    const { author, content } = props;
+    const { suppressPing = false, hideEphemeralMessage = false, replyTo, embeds = [], components = [] } = props;
+    let { className: _className, id, children } = props;
+    const msgEl = useMemo$2(() => $(s => s.tagName('ol').and.data("list-id", "chat-messages").tagName('li')), []);
+    const messageAuthor = useMemo$2(() => ({ ...defaultMessageAuthor, ...author }), [author]);
+    const createdAt = useMemo$2(() => new Date(), []);
+    const className = useMemo$2(() => classNames(msgEl.classes, "danho-better-chat-message", _className), []);
+    const snowflake = useMemo$2(() => Date.now().toString(), []);
+    const DiscordClassModules = useMemo$2(() => window.BDFDB?.DiscordClassModules, []);
+    const messageRepliedTo = useMemo$2(() => {
+        if (!replyTo)
+            return null;
+        const message = $(`li#chat-messages-${replyTo}`);
+        if (!message)
+            return null;
+        return {
+            avatar: message.children("img", true).attr("src"),
+            displayName: message.children(s => s.tagName("h2").className("username"), true).value.toString(),
+            content: message.children(s => s.id(`message-content-${replyTo}`), true).element.innerHTML,
+            element: message.element,
+        };
+    }, [replyTo]);
+    const [showEmbeds, setShowEmbeds] = useState$2(embeds.length > 0);
+    const ref = createRef();
+    id ?? (id = useGenerateMessageId(msgEl, snowflake));
+    if (!content && !children)
+        return null;
+    return (React$1.createElement("li", { ref: ref, id: id, className: className, "aria-setsize": -1, ...props },
+        React$1.createElement("div", { className: classNames(DiscordClassModules.Message.message, DiscordClassModules.Message.cozyMessage, !suppressPing && DiscordClassModules.Message.mentioned, DiscordClassModules.MessageBody.wrapper, DiscordClassModules.MessageBody.cozy, DiscordClassModules.MessageBody.zalgo), role: "article", "data-list-id": `chat-messages___${id}`, tabIndex: -1, "aria-setsize": -1, "aria-roledescription": "Message", "aria-labelledby": `message-username-${snowflake} uid_1 message-content-${snowflake} uid_2 message-timestamp-${snowflake}`, "data-author-id": messageAuthor.id },
+            replyTo && messageRepliedTo && (React$1.createElement("div", { id: `message-reply-context-${snowflake}`, className: DiscordClassModules.MessageBody.repliedMessage, "aria-hidden": true, "aria-label": `Replying to ${messageRepliedTo.displayName}` },
+                React$1.createElement("img", { className: DiscordClassModules.MessageBody.replyAvatar, alt: " ", src: messageRepliedTo?.avatar }),
+                React$1.createElement("span", { className: msgEl
+                        .children(s => s.id("message-username-"), true)
+                        .firstChild.classes
+                        .split(" ").filter(name => !name.includes("clickable")).join(' ') }, messageRepliedTo.displayName),
+                React$1.createElement("div", { className: DiscordClassModules.MessageBody.repliedTextPreview, role: "button", tabIndex: 0, onClick: () => messageRepliedTo.element.scrollTo({ behavior: 'smooth' }) },
+                    React$1.createElement("div", { id: `message-content-${replyTo}`, className: classNames(DiscordClassModules.MessageBody.repliedTextContent, DiscordClassModules.MessageMarkup.markup, DiscordClassModules.MessageBody.messageContent), dangerouslySetInnerHTML: { __html: messageRepliedTo.content || '<span style="color: var(--status-danger)">Unable to load message!</span>' } })))),
+            React$1.createElement("div", { className: msgEl.firstChild.firstChild.classes },
+                React$1.createElement("img", { src: messageAuthor.avatarURL, "aria-hidden": true, className: msgEl.firstChild.firstChild.firstChild.classes, alt: "" }),
+                React$1.createElement("h2", { className: msgEl.firstChild.firstChild.firstChild.nextSibling.classes, "aria-labelledby": `message-username-${snowflake} message-timestamp-${snowflake}` },
+                    React$1.createElement("span", { id: `message-username-${snowflake}`, className: msgEl.children(s => s.id("message-username-"), true).classes },
+                        React$1.createElement("span", { className: msgEl
+                                .children(s => s.id("message-username-"), true)
+                                .firstChild.classes
+                                .split(" ").filter(name => !name.includes("clickable")).join(' ') }, messageAuthor.displayName),
+                        (messageAuthor.isBot || messageAuthor.isVerifiedBot) && (React$1.createElement("span", { className: classNames(DiscordClassModules.MessageBody.botTagCozy, DiscordClassModules.BotTag.botTagRegular, DiscordClassModules.BotTag.rem) },
+                            messageAuthor.isVerifiedBot && (React$1.createElement(Checkmark, { tooltip: 'Verified Bot' })),
+                            React$1.createElement("span", { className: DiscordClassModules.BotTag.botText }, "DBC Bot")))),
+                    React$1.createElement("span", { className: msgEl.children(s => s.id("message-username-"), true).nextSibling.classes },
+                        React$1.createElement("time", { "aria-label": createdAt.toLocaleString(), id: `message-timestamp-${snowflake}`, dateTime: createdAt.toString() }, createdAt.toLocaleString()))),
+                React$1.createElement("div", { id: `message-content-${snowflake}`, className: msgEl.firstChild.firstChild.lastChild.classes }, children || content)),
+            React$1.createElement("div", { id: `message-accessories-${snowflake}`, className: DiscordClassModules.MessageAccessory.container },
+                showEmbeds && embeds.map(embed => (React$1.createElement("article", { className: classNames(DiscordClassModules.MessageAccessory.embedWrapper, DiscordClassModules.Embed.embedFull, DiscordClassModules.MessageMarkup.markup), "aria-hidden": false, style: { borderColor: embed.color } },
+                    React$1.createElement("div", { className: DiscordClassModules.Embed.gridContainer },
+                        React$1.createElement("div", { className: DiscordClassModules.Embed.grid },
+                            React$1.createElement("div", { className: DiscordClassModules.Embed.embedSuppressButton, "aria-label": "Remove all embeds", role: "button", tabIndex: 0, onClick: () => setShowEmbeds(false) },
+                                React$1.createElement(CloseButton, null)),
+                            React$1.createElement("div", { className: classNames(DiscordClassModules.Embed.embedTitle, embed.url && DiscordClassModules.Embed.embedTitleLink, DiscordClassModules.Embed.embedMargin) }, embed.rawTitle),
+                            embed.fields.length && (React$1.createElement("div", { className: DiscordClassModules.Embed.embedFields }, embed.fields.map((field, i) => (React$1.createElement("div", { className: DiscordClassModules.Embed.embedField, key: i, style: {
+                                    gridColumn: "1 / 13"
+                                } },
+                                React$1.createElement("div", { className: DiscordClassModules.Embed.embedFieldName }, field.rawTitle),
+                                React$1.createElement("div", { className: DiscordClassModules.Embed.embedFieldValue }, field.rawValue)))))),
+                            embed.footer && (React$1.createElement("div", { className: classNames(DiscordClassModules.Embed.embedFooter, DiscordClassModules.Embed.embedMargin) },
+                                embed.footer.iconURL && (React$1.createElement("img", { src: embed.footer.iconURL, alt: "", className: DiscordClassModules.Embed.embedFooterIcon })),
+                                React$1.createElement("div", { className: DiscordClassModules.Embed.embedFooterText }, embed.footer.text)))))))),
+                components.length > 0 && (React$1.createElement("div", { className: "container-3Sqbyb" },
+                    React$1.createElement(ActionRow, { components: components }))),
+                (!hideEphemeralMessage && React$1.createElement("div", { className: DiscordClassModules.MessageLocalBot.ephemeralMessage },
+                    React$1.createElement(EphemeralEye, null),
+                    "Only you can see this \u2022",
+                    React$1.createElement("a", { className: classNames(DiscordClassModules.Anchor.anchor, DiscordClassModules.Anchor.anchorUnderlineOnHover), role: "button", tabIndex: 0, onClick: () => ref.current.parentElement.remove() }, " Dismiss message")))),
+            React$1.createElement("div", { className: msgEl.firstChild.lastChild.classes }))));
+}
+
+const BDFDB = window.BDFDB.LibraryComponents;
+
+const Components = {
+    __proto__: null,
+    BDFDB: BDFDB,
+    get Discord () { return Discord$1; },
+    Form: index$2,
+    Message: Message,
+    Setting: Setting
+};
+
+const { useMemo: useMemo$1, useEffect, useState: useState$1 } = React$6;
+function usePatcher(module, type, patch, callback, config) {
+    const { name, version, once } = config;
+    const color = config.color ?? "#777";
+    const repatchDeps = config.repatchDeps ?? [];
+    const patcher = useMemo$1(() => createPatcher(`${name}-settings`, createLogger(`${name}-settings`, color, version)), []);
+    const [patched, setPatched] = useState$1(false);
+    const [cancel, setCancel] = useState$1(() => () => { });
+    useEffect(() => {
+        setCancel(patcher[type](module, patch, callback, { once }));
+        setPatched(true);
+        return cancel;
+    }, repatchDeps);
+    return [patched, cancel];
+}
+
+const { useState, useMemo } = React$6;
+function useMemoedState(initialState, factory, dependencies = []) {
+    const [state, setState] = useState(initialState);
+    const memo = useMemo(() => factory(state), [state, ...dependencies]);
+    return [memo, setState, state];
+}
+
+const Hooks = {
+    __proto__: null,
+    usePatcher: usePatcher,
+    useMemoedState: useMemoedState
+};
+
+const BadReact = {
+    __proto__: null,
+    'default': React$6
+};
+
+const CompiledReact = {
+    ...React$6,
+    ...ReactDOM$1,
+    Components,
+    Hooks,
+    classNames,
+    BadReact
+};
+const CompiledReact$1 = CompiledReact;
+
+const DanhoModules = {
+    CompiledReact: CompiledReact$1,
+    $,
+    DQuery,
+    ElementSelector: ElementSelector$1
+};
+const DanhoModules$1 = DanhoModules;
 
 const { hljs, i18n, joi, lodash, moment, semver, React, ReactDOM } = Modules$1;
 const DiscordModules = {
@@ -1090,10 +1242,278 @@ const DiscordModules = {
     React, ReactDOM, DanhoModules: DanhoModules$1
 };
 
+function forceRerender(selector) {
+    const fiber = $(selector).fiber;
+    if (!fiber)
+        return false;
+    return forceFullRerender(fiber);
+}
+
+const defaultOptions = {
+    isContextMenu: false,
+    isModal: false,
+    once: false,
+    override: false,
+    silent: false
+};
+async function initializePatches(plugin, config = {}) {
+    const patches = [];
+    let patchTypes = Object.keys(config);
+    for (const patchTypeKey of patchTypes) {
+        const patchType = config[patchTypeKey];
+        for (const methodKey of Object.keys(patchType)) {
+            const method = patchType[methodKey];
+            if (method instanceof Array) {
+                for (const methodProp of method) {
+                    const option = getPatchOption(plugin, methodProp);
+                    patches.push(await patch(plugin, option, patchTypeKey, methodKey));
+                }
+            }
+            else {
+                for (const methodPropKey in method) {
+                    const methodProp = method[methodPropKey];
+                    const option = getPatchOption(plugin, methodProp, methodPropKey);
+                    patches.push(await patch(plugin, option, patchTypeKey, methodKey));
+                }
+            }
+        }
+    }
+    patchTypes = ["before", "instead", "after"];
+    const pluginPropKeys = Object.keys(plugin).filter(key => patchTypes.some(type => key.startsWith(type)));
+    for (const pluginPropKey of pluginPropKeys) {
+        const pluginProp = plugin[pluginPropKey];
+        if (!(pluginProp instanceof Function)) {
+            plugin.logger.log(`[Patcher] ${pluginPropKey} is not a function`);
+            continue;
+        }
+        const patchType = (() => {
+            for (const type of patchTypes) {
+                if (pluginPropKey.startsWith(type))
+                    return type;
+            }
+            return "after";
+        })();
+        const pluginPropName = pluginPropKey.replace(/^before|instead|after/, '');
+        const moduleGuesses = await findModuleByGuessing(pluginProp, pluginPropName);
+        if (moduleGuesses.length != 1) {
+            if (!moduleGuesses.length)
+                plugin.logger.warn("No module guesses for", pluginPropKey);
+            else if (moduleGuesses.length > 1)
+                plugin.logger.warn("Multiple module guesses for", pluginPropKey, moduleGuesses);
+            continue;
+        }
+        const { module, method, ...option } = moduleGuesses[0];
+        patches.push(await patch(plugin, option, patchType, method, module));
+    }
+    return patches.filter(patch => patch);
+}
+function getSelector(methodProp, propName) {
+    if (typeof methodProp === 'string' || methodProp instanceof Array)
+        return methodProp;
+    else if ('selector' in methodProp)
+        return methodProp.selector;
+    return propName;
+}
+function getCallback(plugin, selector, methodProp, propName) {
+    let callbackName = "";
+    if (methodProp instanceof Array || selector instanceof Array) {
+        callbackName = `patch${(propName) ?? (typeof methodProp === 'string' ?
+            methodProp :
+            (methodProp[0] ?? (methodProp[0] = selector[0])).charAt(0).toUpperCase() + methodProp[0].slice(1) + "Module")}`;
+        return [plugin[callbackName], callbackName];
+    }
+    else if (typeof methodProp === 'string'
+        || !('callback' in methodProp)) {
+        callbackName = `patch${propName ?? selector}`;
+        return [plugin[callbackName], callbackName];
+    }
+    const callbackResolvable = methodProp.callback;
+    return callbackResolvable instanceof Function ? [callbackResolvable, methodProp.callback['name']] :
+        [plugin[callbackResolvable], callbackResolvable];
+}
+function getPatchOption(plugin, methodProp, methodPropKey) {
+    const selector = getSelector(methodProp, methodPropKey);
+    let [callback, callbackName] = getCallback(plugin, selector, methodProp, methodPropKey);
+    callback = callback.bind(plugin);
+    const options = methodProp instanceof Object ? methodProp : {};
+    if (!callback) {
+        console.error("No callback for", { plugin, methodPropKey, methodProp });
+        return {};
+    }
+    return {
+        selector,
+        callback,
+        callbackName,
+        ...defaultOptions,
+        ...options
+    };
+}
+async function patch(plugin, option, patchType, methodType, module) {
+    module ?? (module = await findModule$1(plugin, option));
+    if (!module) {
+        plugin.logger.error("Module not found for", option.selector);
+        return null;
+    }
+    const previouslyPatched = (plugin.patches ?? (plugin.patches = [])).find(p => p.module === module && p.method === methodType && p.patchType === patchType);
+    if (previouslyPatched && !option.override) {
+        return previouslyPatched;
+    }
+    const callback = (data) => {
+        try {
+            return option.callback(data);
+        }
+        catch (e) {
+            plugin.logger.error(e);
+            throw e;
+        }
+    };
+    const cancel = plugin.patcher[patchType](module, methodType, callback, option);
+    const patched = { module, callback, method: methodType, patch: patchType, option, cancel };
+    if (!option.silent)
+        plugin.logger.log(`Patched ${patchType} ${methodType} ${option.selector} bound to ${option.callbackName}.`, patched);
+    return patched;
+}
+async function waitForModule(patcher, option) {
+    const { isContextMenu, isModal } = option;
+    return (isContextMenu ? patcher.waitForContextMenu(() => getModule(option), { silent: option.silent }) :
+        isModal ? patcher.waitForModal(() => getModule(option), { silent: option.silent }) :
+            new Promise(resolve => resolve(getModule(option))));
+}
+async function getModule(option) {
+    return query({ [option.selector instanceof Array ? "props" : "name"]: option.selector }) ??
+        query({ props: option.selector instanceof Array ? option.selector : [option.selector] });
+}
+async function findModuleByGuessing(pluginProp, pluginPropName) {
+    const guesses = await Promise.all((() => {
+        const sharedOption = {
+            callback: pluginProp,
+            callbackName: `${pluginPropName}`,
+            isModal: pluginPropName.includes("Modal"),
+            isContextMenu: pluginPropName.includes("ContextMenu")
+        };
+        const camelCase = (val) => val.charAt(0).toLowerCase() + val.slice(1);
+        if (pluginPropName.includes("Module")) {
+            const method = camelCase(pluginPropName.replace('Module', ''));
+            return [{ ...sharedOption, method, selector: [method] }];
+        }
+        const defaultModule = {
+            ...sharedOption,
+            method: "default",
+            selector: pluginPropName,
+        };
+        const defaultModuleProps = {
+            ...sharedOption,
+            method: "default",
+            selector: [camelCase(pluginPropName)],
+        };
+        const renderModule = pluginPropName.match(/[A-Z]{1}[a-z]+$/).reduce((_, method) => ({
+            ...sharedOption,
+            method,
+            selector: pluginPropName.replace(method, ''),
+        }), {});
+        return [defaultModule, defaultModuleProps, renderModule];
+    })().map(({ method, ...option }) => getModule(option)
+        .then(module => ({
+        module, method, ...option
+    }))));
+    return guesses.filter(result => result.module && result.method !== 'invalid');
+}
+async function findModule$1(plugin, option) {
+    return option.isModal || option.isContextMenu ? waitForModule(plugin.patcher, option) : getModule(option);
+}
+
+class ContextMenuProvider {
+    constructor(plugin) {
+        this.plugin = plugin;
+        this.events = {};
+        initializePatches(this, {
+            after: {
+                default: [
+                ]
+            }
+        }).then(patches => this.patches = patches);
+    }
+    static getInstance(plugin) {
+        if (!ContextMenuProvider.instance) {
+            ContextMenuProvider.instance = new ContextMenuProvider(plugin);
+        }
+        return ContextMenuProvider.instance;
+    }
+    get logger() {
+        return this.plugin.logger;
+    }
+    get patcher() {
+        return this.plugin.patcher;
+    }
+    on(event, callback) {
+        this.events[event] = callback;
+    }
+    off(event) {
+        this.events[event] = null;
+    }
+    onMessageContextMenu({ args: [props], result: ret }) {
+        console.log('onMessageContextMenu', { this: this, props, ret });
+        this.events['message']?.(props, ret);
+    }
+}
+
+class DanhoPlugin {
+    constructor({ Config, Data, Logger, Patcher, Settings, Styles }) {
+        this.finder = Finder;
+        this.events = new Map();
+        this.config = Config;
+        this.data = Data;
+        this.logger = Logger;
+        this.patcher = Patcher;
+        this.settings = Settings;
+        this.styles = Styles;
+    }
+    async start(config) {
+        this.patches = await initializePatches(this, config);
+        this.contextMenus = ContextMenuProvider.getInstance(this);
+    }
+    stop() {
+    }
+    get BDFDB() {
+        return window.BDFDB;
+    }
+    get ZLibrary() {
+        return window.ZLibrary;
+    }
+    get BDD() {
+        return window.BDD;
+    }
+    on(event, callback) {
+        this.events.set(event, [...this.events.get(event) || [], callback]);
+    }
+    off(event, callback) {
+        this.events.set(event, this.events.get(event)?.filter(e => e !== callback));
+    }
+    emit(event, ...args) {
+        this.events.get(event)?.forEach(e => e(...args));
+    }
+}
+
+const index$1 = {
+    __proto__: null
+};
+
+const DanhoDiscordium = {
+    __proto__: null,
+    Components: Components,
+    Patcher: index$1,
+    forceRerender: forceRerender,
+    ZLibrary: ZLibrary$1,
+    $: $,
+    Discord: Discord,
+    DanhoPlugin: DanhoPlugin
+};
+
 const Libraries = {
     ZLibrary: ZLibrary$1,
     BDFDB: window.BDFDB,
     Discordium,
+    DanhoDiscordium
 };
 
 const delay = (callback, time) => new Promise((resolve, reject) => {
@@ -1110,8 +1530,9 @@ class PluginsCollection extends Array {
         return this.map(plugin => plugin.config.name);
     }
 }
-const PluginUtils = new class PluginUtils {
-    constructor() {
+const CreatePluginUtils = (logger) => new (class PluginUtils {
+    constructor(_logger) {
+        this._logger = _logger;
         this._queue = window.BDD_PluginQueue ?? new Array();
         this.plugins = new PluginsCollection();
         this.startPlugins = this.startPlugins.bind(this);
@@ -1122,78 +1543,89 @@ const PluginUtils = new class PluginUtils {
     }
     get queue() {
         if (this._queue.includes('DanhoLibrary')) {
-            console.warn("[PluginUtils]: DanhoLibrary was found in Plugin queue, which is not intended");
+            this._logger.warn("[PluginUtils]: DanhoLibrary was found in Plugin queue, which is not intended");
             this._queue.splice(this._queue.indexOf('DanhoLibrary'), 1);
         }
         return this._queue;
     }
     startPlugins() {
-        console.log('Starting Danho plugins');
+        this._logger.group('[PluginUtils]: Starting Danho plugins');
         const { queue } = this;
         while (queue.length > 0) {
             const pluginName = queue.shift();
             try {
-                console.log(`[PluginUtils]: Starting plugin ${pluginName}`, BdApi.Plugins.get(pluginName));
+                this._logger.log(`[PluginUtils]: Starting plugin ${pluginName}`, {
+                    get plugin() {
+                        return BdApi.Plugins.get(pluginName);
+                    }
+                });
                 BdApi.Plugins.enable(pluginName);
                 const timeout = 100;
                 if (!BdApi.Plugins.get(pluginName))
                     setTimeout(() => {
                         const plugin = BdApi.Plugins.get(pluginName);
                         if (!plugin)
-                            return console.warn("[PluginUtils]: Plugin not found", pluginName);
+                            return this._logger.warn("[PluginUtils]: Plugin not found", pluginName);
                         if (plugin.instance?.__proto__.constructor.name === 'NoPlugin') {
-                            console.warn(`[PluginUtils]: Plugin ${pluginName} is not a valid plugin, reloading...`);
+                            this._logger.warn(`[PluginUtils]: Plugin ${pluginName} is not a valid plugin, reloading...`);
                             BdApi.Plugins.reload(pluginName);
                             delay(() => this.plugins.push(BdApi.Plugins.get(pluginName).instance.plugin), timeout);
                         }
+                        const existingPluginIndex = this.plugins.findIndex(p => p.config.name === pluginName);
+                        if (existingPluginIndex >= 0)
+                            this.plugins[existingPluginIndex] = BdApi.Plugins.get(pluginName).instance.plugin;
                         else
                             this.plugins.push(plugin.instance.plugin);
+                        if (window.BDD_PluginQueue)
+                            window.BDD_PluginQueue.splice(window.BDD_PluginQueue.indexOf(pluginName), 1);
                     }, timeout);
             }
             catch (err) {
-                console.error(`[PluginUtils]: Failed to start plugin ${pluginName}`, err);
+                this._logger.error(`[PluginUtils]: Failed to start plugin ${pluginName}`, err);
             }
         }
-        console.log('Started Danho plugins');
+        this._logger.groupEnd('Started Danho plugins');
     }
     restartPlugins() {
-        console.log('Restarting Danho plugins');
+        this._logger.group('Restarting Danho plugins');
         const queue = BdApi.Plugins.getAll()
             .filter(p => p.author === "Danho#2105")
             .map(p => p.name);
         for (const pluginName of queue) {
             try {
-                console.log(`[PluginUtils]: Restarting plugin ${pluginName}`);
+                this._logger.log(`[PluginUtils]: Restarting plugin ${pluginName}`);
                 BdApi.Plugins.reload(pluginName);
             }
             catch (err) {
-                console.error(`[PluginUtils]: Failed to start plugin ${pluginName}`, err);
+                this._logger.error(`[PluginUtils]: Failed to start plugin ${pluginName}`, err);
             }
         }
+        this._logger.groupEnd('Danho plugins restarted');
     }
     buildPlugin(config, pluginBuilder) {
         const plugin = createPlugin(config, api => new (pluginBuilder(window.BDD))(api));
-        window.BDD.PluginUtils.queue.push(config.name);
+        if (!window.BDD.PluginUtils.queue.includes(config.name))
+            window.BDD.PluginUtils.queue.push(config.name);
         window.BDD.PluginUtils.startPlugins();
         return plugin;
     }
     stopPlugins() {
-        console.log('Stopping Danho plugins');
+        this._logger.group('Stopping Danho plugins');
         const { queue } = this;
         for (const pluginName of queue) {
             try {
                 BdApi.Plugins.disable(pluginName);
             }
             catch (err) {
-                console.error(`[PluginUtils]: Failed to stop plugin ${pluginName}`, err);
+                this._logger.error(`[PluginUtils]: Failed to stop plugin ${pluginName}`, err);
             }
         }
-        console.log('Danho plugins stopped');
+        this._logger.groupEnd('Danho plugins stopped');
     }
     getPlugin(...pluginNames) {
         return window.BDD?.Utils.getPlugin(...pluginNames);
     }
-};
+})(logger);
 
 function findNodeByIncludingClassName(className, node = document.body) {
     return node.querySelector(`[class*="${className}"]`);
@@ -1262,202 +1694,36 @@ function getPlugin(...pluginNames) {
         BdApi.Plugins.get(pluginNames[0]).instance.plugin :
         BdApi.Plugins.getAll().filter(plugin => pluginNames.includes((plugin['name'] || plugin['getName']?.()))).map(plugin => plugin.instance.plugin);
 }
+function currentGuild() {
+    const guildId = ZLibrary$1.DiscordModules.SelectedGuildStore.getGuildId();
+    return guildId ? ZLibrary$1.DiscordModules.GuildStore.getGuild(guildId) : null;
+}
+function currentChannel() {
+    const channelId = ZLibrary$1.DiscordModules.SelectedChannelStore.getChannelId();
+    return channelId ? ZLibrary$1.DiscordModules.ChannelStore.getChannel(channelId) : null;
+}
+function currentGuildMembers() {
+    const guildId = currentGuild()?.id;
+    return guildId ? ZLibrary$1.DiscordModules.GuildMemberStore.getMembers(guildId) : null;
+}
 const Utils = {
     findNodeByIncludingClassName,
     findModuleByIncludes,
     findClassModuleContainingClass,
     findModule,
     findUserByTag,
-    getPlugin
+    getPlugin,
+    get currentGuild() { return currentGuild(); },
+    get currentChannel() { return currentChannel(); },
+    get currentGuildMembers() { return currentGuildMembers(); },
 };
-
-const defaultOption = {
-    isContextMenu: false,
-    isModal: false,
-    once: false,
-    override: false,
-    silent: false
-};
-function initializePatches(plugin, config = {}) {
-    return configurePatches(plugin, config, async ({ patchType, method, option }) => {
-        const patch = (module) => commitPatch(plugin, module, { patchType, method, option });
-        return optionIsArrayable(option) ?
-            patch(getModule(option)) :
-            waitForModule(plugin.patcher, option).then(patch);
-    });
-}
-async function configurePatches(plugin, config, callback) {
-    const patches = plugin.patches ?? (plugin.patches = new Array());
-    const commitPatch = async ({ patchType, method, option }) => {
-        const patch = await callback({ patchType, method, option });
-        if (!patch)
-            return;
-        const previouslyPatched = patches.find(p => p.module === patch.module && p.method === patch.method && p.patchType === patch.patchType);
-        if (previouslyPatched) {
-            if (optionIsArrayable(option) || !option.override)
-                return;
-            patches.splice(patches.indexOf(previouslyPatched), 1);
-            return;
-        }
-        patches.push(patch);
-    };
-    for (const pt in config) {
-        const patchType = pt;
-        const methods = config[patchType];
-        for (const m in methods) {
-            const method = m;
-            const options = config[patchType][method];
-            if (typeof options[0] === 'string') {
-                const option = Object.assign({}, defaultOption, { selector: options });
-                await commitPatch({ patchType, method, option });
-                continue;
-            }
-            for (const o of options) {
-                const option = Object.assign({}, defaultOption, o);
-                await commitPatch({ patchType, method, option });
-            }
-        }
-    }
-    return patches;
-}
-function optionIsArrayable(option) {
-    return Array.isArray(option) || typeof option === 'string';
-}
-function getModule(selector) {
-    return (
-    Array.isArray(selector) ? query({ props: selector }) :
-        typeof selector === 'string' ? query({ name: selector }) :
-            undefined);
-}
-function commitPatch(plugin, module, { patchType, method, option }) {
-    const selector = optionIsArrayable(option) ? option : option.selector;
-    const callbackName = (() => {
-        const moduleName = module.default?.displayName ? `patch${module.default.displayName}` : selector.toString();
-        const callbackPathName = (name) => typeof name === 'string' ? `patch${name}` : moduleName;
-        const callbackExists = (callback) => typeof callback === 'function' ? callback.name : callback;
-        return !optionIsArrayable(option) && option.callback ?
-            callbackExists(option.callback) :
-            callbackPathName(optionIsArrayable(option) ? selector : option.selector);
-    })();
-    const resolvedCallback = plugin[callbackName].bind(plugin);
-    [
-        [module === undefined, `Could not find module $${typeof selector === 'string' ? `with name "${selector}"` : `with props [${selector.join(', ')}]`}`],
-        [resolvedCallback === undefined, `Could not find ${optionIsArrayable(option) ? `"patch${selector}"` :
-                typeof option.callback === 'function' ? `callback for "${selector}"` :
-                    typeof option.callback === 'string' ? `"${option.callback}"` : 'callback'}`],
-    ].forEach(([condition, message]) => {
-        if (condition)
-            plugin.logger.error(message, option);
-    });
-    const previouslyPatched = plugin.patches.find(p => p.module === module && p.method === method && p.patchType === patchType);
-    if (previouslyPatched && (optionIsArrayable(option) || !option.override)) {
-        return previouslyPatched;
-    }
-    const callback = (data) => {
-        try {
-            resolvedCallback(data);
-        }
-        catch (err) {
-            plugin.logger.error(`Error in patched method for ${module.default?.displayName || module.displayName || 'module'}`, err, patched);
-        }
-    };
-    const cancel = plugin.patcher[patchType](module, method, callback, option);
-    const patched = { module, callback, method, patchType, option, cancel };
-    if (!optionIsArrayable(option) && !option.silent)
-        plugin.logger.log(`Patched ${patchType} ${method} on ${module.displayName
-            || module.default?.displayName
-            || (optionIsArrayable(option) ? typeof option === 'string' ? option : `[${option.join(', ')}]` :
-                optionIsArrayable(option.selector) ? typeof option.selector === 'string' ? option.selector : `[${option.selector.join(', ')}]` :
-                    callbackName)} and bound to ${callbackName}`, patched);
-    return patched;
-}
-function waitForModule(patcher, option) {
-    const { selector, isContextMenu, isModal } = option;
-    return (isContextMenu ? patcher.waitForContextMenu(() => getModule(selector), { silent: option.silent }) :
-        isModal ? patcher.waitForModal(() => getModule(selector), { silent: option.silent }) :
-            new Promise(resolve => resolve(getModule(selector))));
-}
-
-class ContextMenuProvider {
-    constructor(plugin) {
-        this.plugin = plugin;
-        this.events = {};
-        initializePatches(this, {
-            after: {
-                default: [
-                    { selector: 'MessageContextMenu', isContextMenu: true, override: true, callback: this.onMessageContextMenu, silent: true },
-                ]
-            }
-        });
-    }
-    static getInstance(plugin) {
-        if (!ContextMenuProvider.instance) {
-            ContextMenuProvider.instance = new ContextMenuProvider(plugin);
-        }
-        return ContextMenuProvider.instance;
-    }
-    get logger() {
-        return this.plugin.logger;
-    }
-    get patcher() {
-        return this.plugin.patcher;
-    }
-    on(event, callback) {
-        this.events[event] = callback;
-    }
-    off(event) {
-        this.events[event] = null;
-    }
-    onMessageContextMenu(thisObject, props, ret) {
-        this.events['message']?.(props, ret);
-    }
-}
-
-class DanhoPlugin {
-    constructor({ Config, Data, Logger, Patcher, Settings, Styles }) {
-        this.events = new Map();
-        this.config = Config;
-        this.data = Data;
-        this.logger = Logger;
-        this.patcher = Patcher;
-        this.settings = Settings;
-        this.styles = Styles;
-    }
-    async start(config) {
-        this.logger.group("Patches");
-        this.patches = await initializePatches(this, config);
-        this.contextMenus = ContextMenuProvider.getInstance(this);
-        this.logger.groupEnd();
-        this.logger.groupEnd();
-    }
-    stop() {
-    }
-    get BDFDB() {
-        return window.BDFDB;
-    }
-    get ZLibrary() {
-        return window.ZLibrary;
-    }
-    get BDD() {
-        return window.BDD;
-    }
-    on(event, callback) {
-        this.events.set(event, [...this.events.get(event) || [], callback]);
-    }
-    off(event, callback) {
-        this.events.set(event, this.events.get(event)?.filter(e => e !== callback));
-    }
-    emit(event, ...args) {
-        this.events.get(event)?.forEach(e => e(...args));
-    }
-}
 
 class DanhoLibrary extends DanhoPlugin {
     constructor() {
         super(...arguments);
         this.Modules = DiscordModules;
         this.Libraries = Libraries;
-        this.PluginUtils = PluginUtils;
+        this.PluginUtils = CreatePluginUtils(this.logger);
         this.Utils = Utils;
     }
     GetPlugin() {
@@ -1484,6 +1750,7 @@ class DanhoLibraryGlobal extends DanhoLibrary {
         }
     }
     stop() {
+        delete window.BDD;
         this.emit('plugin-stop');
     }
 }
@@ -1497,10 +1764,8 @@ const index = createPlugin({ ...config, settings }, api => {
 module.exports = index;
 
     } catch (err) {
-        if ('DanhoLibrary' === 'DanhoLibrary') console.error(err);
-        
         if (window.BDD) console.error(err);
-        else module.exports = class NoPlugin {
+        module.exports = class NoPlugin {
             //start() { BdApi.Alert("this.name could not be loaded!") }
             start() {
                 window.BDD_PluginQueue ??= [];

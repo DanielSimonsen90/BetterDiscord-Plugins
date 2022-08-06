@@ -78,10 +78,8 @@ const index = window.BDD.PluginUtils.buildPlugin({ ...config, styles }, (Lib) =>
 module.exports = index;
 
     } catch (err) {
-        if ('DanhoGlasses' === 'DanhoLibrary') console.error(err);
-        
         if (window.BDD) console.error(err);
-        else module.exports = class NoPlugin {
+        module.exports = class NoPlugin {
             //start() { BdApi.Alert("this.name could not be loaded!") }
             start() {
                 window.BDD_PluginQueue ??= [];

@@ -74,14 +74,11 @@ const index = window.BDD.PluginUtils.buildPlugin(config, Lib => {
         async start() {
             super.start({
                 after: {
-                    default: [
-                        { selector: "UserPopoutBody", isModal: true },
-                    ]
+                    default: {
+                        UserPopoutBody: { isModal: true }
+                    },
                 }
             });
-        }
-        patchViewAsRoleSelector({ args: [props], result }) {
-            this.logger.log('viewAsRoleSelector', props, result);
         }
         patchUserPopoutBody({ args: [props], result }) {
             const userPopoutBody = $(`.${result.props.className}`);
@@ -104,10 +101,8 @@ const index = window.BDD.PluginUtils.buildPlugin(config, Lib => {
 module.exports = index;
 
     } catch (err) {
-        if ('DanhoDiscordV2' === 'DanhoLibrary') console.error(err);
-        
         if (window.BDD) console.error(err);
-        else module.exports = class NoPlugin {
+        module.exports = class NoPlugin {
             //start() { BdApi.Alert("this.name could not be loaded!") }
             start() {
                 window.BDD_PluginQueue ??= [];
