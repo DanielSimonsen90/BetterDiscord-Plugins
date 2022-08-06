@@ -93,8 +93,8 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
         return new DQuery<El>(this.element.nextElementSibling as El);
     }
     public get value() {
-        if ('value' in this.element) return this.element['value'];
-        if ('checked' in this.element) return this.element['checked'];
+        if ('value' in this.element) return this.element['value'] as string | number;
+        if ('checked' in this.element) return this.element['checked'] as boolean;
         return this.element.textContent;
     }
     public get classes() {
@@ -107,6 +107,15 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
         for (const key in value) {
             this.element.style[key] = value[key];
         }
+    }
+
+    public addClass(className: string) {
+        this.element.classList.add(className);
+        return this;
+    }
+    public removeClass(className: string) {
+        this.element.classList.remove(className);
+        return this;
     }
 
     public hasDirectChild(selector: Selector<El>): boolean {
@@ -224,21 +233,22 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     }
     public appendComponent(component: JSX.Element): DQuery<El> {
         this.element.appendChild(createElement("<></>"));
-        const fragment = this.element.lastChild as HTMLElement;
+        const wrapper = this.element.lastChild as HTMLElement;
 
-        ReactDOM.render(component, fragment, () => this.element.replaceChild(fragment.lastChild, fragment));
+        ReactDOM.render(component, wrapper);
         return this;
     }
 
     public replaceComponent(component: JSX.Element): DQuery<El> {
-        this.element.appendChild(createElement("<></>"));
-        const fragment = this.element.lastChild as HTMLElement;
+        ReactDOM.render(component, this.element);
+        return this;
+    }
 
-        ReactDOM.render(component, fragment, () => {
-            const children = [...this.element.children];
-            if (!children.includes(fragment) || !fragment.firstChild) return;
-            this.parent.element.replaceChild(fragment.firstChild, this.element);
-        });
+    public insertComponent(position: InsertPosition, component: JSX.Element): DQuery<El> {
+        this.element.insertAdjacentElement(position, createElement("<></>"));
+        const wrapper = this.parent.children(".bdd-wrapper", true).element as HTMLElement;
+
+        ReactDOM.render(component, wrapper);
         return this;
     }
 
@@ -247,10 +257,10 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
         return this;
     }
     public prependComponent(component: JSX.Element): DQuery<El> {
-        this.element.insertAdjacentHTML('afterbegin', `<div class="fragment"></div>`);
-        const fragment = this.element.firstChild as HTMLElement;
+        this.element.insertAdjacentElement('afterbegin', createElement("<></>"));
+        const wrapper = this.element.firstChild as HTMLElement;
 
-        ReactDOM.render(component, fragment, () => this.element.replaceChild(fragment.firstChild, fragment));
+        ReactDOM.render(component, wrapper);
         return this;
     }
 
@@ -271,7 +281,7 @@ export default $;
 
 export function createElement(html: string | '<></>' | 'fragment', target?: Selector): Element {
     if (html === "<></>" || html.toLowerCase() === "fragment") {
-        html = `<div class="fragment"></div>`;
+        html = `<div class="bdd-wrapper"></div>`;
     }
 
     const element = new DOMParser().parseFromString(html, "text/html").body.firstElementChild as Element;

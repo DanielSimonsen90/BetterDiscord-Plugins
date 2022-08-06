@@ -1,7 +1,7 @@
 import { Arrayable } from "danholibraryjs";
 import BDFDB from '@BDFDB';
 import { User } from '@discord';
-import { Module } from "@ZLibrary";
+import ZLibrary, { Module } from "@ZLibrary";
 import { Finder } from "@discordium/api";
 import { If } from "danho-discordium/Utils";
 
@@ -79,11 +79,28 @@ function getPlugin<IsArray extends boolean = false>(...pluginNames: Array<string
         ))).map(plugin => plugin.instance.plugin as any);
 }
 
+function currentGuild() {
+    const guildId = ZLibrary.DiscordModules.SelectedGuildStore.getGuildId();
+    return guildId ? ZLibrary.DiscordModules.GuildStore.getGuild(guildId) : null;
+}
+function currentChannel() {
+    const channelId = ZLibrary.DiscordModules.SelectedChannelStore.getChannelId();
+    return channelId ? ZLibrary.DiscordModules.ChannelStore.getChannel(channelId) : null;
+}
+function currentGuildMembers() {
+    const guildId = currentGuild()?.id;
+    return guildId ? ZLibrary.DiscordModules.GuildMemberStore.getMembers(guildId) : null;
+}
+
 export const Utils = {
     findNodeByIncludingClassName,
     findModuleByIncludes,
     findClassModuleContainingClass,
     findModule,
     findUserByTag,
-    getPlugin
+    getPlugin,
+
+    get currentGuild() { return currentGuild() },
+    get currentChannel() { return currentChannel() },
+    get currentGuildMembers() { return currentGuildMembers() },
 }

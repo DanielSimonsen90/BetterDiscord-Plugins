@@ -12,7 +12,9 @@ import DiscordTag from './DiscordTag';
 import Form from './Form';
 import { SwitchItem, TextInput } from './Inputs';
 import Tooltip from './Tooltip';
+import SelectMenu from './SelectMenu';
 import Shakeable from './Shakeable';
+import SystemMessage from './SystemMessage';
 import UserProfileBadgeList from './UserProfileBadgeList';
 
 export namespace Discord {
@@ -26,6 +28,8 @@ export namespace Discord {
     export const DiscordTag: DiscordTag = Finder.query({ name: "DiscordTag" }).default;
     export const Form: Form = Finder.query({ props: ["FormItem", "FormSection", "FormDivider"] });
     export const Shakeable: Shakeable = Finder.query({ name: "Shakeable" }).default;
+    export const GetSelectMenu: <Type extends string | number = string>() => SelectMenu<Type> = () => Finder.query({ props: ["Select"] });
+    export const SystemMessage: SystemMessage = Finder.query({ name: "SystemMessage" });
     export const SwitchItem: SwitchItem = Finder.query({ name: "SwitchItem" }).default;
     export const TextInput: TextInput = Finder.query({ name: "TextInput" }).default;
     export const Tooltip: Tooltip = Finder.query({ props: ['TooltipContainer'] });

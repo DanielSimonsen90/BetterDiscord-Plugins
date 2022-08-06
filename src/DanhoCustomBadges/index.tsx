@@ -23,7 +23,7 @@ export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config, styles,
                 }
             });
 
-            this.patcher.after(Lib.Libraries.Discordium.Finder.byName("UserProfileBadgeList"), "default", (props: PatchReturns["UserProfileBadgeList"] & any) => {
+            this.patcher.after(this.finder.byName("UserProfileBadgeList"), "default", (props: PatchReturns["UserProfileBadgeList"] & any) => {
                 console.log('test');
             });
         }

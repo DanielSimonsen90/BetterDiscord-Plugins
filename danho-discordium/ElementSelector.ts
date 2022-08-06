@@ -49,7 +49,7 @@ export class ElementSelector {
         return this;
     }
     public data(prop: string, value?: string) {
-        this.result += `[data-${prop}"${value ? `="${value}"` : ''}"] `;
+        this.result += `[data-${prop}${value ? `="${value}"` : ''}] `;
         return this;
     }
     public role(role: AriaRole, tagName?: keyof HTMLElementTagNameMap) {

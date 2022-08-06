@@ -196,8 +196,11 @@ async function patch(plugin: DumbPlugin, option: PatchOptionAndCallbackName, pat
     }
 
     const callback = (data: any) => {
-        try { option.callback(data) }
-        catch (e) { console.error(e) }
+        try { return option.callback(data) }
+        catch (e) { 
+            plugin.logger.error(e);
+            throw e;
+         }
     }
 
     const cancel = plugin.patcher[patchType](module, methodType, callback, option);

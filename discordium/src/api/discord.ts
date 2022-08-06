@@ -39,7 +39,7 @@ export interface User {
 
     addGuildAvatarHash(arg1: any, arg2: any): any;
     getAvatarSource(arg1: any, arg2: any): any;
-    getAvatarURL(arg1: any, arg2: any, arg3: any): string;
+    getAvatarURL(guildMemberAvatarId?: string, arg2?: any, canAnimate?: string): string;
     getBannerSource(arg1: any, arg2: any): any;
     getBannerURL(arg1: any, arg2: any): string;
     removeGuildAvatarHash(arg: any): any;

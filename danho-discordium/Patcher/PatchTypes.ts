@@ -4,6 +4,8 @@ import UserProfileBadgeList from "./UserProfileBadgeList";
 
 export type PatchReturns = {
     [Key in keyof PatchProps]: {
+        context: any,
+        cancel: () => void,
         original: OriginalType[Key],
         args: PatchProps[Key] extends Array<any> ? PatchProps[Key] : [moduleProps: PatchProps[Key]],
         result: React.ReactElement<ResultProps[Key]>

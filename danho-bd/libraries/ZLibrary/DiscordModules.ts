@@ -46,7 +46,10 @@ type DiscordModules = {
         getGuildId(): string
     }
     UserStore: {
-        getUser(idOrName: string): User
+        findByTag(username: string, tag: string): User,
+        getCurrentUser(): User,
+        getUser(idOrName: string): User,
+        getUsers(): Record<string, User>
     },
 }
 export default DiscordModules;

@@ -151,49 +151,60 @@ enum TextInputStyles {
     Short = 1,
     Paragraph = 2,
 }
-type ComponentTypes = [
-    NA: null,
-    ActionRow: {
-        type: 1,
-        components: Array<ComponentTypes>
-    },
-    Button: {
-        type: 2,
-        style: ButtonStyles,
-        label?: string,
-        emoji?: Emoji,
-        custom_id?: string,
-        url?: string,
-        disabled?: boolean
-    },
-    SelectMenu: {
-        type: 3,
-        custom_id?: string,
-        options: Array<{
-            label: string,
-            value: string,
-            description?: string,
-            emoji?: Emoji,
-            default?: boolean,
-        }>
-        placeholder?: string,
-        min_values?: number,
-        max_values?: number,
-        disabled?: boolean
-    },
-    TextInput: {
-        type: 4,
-        custom_id?: string,
-        style: TextInputStyles,
-        label: string,
-        min_length?: number,
-        max_length?: number,
-        required?: boolean,
-        value?: string,
-        placeholder?: string,
-    }
-]
 
+export type BaseComponent<Type extends number> = {
+    type: Type
+    [key: string]: any
+}
+export type ActionRow = BaseComponent<1> & {
+    components: Array<BaseComponent<number>>
+}
+export type Button = BaseComponent<2> & {
+    style: ButtonStyles,
+    label?: string,
+    emoji?: Emoji,
+    custom_id?: string,
+    url?: string,
+    disabled?: boolean
+}
+export type SelectMenu = BaseComponent<3> & {
+    custom_id?: string,
+    options: Array<{
+        label: string,
+        value: string,
+        description?: string,
+        emoji?: Emoji,
+        default?: boolean,
+    }>
+    placeholder?: string,
+    min_values?: number,
+    max_values?: number,
+    disabled?: boolean
+}
+export type TextInput = BaseComponent<4> & {
+    custom_id?: string,
+    style: TextInputStyles,
+    label: string,
+    value: string,
+    min_length?: number,
+    max_length?: number,
+    required?: boolean,
+    placeholder?: string,
+}
+
+export type ComponentTypes = {
+    1: ActionRow,
+    2: Button,
+    3: SelectMenu,
+    4: TextInput,
+    [number: number]: BaseComponent<number>
+}
+export enum Components {
+    ActionRow = 1,
+    Button,
+    SelectMenu,
+    TextInput,
+}
 
 export type GuildMember = Pick<User, 'avatar' | 'banner' | 'bio' | 'flags'> & {
     colorString: string,

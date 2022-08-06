@@ -7,7 +7,7 @@ export * as Discord from './Discord';
 export type MutationRecordCallback = (record: MutationRecord) => boolean;
 export type PluginConfig = PatcherConfig;
 
-import { Config, CreatePluginCallbackApi, Logger, Patcher, Plugin, Styles, Data, Settings } from 'discordium';
+import { Config, CreatePluginCallbackApi, Logger, Patcher, Plugin, Styles, Data, Settings, Finder } from 'discordium';
 import ContextMenuProvider from './ContextMenuProvider';
 import initializePatches, { Patched, PatcherConfig } from './Patcher/Patcher';
 import { ComponentType } from 'react';
@@ -31,6 +31,7 @@ export class DanhoPlugin<
     public patcher: Patcher;
     public settings: Settings<SettingsType, DataType>;
     public styles: Styles;
+    public finder = Finder
 
     public patches: Array<Patched>;
     protected contextMenus: ContextMenuProvider;

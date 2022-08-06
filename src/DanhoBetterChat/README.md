@@ -1,9 +1,9 @@
-### [DanhoBetterChat](/dist/bd/DanhoBetterChat.plugin.js) <sub><sup>`v.1.1.0` *(Updated: 05/08/2022)*</sup></sub>
+### [DanhoBetterChat](/dist/bd/DanhoBetterChat.plugin.js) <sub><sup>`v.1.2.0` *(Updated: 05/08/2022)*</sup></sub>
 Personal chat features.
 
 #### Features
 * @someone
-    - Pings a random user from the Discord server (not limited to channel)
+    - Pings a random user that has access to view the current channel
 * Auto timestamps
     - Send a timestamp using one of the following formats:
     > ```html
@@ -24,7 +24,11 @@ Personal chat features.
     >```
     Combine them all using "-" ➡ "<dd/MM/yyyy-HH:mm:ss>"
     Add ":\<style>" at end ➡ "<dd/MM/yyyy-HH:mm:ss:R>" - see available styles [here](https://discord.com/developers/docs/reference#message-formatting-timestamp-styles).
+* Custom commands
+    > prefix: `!bdd`
+    > **Commands**
+    > * say @message=<string>
+    > * spag-smells
 
 > **Features to implement**
-> * @someone only pings people in selected channel
 > * Display properties using ${this.<property>}?

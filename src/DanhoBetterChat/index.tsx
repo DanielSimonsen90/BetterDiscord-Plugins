@@ -1,39 +1,51 @@
 // import styles from './style.scss';
-import { PatchReturns } from "danho-discordium/Patcher";
+import Commands from "./Commands";
 import config from './config.json';
+import { PatchReturns } from "danho-discordium/Patcher";
 
 type Settings = {}
 
-type ChatMatchConfig = [RegExp, (regex: RegExp, matches: RegExpExecArray, content: string) => string];
+type ChatMatchConfig = [RegExp, (regex: RegExp, matches: RegExpExecArray, content: string) => Promise<string> | string];
 
 const REGEX = {
     AtSomeone: /@someone/g,
-    Timestamp: /<(?<calendar>([0-2]\d|3[0-1])?(-|\/)((0\d)|(1[0-2]))?(-|\/)((19\d{2})|(20\d{2})|(\d{1,2})))?.?(?<time>((2[0-3])|([0-1]\d))((:|.)[0-5]\d)?((:|.)[0-5]\d)?((:|.)\d{1,4})?)?(?<format>:[tTdDfFR]|)?>/g
+    Timestamp: /<(?<calendar>([0-2]\d|3[0-1])?(-|\/)((0\d)|(1[0-2]))?(-|\/)((19\d{2})|(20\d{2})|(\d{1,2})))?.?(?<time>((2[0-3])|([0-1]\d))((:|.)[0-5]\d)?((:|.)[0-5]\d)?((:|.)\d{1,4})?)?(?<format>:[tTdDfFR]|)?>/g,
+    Command: /!bdd/g
 }
 
 export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config }, (Lib) => {
     const Plugin = Lib.GetPlugin<Settings>();
-    const { GuildMemberStore, SelectedGuildStore } = Lib.Libraries.ZLibrary.DiscordModules;
+    const { $ } = Lib.Modules.DanhoModules;
+    const { currentChannel, currentGuildMembers } = Lib.Utils;
 
     return class DanhoBetterChat extends Plugin {
         public chatMatches: Array<ChatMatchConfig> = [
             [REGEX.AtSomeone, this.onAtSomeone.bind(this)],
-            [REGEX.Timestamp, this.onTimestamp.bind(this)]
+            [REGEX.Timestamp, this.onTimestamp.bind(this)],
+            [REGEX.Command, this.onCommand.bind(this)],
         ];
+        public commands = Commands(this.logger);
 
-        insteadSendMessageModule = ({ args: [messageId, { content, ...props }, ...args], original: sendMessage }: PatchReturns["Message"]) => {
+        insteadSendMessageModule = async ({ args: [messageId, { content, ...props }, ...args], original: sendMessage }: PatchReturns["Message"]) => {
             const matches = this.chatMatches.filter(([regex]) => content.match(regex));
             for (const [regex, callback] of matches) {
                 const executed = regex.exec(content);
                 this.logger.log(`Executed ${regex}`, regex, executed, content);
-                content = callback(regex, executed, content);
+                try {
+                    content = await callback(regex, executed, content);
+                } catch (err) {
+                    if (err instanceof Error && err.message.includes("Message aborted"))
+                        return "Message cancelled";
+                    this.logger.error(err);
+                    throw err;
+                }
             }
 
             return sendMessage(messageId, { content, ...props }, ...args);
         }
 
         onAtSomeone(regex: RegExp, matches: RegExpExecArray, content: string) {
-            const members = GuildMemberStore.getMembers(SelectedGuildStore.getGuildId());
+            const members = currentGuildMembers.filter(({ userId }) => this.BDFDB.UserUtils.can("VIEW_CHANNEL", userId, currentChannel.id));
             const member = members[Math.floor(Math.random() * members.length)];
             content = content.replace(regex, `<@${member.userId}>`);
             return content;
@@ -102,6 +114,21 @@ export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config }, (Lib)
                     millisecond: (millisecond != NaN && millisecond) ?? current.millisecond,
                 };
             }
+        }
+        async onCommand(regex: RegExp, matches: RegExpExecArray, content: string) {
+            const chatContainer = $(s => s.tagName("ol").and.data("list-id", "chat-messages"));
+
+            try {
+                chatContainer.lastChild.insertComponent(
+                    "beforebegin",
+                    await this.commands.run(content)
+                );
+            } catch (err) {
+                this.logger.error(`[Commands]`, err);
+                throw err;
+            }
+
+            throw new Error("Message aborted");
         }
     } as any;
 });
