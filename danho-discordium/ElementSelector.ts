@@ -65,20 +65,21 @@ export default ElementSelector;
 
 export function getElementFromInstance<Element extends HTMLElement, Multiple extends boolean = false>(instance: React.ReactElement, allowMultiple: Multiple = false as Multiple): If<Multiple, Array<Element>, Element> {
     const selector = new ElementSelector()
-    if (instance.type) selector.tagName(instance.type.toString() as keyof HTMLElementTagNameMap).and;
+    if (instance.type && !instance.type.toString().includes("function")) selector.tagName(instance.type.toString() as keyof HTMLElementTagNameMap).and;
     if (instance.props) {
         const { props } = instance;
         if (props.id) selector.id(props.id).and;
         if (props.className) selector.className(props.className).and;
         if (props.ariaLabel) selector.ariaLabel(props.ariaLabel).and;
         if (props.role) selector.role(props.role).and;
-        if (props.dataMutationManagerId) selector.mutationManagerId(props.dataMutationManagerId).and;
         if (props.data) {
             for (const prop in props.data) {
                 selector.data(prop, props.data[prop]).and;
             }
         }
     }
+
+    // console.log(selector.toString());
 
     return allowMultiple ? 
         document.querySelectorAll(selector.toString()) as any : 

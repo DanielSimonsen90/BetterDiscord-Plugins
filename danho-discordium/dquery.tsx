@@ -167,11 +167,20 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     public get props() {
         return this.fiber.memoizedProps as Record<string, any>;
     }
+    public set props(value: Record<string, any>) {
+        this.fiber.pendingProps = value;
+    }
 
     // Function should get the property that matches provided key.
     // If no property matches, it should see if object has children or props.
     // If it does, it should recurse into those.
     // Finally, it should return undefined if nothing matches.
+    /**
+     * 
+     * @param key The property key to search for.
+     * @param cycleThrough Additional properties to search through, if key cannot be found through .props or .children.
+     * @returns [prop: T, path: Array<string>]
+     */
     public prop<T extends any = any>(key: string, ...cycleThrough: Array<string>): [prop: T, path: Array<string>] | undefined {
         const getProp = (obj: Record<string, Partial<Record<'props' | 'children' | string, any>>>, path: Array<string>) => {
             if (obj === undefined || obj === null) return undefined;
@@ -201,7 +210,12 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
             return undefined;
         }
 
-        return getProp(this.fiber.memoizedProps, []) ?? [undefined, undefined];
+        try {
+            return getProp(this.fiber.memoizedProps, []) ?? [undefined, undefined];
+        } catch (err) {
+            console.error(err, this);
+            return [undefined, undefined];
+        }
     }
     // same as prop<T>(key: string) but returns the parent of the found property
     public propsWith<T>(key: string, ...cycleThrough: Array<string>): [prop: T, path: Array<string>] | undefined {

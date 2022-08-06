@@ -76,7 +76,8 @@ export const CreatePluginUtils = (logger: Logger) => new (class PluginUtils impl
                     const existingPluginIndex = this.plugins.findIndex(p => p.config.name === pluginName);
                     if (existingPluginIndex >= 0) this.plugins[existingPluginIndex] = BdApi.Plugins.get(pluginName).instance.plugin as DanhoPlugin;
                     else this.plugins.push(plugin.instance.plugin as DanhoPlugin);
-                    window.BDD_PluginQueue.splice(window.BDD_PluginQueue.indexOf(pluginName), 1);
+
+                    if (window.BDD_PluginQueue) window.BDD_PluginQueue.splice(window.BDD_PluginQueue.indexOf(pluginName), 1);
                 }, timeout);
             }
             catch (err) {

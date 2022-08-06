@@ -18,6 +18,7 @@ type BadgeProps = {
     classNameImg?: string,
     src: JSX.Element | string,
     id: string,
+    size?: number,
 }
 
 export default function Badge(props: BadgeProps) {
@@ -44,10 +45,10 @@ export default function Badge(props: BadgeProps) {
     )
 }
 
-function getProps(props: BadgeProps) {
+function getProps({ size = 22, ...props }: BadgeProps) {
     const classes = {
         clickable: ZLibrary.DiscordClassModules.UserModal.clickable,
-        img: ZLibrary.DiscordClassModules.UserModal.profileBadge22,
+        img: ZLibrary.DiscordClassModules.UserModal[`profileBadge${size}`],
     }
 
     const tooltip = {

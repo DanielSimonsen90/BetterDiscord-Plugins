@@ -171,8 +171,8 @@ module.exports = (() => {
     try {`,
     footer: `
     } catch (err) {
-        if (!window.BDD) console.error(err);
-        else module.exports = class NoPlugin {
+        if (window.BDD) console.error(err);
+        module.exports = class NoPlugin {
             //start() { BdApi.Alert("this.name could not be loaded!") }
             start() {
                 window.BDD_PluginQueue ??= [];

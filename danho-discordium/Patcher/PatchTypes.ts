@@ -16,7 +16,7 @@ export type PatchReturns = {
         original: React.FunctionComponent,
         context: any;
         args: [moduleProps: any],
-        result: React.ReactElement
+        result: React.ReactElement<any> 
     }
 }
 export type PatchProps = {

@@ -147,10 +147,10 @@ function getSelector(methodProp: {} | string | Array<string> | PatchOption, prop
 function getCallback(plugin: DumbPlugin, selector: Arrayable<string>, methodProp: Object | string | Array<string> | PatchOption, propName?: string): [Function, string] {
     let callbackName = "";
     if (methodProp instanceof Array || selector instanceof Array) {
-        callbackName = `patch${
-            propName ?? typeof methodProp === 'string' ? 
+        callbackName = `patch${(
+            propName) ?? (typeof methodProp === 'string' ? 
             methodProp : 
-            (methodProp[0] ??= selector[0]).charAt(0).toUpperCase() + methodProp[0].slice(1)}Module`; // patchTextChannel ?? patchFormItemModule
+            (methodProp[0] ??= selector[0]).charAt(0).toUpperCase() + methodProp[0].slice(1) + "Module")}`; // patchTextChannel ?? patchFormItemModule
         return [plugin[callbackName], callbackName];
     }
     else if (typeof methodProp === 'string' // patchGuildsList ?? patchUserBanner
@@ -206,7 +206,7 @@ async function patch(plugin: DumbPlugin, option: PatchOptionAndCallbackName, pat
     const cancel = plugin.patcher[patchType](module, methodType, callback, option);
     const patched = { module, callback, method: methodType, patch: patchType, option, cancel };
     // Patched after render UserPopout bound to plugin.afterUserPopout.
-    if (!option.silent) plugin.logger.log(`Patched ${patchType} ${methodType} ${option.selector} bound to ${option.callbackName}.`, option);
+    if (!option.silent) plugin.logger.log(`Patched ${patchType} ${methodType} ${option.selector} bound to ${option.callbackName}.`, patched);
     return patched;
 }
 

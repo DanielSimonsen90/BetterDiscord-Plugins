@@ -8,6 +8,8 @@ import { Settings, SettingsUser } from "./Settings/types";
 import config from './config.json';
 import styles from './styles/index.scss';
 import settings from './Settings/data.json';
+import UserProfileBadgeList from "danho-discordium/Patcher/UserProfileBadgeList";
+import { DQuery } from "@dquery";
 
 export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config, styles, settings }, (Lib) => {
     const { $ } = Lib.Modules.DanhoModules;
@@ -17,14 +19,15 @@ export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config, styles,
         async start() {
             await super.start({
                 after: {
-                    default: [{
-                        selector: "UserProfileBadgeList", isModal: true
-                    }]
+                    default: {
+                        UserProfileBadgeList: { isModal: true }, // TODO: Doesn't work for some reason
+                        UserProfileModalHeader: { isModal: true },
+                        AccountBadges: { selector: "UserSettingsAccountProfileCard" },
+                    },
+                    UserPopoutInfo: {
+                        UserPopoutInfo: { selector: ["UserPopoutInfo"], isModal: true },
+                    }
                 }
-            });
-
-            this.patcher.after(this.finder.byName("UserProfileBadgeList"), "default", (props: PatchReturns["UserProfileBadgeList"] & any) => {
-                console.log('test');
             });
         }
 
@@ -34,36 +37,69 @@ export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config, styles,
         }
 
         patchUserProfileBadgeList({ args: [props], result }: PatchReturns["UserProfileBadgeList"]) {
-            this.logger.log("Hello");
-            if (!Array.isArray(result.props.children)) return this.logger.warn('UserProfileBadgeList children is not an array');
+            this.logger.log("Hello from UserProfileBadgeList");
+            // if (!Array.isArray(result.props.children)) return this.logger.warn('UserProfileBadgeList children is not an array');
 
-            const ref = $(s => s.getElementFromInstance(result, true), false);
-            if (!ref.length) return console.log("No ref element");
+            // const ref = $(s => s.getElementFromInstance(result, true), false);
+            // if (!ref.length) return this.logger.log("No ref element");
 
-            const userSettings = this.getUserSettings(props.user.id);
+            // this.modifyBadges(result.props, props.user.id);
+        }
+        patchUserProfileModalHeader({ args: [props], result }: PatchReturns["UserProfileModalHeader"]) {
+            const ref = $(s => s.getElementFromInstance(result.props.children[1], false), true);
+            if (!ref || !ref.element || !ref.fiber) return this.logger.log("No ref element");
+
+            const [{ className }] = ref.propsWith<{ className: string }>("openPremiumSettings");
+            const badgeList = $<true, HTMLDivElement>(`.${className}`, true);
+
+            this.modifyBadges(badgeList, props.user.id, 24);
+        }
+        patchUserPopoutInfo({ args: [props], result }: PatchReturns["UserPopoutInfo"]) {
+            const ref = $<true, HTMLDivElement>(s => s.getElementFromInstance(result.props.children[1], false) as HTMLDivElement, true);
+            if (!ref || !ref.element || !ref.fiber) return this.logger.log("No ref element");
+
+            this.modifyBadges(ref, props.user.id);
+        }
+        patchAccountBadges({ args: [props], result }: PatchReturns["UserSettingsAccountProfileCard"]) {
+            this.logger.log("Hello from AccountBadges", { props, result });
+        }
+
+        modifyBadges(badgeList: DQuery<HTMLDivElement>, userId: string, size = 22) {
+            const userSettings = this.getUserSettings(userId);
             if (!userSettings) return this.logger.log("User has no settings");
 
-            for (const { index, tooltip, ...props } of userSettings.badges) {
+            const props = badgeList.props as UserProfileBadgeList;
+
+            for (const { index, tooltip, ...badgeProps } of userSettings.badges) {
                 const badge = (() => {
                     try {
-                        return <Badge BDFDB={this.BDFDB} tooltipText={tooltip} {...props} />
+                        return <Badge key={index} BDFDB={this.BDFDB} tooltipText={tooltip} {...badgeProps} size={size} />
                     } catch (err) {
                         this.logger.error(err);
                         return null;
                     }
                 })()
 
-                if (badge) result.props.children.splice(index, 0, badge);
+                // if (badge) badgeList.props.children.splice(index, 0, badge);
+                if (badge) {
+                    const badgeAtPos = badgeList.children()[index];
+                    if (badgeAtPos.classes === "bdd-wrapper"
+                        && badgeAtPos.firstChild.classes.includes("danho-badge")
+                        && badgeAtPos.firstChild.attr("data-id") === badgeProps.id)
+                        continue;
+
+                    badgeAtPos.insertComponent("beforebegin", badge)
+                }
             }
 
-            this.storePremiumData(props.user.id, result);
+            this.storePremiumData(userId, props as UserProfileBadgeList);
         }
 
-        storePremiumData(userId: string, badgeList: PatchReturns["UserProfileBadgeList"]["result"]) {
+        storePremiumData(userId: string, badgeListProps: UserProfileBadgeList) {
             const userSettings = this.getUserSettings(userId);
 
             const isPremiumBadge = (text: string) => text?.includes("Subscriber since") || text?.includes("Server boosting since");
-            const premiumBadges = badgeList.props.children.filter(child => isPremiumBadge(child.props.text)).map(child => child.props.text);
+            const premiumBadges = badgeListProps.children.filter(child => isPremiumBadge(child.props.text)).map(child => child.props.text);
             if (!premiumBadges.length) {
                 if (!userSettings.premiumSince && !userSettings.boosterSince) return;
 
