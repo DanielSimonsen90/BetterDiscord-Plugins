@@ -1,6 +1,7 @@
 import { Logger } from "@discordium/api";
 const { Message } = window.BDD.Modules.DanhoModules.CompiledReact.Components;
 
+type CommandCallback<Props> = (Lib: typeof window.BDD, React: typeof window.BDD.Modules.React, component: typeof Message, props: Props) => JSX.Element;
 
 export default class DanhoBetterChatCommands extends Array<DanhoBetterChatCommand> {
     public constructor(private logger: Logger, ...commands: DanhoBetterChatCommand[]) {
@@ -32,12 +33,12 @@ export class DanhoBetterChatCommand<Props = any> {
         public readonly description: string,
         public readonly usage: string,
         public readonly aliases: Array<string>,
-        public readonly run: (Lib: typeof window.BDD, React: typeof window.BDD.Modules.React, component: typeof Message, props: Props) => Promise<JSX.Element>
+        public readonly run: CommandCallback<Props>
     ) { }
 }
 
 export function buildCommand<Props>(name: string, description: string, usage: string, aliases: Array<string>,
-    run: (Lib: typeof window.BDD, React: typeof window.BDD.Modules.React, component: typeof Message, props: Props) => Promise<JSX.Element>
+    run: CommandCallback<Props>
 ): DanhoBetterChatCommand {
     return new DanhoBetterChatCommand<Props>(name, description, usage, aliases, run);
 }

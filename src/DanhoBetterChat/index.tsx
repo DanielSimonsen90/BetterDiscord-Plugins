@@ -5,7 +5,7 @@ import { PatchReturns } from "danho-discordium/Patcher";
 
 type Settings = {}
 
-type ChatMatchConfig = [RegExp, (regex: RegExp, matches: RegExpExecArray, content: string) => Promise<string> | string];
+type ChatMatchConfig = [RegExp, (regex: RegExp, matches: RegExpExecArray, content: string) => string];
 
 const REGEX = {
     AtSomeone: /@someone/g,
@@ -26,21 +26,34 @@ export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config }, (Lib)
         ];
         public commands = Commands(this.logger);
 
-        insteadSendMessageModule = async ({ args: [messageId, { content, ...props }, ...args], original: sendMessage }: PatchReturns["Message"]) => {
+        insteadSendMessageModule = ({ args: [messageId, { content, ...props }, ...args], original: sendMessage }: PatchReturns["Message"]) => {
+            const typeTest = content.toLowerCase() === "random type test" || content.toLowerCase() === "rtt";
+
             const matches = this.chatMatches.filter(([regex]) => content.match(regex));
+            if (typeTest) this.logger.log(`[TypeTest]: Matched regex`, matches);
+
             for (const [regex, callback] of matches) {
                 const executed = regex.exec(content);
+                if (typeTest) this.logger.log(`[TypeTest]: Executed regex`, executed);
                 this.logger.log(`Executed ${regex}`, regex, executed, content);
+
                 try {
-                    content = await callback(regex, executed, content);
+                    if (typeTest) this.logger.log(`[TypeTest]: Executing callback for ${regex}`, callback);
+                    content = callback(regex, executed, content);
+                    if (typeTest) this.logger.log(`[TypeTest]: Executed callback for ${regex}`, content);
                 } catch (err) {
+                    this.logger.log(`[TypeTest]: Error executing callback for ${regex}`, err);
+
                     if (err instanceof Error && err.message.includes("Message aborted"))
                         return "Message cancelled";
+
+                    if (typeTest) this.logger.error(`[TypeTest]: Error executing callback for ${regex}`, err);
                     this.logger.error(err);
                     throw err;
                 }
             }
 
+            if (typeTest) this.logger.log(`[TypeTest]: Sending message`, content);
             return sendMessage(messageId, { content, ...props }, ...args);
         }
 
@@ -115,13 +128,13 @@ export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config }, (Lib)
                 };
             }
         }
-        async onCommand(regex: RegExp, matches: RegExpExecArray, content: string) {
+        onCommand(regex: RegExp, matches: RegExpExecArray, content: string) {
             const chatContainer = $(s => s.tagName("ol").and.data("list-id", "chat-messages"));
 
             try {
                 chatContainer.lastChild.insertComponent(
                     "beforebegin",
-                    await this.commands.run(content)
+                    this.commands.run(content)
                 );
             } catch (err) {
                 this.logger.error(`[Commands]`, err);

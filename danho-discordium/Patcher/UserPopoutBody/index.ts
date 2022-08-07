@@ -10,3 +10,4 @@ export type UserPopoutBody = {
     ],
     className: string,
 }
+export default UserPopoutBody;

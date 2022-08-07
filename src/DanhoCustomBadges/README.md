@@ -10,3 +10,8 @@ Add your own custom badges to your or other people's profile.
 > * Partner/Verified badges clicked redirects to server invite
 >
 > * Settings Collapse containers
+
+> **Bugs**
+> * Doesn't always find UserProfileModalHeader on load, therefore not working
+> * Settings aren't showing custom badges - thanks to UserProfileBadgeList for not working anymore >.>
+> * Custom badges don't load in UserSettings - also thanks to UserProfileBadgeList for not working anymore

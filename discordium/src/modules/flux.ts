@@ -32,7 +32,6 @@ export interface Dispatcher {
     _waitQueue: any[];
 
     dispatch<A extends Action>(action: A): void;
-    dirtyDispatch<A extends Action>(action: A): void;
     maybeDispatch<A extends Action>(action: A): any;
     isDispatching(): boolean;
 
@@ -120,4 +119,4 @@ export interface FluxHooks {
 
 export const Flux = (): FluxHooks => Finder.byProps("Store", "useStateFromStores");
 
-export const Dispatcher = (): Dispatcher => Finder.byProps("dirtyDispatch");
+export const Dispatcher = (): Dispatcher => Finder.byProps("dispatch", "subscribe");

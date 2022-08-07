@@ -165,7 +165,13 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
         return this.element['__reactFiber$'] as Fiber;
     }
     public get props() {
-        return this.fiber.memoizedProps as Record<string, any>;
+        try {
+            return this.fiber.memoizedProps as Record<string, any>;
+        }
+        catch (err) {
+            console.error(err, this);
+            return null;
+        }
     }
     public set props(value: Record<string, any>) {
         this.fiber.pendingProps = value;

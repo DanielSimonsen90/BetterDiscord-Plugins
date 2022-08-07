@@ -31,6 +31,8 @@ export type ZLibrary = {
     DiscordClassModules: DiscordClassModules,
     WebpackModules: WebpackModules,
     Patcher: Patcher
+} & {
+    [key: string]: any
 }
 export const ZLibrary: ZLibrary = (window as any).ZLibrary;
 export default ZLibrary

@@ -31,7 +31,6 @@ export type PatchOption<ForceCbIsFunc = false> = {
      * Module triggered by modal
      */
     isModal?: boolean,
-    // isLazy?: boolean,
     /**
      * If already patched, should override?
      */

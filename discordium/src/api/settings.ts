@@ -33,7 +33,7 @@ class Settings<
 
     /** Dispatches a settings update. */
     dispatch(): void {
-        this._dispatcher.dirtyDispatch({type: "update", current: this.current});
+        this._dispatcher._dispatch({type: "update", current: this.current});
     }
 
     /** Returns current settings state. */

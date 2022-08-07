@@ -14,6 +14,7 @@ type ReactUtils = typeof React & typeof ReactDOM & {
         filter?: (component: ComponentFiber<any, any>) => boolean;
         depth?: number;
         time?: number;
-    })
+    }): ComponentFiber<any, any> | null;
+    setChild(parent: React.ReactElement, child: React.ReactElement | string): void;
 }
 export default ReactUtils;

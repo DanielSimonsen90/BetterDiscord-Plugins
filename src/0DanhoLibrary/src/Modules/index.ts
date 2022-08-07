@@ -20,7 +20,18 @@ export type DiscordModules = {
 }
 
 export const DiscordModules = {
-    hljs, i18n, joi, lodash, moment, semver,
+    /** Code/Block highlighter */
+    hljs, 
+    /** Translation module */
+    i18n, 
+    /** Data Validation module */
+    joi, 
+    /** Utility module */
+    lodash, 
+    /** Date/Time module */
+    moment, 
+    /** Version module */
+    semver,
     Discord,
     React, ReactDOM, DanhoModules
 }

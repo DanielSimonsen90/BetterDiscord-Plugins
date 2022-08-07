@@ -7,6 +7,7 @@ const { BDFDB } = window.BDD?.Libraries ?? window;
 
 import Avatar from './Avatar';
 import Button from './Button';
+import ChannelEditorContainer from './ChannelEditorContainer';
 import Clickable from './Clickable';
 import DiscordTag from './DiscordTag';
 import Form from './Form';
@@ -25,6 +26,7 @@ export namespace Discord {
     export const Avatar: Avatar = Finder.query({ props: ['AnimatedAvatar'] });
     export const Button: Button = Finder.query({ props: ["Link", "Hovers"] });
     export const Clickable: Clickable = Finder.query({ name: "Clickable" });
+    export const ChannelEditorContainer: ChannelEditorContainer = Finder.query({ name: "ChannelEditorContainer" });
     export const DiscordTag: DiscordTag = Finder.query({ name: "DiscordTag" }).default;
     export const Form: Form = Finder.query({ props: ["FormItem", "FormSection", "FormDivider"] });
     export const Shakeable: Shakeable = Finder.query({ name: "Shakeable" }).default;

@@ -32,3 +32,6 @@ Personal chat features.
 
 > **Features to implement**
 > * Display properties using ${this.<property>}?
+
+> **Bugs**
+> * Randomly decides to spam unrelated message

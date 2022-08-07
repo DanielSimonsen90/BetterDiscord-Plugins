@@ -2,6 +2,8 @@ import { Channel, Guild, GuildMember, User } from "@discord"
 const { React, ReactDOM } = window.BDD.Modules;
 
 type DiscordModules = {
+    [key: string]: any
+
     ChannelStore: {
         getChannel(channelId: string): Channel,
         getAllThreadsForParent(parentId: string): Channel[],

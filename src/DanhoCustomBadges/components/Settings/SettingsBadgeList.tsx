@@ -28,8 +28,8 @@ export default function SettingsBadgeList({ user, BDFDB, data: { premiumSince, b
         if (!containerRef.current) return;
         const children = $(containerRef.current).firstChild.children().map(badge => ({
             tooltipText: badge.element.ariaLabel,
-            src: badge.firstChild.attr<true, false>('src'),
-            href: badge.firstChild.attr("data-href"),
+            src: badge.firstChild?.attr<true, false>('src'),
+            href: badge.firstChild?.attr("data-href"),
             id: badge.attr("data-id"),
             isDanhoBadge: badge.classes.includes("danho-badge"),
         })).map(({ isDanhoBadge, ...data }, index) => (
@@ -44,11 +44,11 @@ export default function SettingsBadgeList({ user, BDFDB, data: { premiumSince, b
                 <PlusIcon onClick={onAddBadgeClick} />
             </>
         ), containerRef.current.lastElementChild);
-    }, [badges, onBadgeClick, BDFDB]);
+    }, [containerRef.current, badges, onBadgeClick, BDFDB]);
 
     return (
         <div className="settings-badge-list-container" ref={containerRef}>
-            <BadgeList user={user as User} className='hidden'
+            <BadgeList user={user as User} className={`hidden data-user-id-${user.id}`} // using classes because component ignores additional props
                 premiumSince={premiumSince ? new Date(premiumSince) : null}
                 premiumGuildSince={boosterSince ? new Date(boosterSince) : null}
             />

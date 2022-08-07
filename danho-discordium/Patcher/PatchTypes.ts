@@ -1,6 +1,7 @@
-import { ActivityIndexes, ActivityTypes, ChannelInputType, Guild, GuildMember, Message, Snowflake, User } from "@discord";
-import { UserPopoutBody } from "./UserPopoutBody";
+import { ActivityIndexes, ActivityTypes, Guild, GuildMember, Message, Snowflake, User } from "@discord";
+import UserPopoutBody from "./UserPopoutBody";
 import UserProfileBadgeList from "./UserProfileBadgeList";
+import UserBio from "./UserBio";
 
 export type PatchReturns = {
     [Key in keyof PatchProps]: {
@@ -50,7 +51,11 @@ export type PatchProps = {
         },
         arg3: undefined,
         arg4: {}
-    ]
+    ],
+    UserBio: {
+        className: string,
+        userBio: string
+    }
 }
 export type OriginalType = {
     [Key in keyof PatchProps]: (...args: any[]) => any
@@ -58,5 +63,6 @@ export type OriginalType = {
 export type ResultProps = {
     UserProfileBadgeList: UserProfileBadgeList
     UserPopoutBody: UserPopoutBody,
-    Message: Message
+    Message: Message,
+    UserBio: UserBio
 }

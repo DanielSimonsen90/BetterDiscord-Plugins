@@ -22,7 +22,6 @@ export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config, styles,
                     default: {
                         UserProfileBadgeList: { isModal: true }, // TODO: Doesn't work for some reason
                         UserProfileModalHeader: { isModal: true },
-                        AccountBadges: { selector: "UserSettingsAccountProfileCard" },
                     },
                     UserPopoutInfo: {
                         UserPopoutInfo: { selector: ["UserPopoutInfo"], isModal: true },
@@ -38,16 +37,16 @@ export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config, styles,
 
         patchUserProfileBadgeList({ args: [props], result }: PatchReturns["UserProfileBadgeList"]) {
             this.logger.log("Hello from UserProfileBadgeList");
-            // if (!Array.isArray(result.props.children)) return this.logger.warn('UserProfileBadgeList children is not an array');
+            if (!Array.isArray(result.props.children)) return this.logger.warn('UserProfileBadgeList children is not an array');
 
-            // const ref = $(s => s.getElementFromInstance(result, true), false);
-            // if (!ref.length) return this.logger.log("No ref element");
+            const ref = $(s => s.getElementFromInstance(result, false), true);
+            if (!ref || !ref.element || !ref.fiber) return /*this.logger.log("No ref element");*/
 
-            // this.modifyBadges(result.props, props.user.id);
+            this.modifyBadges(ref as DQuery<HTMLDivElement>, props.user.id);
         }
         patchUserProfileModalHeader({ args: [props], result }: PatchReturns["UserProfileModalHeader"]) {
             const ref = $(s => s.getElementFromInstance(result.props.children[1], false), true);
-            if (!ref || !ref.element || !ref.fiber) return this.logger.log("No ref element");
+            if (!ref || !ref.element || !ref.fiber) return /*this.logger.log("No ref element");*/
 
             const [{ className }] = ref.propsWith<{ className: string }>("openPremiumSettings");
             const badgeList = $<true, HTMLDivElement>(`.${className}`, true);
@@ -56,17 +55,14 @@ export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config, styles,
         }
         patchUserPopoutInfo({ args: [props], result }: PatchReturns["UserPopoutInfo"]) {
             const ref = $<true, HTMLDivElement>(s => s.getElementFromInstance(result.props.children[1], false) as HTMLDivElement, true);
-            if (!ref || !ref.element || !ref.fiber) return this.logger.log("No ref element");
+            if (!ref || !ref.element || !ref.fiber) return /*this.logger.log("No ref element");*/
 
             this.modifyBadges(ref, props.user.id);
-        }
-        patchAccountBadges({ args: [props], result }: PatchReturns["UserSettingsAccountProfileCard"]) {
-            this.logger.log("Hello from AccountBadges", { props, result });
         }
 
         modifyBadges(badgeList: DQuery<HTMLDivElement>, userId: string, size = 22) {
             const userSettings = this.getUserSettings(userId);
-            if (!userSettings) return this.logger.log("User has no settings");
+            if (!userSettings) return /*this.logger.log("User has no settings");*/
 
             const props = badgeList.props as UserProfileBadgeList;
 
@@ -80,11 +76,13 @@ export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config, styles,
                     }
                 })()
 
-                // if (badge) badgeList.props.children.splice(index, 0, badge);
                 if (badge) {
                     const badgeAtPos = badgeList.children()[index];
-                    if (badgeAtPos.classes === "bdd-wrapper"
-                        && badgeAtPos.firstChild.classes.includes("danho-badge")
+                    if (badgeAtPos.classes === "bdd-wrapper" && !badgeAtPos.children().length) {
+                        badgeAtPos.unmount();
+                        continue;
+                    }
+                    if (badgeAtPos.firstChild.classes.includes("danho-badge")
                         && badgeAtPos.firstChild.attr("data-id") === badgeProps.id)
                         continue;
 
