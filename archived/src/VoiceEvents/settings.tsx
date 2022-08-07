@@ -1,10 +1,8 @@
-import { Finder, React, Modules, classNames } from "discordium";
+import { Finder, React } from "discordium";
+import { classNames, Flex, Button, Text, Switch, SwitchItem, TextInput, Slider, Form, margins } from "@discordium/modules";
 
-const { Flex, Button, Text, Switch, SwitchItem, TextInput, Slider } = Modules;
-const { FormSection, FormTitle, FormItem, FormText, FormDivider } = Modules.Form;
+const { FormSection, FormTitle, FormItem, FormText, FormDivider } = Form;
 const SingleSelect = Finder.byName("SingleSelect");
-
-const { margins } = Modules;
 
 export const settings = {
     voice: null as string,

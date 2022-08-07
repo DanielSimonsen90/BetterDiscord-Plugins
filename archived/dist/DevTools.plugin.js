@@ -1,8 +1,8 @@
 /**
- * @name DiumDevTools
+ * @name DevTools
  * @author Zerthox
- * @version 0.2.3
- * @description Makes Dium available as global for development.
+ * @version 0.3.1
+ * @description Utilities for development.
  * @authorLink https://github.com/Zerthox
  * @website https://github.com/Zerthox/BetterDiscord-Plugins
  * @source https://github.com/Zerthox/BetterDiscord-Plugins/tree/master/src/DevTools
@@ -150,87 +150,89 @@ const index$2 = {
     Filters: Filters
 };
 
-const EventEmitter = () => byProps$1("subscribe", "emit");
-const React$1 = () => byProps$1("createElement", "Component", "Fragment");
-const ReactDOM$1 = () => byProps$1("render", "findDOMNode", "createPortal");
-const classNames$1 = () => find$1((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
-const lodash$1 = () => byProps$1("cloneDeep", "flattenDeep");
-const semver = () => byProps$1("valid", "satifies");
-const moment = () => byProps$1("utc", "months");
-const SimpleMarkdown = () => byProps$1("parseBlock", "parseInline");
-const hljs = () => byProps$1("highlight", "highlightBlock");
-const Raven = () => byProps$1("captureBreadcrumb");
-const joi = () => byProps$1("assert", "validate", "object");
+const EventEmitter = /* @__PURE__ */ byProps$1("subscribe", "emit");
+const React$1 = /* @__PURE__ */ byProps$1("createElement", "Component", "Fragment");
+const ReactDOM = /* @__PURE__ */ byProps$1("render", "findDOMNode", "createPortal");
+const classNames = /* @__PURE__ */ find$1((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
+const lodash = /* @__PURE__ */ byProps$1("cloneDeep", "flattenDeep");
+const semver = /* @__PURE__ */ byProps$1("valid", "satifies");
+const moment = /* @__PURE__ */ byProps$1("utc", "months");
+const SimpleMarkdown = /* @__PURE__ */ byProps$1("parseBlock", "parseInline");
+const hljs = /* @__PURE__ */ byProps$1("highlight", "highlightBlock");
+const Raven = /* @__PURE__ */ byProps$1("captureBreadcrumb");
+const joi = /* @__PURE__ */ byProps$1("assert", "validate", "object");
 
-const npm = {
+const Flux = /* @__PURE__ */ byProps$1("Store", "useStateFromStores");
+const Dispatcher = /* @__PURE__ */ byProps$1("dispatch", "subscribe");
+
+const Constants = /* @__PURE__ */ byProps$1("Permissions", "RelationshipTypes");
+const i18n = /* @__PURE__ */ byProps$1("languages", "getLocale");
+const Platforms = /* @__PURE__ */ byProps$1("getPlatform", "isWindows", "isWeb", "PlatformTypes");
+const ClientActions = /* @__PURE__ */ byProps$1("toggleGuildFolderExpand");
+const GuildStore = /* @__PURE__ */ byProps$1("getGuild");
+const GuildActions = /* @__PURE__ */ byProps$1("requestMembers");
+const ChannelStore = /* @__PURE__ */ byProps$1("getChannel", "hasChannel");
+const ChannelActions = /* @__PURE__ */ byProps$1("selectChannel");
+const SelectedChannelStore = /* @__PURE__ */ byProps$1("getChannelId", "getVoiceChannelId");
+const UserStore = /* @__PURE__ */ byProps$1("getUser", "getCurrentUser");
+const GuildMemberStore = /* @__PURE__ */ byProps$1("getMember", "isMember");
+const PresenceStore = /* @__PURE__ */ byProps$1("getState", "getStatus", "isMobileOnline");
+const RelationshipStore = /* @__PURE__ */ byProps$1("isFriend", "getRelationshipCount");
+const MessageStore = /* @__PURE__ */ byProps$1("getMessage", "getMessages");
+const MessageActions = /* @__PURE__ */ byProps$1("jumpToMessage", "_sendMessage");
+const MediaEngineStore = /* @__PURE__ */ byProps$1("getLocalVolume");
+const MediaEngineActions = /* @__PURE__ */ byProps$1("setLocalVolume");
+const ContextMenuActions = /* @__PURE__ */ byProps$1("openContextMenuLazy");
+const ModalActions = /* @__PURE__ */ byProps$1("openModalLazy");
+const Flex = /* @__PURE__ */ byName$1("Flex");
+const Button = /* @__PURE__ */ byProps$1("Link", "Hovers");
+const Text = /* @__PURE__ */ byName$1("Text");
+const Links = /* @__PURE__ */ byProps$1("Link", "NavLink");
+const Switch = /* @__PURE__ */ byName$1("Switch");
+const SwitchItem = /* @__PURE__ */ byName$1("SwitchItem");
+const RadioGroup = /* @__PURE__ */ byName$1("RadioGroup");
+const Slider = /* @__PURE__ */ byName$1("Slider");
+const TextInput = /* @__PURE__ */ byName$1("TextInput");
+const Menu = /* @__PURE__ */ byProps$1("MenuGroup", "MenuItem", "MenuSeparator");
+const Form = /* @__PURE__ */ byProps$1("FormItem", "FormSection", "FormDivider");
+const margins = /* @__PURE__ */ byProps$1("marginLarge");
+
+const Modules = {
     __proto__: null,
+    Flux: Flux,
+    Dispatcher: Dispatcher,
     EventEmitter: EventEmitter,
     React: React$1,
-    ReactDOM: ReactDOM$1,
-    classNames: classNames$1,
-    lodash: lodash$1,
+    ReactDOM: ReactDOM,
+    classNames: classNames,
+    lodash: lodash,
     semver: semver,
     moment: moment,
     SimpleMarkdown: SimpleMarkdown,
     hljs: hljs,
     Raven: Raven,
-    joi: joi
-};
-
-const Flux$1 = () => byProps$1("Store", "useStateFromStores");
-const Dispatcher = () => byProps$1("dirtyDispatch");
-
-const flux = {
-    __proto__: null,
-    Flux: Flux$1,
-    Dispatcher: Dispatcher
-};
-
-const Constants = () => byProps$1("Permissions", "RelationshipTypes");
-const i18n = () => byProps$1("languages", "getLocale");
-const Platforms = () => byProps$1("getPlatform", "isWindows", "isWeb", "PlatformTypes");
-const ClientActions = () => byProps$1("toggleGuildFolderExpand");
-const ChannelStore = () => byProps$1("getChannel", "hasChannel");
-const SelectedChannelStore = () => byProps$1("getChannelId", "getVoiceChannelId");
-const UserStore = () => byProps$1("getUser", "getCurrentUser");
-const GuildMemberStore = () => byProps$1("getMember", "isMember");
-const PresenceStore = () => byProps$1("getState", "getStatus", "isMobileOnline");
-const RelationshipStore = () => byProps$1("isFriend", "getRelationshipCount");
-const MediaEngineStore = () => byProps$1("getLocalVolume");
-const MediaEngineActions = () => byProps$1("setLocalVolume");
-const ContextMenuActions = () => byProps$1("openContextMenuLazy");
-const ModalActions = () => byProps$1("openModalLazy");
-const Flex$1 = () => byName$1("Flex");
-const Button$1 = () => byProps$1("Link", "Hovers");
-const Text = () => byName$1("Text");
-const Links = () => byProps$1("Link", "NavLink");
-const Switch = () => byName$1("Switch");
-const SwitchItem = () => byName$1("SwitchItem");
-const RadioGroup = () => byName$1("RadioGroup");
-const Slider = () => byName$1("Slider");
-const TextInput = () => byName$1("TextInput");
-const Menu = () => byProps$1("MenuGroup", "MenuItem", "MenuSeparator");
-const Form$1 = () => byProps$1("FormItem", "FormSection", "FormDivider");
-const margins$1 = () => byProps$1("marginLarge");
-
-const discord = {
-    __proto__: null,
+    joi: joi,
     Constants: Constants,
     i18n: i18n,
     Platforms: Platforms,
     ClientActions: ClientActions,
+    GuildStore: GuildStore,
+    GuildActions: GuildActions,
     ChannelStore: ChannelStore,
+    ChannelActions: ChannelActions,
     SelectedChannelStore: SelectedChannelStore,
     UserStore: UserStore,
     GuildMemberStore: GuildMemberStore,
     PresenceStore: PresenceStore,
     RelationshipStore: RelationshipStore,
+    MessageStore: MessageStore,
+    MessageActions: MessageActions,
     MediaEngineStore: MediaEngineStore,
     MediaEngineActions: MediaEngineActions,
     ContextMenuActions: ContextMenuActions,
     ModalActions: ModalActions,
-    Flex: Flex$1,
-    Button: Button$1,
+    Flex: Flex,
+    Button: Button,
     Text: Text,
     Links: Links,
     Switch: Switch,
@@ -239,32 +241,9 @@ const discord = {
     Slider: Slider,
     TextInput: TextInput,
     Menu: Menu,
-    Form: Form$1,
-    margins: margins$1
+    Form: Form,
+    margins: margins
 };
-
-const createProxy = (entries) => {
-    const result = {};
-    for (const [key, value] of Object.entries(entries)) {
-        Object.defineProperty(result, key, {
-            enumerable: true,
-            configurable: true,
-            get() {
-                delete this[key];
-                this[key] = value();
-                return this[key];
-            }
-        });
-    }
-    return result;
-};
-const Modules = createProxy({
-    ...npm,
-    ...flux,
-    ...discord
-});
-const Modules$1 = Modules;
-const { React, ReactDOM, classNames, lodash, Flux } = Modules;
 
 const resolveName = (object, method) => {
     const target = method === "default" ? object[method] : {};
@@ -279,7 +258,7 @@ const createPatcher = (id, Logger) => {
             return temp;
         } : (context, args, result) => callback({ cancel, original, context, args, result }), { silent: true });
         if (!options.silent) {
-            Logger.log(`Patched ${method} of ${options.name ?? resolveName(object, method)}`);
+            Logger.log(`Patched ${String(method)} of ${options.name ?? resolveName(object, method)}`);
         }
         return cancel;
     };
@@ -289,8 +268,10 @@ const createPatcher = (id, Logger) => {
         before: (object, method, callback, options = {}) => forward(rawPatcher.before, object, method, ({ result: _, ...data }) => callback(data), options),
         after: (object, method, callback, options = {}) => forward(rawPatcher.after, object, method, callback, options),
         unpatchAll: () => {
-            rawPatcher.unpatchAll(id);
-            Logger.log("Unpatched all");
+            if (rawPatcher.getPatchesByCaller(id).length > 0) {
+                rawPatcher.unpatchAll(id);
+                Logger.log("Unpatched all");
+            }
         },
         waitForLazy: (object, method, argIndex, callback) => new Promise((resolve) => {
             const found = callback();
@@ -298,7 +279,7 @@ const createPatcher = (id, Logger) => {
                 resolve(found);
             }
             else {
-                Logger.log(`Waiting for lazy load in ${method} of ${resolveName(object, method)}`);
+                Logger.log(`Waiting for lazy load in ${String(method)} of ${resolveName(object, method)}`);
                 patcher.before(object, method, ({ args, cancel }) => {
                     const original = args[argIndex];
                     args[argIndex] = async function (...args) {
@@ -315,8 +296,8 @@ const createPatcher = (id, Logger) => {
                 }, { silent: true });
             }
         }),
-        waitForContextMenu: (callback) => patcher.waitForLazy(Modules$1.ContextMenuActions, "openContextMenuLazy", 1, callback),
-        waitForModal: (callback) => patcher.waitForLazy(Modules$1.ModalActions, "openModalLazy", 0, callback)
+        waitForContextMenu: (callback) => patcher.waitForLazy(ContextMenuActions, "openContextMenuLazy", 1, callback),
+        waitForModal: (callback) => patcher.waitForLazy(ModalActions, "openModalLazy", 0, callback)
     };
     return patcher;
 };
@@ -348,17 +329,17 @@ class Settings extends Flux.Store {
         this.current = { ...defaults, ...Data.load("settings") };
     }
     dispatch() {
-        this._dispatcher.dirtyDispatch({ type: "update", current: this.current });
+        this._dispatcher.dispatch({
+            type: "update",
+            current: this.current
+        });
     }
-    get() {
-        return { ...this.current };
-    }
-    set(settings) {
-        Object.assign(this.current, settings instanceof Function ? settings(this.get()) : settings);
+    update(settings) {
+        Object.assign(this.current, settings instanceof Function ? settings(this.current) : settings);
         this.dispatch();
     }
     reset() {
-        this.set({ ...this.defaults });
+        this.update({ ...this.defaults });
     }
     delete(...keys) {
         for (const key of keys) {
@@ -367,13 +348,13 @@ class Settings extends Flux.Store {
         this.dispatch();
     }
     useCurrent() {
-        return Flux.useStateFromStores([this], () => this.get());
+        return Flux.useStateFromStores([this], () => this.current);
     }
     useState() {
-        return Flux.useStateFromStores([this], () => [this.get(), (settings) => this.set(settings)]);
+        return Flux.useStateFromStores([this], () => [this.current, (settings) => this.update(settings)]);
     }
     useStateWithDefaults() {
-        return Flux.useStateFromStores([this], () => [this.get(), this.defaults, (settings) => this.set(settings)]);
+        return Flux.useStateFromStores([this], () => [this.current, this.defaults, (settings) => this.update(settings)]);
     }
     addListener(listener) {
         const wrapper = ({ current }) => listener(current);
@@ -397,7 +378,7 @@ class Settings extends Flux.Store {
 }
 const createSettings = (Data, defaults) => new Settings(Data, defaults);
 
-const ReactInternals = React?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+const ReactInternals = React$1?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
 const [getInstanceFromNode, getNodeFromInstance, getFiberCurrentPropsFromNode, enqueueStateRestore, restoreStateIfNeeded, batchedUpdates] = ReactDOM?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?.Events ?? [];
 const ReactDOMInternals = {
     getInstanceFromNode,
@@ -467,7 +448,7 @@ const queryFiber = (fiber, predicate, direction = "up" , depth = 30, current = 0
     return null;
 };
 const findOwner = (fiber) => {
-    return queryFiber(fiber, (node) => node?.stateNode instanceof React.Component, "up" , 50);
+    return queryFiber(fiber, (node) => node?.stateNode instanceof React$1.Component, "up" , 50);
 };
 const forceUpdateOwner = (fiber) => new Promise((resolve) => {
     const owner = findOwner(fiber);
@@ -510,16 +491,15 @@ const index$1 = {
     forceFullRerender: forceFullRerender
 };
 
-const { Flex, Button, Form, margins } = Modules$1;
-const SettingsContainer = ({ name, children, onReset }) => (React.createElement(Form.FormSection, null,
+const SettingsContainer = ({ name, children, onReset }) => (React$1.createElement(Form.FormSection, null,
     children,
-    React.createElement(Form.FormDivider, { className: classNames(margins.marginTop20, margins.marginBottom20) }),
-    React.createElement(Flex, { justify: Flex.Justify.END },
-        React.createElement(Button, { size: Button.Sizes.SMALL, onClick: () => confirm(name, "Reset all settings?", {
+    React$1.createElement(Form.FormDivider, { className: classNames(margins.marginTop20, margins.marginBottom20) }),
+    React$1.createElement(Flex, { justify: Flex.Justify.END },
+        React$1.createElement(Button, { size: Button.Sizes.SMALL, onClick: () => confirm(name, "Reset all settings?", {
                 onConfirm: () => onReset()
             }) }, "Reset"))));
 
-const version$1 = "0.2.8";
+const version$1 = "0.2.10";
 
 const createPlugin = ({ name, version, styles, settings }, callback) => {
     const Logger = createLogger(name, "#3a71c1", version);
@@ -542,8 +522,8 @@ const createPlugin = ({ name, version, styles, settings }, callback) => {
         }
     }
     if (plugin.SettingsPanel) {
-        Wrapper.prototype.getSettingsPanel = () => (React.createElement(SettingsContainer, { name: name, onReset: () => Settings.reset() },
-            React.createElement(plugin.SettingsPanel, null)));
+        Wrapper.prototype.getSettingsPanel = () => (React$1.createElement(SettingsContainer, { name: name, onReset: () => Settings.reset() },
+            React$1.createElement(plugin.SettingsPanel, null)));
     }
     return Wrapper;
 };
@@ -555,13 +535,10 @@ const dium = {
     ReactInternals: ReactInternals,
     ReactDOMInternals: ReactDOMInternals,
     Utils: index$1,
-    Modules: Modules$1,
-    version: version$1,
-    React: React,
+    React: React$1,
     ReactDOM: ReactDOM,
-    classNames: classNames,
-    lodash: lodash,
-    Flux: Flux
+    Flux: Flux,
+    version: version$1
 };
 
 const getWebpackRequire = () => {
@@ -655,10 +632,10 @@ const DevFinder = {
     resolveUsers: resolveUsers
 };
 
-const name = "DiumDevTools";
+const name = "DevTools";
 const author = "Zerthox";
-const version = "0.2.3";
-const description = "Makes Dium available as global for development.";
+const version = "0.3.1";
+const description = "Utilities for development.";
 const config = {
 	name: name,
 	author: author,
@@ -666,14 +643,68 @@ const config = {
 	description: description
 };
 
-const { Finder } = dium;
-Finder.dev = DevFinder;
-const index = createPlugin(config, () => ({
+const { React, Finder } = dium;
+const { UserFlags } = Constants;
+const settings = {
+    global: true,
+    developer: false,
+    staff: false
+};
+const diumGlobal = {
+    ...dium,
+    Finder: { ...Finder, dev: DevFinder },
+    Modules
+};
+const updateGlobal = (expose) => {
+    if (expose) {
+        window.dium = diumGlobal;
+    }
+    else {
+        delete window.dium;
+    }
+};
+const updateStaffFlag = (flag) => {
+    const user = UserStore.getCurrentUser();
+    if (flag) {
+        user.flags |= UserFlags.STAFF;
+    }
+    else {
+        user.flags &= ~UserFlags.STAFF;
+    }
+    UserStore.emitChange();
+};
+const index = createPlugin({ ...config, settings }, ({ Settings }) => ({
     start() {
-        window.dium = dium;
+        updateGlobal(Settings.current.global);
+        try {
+            updateStaffFlag(Settings.current.staff);
+        }
+        catch (err) {
+            console.error(err);
+        }
     },
     stop() {
-        delete window.dium;
+        updateGlobal(false);
+        try {
+            updateStaffFlag(false);
+        }
+        catch (err) {
+            console.error(err);
+        }
+    },
+    SettingsPanel: () => {
+        const [settings, setSettings] = Settings.useState();
+        return (React.createElement(React.Fragment, null,
+            React.createElement(SwitchItem, { value: settings.global, onChange: (checked) => {
+                    setSettings({ global: checked });
+                    updateGlobal(checked);
+                }, note: "Expose dium as global for development." }, "Dium Global"),
+            React.createElement(SwitchItem, { disabled
+                : true, value: false, note: "Enable experiments & other developer tabs in settings. Reopen to see them." }, "Enable Developer Experiments"),
+            React.createElement(SwitchItem, { value: settings.staff, onChange: (checked) => {
+                    setSettings({ staff: checked });
+                    updateStaffFlag(checked);
+                }, note: "Add the Staff flag to the current user.", hideBorder: true }, "Enable Staff flag")));
     }
 }));
 

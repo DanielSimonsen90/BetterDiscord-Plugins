@@ -1,17 +1,15 @@
-import { createPlugin, Finder, Utils, React, Modules } from "discordium";
+
+import { createPlugin, Finder, Utils, React } from "discordium";
+import { Platforms } from "@discordium/modules";
 import config from "./config.json";
 
-const { Platforms } = Modules;
 const { PlatformTypes } = Platforms;
 const OverlayBridgeStore = Finder.byProps("initialize", "isSupported", "getFocusedPID");
 
 const RadioGroup = Finder.byName("RadioGroup");
 
 const settings = {
-    platform: /^win/.test(Platforms.platform) ? PlatformTypes.WINDOWS
-        : Platforms.platform === "darwin" ? PlatformTypes.OSX
-            : Platforms.platform === "linux" ? PlatformTypes.LINUX
-                : PlatformTypes.WEB
+    platform: null // TODO: get platform
 };
 
 export default createPlugin({ ...config, settings }, ({ Logger, Patcher, Settings }) => {
@@ -25,7 +23,7 @@ export default createPlugin({ ...config, settings }, ({ Logger, Patcher, Setting
     };
 
     const changePlatform = async (platform: any) => {
-        Settings.set({ platform });
+        Settings.update({ platform });
         await triggerRerender();
         const platformName = Platforms.isWindows() ? "Windows" : Platforms.isOSX() ? "MacOS" : Platforms.isLinux() ? "Linux" : "Browser";
         notify(`Emulating ${platformName}`, { type: Utils.ToastType.Info, timeout: 5000 });
@@ -35,7 +33,7 @@ export default createPlugin({ ...config, settings }, ({ Logger, Patcher, Setting
         start() {
             // patch platform specific getters
             for (const platform of ["Windows", "OSX", "Linux", "Web"] as const) {
-                Patcher.instead(Platforms, `is${platform}`, () => Settings.get().platform === PlatformTypes[platform.toUpperCase()]);
+                Patcher.instead(Platforms, `is${platform}`, () => Settings.current.platform === PlatformTypes[platform.toUpperCase()]);
             }
 
             // patch overlay requirement

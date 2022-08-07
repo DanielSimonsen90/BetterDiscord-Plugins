@@ -1,12 +1,13 @@
-import {createPlugin, Finder, Utils, React, Flux, Modules} from "discordium";
+
+import { createPlugin, Finder, Utils, React, Flux } from "discordium";
+import { Constants, PresenceStore, RelationshipStore, Links } from "@discordium/modules";
 import config from "./config.json";
 import styles from "./styles.scss";
 
-const {RelationshipTypes, StatusTypes} = Modules.Constants;
-const {PresenceStore, RelationshipStore} = Modules;
+const { RelationshipTypes, StatusTypes } = Constants;
 
-const HomeButton = Finder.byProps("HomeButton");
-const {Link} = Modules.Links;
+const HomeButtonModule = Finder.byProps("HomeButton") as { HomeButton: React.FunctionComponent };
+const { Link } = Links;
 
 const guildStyles = Finder.byProps("guilds", "base");
 const listStyles = Finder.byProps("listItem");
@@ -21,14 +22,14 @@ const OnlineCount = () => {
 
     return (
         <div className={listStyles.listItem}>
-            <Link to={{pathname: "/channels/@me"}}>
+            <Link to={{ pathname: "/channels/@me" }}>
                 <div className={friendsOnline}>{online} Online</div>
             </Link>
         </div>
     );
 };
 
-export default createPlugin({...config, styles}, ({Logger, Patcher}) => {
+export default createPlugin({ ...config, styles }, ({ Logger, Patcher }) => {
     const triggerRerender = async () => {
         const node = document.getElementsByClassName(guildStyles.guilds)?.[0];
         const fiber = Utils.getFiber(node);
@@ -41,10 +42,10 @@ export default createPlugin({...config, styles}, ({Logger, Patcher}) => {
 
     return {
         start() {
-            Patcher.instead(HomeButton, "HomeButton", ({original: HomeButton, args: [props]}) => (
+            Patcher.instead(HomeButtonModule, "HomeButton", ({ original: HomeButton, args: [props] }) => (
                 <>
-                    <HomeButton {...props}/>
-                    <OnlineCount/>
+                    <HomeButton {...props} />
+                    <OnlineCount />
                 </>
             ));
 

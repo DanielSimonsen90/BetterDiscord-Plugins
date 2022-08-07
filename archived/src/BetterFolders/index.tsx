@@ -1,16 +1,13 @@
-// @ts-nocheck
-
-import { createPlugin, Finder, Utils, React, Flux, Modules } from "discordium";
+import { createPlugin, Finder, Utils, React, Flux } from "discordium";
+import { ClientActions, RadioGroup, SwitchItem, Form } from "@discordium/modules";
 import { BetterFolderIcon, BetterFolderUploader, FolderData } from "./components";
 import config from "./config.json";
 import styles from "./styles.scss";
 
-const { ClientActions } = Modules;
 const SortedGuildStore = Finder.byProps("getGuildsTree");
 const ExpandedGuildFolderStore = Finder.byProps("getExpandedFolders");
 
-const { RadioGroup, SwitchItem } = Modules;
-const { FormItem } = Modules.Form;
+const { FormItem } = Form;
 const FolderHeader = Finder.query({ name: "FolderHeader" });
 
 let FolderIcon = null;
@@ -24,13 +21,13 @@ const settings = {
 
 export default createPlugin({ ...config, styles, settings }, ({ Logger, Patcher, Data, Settings }) => {
     // backwards compatibility for old bd version
-    const oldFolders = Data.load("folders");
+    const oldFolders = Data.load("settings").folders;
     if (oldFolders) {
-        Data.delete("folders");
-        Settings.set({ folders: oldFolders as Record<number, FolderData> });
+        delete Data.load("settings").folders;
+        Settings.update({ folders: oldFolders as Record<number, FolderData> });
     }
 
-    const getFolder = (id: number) => Settings.get().folders[id];
+    const getFolder = (id: number) => Settings.current.folders[id];
 
     interface OuterIconProps {
         folderId: number;
@@ -80,7 +77,7 @@ export default createPlugin({ ...config, styles, settings }, ({ Logger, Patcher,
 
             // patch folder expand
             Patcher.after(ClientActions, "toggleGuildFolderExpand", ({ original, args: [folderId] }) => {
-                if (Settings.get().closeOnOpen) {
+                if (Settings.current.closeOnOpen) {
                     for (const id of ExpandedGuildFolderStore.getExpandedFolders()) {
                         if (id !== folderId) {
                             original(id);
@@ -155,13 +152,14 @@ export default createPlugin({ ...config, styles, settings }, ({ Logger, Patcher,
                     original(...args);
 
                     // update folders if necessary
-                    const { folders } = Settings.get();
+
+                    const { folders } = Settings.current;
                     if (state.iconType === "custom" && state.icon) {
                         folders[folderId] = { icon: state.icon, always: state.always };
-                        Settings.set({ folders });
+                        Settings.update({ folders });
                     } else if ((state.iconType === "default" || !state.icon) && folders[folderId]) {
                         delete folders[folderId];
-                        Settings.set({ folders });
+                        Settings.update({ folders });
                     }
                 };
             });

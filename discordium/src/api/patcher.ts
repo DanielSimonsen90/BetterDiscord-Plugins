@@ -1,5 +1,5 @@
 import {Logger} from "./logger";
-import Modules from "../modules";
+import {ContextMenuActions, ModalActions} from "../modules";
 
 export interface Options {
     silent?: boolean;
@@ -172,18 +172,20 @@ export const createPatcher = (id: string, Logger: Logger): Patcher => {
             options
         ),
         unpatchAll: () => {
-            rawPatcher.unpatchAll(id);
-            Logger.log("Unpatched all");
+            if (rawPatcher.getPatchesByCaller(id).length > 0) {
+                rawPatcher.unpatchAll(id);
+                Logger.log("Unpatched all");
+            }
         },
         waitForLazy: (object, method, argIndex, callback, options) => new Promise<any>((resolve) => {
             // check load once before we patch
             const found = callback();
             if (found) {
-                if (!options.silent) Logger.log(`Lazy load in ${method} of ${resolveName(object, method)} found from callback`, {found});
+                if (!options.silent) Logger.log(`Lazy load in ${String(method)} of ${resolveName(object, method)} found from callback`, {found});
                 resolve(found);
             } else {
                 // patch lazy load method
-                if (!options.silent) Logger.log(`Waiting for lazy load in ${method} of ${resolveName(object, method)} ${(callback.name ? `and bound to ${callback.name}` : '')}`, {object, method, arg: argIndex, callback, options});
+                Logger.log(`Waiting for lazy load in ${String(method)} of ${resolveName(object, method)}`);
                 patcher.before(object, method, ({args, cancel}) => {
                     // replace resolver function
                     const original = args[argIndex] as (...args: any[]) => Promise<any>;
@@ -194,7 +196,7 @@ export const createPatcher = (id: string, Logger: Logger): Patcher => {
                         Promise.resolve().then(() => {
                             const found = callback();
                             if (found) {
-                                if (!options.silent) Logger.log(`Lazy load in ${method} of ${resolveName(object, method)} found from callback`, {found});
+                                if (!options.silent) Logger.log(`Lazy load in ${String(method)} of ${resolveName(object, method)} found from callback`, {found});
                                 resolve(found);
 
                                 // we dont need the patch anymore
@@ -207,8 +209,8 @@ export const createPatcher = (id: string, Logger: Logger): Patcher => {
                 }, {silent: true});
             }
         }),
-        waitForContextMenu: (callback, options = { silent: false }) => patcher.waitForLazy(Modules.ContextMenuActions, "openContextMenuLazy", 1, callback, options),
-        waitForModal: (callback, options = { silent: false }) => patcher.waitForLazy(Modules.ModalActions, "openModalLazy", 0, callback, options)
+        waitForContextMenu: (callback) => patcher.waitForLazy(ContextMenuActions, "openContextMenuLazy", 1, callback),
+        waitForModal: (callback) => patcher.waitForLazy(ModalActions, "openModalLazy", 0, callback)
     };
 
     return patcher;

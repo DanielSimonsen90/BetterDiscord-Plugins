@@ -1,10 +1,8 @@
-import {Finder, React, Modules} from "discordium";
+import { Finder, React } from "discordium";
+import { Flex, Button, SwitchItem, Form, margins } from "@discordium/modules";
 
-const {Flex, Button, SwitchItem} = Modules;
-const {FormText} = Modules.Form;
+const { FormText } = Form;
 const ImageInput = Finder.byName("ImageInput");
-
-const {margins} = Modules;
 
 export interface FolderData {
     icon: string;
@@ -16,10 +14,10 @@ export interface BetterFolderIconProps extends FolderData {
     FolderIcon(props: any): JSX.Element;
 }
 
-export const BetterFolderIcon = ({icon, always, childProps, FolderIcon}: BetterFolderIconProps): JSX.Element => {
+export const BetterFolderIcon = ({ icon, always, childProps, FolderIcon }: BetterFolderIconProps): JSX.Element => {
     const result = FolderIcon(childProps);
     if (icon && (childProps.expanded || always)) {
-        result.props.children = <div className="betterFolders-customIcon" style={{backgroundImage: `url(${icon})`}}/>;
+        result.props.children = <div className="betterFolders-customIcon" style={{ backgroundImage: `url(${icon})` }} />;
     }
     return result;
 };
@@ -49,18 +47,18 @@ export interface BetterFolderUploaderProps extends FolderData {
     FolderIcon(props: any): JSX.Element;
 }
 
-export const BetterFolderUploader = ({icon, always, folderNode, onChange, FolderIcon}: BetterFolderUploaderProps): JSX.Element => (
+export const BetterFolderUploader = ({ icon, always, folderNode, onChange, FolderIcon }: BetterFolderUploaderProps): JSX.Element => (
     <>
         <Flex align={Flex.Align.CENTER}>
             <Button color={Button.Colors.WHITE} look={Button.Looks.OUTLINED}>
                 Upload Image
-                <ImageInput onChange={(img: string) => onChange({icon: img, always})}/>
+                <ImageInput onChange={(img: string) => onChange({ icon: img, always })} />
             </Button>
-            <FormText type="description" style={{margin: "0 10px 0 40px"}}>Preview:</FormText>
+            <FormText type="description" style={{ margin: "0 10px 0 40px" }}>Preview:</FormText>
             <BetterFolderIcon
                 icon={icon}
                 always
-                childProps={{expanded: false, folderNode}}
+                childProps={{ expanded: false, folderNode }}
                 FolderIcon={FolderIcon}
             />
         </Flex>
@@ -68,7 +66,7 @@ export const BetterFolderUploader = ({icon, always, folderNode, onChange, Folder
             hideBorder
             className={margins.marginTop8}
             value={always}
-            onChange={(checked: boolean) => onChange({icon, always: checked})}
+            onChange={(checked: boolean) => onChange({ icon, always: checked })}
         >Always display icon</SwitchItem>
     </>
 );

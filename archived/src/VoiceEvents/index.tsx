@@ -1,17 +1,30 @@
-import {createPlugin, Finder, Utils, React, Modules, Discord} from "discordium";
-import {settings, SettingsPanel, NotificationType} from "./settings";
+import { createPlugin, Finder, Utils, React } from "discordium";
+import {
+    Dispatcher,
+    ChannelStore,
+    SelectedChannelStore,
+    UserStore,
+    GuildMemberStore,
+    MediaEngineStore,
+    Text,
+    Menu
+} from "@discordium/modules";
+import type { Snowflake, User, Channel } from "@discordium/modules";
+import { settings, SettingsPanel, NotificationType } from "./settings";
 import config from "./config.json";
 
-const {Dispatcher, ChannelStore, SelectedChannelStore, UserStore, GuildMemberStore, MediaEngineStore} = Modules;
-const {ActionTypes} = Modules.Constants;
 const VoiceStateStore = Finder.byProps("getVoiceStates", "hasVideo");
 
-const {Text} = Modules;
-const {MenuItem} = Modules.Menu;
+const { MenuItem } = Menu;
+
+interface VoiceStateUpdatesAction {
+    type: "VOICE_STATE_UPDATES";
+    voiceStates: VoiceState[];
+}
 
 interface VoiceState {
-    channelId: Discord.Snowflake;
-    userId: Discord.Snowflake;
+    channelId: Snowflake;
+    userId: Snowflake;
     sessionId: string;
     deaf: boolean;
     mute: boolean;
@@ -25,22 +38,22 @@ interface VoiceState {
 
 let prevStates: Record<string, VoiceState> = {};
 const saveStates = () => {
-    prevStates = {...VoiceStateStore.getVoiceStatesForChannel(SelectedChannelStore.getVoiceChannelId())};
+    prevStates = { ...VoiceStateStore.getVoiceStatesForChannel(SelectedChannelStore.getVoiceChannelId()) };
 };
 
-export default createPlugin({...config, settings}, ({Logger, Patcher, Settings}) => {
+export default createPlugin({ ...config, settings }, ({ Logger, Patcher, Settings }) => {
     // backwards compatibility for settings
-    const loaded = Settings.get() as any;
+    const loaded = Settings.current as any;
     for (const [key, value] of Object.entries(Settings.defaults.notifs)) {
         if (typeof loaded[key] === "string") {
-            const {notifs} = Settings.get();
-            notifs[key] = {...value, message: loaded[key]};
-            Settings.set({notifs});
+            const { notifs } = Settings.current;
+            notifs[key] = { ...value, message: loaded[key] };
+            Settings.update({ notifs });
             Settings.delete(key);
         }
     }
     if (typeof loaded.privateCall === "string") {
-        Settings.set({unknownChannel: loaded.privateCall});
+        Settings.update({ unknownChannel: loaded.privateCall });
         Settings.delete("privateCall");
     }
 
@@ -52,7 +65,7 @@ export default createPlugin({...config, settings}, ({Logger, Patcher, Settings})
                 config.name,
                 <Text color={Text.Colors.STANDARD}>
                     Electron does not have any Speech Synthesis Voices available on your system.
-                    <br/>
+                    <br />
                     The plugin will be unable to function properly.
                 </Text>
             );
@@ -64,25 +77,25 @@ export default createPlugin({...config, settings}, ({Logger, Patcher, Settings})
 
     // update default voice
     Settings.defaults.voice = findDefaultVoice()?.voiceURI;
-    if (Settings.get().voice === null) {
-        Settings.set({voice: Settings.defaults.voice});
+    if (Settings.current.voice === null) {
+        Settings.update({ voice: Settings.defaults.voice });
     }
 
     const findCurrentVoice = () => {
-        const uri = Settings.get().voice;
+        const uri = Settings.current.voice;
         const voice = speechSynthesis.getVoices().find((voice) => voice.voiceURI === uri);
         if (voice) {
             return voice;
         } else {
             Logger.warn(`Voice "${uri}" not found, reverting to default`);
             const defaultVoice = findDefaultVoice();
-            Settings.set({voice: defaultVoice.voiceURI});
+            Settings.update({ voice: defaultVoice.voiceURI });
             return defaultVoice;
         }
     };
 
     const speak = (message: string) => {
-        const {volume, speed} = Settings.get();
+        const { volume, speed } = Settings.current;
 
         const utterance = new SpeechSynthesisUtterance(message);
         utterance.voice = findCurrentVoice();
@@ -93,19 +106,19 @@ export default createPlugin({...config, settings}, ({Logger, Patcher, Settings})
     };
 
     const processName = (name: string) => {
-        return Settings.get().filterNames ? name.split("").map((char) => /[a-zA-Z0-9]/.test(char) ? char : " ").join("") : name;
+        return Settings.current.filterNames ? name.split("").map((char) => /[a-zA-Z0-9]/.test(char) ? char : " ").join("") : name;
     };
 
     const notify = (type: NotificationType, userId: string, channelId: string) => {
-        const settings = Settings.get();
+        const settings = Settings.current;
 
         // check for enabled
         if (!settings.notifs[type].enabled) {
             return;
         }
 
-        const user = UserStore.getUser(userId) as Discord.User;
-        const channel = ChannelStore.getChannel(channelId) as Discord.Channel;
+        const user = UserStore.getUser(userId) as User;
+        const channel = ChannelStore.getChannel(channelId) as Channel;
 
         // check for filters
         if (
@@ -127,20 +140,20 @@ export default createPlugin({...config, settings}, ({Logger, Patcher, Settings})
         );
     };
 
-    const selfMuteListener = () => {
+    const selfMuteHandler = () => {
         const userId = UserStore.getCurrentUser().id;
         const channelId = SelectedChannelStore.getVoiceChannelId();
         notify(MediaEngineStore.isSelfMute() ? "mute" : "unmute", userId, channelId);
     };
 
-    const selfDeafListener = () => {
+    const selfDeafHandler = () => {
         const userId = UserStore.getCurrentUser().id;
         const channelId = SelectedChannelStore.getVoiceChannelId();
         notify(MediaEngineStore.isSelfDeaf() ? "deafen" : "undeafen", userId, channelId);
     };
 
-    const voiceStateListener = (event) => {
-        for (const {userId, channelId} of event.voiceStates as VoiceState[]) {
+    const voiceStateHandler = (action: VoiceStateUpdatesAction) => {
+        for (const { userId, channelId } of action.voiceStates) {
             try {
                 const prev = prevStates[userId];
 
@@ -190,22 +203,22 @@ export default createPlugin({...config, settings}, ({Logger, Patcher, Settings})
             saveStates();
 
             // listen for updates
-            Dispatcher.subscribe(ActionTypes.VOICE_STATE_UPDATES, voiceStateListener);
-            Logger.log("Subscribed to voice state events");
+            Dispatcher.subscribe("VOICE_STATE_UPDATES", voiceStateHandler);
+            Logger.log("Subscribed to voice state actions");
 
-            Dispatcher.subscribe(ActionTypes.AUDIO_TOGGLE_SELF_MUTE, selfMuteListener);
-            Logger.log("Subscribed to self mute events");
+            Dispatcher.subscribe("AUDIO_TOGGLE_SELF_MUTE", selfMuteHandler);
+            Logger.log("Subscribed to self mute actions");
 
-            Dispatcher.subscribe(ActionTypes.AUDIO_TOGGLE_SELF_DEAF, selfDeafListener);
-            Logger.log("Subscribed to self deaf events");
+            Dispatcher.subscribe("AUDIO_TOGGLE_SELF_DEAF", selfDeafHandler);
+            Logger.log("Subscribed to self deaf actions");
 
             // wait for context menu lazy load
             const useChannelHideNamesItem = await Patcher.waitForContextMenu(
-                () => Finder.query({name: "useChannelHideNamesItem"}) as {default: (channel: Discord.Channel) => JSX.Element}
+                () => Finder.query({ name: "useChannelHideNamesItem" }) as { default: (channel: Channel) => JSX.Element }
             );
 
             // add queue clear item
-            Patcher.after(useChannelHideNamesItem, "default", ({result}) => {
+            Patcher.after(useChannelHideNamesItem, "default", ({ result }) => {
                 if (result) {
                     return (
                         <>
@@ -213,7 +226,7 @@ export default createPlugin({...config, settings}, ({Logger, Patcher, Settings})
                             <MenuItem
                                 isFocused={false}
                                 id="voiceevents-clear"
-                                label="Clear notification queue"
+                                label="Clear VoiceEvents queue"
                                 action={() => speechSynthesis.cancel()}
                             />
                         </>
@@ -225,18 +238,18 @@ export default createPlugin({...config, settings}, ({Logger, Patcher, Settings})
             // reset
             prevStates = {};
 
-            Dispatcher.unsubscribe(ActionTypes.VOICE_STATE_UPDATES, voiceStateListener);
-            Logger.log("Unsubscribed from voice state events");
+            Dispatcher.unsubscribe("VOICE_STATE_UPDATES", voiceStateHandler);
+            Logger.log("Unsubscribed from voice state actions");
 
-            Dispatcher.unsubscribe(ActionTypes.AUDIO_TOGGLE_SELF_MUTE, selfMuteListener);
-            Logger.log("Unsubscribed from self mute events");
+            Dispatcher.unsubscribe("AUDIO_TOGGLE_SELF_MUTE", selfMuteHandler);
+            Logger.log("Unsubscribed from self mute actions");
 
-            Dispatcher.unsubscribe(ActionTypes.AUDIO_TOGGLE_SELF_DEAF, selfDeafListener);
-            Logger.log("Unsubscribed from self deaf events");
+            Dispatcher.unsubscribe("AUDIO_TOGGLE_SELF_DEAF", selfDeafHandler);
+            Logger.log("Unsubscribed from self deaf actions");
         },
         SettingsPanel: () => {
             const [current, defaults, setSettings] = Settings.useStateWithDefaults();
-            return <SettingsPanel current={current} defaults={defaults} onChange={setSettings} speak={speak}/>;
+            return <SettingsPanel current={current} defaults={defaults} onChange={setSettings} speak={speak} />;
         }
     };
 });
