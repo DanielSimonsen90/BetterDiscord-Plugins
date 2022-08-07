@@ -1,6 +1,5 @@
 import { Finder } from 'discordium';
 
-import * as DiumModules from '@discordium/modules/discord'
 import ZLibrary from '@ZLibrary';
 import BDFDB from '@BDFDB';
 const { BDFDB } = window.BDD?.Libraries ?? window;
@@ -19,7 +18,6 @@ import SystemMessage from './SystemMessage';
 import UserProfileBadgeList from './UserProfileBadgeList';
 
 export namespace Discord {
-    export const Modules = DiumModules;
     export const Margins: ZLibrary['DiscordClassModules']['Margins'] = Finder.query({ props: ["marginLarge"] });
     export const ClassModules: typeof ZLibrary.DiscordClassModules & typeof BDFDB.DiscordClassModules = Object.assign({}, ZLibrary.DiscordClassModules, BDFDB.DiscordClassModules);
 

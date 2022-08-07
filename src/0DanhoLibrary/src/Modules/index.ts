@@ -1,8 +1,6 @@
-import { Modules } from 'discordium';
+import { hljs, i18n, joi, lodash, moment, semver, React, ReactDOM } from '@discordium/modules';
 import DanhoModules from './DanhoModules';
 import * as Discord from '@discord';
-
-const { hljs, i18n, joi, lodash, moment, semver, React, ReactDOM } = Modules;
 
 export type DiscordModules = {
     hljs: typeof hljs,

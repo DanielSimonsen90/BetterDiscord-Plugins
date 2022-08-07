@@ -18,13 +18,13 @@ export function Setting<Settings>({ key, value, set, onChange, titles }: Setting
     const [v, setV] = useState(value);
 
     switch (typeof value) {
-        case 'boolean': return <SwitchItem key={key} title={titles[key]} value={v as any} onChange={checked => {
+        case 'boolean': return <SwitchItem key={key.toString()} title={titles[key.toString()]} value={v as any} onChange={checked => {
             set({ [key]: checked } as any);
             onChange?.(checked as any);
             setV(checked as any);
         }} />;
         case 'number':
-        case 'string': return <TextInput key={key} title={titles[key]} value={v as any} onChange={value => {
+        case 'string': return <TextInput key={key.toString()} title={titles[key]} value={v as any} onChange={value => {
             set({ [key]: value } as any);
             onChange?.(value as any);
             setV(value as any);

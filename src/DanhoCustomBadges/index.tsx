@@ -129,7 +129,7 @@ export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config, styles,
             return this.settings.get().users[userId];
         }
         saveUserSettings(userId: string, data: SettingsUser) {
-            const settings = this.settings.get();
+            const settings = this.settings.useCurrent();
             const { users } = settings;
             this.logger.log(`Saving user settings for ${userId}`, data);
             this.data.save("settings", { ...settings, users: { ...users, [userId]: data } });

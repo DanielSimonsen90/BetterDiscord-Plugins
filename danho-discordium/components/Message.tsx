@@ -1,11 +1,10 @@
-import { Embed, Components, ComponentTypes } from '@discord';
+import { Embed, ComponentTypes } from '@discord';
 import { classNames } from '@discordium/modules';
 import $ from 'danho-discordium/dquery';
-import { Modules } from 'discordium';
+import { React } from 'discordium';
 import { Checkmark, CloseButton, EphemeralEye } from './Discord/Icons';
 import ActionRow from './MessageComponents/ActionRow';
 
-const { React } = Modules;
 const { useMemo, useState, createRef } = React;
 
 type MessageAuthor = {

@@ -1,2 +1,2 @@
 export * from 'danho-bd/discord';
-export * from '@discordium/api/discord';
+export * from '@discordium/modules';

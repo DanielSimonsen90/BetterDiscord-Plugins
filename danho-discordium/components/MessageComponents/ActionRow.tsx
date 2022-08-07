@@ -1,6 +1,5 @@
-import { Modules } from 'discordium';
+import { React } from 'discordium';
 import { ComponentTypes, Components } from "@discord";
-const { React } = Modules;
 
 import DiscordComponents from '../Discord';
 const { Button, GetSelectMenu, TextInput } = DiscordComponents;

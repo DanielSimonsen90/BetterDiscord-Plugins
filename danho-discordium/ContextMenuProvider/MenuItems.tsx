@@ -1,7 +1,7 @@
 import { React } from 'discordium';
-import { Menu } from "@discordium/modules/discord";
+import { Menu } from "@discordium/modules";
 
-const { MenuGroup, MenuItem } = Menu();
+const { MenuGroup, MenuItem } = Menu;
 
 export function Group(props: GroupProps) {
     return <MenuGroup {...props} />;
