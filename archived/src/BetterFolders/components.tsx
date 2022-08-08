@@ -1,5 +1,5 @@
 import { Finder, React } from "discordium";
-import { Flex, Button, SwitchItem, Form, Margins } from "@components";
+import { Flex, Button, SwitchItem, Form, Margins } from "@react";
 
 const { FormText } = Form;
 const ImageInput = Finder.byName("ImageInput");

@@ -3,6 +3,10 @@ import { React, ReactDOM } from 'discordium';
 export { React, ReactDOM, classNames } from '@discordium/modules/npm';
 export default React;
 
+export * from './components';
+export * from './hooks';
+
+
 export const {
     useCallback,
     useContext,

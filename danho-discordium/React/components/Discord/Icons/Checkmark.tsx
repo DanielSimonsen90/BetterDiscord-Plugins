@@ -1,4 +1,4 @@
-import React from "@react";
+import { React } from '@discordium/modules';
 
 type Props = {
     tooltip: string

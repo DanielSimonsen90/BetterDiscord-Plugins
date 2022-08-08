@@ -1,5 +1,5 @@
 import { User } from "@discord";
-import { FunctionComponent } from "@react";
+import { FunctionComponent } from "../../";
 
 type BadgeSize = Record<`SIZE_${18  | 22 | 24}`, number>
 type UserProfileBadgeListComponent = FunctionComponent<{

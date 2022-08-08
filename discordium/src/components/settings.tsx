@@ -1,5 +1,5 @@
 import { React, classNames, Flex } from "../modules";
-import { Button, Margins, Form } from '../../../danho-discordium/components/Discord';
+import { Button, Margins, Form } from '../../../danho-discordium/React/components/Discord';
 import { confirm } from "../utils";
 
 export interface SettingsContainerProps {

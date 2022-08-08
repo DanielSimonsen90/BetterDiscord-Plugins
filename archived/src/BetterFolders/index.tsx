@@ -1,6 +1,6 @@
 import { createPlugin, Finder, Utils, React, Flux } from "discordium";
 import { ClientActions } from "@discordium/modules";
-import { SwitchItem, Form, RadioGroup } from "@components"
+import { SwitchItem, Form, RadioGroup } from "@react"
 import { BetterFolderIcon, BetterFolderUploader, FolderData } from "./components";
 import config from "./config.json";
 import styles from "./styles.scss";

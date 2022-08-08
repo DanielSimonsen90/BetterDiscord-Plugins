@@ -1,6 +1,6 @@
 import { Finder, React } from "discordium";
 import { classNames, Flex, Text, Slider } from "@discordium/modules";
-import { Button, SwitchItem, TextInput, Form, Margins } from '@components'
+import { Button, SwitchItem, TextInput, Form, Margins } from '@react/components'
 
 const { FormSection, FormTitle, FormItem, FormText, FormDivider } = Form;
 const SingleSelect = Finder.byName("SingleSelect");

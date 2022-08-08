@@ -1,4 +1,4 @@
-import React from "@react";
+import { React } from '@discordium/modules';
 
 export default function CloseButton() {
     return (

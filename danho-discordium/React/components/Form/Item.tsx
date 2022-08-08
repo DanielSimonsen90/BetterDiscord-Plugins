@@ -1,4 +1,4 @@
-import React, { classNames } from "@react";
+import { React, classNames } from '@discordium/modules';
 import ZLibrary from "@ZLibrary";
 import { Form } from '../Discord';
 

@@ -1,6 +1,6 @@
 import { ComponentTypes, Components } from "@discord";
 import { Button, TextInput } from '../Discord';
-import React from '@react';
+import { React } from '@discordium/modules';
 
 type ActionRowProps = Omit<ComponentTypes[Components.ActionRow], 'type'>
 

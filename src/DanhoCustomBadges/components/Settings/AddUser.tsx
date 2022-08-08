@@ -1,4 +1,4 @@
-import { ShakeableRef } from "danho-discordium/components/Discord/Shakeable";
+import { ShakeableRef } from "@react/components/Discord/Shakeable";
 import { User } from "@discord";
 import BDFDB from '@BDFDB';
 

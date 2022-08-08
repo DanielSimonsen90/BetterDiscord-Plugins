@@ -1,9 +1,10 @@
-import React, { useState } from '@react';
+import { React } from '@discordium/modules';
 import { Update } from '@discordium/api/settings';
 import { SwitchItem, TextInput } from './Discord';
 
 // const { Flex, Button, Switch, SwitchItem, TextInput, margins } = Modules;
 // const { FormSection, FormTitle, FormItem, FormText, FormDivider } = Modules.Form;
+const { useState } = React;
 
 type SettingProps<Settings extends Record<string, any>> = {
     key: keyof Settings,

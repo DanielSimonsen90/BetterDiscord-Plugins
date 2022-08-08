@@ -3,7 +3,8 @@ import { classNames } from '@discordium/modules';
 import $ from 'danho-discordium/dquery';
 import { Checkmark, CloseButton, EphemeralEye } from './Discord/Icons';
 import ActionRow from './MessageComponents/ActionRow';
-import React, { useMemo, useState, createRef } from '@react';
+import { React } from '@discordium/modules';
+const { useMemo, useState, createRef } = React;
 
 type MessageAuthor = {
     displayName: string;
