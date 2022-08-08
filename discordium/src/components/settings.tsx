@@ -1,5 +1,6 @@
-import {React, classNames, Flex, Button, Form, margins} from "../modules";
-import {confirm} from "../utils";
+import { React, classNames, Flex } from "../modules";
+import { Button, Margins, Form } from '../../../danho-discordium/components/Discord';
+import { confirm } from "../utils";
 
 export interface SettingsContainerProps {
     name: string;
@@ -7,10 +8,10 @@ export interface SettingsContainerProps {
     onReset: () => void;
 }
 
-export const SettingsContainer = ({name, children, onReset}: SettingsContainerProps): JSX.Element => (
+export const SettingsContainer = ({ name, children, onReset }: SettingsContainerProps): JSX.Element => (
     <Form.FormSection>
         {children}
-        <Form.FormDivider className={classNames(margins.marginTop20, margins.marginBottom20)}/>
+        <Form.FormDivider className={classNames(Margins.marginTop20, Margins.marginBottom20)} />
         <Flex justify={Flex.Justify.END}>
             <Button
                 size={Button.Sizes.SMALL}

@@ -1,9 +1,8 @@
-import { DependencyList } from 'react';
-import { React, Patcher } from 'discordium';
+import { DependencyList, useMemo, useEffect, useState } from '@react';
+import { Patcher } from 'discordium';
+
 import { createLogger } from '@discordium/api';
 import { Callback, createPatcher } from '@discordium/api/patcher';
-
-const { useMemo, useEffect, useState } = React;
 
 type PatcherConfig = {
     name: string,

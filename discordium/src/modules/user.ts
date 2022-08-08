@@ -63,7 +63,7 @@ export interface User {
 export interface UserStore extends Store {
     filter(predicate: (user: User) => boolean, sorted?: boolean): User[];
     findByTag(username: string, discriminator: string): User;
-    forEach(callback: (user: User) => boolean);
+    forEach(callback: (user: User) => boolean): void;
     getCurrentUser(): User;
     getUser(id: Snowflake): User;
     getUsers(): User[];

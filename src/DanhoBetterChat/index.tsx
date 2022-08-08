@@ -15,7 +15,7 @@ const REGEX = {
 
 export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config }, (Lib) => {
     const Plugin = Lib.GetPlugin<Settings>();
-    const { $ } = Lib.Modules.DanhoModules;
+    const { $ } = Lib.Modules;
     const { currentChannel, currentGuildMembers } = Lib.Utils;
 
     return class DanhoBetterChat extends Plugin {
@@ -25,8 +25,12 @@ export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config }, (Lib)
             [REGEX.Command, this.onCommand.bind(this)],
         ];
         public commands = Commands(this.logger);
+        private _lastMessageId: string | null = null;
+        private timesAttempted = 0;
 
         insteadSendMessageModule = ({ args: [messageId, { content, ...props }, ...args], original: sendMessage }: PatchReturns["Message"]) => {
+            if (messageId === this._lastMessageId) return this.logger.warn(`[insteadSendMessage]`, `Attempted to send ${messageId} ${++this.timesAttempted} times`);
+            this._lastMessageId = messageId;
             const typeTest = content.toLowerCase() === "random type test" || content.toLowerCase() === "rtt";
 
             const matches = this.chatMatches.filter(([regex]) => content.match(regex));
@@ -53,7 +57,7 @@ export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config }, (Lib)
                 }
             }
 
-            if (typeTest) this.logger.log(`[TypeTest]: Sending message`, content);
+            if (typeTest) this.logger.log(`[TypeTest]: Sending message`, { messageId, content, ...props, ...args });
             return sendMessage(messageId, { content, ...props }, ...args);
         }
 

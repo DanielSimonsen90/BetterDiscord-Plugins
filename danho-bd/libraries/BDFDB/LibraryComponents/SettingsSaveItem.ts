@@ -1,8 +1,7 @@
-import Component from "danho-discordium/components/Component";
-import { Children } from "@lib/React"
+import { ComponentClass, Children } from "@react";
 import LibraryComponents from "./LibraryComponents"
 
-type SettingsSaveItem<T = any> = Component<{
+type SettingsSaveItem<T = any> = ComponentClass<{
     type: keyof LibraryComponents | keyof HTMLElementTagNameMap
     plugin: any,
     label: string,

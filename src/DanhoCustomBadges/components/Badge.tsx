@@ -2,8 +2,7 @@ import BDFDB from "@BDFDB";
 
 const { Libraries, Modules } = window.BDD;
 const { ZLibrary } = Libraries;
-const { React, DanhoModules } = Modules;
-const { classNames } = DanhoModules.CompiledReact;
+const { React, CompiledReact: { classNames } } = Modules;
 
 type BadgeProps = {
     BDFDB: BDFDB,

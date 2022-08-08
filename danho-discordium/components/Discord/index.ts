@@ -1,4 +1,5 @@
-import { Finder } from 'discordium';
+import * as Finder from '@discordium/api/finder';
+export * from '@discordium/modules/components';
 
 import ZLibrary from '@ZLibrary';
 import BDFDB from '@BDFDB';
@@ -17,23 +18,25 @@ import Shakeable from './Shakeable';
 import SystemMessage from './SystemMessage';
 import UserProfileBadgeList from './UserProfileBadgeList';
 
-export namespace Discord {
-    export const Margins: ZLibrary['DiscordClassModules']['Margins'] = Finder.query({ props: ["marginLarge"] });
-    export const ClassModules: typeof ZLibrary.DiscordClassModules & typeof BDFDB.DiscordClassModules = Object.assign({}, ZLibrary.DiscordClassModules, BDFDB.DiscordClassModules);
+export const Margins: ZLibrary['DiscordClassModules']['Margins'] = Finder.query({ props: ["marginLarge"] });
+export const ClassModules: typeof ZLibrary.DiscordClassModules & typeof BDFDB.DiscordClassModules = Object.assign({}, ZLibrary.DiscordClassModules, BDFDB.DiscordClassModules);
 
-    export const Avatar: Avatar = Finder.query({ props: ['AnimatedAvatar'] });
-    export const Button: Button = Finder.query({ props: ["Link", "Hovers"] });
-    export const Clickable: Clickable = Finder.query({ name: "Clickable" });
-    export const ChannelEditorContainer: ChannelEditorContainer = Finder.query({ name: "ChannelEditorContainer" });
-    export const DiscordTag: DiscordTag = Finder.query({ name: "DiscordTag" }).default;
-    export const Form: Form = Finder.query({ props: ["FormItem", "FormSection", "FormDivider"] });
-    export const Shakeable: Shakeable = Finder.query({ name: "Shakeable" }).default;
-    export const GetSelectMenu: <Type extends string | number = string>() => SelectMenu<Type> = () => Finder.query({ props: ["Select"] });
-    export const SystemMessage: SystemMessage = Finder.query({ name: "SystemMessage" });
-    export const SwitchItem: SwitchItem = Finder.query({ name: "SwitchItem" }).default;
-    export const TextInput: TextInput = Finder.query({ name: "TextInput" }).default;
-    export const Tooltip: Tooltip = Finder.query({ props: ['TooltipContainer'] });
-    export const UserProfileBadgeList: UserProfileBadgeList = Finder.query({ name: "UserProfileBadgeList" });
+export const Avatar: Avatar = Finder.query({ props: ['AnimatedAvatar'] });
+export const Button: Button = Finder.query({ props: ["Link", "Hovers"] });
+export const Clickable: Clickable = Finder.query({ name: "Clickable" });
+export const ChannelEditorContainer: ChannelEditorContainer = Finder.query({ name: "ChannelEditorContainer" });
+export const DiscordTag: DiscordTag = Finder.query({ name: "DiscordTag" }).default;
+export const Form: Form = Finder.query({ props: ["FormItem", "FormSection", "FormDivider"] });
+export const Shakeable: Shakeable = Finder.query({ name: "Shakeable" }).default;
+export const GetSelectMenu: <Type extends string | number = string>() => SelectMenu<Type> = () => Finder.query({ props: ["Select"] });
+export const SystemMessage: SystemMessage = Finder.query({ name: "SystemMessage" });
+export const Tooltip: Tooltip = Finder.query({ props: ['TooltipContainer'] });
+export const UserProfileBadgeList: UserProfileBadgeList = Finder.query({ name: "UserProfileBadgeList" });
+
+const SwitchItemDefault: SwitchItem = Finder.query({ name: "SwitchItem" }).default;
+const TextInputDefault: TextInput = Finder.query({ name: "TextInput" }).default;
+
+export {
+    SwitchItemDefault as SwitchItem,
+    TextInputDefault as TextInput,
 }
-
-export default Discord;

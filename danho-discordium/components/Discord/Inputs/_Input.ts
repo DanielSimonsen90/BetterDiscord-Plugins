@@ -1,10 +1,13 @@
-import { BaseProps } from "@lib/React";
+import { CSSProperties } from "react";
 
 type Input<T, Props> = React.FunctionComponent<{
     onChange?: (value: T) => void;
-    value: T;
+    value?: T;
+    hideBorder?: boolean;
 } & Omit<React.HTMLAttributes<HTMLInputElement>, 'onChange'>
-    & BaseProps
     & Props
+    & {
+        style?: CSSProperties
+    }
 >;
 export default Input;

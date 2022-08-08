@@ -1,6 +1,6 @@
-import { classNames, React } from '@discordium/modules';
-import Discord from '../Discord';
-const { Form: { FormSection }, Margins } = Discord;
+import React, { classNames } from '@react';
+import { Form, Margins } from '../Discord';
+const { FormSection } = Form;
 
 type SectionProps = {
     className?: string,

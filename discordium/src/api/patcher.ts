@@ -177,7 +177,7 @@ export const createPatcher = (id: string, Logger: Logger): Patcher => {
                 Logger.log("Unpatched all");
             }
         },
-        waitForLazy: (object, method, argIndex, callback, options) => new Promise<any>((resolve) => {
+        waitForLazy: (object, method, argIndex, callback, options = {}) => new Promise<any>((resolve) => {
             // check load once before we patch
             const found = callback();
             if (found) {

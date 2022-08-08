@@ -1,7 +1,6 @@
-import React, { Children, MouseEventHandler } from "@lib/React";
-import Component from "danho-discordium/components/Component";
+import React, { ComponentClass, MouseEventHandler, Children } from "@react";
 
-type CollapseContainer = Component<{
+type CollapseContainer = ComponentClass<{
     title: string,
     collapseStates: { [title: string]: boolean },
     children: Children,

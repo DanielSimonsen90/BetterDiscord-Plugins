@@ -1,4 +1,3 @@
-const { React } = window.ZLibrary.DiscordModules;
 import { PatchReturns } from "danho-discordium/Patcher";
 
 import Badge from "./components/Badge";
@@ -12,7 +11,7 @@ import UserProfileBadgeList from "danho-discordium/Patcher/UserProfileBadgeList"
 import { DQuery } from "@dquery";
 
 export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config, styles, settings }, (Lib) => {
-    const { $ } = Lib.Modules.DanhoModules;
+    const { $, React } = Lib.Modules;
     const Plugin = Lib.GetPlugin<Settings>();
 
     return class DanhoCustomBadge extends Plugin<Settings> {
@@ -126,7 +125,7 @@ export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config, styles,
         }
 
         getUserSettings(userId: string): SettingsUser {
-            return this.settings.get().users[userId];
+            return this.settings.current.users[userId];
         }
         saveUserSettings(userId: string, data: SettingsUser) {
             const settings = this.settings.useCurrent();

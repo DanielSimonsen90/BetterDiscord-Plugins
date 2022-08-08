@@ -1,14 +1,13 @@
+import { User } from '@discord';
 import { PatchReturns } from 'danho-discordium/Patcher';
 import { Roles } from 'danho-discordium/Patcher/UserPopoutBody/roles';
 import config from './config.json';
 
 export default window.BDD.PluginUtils.buildPlugin(config, Lib => {
     const Plugin = Lib.GetPlugin();
-    const { React, DanhoModules } = Lib.Modules;
-    const { $, CompiledReact } = DanhoModules;
-
+    const { React, $, CompiledReact } = Lib.Modules;
     const { useState, useCallback, render, classNames } = CompiledReact;
-    const { Button } = CompiledReact.Components.Discord;
+    const { Button } = CompiledReact.Components;
 
     type EditBioButtonProps = {
         userBioClassName: string,
@@ -26,14 +25,14 @@ export default window.BDD.PluginUtils.buildPlugin(config, Lib => {
             ), container)
         }
 
-        return (
+        return Button ? (
             <Button className={marginTop}
                 look={Button.Looks.OUTLINED} color={Button.Colors.WHITE}
                 onClick={onEditBioClicked}
             >
                 Edit Bio
             </Button>
-        )
+        ) : <p className='error'>But component not found.</p>;
     }
 
     type UserBioEditorProps = {
@@ -145,11 +144,14 @@ export default window.BDD.PluginUtils.buildPlugin(config, Lib => {
             });
         }
         patchUserBio({ args: [props], result }: PatchReturns["UserBio"]) {
+            const [user] = $(`.${props.className}`)?.propFromParent<User>("user") ?? [undefined];
+            if (user?.id === this.ZLibrary.DiscordModules.UserStore.getCurrentUser().id) return;
+
             const lastChild = () => result.props.children[result.props.children.length - 1] as any;
 
-            if (["button", EditBioButton].includes(lastChild().type)
-                || lastChild().type === "div"
-                && lastChild().props.className.includes("button-container"))
+            if ((lastChild().type === "button" || lastChild().type === EditBioButton)
+                || (lastChild().type === "p" && lastChild().props.className === "error")
+                || lastChild().type === "div" && lastChild().props.className.includes("button-container"))
                 return;
 
             result.props.children.push(

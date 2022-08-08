@@ -1,5 +1,4 @@
-import { Children } from "../React";
-import Component from "danho-discordium/components/Component";
+import { Children, Component } from "@react";
 
 type ModalProps = {
     text?: string,

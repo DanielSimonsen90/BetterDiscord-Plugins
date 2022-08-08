@@ -16,6 +16,7 @@ interface SettingsAction<SettingsType> extends Action {
 class Settings<
     SettingsType extends Record<string, any>,
     DataType extends {settings: SettingsType}
+    // @ts-ignore
 > extends Flux.Store {
     /** Default settings values. */
     defaults: SettingsType;

@@ -1,7 +1,6 @@
-import { Children } from "@lib/React";
-import Component from "danho-discordium/components/Component";
+import { ComponentClass, Children } from "@react";
 
-type TextInput = Component<{
+type TextInput = ComponentClass<{
     value: string,
     onChange?: (value: string, component: TextInput) => void,
     valuePrefix?: string,

@@ -1,5 +1,5 @@
 import { Arrayable } from "danholibraryjs";
-import Component from "danho-discordium/components/Component";
+import { Component } from "@react";
 
 type ColorPicker = Component<{
     className?: string,

@@ -1,6 +1,6 @@
-import Component from "danho-discordium/components/Component";
+import { ComponentClass } from "@react";
 
-type Switch = Component<{
+type Switch = ComponentClass<{
     value: boolean,
     onChange: (value: boolean) => void,
     disabled?: boolean,

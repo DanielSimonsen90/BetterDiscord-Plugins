@@ -1,8 +1,8 @@
-import { React, classNames } from "@discordium/modules";
+import React, { classNames } from "@react";
 import ZLibrary from "@ZLibrary";
-import Discord from '../Discord';
+import { Form } from '../Discord';
 
-const { Form: { FormItem } } = Discord;
+const { FormItem } = Form;
 const { PopoutRoles } = ZLibrary.DiscordClassModules;
 
 type MyFormItemProps = {

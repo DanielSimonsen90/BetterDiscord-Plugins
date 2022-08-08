@@ -5,9 +5,9 @@ import BDFDB from '@BDFDB';
 const { Libraries, Modules, Utils } = window.BDD;
 const { BDFDB, ZLibrary } = Libraries;
 
-const { React, DanhoModules } = Modules;
+const { React, CompiledReact } = Modules;
 const { useState, createRef, useEffect } = React;
-const { Button, TextInput, Shakeable } = DanhoModules.CompiledReact.Components.Discord;
+const { Button, TextInput, Shakeable } = CompiledReact.Components;
 
 const { findUserByTag } = Utils;
 

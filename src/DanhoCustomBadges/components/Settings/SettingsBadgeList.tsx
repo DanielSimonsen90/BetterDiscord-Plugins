@@ -4,11 +4,10 @@ import PlusIcon from './PlusIcon';
 import BDFDB from '@BDFDB';
 import { BadgeData, SettingsUser } from 'src/DanhoCustomBadges/Settings/types';
 
-const { React, ReactDOM, DanhoModules } = window.BDD.Modules;
+const { React, ReactDOM, $, CompiledReact } = window.BDD.Modules;
 const { useEffect, createRef } = React;
-const { $, CompiledReact } = DanhoModules;
 const { classNames, Components } = CompiledReact;
-const { UserProfileBadgeList } = Components.Discord;
+const { UserProfileBadgeList } = Components;
 const { default: BadgeList } = UserProfileBadgeList;
 
 type SettingsBadgeListProps = {

@@ -1,9 +1,6 @@
-import { React } from 'discordium';
 import { ComponentTypes, Components } from "@discord";
-
-import DiscordComponents from '../Discord';
-const { Button, GetSelectMenu, TextInput } = DiscordComponents;
-const SelectMenu = GetSelectMenu();
+import { Button, TextInput } from '../Discord';
+import React from '@react';
 
 type ActionRowProps = Omit<ComponentTypes[Components.ActionRow], 'type'>
 
@@ -15,6 +12,7 @@ export function ActionRow({ components, ...props }: ActionRowProps) {
                     switch (type) {
                         case Components.Button: return <Button {...component} />;
                         // case Components.SelectMenu: return <SelectMenu {...component as ComponentTypes[Components.SelectMenu]} />;
+                        // @ts-ignore
                         case Components.TextInput: return <TextInput {...component as ComponentTypes[Components.TextInput]} />;
                         default: return <ActionRow {...component as ComponentTypes[Components.ActionRow]} />
                     }

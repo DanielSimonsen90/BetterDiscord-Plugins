@@ -11,7 +11,7 @@ import {
     Settings
 } from "./api";
 import { React } from "./modules";
-import { SettingsContainer } from "./components";
+import { SettingsContainer } from "./components/settings";
 
 export { Finder, ReactInternals, ReactDOMInternals } from "./api";
 export * as Utils from "./utils";

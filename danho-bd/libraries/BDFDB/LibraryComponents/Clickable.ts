@@ -1,7 +1,6 @@
-import { Children, MouseEventHandler } from "@lib/React";
-import Component from "danho-discordium/components/Component";
+import { ComponentClass, MouseEventHandler, Children } from "@react";
 
-type Clickable = Component<{
+type Clickable = ComponentClass<{
     "aria-label"?: string,
     className?: string,
     role?: string,

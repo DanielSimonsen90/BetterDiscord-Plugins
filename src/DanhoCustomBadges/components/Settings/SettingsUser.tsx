@@ -9,15 +9,15 @@ import useSelectedBadge from './useSelectedBadge';
 
 const { Libraries, Modules } = window.BDD;
 const { ZLibrary } = Libraries;
-const { React, DanhoModules } = Modules;
+const { React, CompiledReact } = Modules;
 const { useMemo, useCallback } = React;
-const { classNames, Components } = DanhoModules.CompiledReact;
+const { classNames, Components } = CompiledReact;
 const {
     Avatar: { default: Avatar, Sizes },
     DiscordTag,
     Form: { FormItem },
     Margins, ClassModules
-} = Components.Discord;
+} = Components;
 
 
 type SettingsUserProps = {

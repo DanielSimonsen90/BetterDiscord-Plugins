@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { Discord } from "discordium/src";
 import { ComponentFiber, ComponentInstance } from "@lib/React";
 import { BDMutationRecord } from "@ZLibrary";

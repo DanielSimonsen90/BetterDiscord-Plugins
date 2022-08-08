@@ -1,9 +1,9 @@
-import Component from "danho-discordium/components/Component";
+import { ComponentClass, Children } from "@react";
 
-type SettingsPanel = Component<{
+type SettingsPanel = ComponentClass<{
     addon?: {
         name?: string,
-        children?: Array<Component> | (() => Array<Component>),
+        children?: Children,
         onSettingsClosed?: () => void,
     }
 }>

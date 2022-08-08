@@ -38,7 +38,7 @@ export type BDFDB = {
     DMUtils: DMUtils,
     DOMUtils: DOMUtils
     FolderUtils: FolderUtils,
-    GuilddUtils: GuildUtils,
+    GuildUtils: GuildUtils,
     LibraryComponents: LibraryComponents,
     LibraryModules: LibraryModules
     MessageUtils: MessageUtils,

@@ -1,6 +1,6 @@
-import Component from "danho-discordium/components/Component";
+import { ComponentClass } from "@react";
 
-type ColorSwatches = Component<{
+type ColorSwatches = ComponentClass<{
     className?: string,
     color?: string,
     colors?: Array<number>,

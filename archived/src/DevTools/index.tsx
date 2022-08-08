@@ -1,5 +1,6 @@
 import * as dium from "discordium";
-import { Constants, SwitchItem, UserStore } from "@discordium/modules";
+import { Constants, UserStore } from "@discordium/modules";
+import { SwitchItem } from "@components";
 import * as Modules from "@discordium/modules";
 import * as DevFinder from "./finder";
 import config from "./config.json";

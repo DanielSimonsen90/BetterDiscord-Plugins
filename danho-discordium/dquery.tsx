@@ -1,8 +1,8 @@
 import { Arrayable } from 'danholibraryjs';
 import { ReactDOM, Utils } from 'discordium'
-import { Fiber } from '@react';
 import ElementSelector from './ElementSelector';
 import { If, PromisedReturn } from './Utils';
+import { Fiber } from '@react';
 
 export type SelectorCallback<Element extends Arrayable<HTMLElement> = HTMLElement> =
     ((selector: ElementSelector, _$: typeof $) => ElementSelector | string | DQuery<HTMLElement> | Element);
@@ -231,6 +231,42 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
             return obj[prop];
         }, this.fiber.memoizedProps);
         return [parent, path.slice(0, -1)]
+    }
+    public propFromParent<T>(key: string, ...cycleThrough: Array<string>): [prop: T, path: Array<string>] | undefined {
+        if (!this.element || !this.fiber) return [undefined, undefined];
+
+        const getProp = (obj: Fiber, path: Array<string>) => {
+            if (obj === undefined || obj === null) return undefined;
+            else if (obj[key]) return [obj[key], path];
+
+            if (obj.return) {
+                const result = getProp(obj.return, [...path, 'return']);
+                if (result) return result;
+            }
+            if (obj.memoizedProps) {
+                const result = getProp(obj.memoizedProps, [...path, 'memoizedProps']);
+                if (result) return result;
+            }
+            if (obj.pendingProps) {
+                const result = getProp(obj.pendingProps, [...path, 'pendingProps']);
+                if (result) return result;
+            }
+            if (cycleThrough) {
+                for (const prop of cycleThrough) {
+                    const result = getProp(obj[prop], [...path, prop]);
+                    if (result) return result;
+                }
+            }
+            return undefined;
+        }
+
+        try {
+            return getProp(this.fiber.return, []) ?? [undefined, undefined];
+        }
+        catch (err) {
+            console.error(err, this);
+            return [undefined, undefined];
+        }
     }
 
     public attr<

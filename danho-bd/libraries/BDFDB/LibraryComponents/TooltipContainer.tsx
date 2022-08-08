@@ -1,7 +1,6 @@
-import { Children } from '@lib/React';
-import Component from "danho-discordium/components/Component";
+import { ComponentClass, Children } from "@react";
 
-type TooltipContainer = Component<{
+type TooltipContainer = ComponentClass<{
     allowOverflow?: boolean,
     color?: string,
     disableTooltipPoinerEvents?: boolean,

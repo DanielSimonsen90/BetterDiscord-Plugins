@@ -1,11 +1,9 @@
-import { React } from 'discordium';
+import React, { useState } from '@react';
 import { Update } from '@discordium/api/settings';
-import Discord from 'danho-discordium/components/Discord';
+import { SwitchItem, TextInput } from './Discord';
 
-const { SwitchItem, TextInput } = Discord;
 // const { Flex, Button, Switch, SwitchItem, TextInput, margins } = Modules;
 // const { FormSection, FormTitle, FormItem, FormText, FormDivider } = Modules.Form;
-const { useState } = React;
 
 type SettingProps<Settings extends Record<string, any>> = {
     key: keyof Settings,

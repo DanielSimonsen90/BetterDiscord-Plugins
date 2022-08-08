@@ -9,6 +9,7 @@
         "baseUrl": ".",
         "paths": {
             "@discord": ["./danho-discordium/Discord"],
+            "@components": ["./danho-discordium/components/index"],
             "@BDFDB": ["./danho-bd/libraries/BDFDB/index"],
             "@ZLibrary": ["./danho-bd/libraries/ZLibrary/index"],
 
@@ -18,7 +19,7 @@
             "@discordium/*": ["./discordium/src/*"],
             "@BDFDB/*": ["./danho-bd/libraries/BDFDB/*"],
             "@ZLibrary/*": ["./danho-bd/libraries/ZLibrary/*"],
-            "@react": ["./discordium/src/api/react"]
+            "@react": ["./danho-discordium/React/index"],
         }
     },
     "ts-node": {

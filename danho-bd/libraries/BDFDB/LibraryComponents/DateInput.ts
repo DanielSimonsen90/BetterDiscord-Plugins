@@ -1,6 +1,6 @@
-import Component from "danho-discordium/components/Component";
+import { ComponentClass } from "@react";
 
-type DateInput = Component<{
+type DateInput = ComponentClass<{
     className?: string,
     label?: string,
     dateString?: string,

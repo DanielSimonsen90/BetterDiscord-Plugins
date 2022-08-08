@@ -540,7 +540,7 @@ module.exports = (() => {
                     if (!role) continue;
                     else if (role.name === "@everyone") {
                         const rolesList = popout.querySelector("div[class*='bodyInnerWrapper'] > div[class*='rolesList']");
-                        if (rolesList && roleList.lastElementChild) {
+                        if (rolesList && rolesList.lastElementChild) {
                             rolesList.lastElementChild.insertAdjacentElement(
                                 rolesList.lastElementChild.type === "button" ? "beforebegin" : "afterend", 
                                 DOMTools.createElement(this.itemHTML({

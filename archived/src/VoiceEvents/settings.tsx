@@ -1,5 +1,6 @@
 import { Finder, React } from "discordium";
-import { classNames, Flex, Button, Text, Switch, SwitchItem, TextInput, Slider, Form, margins } from "@discordium/modules";
+import { classNames, Flex, Text, Slider } from "@discordium/modules";
+import { Button, SwitchItem, TextInput, Form, Margins } from '@components'
 
 const { FormSection, FormTitle, FormItem, FormText, FormDivider } = Form;
 const SingleSelect = Finder.byName("SingleSelect");
@@ -103,7 +104,7 @@ export const SettingsPanel = ({ current, defaults, onChange, speak }: SettingsPa
 
     return (
         <>
-            <FormItem className={margins.marginBottom20}>
+            <FormItem className={Margins.marginBottom20}>
                 <FormTitle>TTS Voice</FormTitle>
                 <SingleSelect
                     value={voice}
@@ -117,7 +118,7 @@ export const SettingsPanel = ({ current, defaults, onChange, speak }: SettingsPa
                     renderOptionValue={([{ label, lang }]: VoiceSelectOption[]) => <VoiceLabel name={label} lang={lang} />}
                 />
             </FormItem>
-            <FormItem className={margins.marginBottom20}>
+            <FormItem className={Margins.marginBottom20}>
                 <FormTitle>TTS Volume</FormTitle>
                 <Slider
                     initialValue={volume}
@@ -126,7 +127,7 @@ export const SettingsPanel = ({ current, defaults, onChange, speak }: SettingsPa
                     asValueChanges={(value: number) => onChange({ volume: value })}
                 />
             </FormItem>
-            <FormItem className={margins.marginBottom20}>
+            <FormItem className={Margins.marginBottom20}>
                 <FormTitle>TTS Speed</FormTitle>
                 <Slider
                     initialValue={speed}
@@ -138,7 +139,7 @@ export const SettingsPanel = ({ current, defaults, onChange, speak }: SettingsPa
                     onMarkerRender={(value: number) => `${value.toFixed(2)}x`}
                 />
             </FormItem>
-            <FormDivider className={classNames(margins.marginTop20, margins.marginBottom20)} />
+            <FormDivider className={classNames(Margins.marginTop20, Margins.marginBottom20)} />
             <FormItem>
                 <SwitchItem
                     value={filterNames}
@@ -162,12 +163,12 @@ export const SettingsPanel = ({ current, defaults, onChange, speak }: SettingsPa
             </FormItem>
             <FormSection>
                 <FormTitle tag="h3">Notifications</FormTitle>
-                <FormText type="description" className={margins.marginBottom20}>
+                <FormText type="description" className={Margins.marginBottom20}>
                     $user will get replaced with the respective User Nickname, $username with the User Account name and $channel with the respective Voice Channel name.
                 </FormText>
             </FormSection>
             {Object.entries(titles).map(([key, title]) => (
-                <FormItem key={key} className={margins.marginBottom20}>
+                <FormItem key={key} className={Margins.marginBottom20}>
                     <FormTitle>{title}</FormTitle>
                     <Flex align={Flex.Align.CENTER}>
                         <Flex.Child grow={1}>
@@ -184,10 +185,10 @@ export const SettingsPanel = ({ current, defaults, onChange, speak }: SettingsPa
                             </div>
                         </Flex.Child>
                         <Flex.Child grow={0}>
-                            <Switch
-                                className={margins.marginRight20}
+                            <SwitchItem
+                                // className={Margins.marginRight20}
                                 checked={settings.notifs[key].enabled}
-                                onChange={(value: boolean) => {
+                                onChange={value => {
                                     const { notifs } = settings;
                                     notifs[key].enabled = value;
                                     onChange({ notifs });
@@ -207,7 +208,7 @@ export const SettingsPanel = ({ current, defaults, onChange, speak }: SettingsPa
                     </Flex>
                 </FormItem>
             ))}
-            <FormItem key="unknownChannel" className={margins.marginBottom20}>
+            <FormItem key="unknownChannel" className={Margins.marginBottom20}>
                 <FormTitle>Unknown Channel Name</FormTitle>
                 <Flex align={Flex.Align.CENTER}>
                     <Flex.Child grow={1}>

@@ -1,5 +1,4 @@
-import React, { ComponentFiber } from "../React";
-import ReactDOM from 'react-dom';
+import React, { ComponentFiber, ReactDOM } from "@react";
 
 type ReactUtils = typeof React & typeof ReactDOM & {
     getInstance<Props = {}, State = any>(node: Node): ComponentFiber<Props, State> | null;
@@ -11,10 +10,10 @@ type ReactUtils = typeof React & typeof ReactDOM & {
         group?: boolean;
         all?: boolean;
         type?: string;
-        filter?: (component: ComponentFiber<any, any>) => boolean;
+        filter?: (component: ComponentFiber) => boolean;
         depth?: number;
         time?: number;
-    }): ComponentFiber<any, any> | null;
+    }): ComponentFiber | null;
     setChild(parent: React.ReactElement, child: React.ReactElement | string): void;
 }
 export default ReactUtils;

@@ -1,8 +1,6 @@
-import { TransformType } from 'danholibraryjs';
 import ContextMenu from './ContextMenu';
 import DiscordClassModules from './DiscordClassModules';
 import DiscordModules from './DiscordModules';
-import { ObservationNode } from '../React'
 import WebpackModules from './WebpackModules';
 import Patcher from './Patcher';
 
@@ -22,8 +20,6 @@ export type Module = {
     render?: (props: any) => JSX.Element,
     displayName?: string
 } & { [key: string]: any }
-
-export type BDMutationRecord = TransformType<MutationRecord, NodeList, Array<ObservationNode>>;
 
 export type ZLibrary = {
     DiscordModules: DiscordModules,

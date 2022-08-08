@@ -8,12 +8,12 @@ import SettingsProps from 'danho-discordium/SettingsProps';
 
 const { Libraries, Modules } = window.BDD;
 const { BDFDB, ZLibrary } = Libraries;
-const { React, DanhoModules } = Modules;
+const { React, CompiledReact } = Modules;
 const { useState, useMemo } = React;
-const { classNames, Components } = DanhoModules.CompiledReact;
-const { Discord, Form, Setting } = Components;
-const { Form: { FormTitle } } = Discord;
-const { Section, Item } = Form;
+const { classNames, Components } = CompiledReact;
+const { Form, MyForm, Setting } = Components;
+const { FormTitle } = Form;
+const { Section, Item } = MyForm;
 
 type SettingsPanelProps = SettingsProps<Settings> & {
     BDFDB: BDFDB,

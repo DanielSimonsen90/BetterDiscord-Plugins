@@ -1,7 +1,8 @@
+// @ts-nocheck
 import { BaseProps, ComponentInstance, ComponentFiber } from '@lib/React';
 import { MethodNames, PatchTypes } from '@BDFDB';
 import { ActivityTypes, Channel, Guild, GuildMember, User, UserStatus } from '@discord';
-import { Component } from 'react';
+import { Component } from '@react';
 
 export type Modules =
     | 'Shakeable'

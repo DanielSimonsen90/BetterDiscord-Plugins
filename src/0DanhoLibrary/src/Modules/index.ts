@@ -2,7 +2,7 @@ import { hljs, i18n, joi, lodash, moment, semver, React, ReactDOM } from '@disco
 import DanhoModules from './DanhoModules';
 import * as Discord from '@discord';
 
-export type DiscordModules = {
+export type DiscordModules = DanhoModules & {
     hljs: typeof hljs,
     i18n: typeof i18n,
     joi: typeof joi,
@@ -14,7 +14,7 @@ export type DiscordModules = {
 
     React: typeof React,
     ReactDOM: typeof ReactDOM,
-    DanhoModules: typeof DanhoModules
+    
 }
 
 export const DiscordModules = {
@@ -31,5 +31,6 @@ export const DiscordModules = {
     /** Version module */
     semver,
     Discord,
-    React, ReactDOM, DanhoModules
+    React, ReactDOM, 
+    ...DanhoModules
 }

@@ -1,5 +1,5 @@
 import { Logger } from "@discordium/api";
-const { Message } = window.BDD.Modules.DanhoModules.CompiledReact.Components;
+const { Message } = window.BDD.Modules.CompiledReact.Components;
 
 type CommandCallback<Props> = (Lib: typeof window.BDD, React: typeof window.BDD.Modules.React, component: typeof Message, props: Props) => JSX.Element;
 

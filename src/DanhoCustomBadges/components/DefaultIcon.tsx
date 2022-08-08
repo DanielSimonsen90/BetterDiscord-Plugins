@@ -1,4 +1,4 @@
-const { React } = window.ZLibrary.DiscordModules;
+const { React } = window.BDD.Modules;
 
 export default function DefaultIcon() {
     return (
