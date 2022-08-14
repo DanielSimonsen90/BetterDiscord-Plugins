@@ -1,5 +1,6 @@
 import * as Finder from '@discordium/api/finder';
 export * from '@discordium/modules/components';
+export * as Icons from './Icons';
 
 import ZLibrary from '@ZLibrary';
 import BDFDB from '@BDFDB';

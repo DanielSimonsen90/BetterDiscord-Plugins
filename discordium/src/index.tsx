@@ -40,7 +40,7 @@ export interface Config<Settings extends Record<string, any>> {
     settings?: Settings;
 }
 
-export interface Plugin<> {
+export interface Plugin<SettingsType> {
     /** Called on plugin start. */
     start(): void | Promise<void>;
 
@@ -52,7 +52,7 @@ export interface Plugin<> {
     stop(): void;
 
     /** Settings UI as React component. */
-    SettingsPanel?: React.ComponentType;
+    SettingsPanel?: React.ComponentType<SettingsType>;
 }
 
 export type CreatePluginCallbackApi<
@@ -68,7 +68,7 @@ export const createPlugin = <
     DataType extends { settings: SettingsType } = { settings: SettingsType }
 >(
     config: Config<SettingsType>,
-    callback: (api: CreatePluginCallbackApi<SettingsType, DataType>) => Plugin
+    callback: (api: CreatePluginCallbackApi<SettingsType, DataType>) => Plugin<SettingsType>
 ): BdApi.PluginConstructor => {
     // create log
     const { name, version, styles, settings } = config;

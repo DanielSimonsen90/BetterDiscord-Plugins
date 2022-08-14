@@ -1,14 +1,17 @@
 enum Colors { BLACK, BRAND, CUSTOM, GREEN, GREY, PRIMARY, RED, YELLOW }
 enum Positions { BOTTOM, CENTER, LEFT, RIGHT, WINDOW_CENTER }
 
-export type TooltipModule = {
-    TooltipColors: Colors,
+export default interface TooltipComponent extends React.FunctionComponent<{
+    Colors?: Colors,
+    Positions?: Positions,
+    displayName: "Tooltip",
+    getDerivedStateFromProps?: (e: { text?: string }, t: { shouldShowTooltip?: boolean }) => { shouldShowTooltip: boolean } | null,
+}> {
+    TooltipColors: Record<keyof typeof Colors, Colors>,
     TooltipContainer: TooltipContainer,
     TooltipLayer: TooltipLayer,
-    TooltipPositions: Positions,
-    default: Tooltip
+    TooltipPositions: Record<keyof typeof Positions, Positions>,
 }
-export default TooltipModule;
 
 type TooltipContainer = React.FunctionComponent<{
     children: React.ReactNode,
@@ -28,10 +31,3 @@ type TooltipLayer = React.FunctionComponent<{
     disableTooltipPointerEvnets?: boolean,
     allowOverflow?: boolean
 }>
-
-type Tooltip = React.FunctionComponent & {
-    Colors: Colors,
-    Positions: Positions,
-    displayName: "Tooltip",
-    getDerivedStateFromProps(e: { text?: string }, t: { shouldShowTooltip?: boolean }): { shouldShowTooltip: boolean } | null
-}

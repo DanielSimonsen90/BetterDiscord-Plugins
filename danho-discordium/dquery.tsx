@@ -290,8 +290,8 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
         this.element.appendChild(createElement(html));
         return this;
     }
-    public appendComponent(component: JSX.Element): DQuery<El> {
-        this.element.appendChild(createElement("<></>"));
+    public appendComponent(component: JSX.Element, wrapperProps?: any): DQuery<El> {
+        this.element.appendChild(createElement("<></>", wrapperProps));
         const wrapper = this.element.lastChild as HTMLElement;
 
         ReactDOM.render(component, wrapper);
@@ -338,12 +338,16 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
 }
 export default $;
 
-export function createElement(html: string | '<></>' | 'fragment', target?: Selector): Element {
+export function createElement(html: string | '<></>' | 'fragment', props: Record<string, any> = {}, target?: Selector): Element {
     if (html === "<></>" || html.toLowerCase() === "fragment") {
-        html = `<div class="bdd-wrapper"></div>`;
+        html = `<div ${Object.entries(props).reduce((result, [key, value]) => {
+            return result + `${key}="${value}" `;
+        }, "")}></div>`;
     }
 
     const element = new DOMParser().parseFromString(html, "text/html").body.firstElementChild as Element;
+    element.classList.add("bdd-wrapper");
+
     if (!target) return element;
 
     if (target instanceof Node) return target.appendChild(element);

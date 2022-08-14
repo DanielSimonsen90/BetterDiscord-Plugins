@@ -1,17 +1,17 @@
 import { Arrayable } from "danholibraryjs";
-import { Finder, Patcher } from "discordium";
+import { Finder, Patcher, Settings } from "discordium";
 import { Module } from "@ZLibrary";
-import { If, PartialRecord } from "../Utils";
+import { Functionable, If, PartialRecord } from "../Utils";
 import Plugin from "../Plugin";
 
-export type PatcherConfig = PartialRecord<
+export type PatcherConfig<Settings = Record<string, any>> = PartialRecord<
     'before' | 'instead' | 'after', 
     PartialRecord<
         'default' | 'render' | string, 
-        Array<PatchOptions> | Record<string, PatchOptions>
+        Array<PatchOptions<false, Settings>> | Record<string, PatchOptions<false, Settings>>
     >
 >
-export type PatchOption<ForceCbIsFunc = false> = {
+export type PatchOption<ForceCbIsFunc = false, SettingsType = any> = {
     /**
      * @type {string} - displayName of the module
      * @type {Array<string>} - Properties from module
@@ -42,9 +42,13 @@ export type PatchOption<ForceCbIsFunc = false> = {
     /**
      * Run this patch once, then cancel
      */
-    once?: boolean
+    once?: boolean,
+    /**
+     * Patch if condition is true - useful for settings
+     */
+    condition?: Functionable<boolean, [Settings<SettingsType, { settings: SettingsType }>['current']]>,
 }
-export type PatchOptions<ForceCbIsFunc = false> = PatchOption<ForceCbIsFunc> | Arrayable<string>
+export type PatchOptions<ForceCbIsFunc = false, Settings = Record<string, any>> = PatchOption<ForceCbIsFunc, Settings> | Arrayable<string>
 export type PatchOptionAndMethod<
     ForceCbIsFunc = false,
     IncludeModule extends boolean = false
@@ -59,17 +63,18 @@ export type Patched = {
     cancel: Function
 }
 
-type DumbPlugin = Pick<Plugin<any>, 'patcher' | 'logger' | 'patches'>
+type DumbPlugin<Settings = Record<string, any>> = Pick<Plugin<Settings>, 'patcher' | 'logger' | 'patches' | 'settings'>
 
 const defaultOptions: Partial<PatchOptions> = {
     isContextMenu: false,
     isModal: false,
     once: false,
     override: false,
-    silent: false
+    silent: false,
+    condition: true
 }
 
-export default async function initializePatches(plugin: DumbPlugin, config: PatcherConfig = {} as any) {
+export default async function initializePatches<Settings>(plugin: DumbPlugin<Settings>, config: PatcherConfig<Settings> = {} as any) {
     const patches = [];
     let patchTypes = Object.keys(config); //["before", "instead", "after"];
 
@@ -93,6 +98,12 @@ export default async function initializePatches(plugin: DumbPlugin, config: Patc
                 for (const methodPropKey in method) {
                     const methodProp: Object | string | PatchOption | Array<string> = method[methodPropKey];
                     const option = getPatchOption(plugin, methodProp, methodPropKey);
+
+                    const isConditionTrue = (condition: Functionable<boolean>) => typeof condition === 'function' ? condition(plugin.settings.current) : condition;
+                    if (typeof option.condition === 'boolean' && !option.condition) continue;
+                    else if (typeof option.condition === 'function' && !option.condition(plugin.settings.current)) continue;
+                    else if (Array.isArray(option.condition) && option.condition.some(isConditionTrue)) continue;
+
                     patches.push(await patch(plugin, option, patchTypeKey, methodKey))
                 }
             }

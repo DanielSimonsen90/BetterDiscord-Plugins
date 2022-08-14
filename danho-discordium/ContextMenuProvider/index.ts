@@ -1,5 +1,5 @@
 import initializePatches, { Patched } from 'danho-discordium/Patcher/Patcher';
-import { Logger, Patcher } from 'discordium';
+import { Logger, Patcher, Settings } from 'discordium';
 import Plugin from '../Plugin';
 
 export * from './MenuItems';
@@ -19,16 +19,22 @@ type PatchedProps = {
 }
 type PatchCallback<E extends keyof PatchedProps> = (props: PatchedProps[E], ret: WeakFiber) => void;
 
-export default class ContextMenuProvider {
-    public static getInstance(plugin: Plugin<any>) {
+export default class ContextMenuProvider<
+    SettingsType, 
+    DataType extends Record<'settings', SettingsType> = Record<'settings', SettingsType>
+> {
+    public static getInstance<
+        SettingsType, 
+        DataType extends Record<'settings', SettingsType> = Record<'settings', SettingsType>
+    >(plugin: Plugin<SettingsType, DataType>) {
         if (!ContextMenuProvider.instance) {
-            ContextMenuProvider.instance = new ContextMenuProvider(plugin);
+            ContextMenuProvider.instance = new ContextMenuProvider<SettingsType, DataType>(plugin);
         }
         return ContextMenuProvider.instance;
     }
-    private static instance: ContextMenuProvider;
-    private constructor(public plugin: Plugin<any>) {
-        initializePatches(this, {
+    private static instance: ContextMenuProvider<any, Record<'settings', any>>;
+    private constructor(public plugin: Plugin<SettingsType>) {
+        initializePatches<SettingsType>(this, {
             after: {
                 default: [
                     // These modules don't exist anymore?
@@ -46,6 +52,9 @@ export default class ContextMenuProvider {
     public get patcher(): Patcher {
         return this.plugin.patcher;
     }
+    public get settings(): Settings<SettingsType, DataType> {
+        return this.plugin.settings;
+    }
     public patches: Array<Patched>
 
     private events: Record<keyof PatchedProps, PatchCallback<any>> = {} as any
@@ -57,7 +66,7 @@ export default class ContextMenuProvider {
     }
 
     private onMessageContextMenu({ args: [props], result: ret }) {
-        console.log('onMessageContextMenu', { this: this, props, ret });
+        this.logger.log('onMessageContextMenu', { this: this, props, ret });
         this.events['message']?.(props, ret);
     }
 }

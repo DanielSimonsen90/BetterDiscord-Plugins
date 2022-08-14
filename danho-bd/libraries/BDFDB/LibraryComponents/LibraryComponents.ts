@@ -6,6 +6,7 @@ import DateInput from './DateInput';
 import SettingsItem from './SettingsItem';
 import SettingsSaveItem from './SettingsSaveItem';
 import SettingsPanel from './SettingsPanel';
+import SvgIcon from './SvgIcon';
 import Switch from './Switch';
 import TextInput from './TextInput';
 import TooltipContainer from './TooltipContainer';
@@ -20,8 +21,11 @@ export type LibraryComponents = {
     SettingsItem: SettingsItem,
     SettingsPanel: SettingsPanel,
     SettingsSaveItem: SettingsSaveItem,
+    SvgIcon: SvgIcon,
     Switch: Switch,
     TextInput: TextInput,
     TooltipContainer: TooltipContainer
+} & {
+    [key: string]: () => JSX.Element
 }
 export default LibraryComponents;

@@ -1,5 +1,6 @@
 import config from './config.json';
 import { settings } from './Settings';
+import styles from './styles/index.scss';
 import { createPlugin } from 'discordium';
 import DanhoLibrary from './src';
 import { delay } from 'danho-discordium/Utils';
@@ -38,7 +39,7 @@ declare global {
     }
 }
 
-export default createPlugin({ ...config, settings }, api => {
+export default createPlugin({ ...config, settings, styles }, api => {
     const plugin = new DanhoLibraryGlobal(api);
     window.BDD ??= plugin;
     window.BDD.PluginUtils?.restartPlugins();

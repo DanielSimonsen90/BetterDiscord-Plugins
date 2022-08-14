@@ -1,4 +1,4 @@
-### [DanhoDiscordV2](/dist/bd/DanhoDiscordV2.plugin.js) <sub><sup>`v.0.2.0` *(Updated: 20/05/2022)*</sup></sub>
+### [DanhoDiscordV2](/dist/bd/DanhoDiscordV2.plugin.js) <sub><sup>`v.0.3.0` *(Updated: 14/08/2022)*</sup></sub>
 General small Discord changes to my liking. So far only includes:
 * BetterRoles
   - Color role background with slight opacity
@@ -10,7 +10,6 @@ General small Discord changes to my liking. So far only includes:
 **Features to implement**
 > * Role Groups to group roles in a container using REGEX on the role's name
 > * MoreDiscordPages to add more Discord pages to the Guild list
-> * Setting for Button [ Edit Bio ] or ✏ icon
 > - Add support for custom components?
 
 > **Bugs**

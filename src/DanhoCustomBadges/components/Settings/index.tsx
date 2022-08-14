@@ -47,17 +47,17 @@ export const SettingsPanel = ({ BDFDB, defaults, set, ...settings }: SettingsPan
                 <Item className={'vertical'}>
                     <Item className={'horizontal'}>
                         <FormTitle>{titles.allowVerified}</FormTitle>
-                        <Setting key="allowVerified" value={settings.allowVerified} set={set} onChange={v => typeof v === 'boolean' && setAllowVerified(v)} titles={titles} />
+                        <Setting setting="allowVerified" settings={settings} set={set} onChange={v => typeof v === 'boolean' && setAllowVerified(v)} titles={titles} />
                     </Item>
                     {allowVerified && (
                         <Item>
                             <FormTitle>{titles.allowVerifiedInvite}</FormTitle>
-                            <Setting key="allowVerifiedInvite" value={settings.allowVerifiedInvite} set={set} titles={titles} />
+                            <Setting setting="allowVerifiedInvite" settings={settings} set={set} titles={titles} />
                         </Item>
                     )}
                     <Item className={'horizontal'}>
                         <FormTitle>{titles.allowPartneredInvite}</FormTitle>
-                        <Setting key="allowPartneredInvite" value={settings.allowPartneredInvite} set={set} titles={titles} />
+                        <Setting setting="allowPartneredInvite" settings={settings} set={set} titles={titles} />
                     </Item>
                 </Item>
             </Section>

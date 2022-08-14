@@ -3,7 +3,7 @@ import ZLibrary from "@ZLibrary";
 import { Form } from '../Discord';
 
 const { FormItem } = Form;
-const { PopoutRoles } = ZLibrary.DiscordClassModules;
+const { PopoutRoles, Margins } = ZLibrary.DiscordClassModules;
 
 type MyFormItemProps = {
     direction?: 'vertical' | 'horizontal',
@@ -11,7 +11,14 @@ type MyFormItemProps = {
     className?: string
 }
 export const Item = ({ direction, children, className, ...props }: MyFormItemProps) => (
-    <FormItem className={classNames(PopoutRoles.flex, direction, 'center', className)} {...props}>
+    <FormItem className={classNames(
+        PopoutRoles.flex,
+        Margins.marginBottom20,
+        direction,
+        'center',
+        'settings-item',
+        className
+    )} {...props}>
         {children}
     </FormItem>
 )

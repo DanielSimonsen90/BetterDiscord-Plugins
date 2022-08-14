@@ -15,6 +15,7 @@ export type NewReturnType<
 export type PromisedReturn<
     Function extends (...args: any[]) => any,
 > = NewReturnType<Function, Promise<ReturnType<Function>>>;
+export type Functionable<T, Parameters extends any[] = any[]> = ((...args: Parameters) => T) | T;
 
 import { Store } from '@discordium/modules/flux';
 
