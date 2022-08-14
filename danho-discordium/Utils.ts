@@ -1,3 +1,4 @@
+
 export type If<Condition, Then, Else> = Condition extends true ? Then : Else;
 export type PartialRecord<Keys extends string, Values> = Partial<Record<Keys, Values>>;
 
@@ -14,3 +15,8 @@ export type NewReturnType<
 export type PromisedReturn<
     Function extends (...args: any[]) => any,
 > = NewReturnType<Function, Promise<ReturnType<Function>>>;
+
+import { Store } from '@discordium/modules/flux';
+
+// Pick properties from T if key is not in Store
+export type FilterStore<T extends Store> = Pick<T, Exclude<keyof T, keyof Store>>;

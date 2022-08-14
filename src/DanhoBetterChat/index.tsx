@@ -25,12 +25,13 @@ export default window.BDD.PluginUtils.buildPlugin<Settings>({ ...config }, (Lib)
             [REGEX.Command, this.onCommand.bind(this)],
         ];
         public commands = Commands(this.logger);
-        private _lastMessageId: string | null = null;
         private timesAttempted = 0;
+        private _lastMessage: string | undefined;
 
         insteadSendMessageModule = ({ args: [messageId, { content, ...props }, ...args], original: sendMessage }: PatchReturns["Message"]) => {
-            if (messageId === this._lastMessageId) return this.logger.warn(`[insteadSendMessage]`, `Attempted to send ${messageId} ${++this.timesAttempted} times`);
-            this._lastMessageId = messageId;
+            // if (content === this._lastMessage) this.logger.warn(`[insteadSendMessage]`, `Attempted to send ${messageId} ${++this.timesAttempted} times`, {
+            //     messageId, content, props, args
+            // });
             const typeTest = content.toLowerCase() === "random type test" || content.toLowerCase() === "rtt";
 
             const matches = this.chatMatches.filter(([regex]) => content.match(regex));

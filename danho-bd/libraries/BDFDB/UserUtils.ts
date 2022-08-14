@@ -1,10 +1,10 @@
-import { ActivityTypes, PermissionString, User, UserStatus } from "@discord"
+import { ActivityTypes, PermissionString, User, StatusType } from "@discord"
 
 type UserUtils = {
     me: User,
     is(user: any): user is User,
-    getStatus(id?: string): UserStatus,
-    getStatusColor(statis: UserStatus, useColor?: boolean): string,
+    getStatus(id?: string): StatusType,
+    getStatusColor(statis: StatusType, useColor?: boolean): string,
     getActivity(id?: string): ActivityTypes[any],
     getCustomStatus(id?: string): ActivityTypes[4],
     getAvatar(id?: string): string,

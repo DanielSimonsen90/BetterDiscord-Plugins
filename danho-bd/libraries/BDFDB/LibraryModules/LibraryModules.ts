@@ -1,20 +1,19 @@
-import { Channel, User } from "@discord"
+import { Channel, ChannelStore, User, UserStore } from "@discord"
 import LanguageStore from "./LanguageStore"
+import NitroUtils from "./NitroUtils";
+import FolderStore from './FolderStore';
 
-type LibraryModules = {
-    ChannelStore: {
-        getChannel(channelId: string): Channel,
-    },
+export type LibraryModules = {
+    ChannelStore: ChannelStore,
     CurrentVoiceUtils: {
         getChannelId(): string
     }
+    FolderStore: FolderStore
     LanguageStore: LanguageStore,
     LastChannelStore: {
         getChannelId(guildId: string): string;
     },
-    UserStore: {
-        getUser(userId: string): User,
-        findByTag(username: string, discriminator: string): User,
-    }
+    NitroUtils: NitroUtils
+    UserStore: UserStore
 }
 export default LibraryModules;

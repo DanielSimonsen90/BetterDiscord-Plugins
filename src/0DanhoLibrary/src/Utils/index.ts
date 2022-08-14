@@ -8,8 +8,14 @@ import { If } from "danho-discordium/Utils";
 function findNodeByIncludingClassName<NodeType = Element>(className: string, node = document.body): NodeType | null {
     return node.querySelector(`[class*="${className}"]`) as any;
 }
-function findModuleByIncludes(displayName: string, returnDisplayNamesOnly = false) {
-    const modules = window.ZLibrary.WebpackModules.findAll(match => match?.default?.displayName?.toLowerCase().includes(displayName.toLowerCase()));
+function findModuleByIncludes(displayNameOrProps: Arrayable<string>, returnDisplayNamesOnly = false) {
+    const modules = typeof displayNameOrProps === 'string' ? 
+        window.ZLibrary.WebpackModules.findAll(match => match?.default?.displayName?.toLowerCase().includes(displayNameOrProps.toLowerCase())) :
+        window.ZLibrary.WebpackModules.findAll(match => match && Object.keys({ ...match, ...(match.default ?? {}) })
+            .filter(key => displayNameOrProps.some(prop => key.toLowerCase().includes(prop.toLowerCase())))
+            .length > 0
+        );
+    
     if (!returnDisplayNamesOnly) return modules;
     return modules.map(module => module.default.displayName).sort();
 }
@@ -56,6 +62,16 @@ function findModule(args: Arrayable<string>, returnDisplayNamesOnly = false) {
             module.default?.displayName || module.displayName 
         : module;
 }
+function findStore(storeName: string, allowMultiple = false) {
+    const result = Object.values<any>(
+        window.BDD.finder.byName("UserSettingsAccountStore")
+        ._dispatcher._actionHandlers._dependencyGraph.nodes
+    ).sort((a, b) => a.name.localeCompare(b.name))
+    .filter(s => s.name.toLowerCase().includes(storeName.toLowerCase()));
+
+    return allowMultiple ? result : result[0];
+}
+
 async function findUserByTag(tag: string, BDFDB: BDFDB): Promise<User> {
     return new Promise((resolve, reject) => {
         console.time(`Looking for ${tag}`);
@@ -79,6 +95,10 @@ function getPlugin<IsArray extends boolean = false>(...pluginNames: Array<string
         ))).map(plugin => plugin.instance.plugin as any);
 }
 
+function currentUser() {
+    return window.BDFDB.UserUtils.me;
+}
+
 function currentGuild() {
     const guildId = ZLibrary.DiscordModules.SelectedGuildStore.getGuildId();
     return guildId ? ZLibrary.DiscordModules.GuildStore.getGuild(guildId) : null;
@@ -98,9 +118,19 @@ export const Utils = {
     findClassModuleContainingClass,
     findModule,
     findUserByTag,
+    findStore,
     getPlugin,
 
+    get currentUser() { return currentUser() },
     get currentGuild() { return currentGuild() },
     get currentChannel() { return currentChannel() },
     get currentGuildMembers() { return currentGuildMembers() },
 }
+
+export * from './Users';
+export * from './Guilds';
+
+/**
+ * Object.values(ZLibrary.WebpackModules.getAllModules()).filter(m => m.id === 401648)[0].exports;
+ */
+

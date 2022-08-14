@@ -60,7 +60,7 @@ export type GuildFolder = {
     folderColor: number,
     folderId: number,
     folderName: string,
-    guildIds: Array<string>
+    guildIds: Array<Snowflake>
 }
 
 type BaseActivityType<Type extends number> = {

@@ -1,112 +1,20 @@
-import { User } from '@discord';
+import { Store, User } from '@discord';
 import { PatchReturns } from 'danho-discordium/Patcher';
 import { Roles } from 'danho-discordium/Patcher/UserPopoutBody/roles';
+
+import EditBioButton from './components/EditBioButton';
+import EditBioSection from './components/EditBioSection';
+import UserBioEditor from './components/UserBioEditor';
+
 import config from './config.json';
+import styles from './styles.scss';
 
-export default window.BDD.PluginUtils.buildPlugin(config, Lib => {
+export default window.BDD.PluginUtils.buildPlugin({ ...config, styles }, Lib => {
     const Plugin = Lib.GetPlugin();
-    const { React, $, CompiledReact } = Lib.Modules;
-    const { useState, useCallback, render, classNames } = CompiledReact;
-    const { Button } = CompiledReact.Components;
-
-    type EditBioButtonProps = {
-        userBioClassName: string,
-        userBio: string,
-        marginTop: string
-    }
-    function EditBioButton({ userBioClassName, userBio, marginTop }: EditBioButtonProps) {
-        const onEditBioClicked = () => {
-            const container = $(`.${userBioClassName.replace(/ +/g, '.')}`).element;
-            render((
-                <UserBioEditor {...{
-                    container, marginTop,
-                    initialValue: userBio,
-                }} />
-            ), container)
-        }
-
-        return Button ? (
-            <Button className={marginTop}
-                look={Button.Looks.OUTLINED} color={Button.Colors.WHITE}
-                onClick={onEditBioClicked}
-            >
-                Edit Bio
-            </Button>
-        ) : <p className='error'>But component not found.</p>;
-    }
-
-    type UserBioEditorProps = {
-        container: HTMLElement;
-        initialValue: string;
-        marginTop: string
-    }
-    function UserBioEditor({ container, initialValue, marginTop }: UserBioEditorProps) {
-        const [value, setValue] = useState(initialValue);
-
-        const { DiscordClassModules } = window.BDFDB;
-
-        const format = useCallback((value: string) => {
-            const SimpleMarkdown = window.ZLibrary.DiscordModules.SimpleMarkdown;
-            const { defaultBlockParse: parse, defaultReactOutput: output } = SimpleMarkdown;
-            return output(parse(value));
-        }, []);
-        const renderUserBio = useCallback((value: string) => render((
-            <>
-                {format(value)}
-                <EditBioButton {...{
-                    userBioClassName: container.className,
-                    userBio: value,
-                    marginTop,
-                }} />
-            </>
-        ), container), [container, format]);
-        const onCancel = useCallback(() => renderUserBio(initialValue), [initialValue, renderUserBio]);
-        const onSave = useCallback(() => {
-            console.log("Edit bio saved", value);
-            renderUserBio(value);
-        }, [value, renderUserBio]);
-
-        return (
-            <div className={classNames(
-                DiscordClassModules.Flex.flex,
-                DiscordClassModules.Flex.directionColumn,
-            )} style={{ gap: "1em" }}>
-                {format(value)}
-                <textarea value={value} onChange={e => setValue(e.target.value)}
-                    className={classNames(
-                        DiscordClassModules.ChannelTextArea.channelTextArea,
-                        DiscordClassModules.ChannelTextArea.inner,
-                        DiscordClassModules.ChannelTextArea.profileBioInput,
-                        // marginTop
-                    )}
-                    style={{
-                        backgroundColor: "var(--background-secondary)",
-                        color: "var(--text-normal)",
-                        width: "auto",
-                        resize: "vertical",
-                        padding: "0.5rem",
-                        minHeight: "1rem",
-                        height: "auto",
-                    }}
-                />
-                <div className={CompiledReact.classNames(
-                    "button-container",
-                    // marginTop
-                )}>
-                    <Button
-                        look={Button.Looks.OUTLINED}
-                        borderColor={Button.BorderColors.RED}
-                        onClick={onCancel}
-                    >Cancel</Button>
-                    <Button
-                        look={Button.Looks.FILLED}
-                        color={Button.Colors.GREEN}
-                        onClick={onSave}
-                    >Save</Button>
-                </div>
-            </div>
-        )
-    }
+    const { CompiledReact, $ } = Lib.Modules;
+    const { React } = CompiledReact;
+    // TODO: Change to UserSettingsStore, when it's created
+    const UserSettingsStore = Lib.finder.byProps("getAllSettings", "theme") as Store & Record<string, any>;
 
     return class DanhoDiscordV2 extends Plugin {
         async start() {
@@ -120,14 +28,14 @@ export default window.BDD.PluginUtils.buildPlugin(config, Lib => {
                 }
             });
 
-            this.ZLibrary.DiscordModules.UserSettingsStore.addChangeListener(this.onUserSettingsChanged);
+            UserSettingsStore.addChangeListener(this.onUserSettingsChanged);
         }
 
         onUserSettingsChanged = () => {
-            const { theme } = this.ZLibrary.DiscordModules.UserSettingsStore.getAllSettings();
+            const { theme } = this.finder.byProps("getAllSettings", "theme")?.getAllSettings() || "dark";
             this.userTheme = theme;
         }
-        userTheme = this.ZLibrary.DiscordModules.UserSettingsStore.theme;
+        userTheme = UserSettingsStore.theme;
 
         patchUserPopoutBody({ args: [props], result }: PatchReturns["UserPopoutBody"]) {
             const userPopoutBody = $(`.${result.props.className}`);
@@ -144,22 +52,17 @@ export default window.BDD.PluginUtils.buildPlugin(config, Lib => {
             });
         }
         patchUserBio({ args: [props], result }: PatchReturns["UserBio"]) {
-            const [user] = $(`.${props.className}`)?.propFromParent<User>("user") ?? [undefined];
-            if (user?.id === this.ZLibrary.DiscordModules.UserStore.getCurrentUser().id) return;
-
             const lastChild = () => result.props.children[result.props.children.length - 1] as any;
+            const [user] = $(`.${props.className}`)?.propFromParent<User>("user") ?? [{ id: undefined }];
+            const componentClassName = "edit-bio-section";
 
-            if ((lastChild().type === "button" || lastChild().type === EditBioButton)
-                || (lastChild().type === "p" && lastChild().props.className === "error")
-                || lastChild().type === "div" && lastChild().props.className.includes("button-container"))
-                return;
+            if (user?.id !== Lib.Users.me.id) return;
+            else if ([componentClassName].includes(lastChild().props?.className)) return;
+            console.log({
+                user, lastChild: lastChild()
+            })
 
-            result.props.children.push(
-                <EditBioButton marginTop={this.ZLibrary.DiscordClassModules.Margins.marginTop20}
-                    userBio={props.userBio}
-                    userBioClassName={props.className}
-                />
-            );
+            result.props.children.push(<EditBioSection bio={props.userBio} className={componentClassName} />);
         }
         patchCreateGuildModal({ args: [props], result }: PatchReturns["CreateGuildModal"]) {
             $('.theme-light', false).map(el => el

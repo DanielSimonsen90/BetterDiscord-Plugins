@@ -50,4 +50,9 @@ export type BDFDB = {
     UserUtils: UserUtils,
 }
 
+// export const BDFDB = new Proxy<BDFDB>(window.BDFDB, {
+//     get(_, prop) {
+//         return window.BDFDB[prop];
+//     }
+// });
 export default BDFDB;

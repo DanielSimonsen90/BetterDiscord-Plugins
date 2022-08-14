@@ -8,17 +8,25 @@
         "keyofStringsOnly": false,
         "baseUrl": ".",
         "paths": {
-            "@discord": ["./danho-discordium/Discord"],
-            "@components": ["danho-discordium/React/components/index"],
+            "@lib/*": ["./danho-bd/libraries/*"],
+            "@discordium/*": ["./discordium/src/*"],
+            "@dquery": ["./danho-discordium/dquery"],
+            
             "@BDFDB": ["./danho-bd/libraries/BDFDB/index"],
+            "@BDFDB/*": ["./danho-bd/libraries/BDFDB/*"],
+
+            "@ZLibrary/*": ["./danho-bd/libraries/ZLibrary/*"],
             "@ZLibrary": ["./danho-bd/libraries/ZLibrary/index"],
 
-            "@dquery": ["./danho-discordium/dquery"],
-            "@lib/*": ["./danho-bd/libraries/*"],
+            "@discord": ["./danho-discordium/Discord"],
+            "@components": ["danho-discordium/React/components/index"],
 
-            "@discordium/*": ["./discordium/src/*"],
-            "@BDFDB/*": ["./danho-bd/libraries/BDFDB/*"],
-            "@ZLibrary/*": ["./danho-bd/libraries/ZLibrary/*"],
+            "@actions": ["./danho-discordium/Actions"],
+            "@actions/*": ["./danho-discordium/Actions/*"],
+
+            "@stores": ["./danho-discordium/Stores"],
+            "@stores/*": ["./danho-discordium/Stores/*"],
+
             "@react": ["./danho-discordium/React/index"],
             "@react/*": ["./danho-discordium/React/*"],
         }

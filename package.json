@@ -8,6 +8,7 @@
     "scripts": {
         "build": "ts-node scripts/build.ts",
         "dev": "ts-node scripts/build.ts --dev --watch",
+        "dev-once": "ts-node scripts/build.ts --dev",
         "check": "tsc --noemit",
         "lint": "eslint . -f node_modules/eslint-friendly-formatter",
         "lint-fix": "eslint . -f node_modules/eslint-friendly-formatter --fix"

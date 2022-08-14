@@ -55,6 +55,9 @@ export async function $p<
     return elements.map(el => new DQuery<T>(el)) as any;
 }
 
+export type DQuery$ = typeof $;
+export type DQuery$p = typeof $p;
+
 export class DQuery<El extends HTMLElement = HTMLElement> {
     constructor(private selector: Selector<El>) {
         if (selector) {

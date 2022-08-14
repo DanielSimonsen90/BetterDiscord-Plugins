@@ -100,7 +100,7 @@ export interface PresenceStore extends Store {
     getApplicationActivity(e, t, n);
     getPrimaryActivity(e, t);
     getState(): PresenceStoreState;
-    getStatus(user: Snowflake, t?, n?): StatusType;
+    getStatus(user: Snowflake, t?: any, n?: StatusType): StatusType;
     getUserIds(): Snowflake[];
     isMobileOnline(user: Snowflake): boolean;
     setCurrentUserOnConnectionOpen(e, t);
