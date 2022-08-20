@@ -1,6 +1,8 @@
 import { User } from "@discord";
 import { Item } from "./base";
 
+export type DiscordTimeFormat = 'f' | 'F' | 'd' | 'D' | 't' | 'T' | 'R';
+
 export type Features = 
     'ANIMATED_ICON' | 
     'BANNER' |
@@ -424,30 +426,7 @@ export type PermissionOverwrite = {
     type: number
 }
 
-export type Timestamp = {
-    _d: Date,
-    _i: Date,
-    _isAMomentObject: boolean,
-    _isUTC: boolean,
-    _isValid: boolean,
-    _locale: Locale,
-    _pf: {
-        charsLeftOver: number,
-        empty: boolean,
-        invalidFormat: boolean,
-        invalidMonth?: boolean,
-        iso: boolean,
-        meridiem: boolean,
-        nullInput: boolean,
-        overflow: number,
-        parsedDateParts: Array<number>,
-        rfc2822: boolean,
-        unusedInput: Array<string>,
-        unusedTokens: Array<string>,
-        userInvalidated: boolean,
-        weekdaymismatch: boolean
-    }
-}
+export type Timestamp = moment.Moment;
 export enum PremiumTypes {
     User = 0,
     Classic = 1,

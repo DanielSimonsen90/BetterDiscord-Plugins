@@ -1,3 +1,5 @@
+import { Finder } from "@discordium/api"
+
 type SystemMessageComponent = React.FunctionComponent<{
     icon?: string,
     iconNode?: React.ReactNode,
@@ -10,10 +12,12 @@ type SystemMessageComponent = React.FunctionComponent<{
     compact?: boolean
 }>
 
-export default interface SystemMessage extends SystemMessageComponent {
+export interface SystemMessage extends SystemMessageComponent {
     SystemMessageAction: React.FunctionComponent<{
         onClick?: (e: React.MouseEvent<HTMLDivElement>) => void,
         children?: React.ReactNode,
     }>,
     default: SystemMessageComponent
 }
+export const SystemMessage: SystemMessage = Finder.byName("SystemMessage");
+export default SystemMessage;

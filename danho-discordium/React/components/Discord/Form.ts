@@ -1,3 +1,5 @@
+import { Finder } from "@discordium/api";
+
 type FormKeys = `Form${
     'Divider' 
     | 'Item' 
@@ -111,4 +113,5 @@ export type Form = Record<FormKeys, React.FunctionComponent<any>> & {
     }>;
     FormTitleTags: Record<Uppercase<Tag>, Tag>;        
 }
+export const Form: Form = Finder.byProps("FormItem", "FormSection", "FormDivider");
 export default Form;

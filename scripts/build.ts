@@ -172,6 +172,8 @@ module.exports = (() => {
     footer: `
     } catch (err) {
         if (window.BDD) console.error(err);
+
+        window.BDD_Reloads ??= {};
         module.exports = class NoPlugin {
             //start() { BdApi.Alert("this.name could not be loaded!") }
             start() {
@@ -180,9 +182,12 @@ module.exports = (() => {
                 if (!this.isLib) {
                     if (window.BDD_PluginQueue.includes(this.name)) return console.log(\`\${this.name} is already in plugin queue\`, err);
                     window.BDD_PluginQueue.push(this.name); 
+                } else if (this.reloadedTimes > 2) {
+                    console.error(\`\${this.name} has been reloaded too many times\`, err);
                 } else {
                     setTimeout(() => {
                         BdApi.Plugins.reload(this.name);
+                        this.reloadedTimes++;
 
                         setTimeout(() => window.BDD?.PluginUtils.restartPlugins(), 500);
                     }, 1000);
@@ -191,7 +196,13 @@ module.exports = (() => {
             stop() {}
 
             name = '${config.name}';
-            isLib = '${config.name}' === 'DanhoLibrary'
+            isLib = '${config.name}' === 'DanhoLibrary';
+            get reloadedTimes() {
+                return window.BDD_Reloads[this.name] ??= 0;
+            }
+            set reloadedTimes(value) {
+                window.BDD_Reloads[this.name] = value;
+            }
         }
     }
 

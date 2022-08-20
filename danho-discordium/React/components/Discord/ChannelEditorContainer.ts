@@ -1,4 +1,5 @@
 import { Channel } from '@discord';
+import { Finder } from '@discordium/api';
 
 type ChannelEditorContainerComponent = React.ComponentClass<{
     accessibilityLabel?: string,
@@ -44,6 +45,8 @@ type ChannelEditorContainerComponent = React.ComponentClass<{
     submitting: boolean,
 }>
 
-export default interface ChannelEditorContainer extends ChannelEditorContainerComponent {
+export interface ChannelEditorContainer extends ChannelEditorContainerComponent {
     default: ChannelEditorContainerComponent,
 }
+export const ChannelEditorContainer: ChannelEditorContainer = Finder.byName("ChannelEditorContainer");
+export default ChannelEditorContainer;

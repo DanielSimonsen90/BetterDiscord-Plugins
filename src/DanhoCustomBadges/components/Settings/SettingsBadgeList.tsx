@@ -8,7 +8,6 @@ const { React, ReactDOM, $, CompiledReact } = window.BDD.Modules;
 const { useEffect, createRef } = React;
 const { classNames, Components } = CompiledReact;
 const { UserProfileBadgeList } = Components;
-const { default: BadgeList } = UserProfileBadgeList;
 
 type SettingsBadgeListProps = {
     user: User,
@@ -47,7 +46,7 @@ export default function SettingsBadgeList({ user, BDFDB, data: { premiumSince, b
 
     return (
         <div className="settings-badge-list-container" ref={containerRef}>
-            <BadgeList user={user as User} className={`hidden data-user-id-${user.id}`} // using classes because component ignores additional props
+            <UserProfileBadgeList user={user as User} className={`hidden data-user-id-${user.id}`} // using classes because component ignores additional props
                 premiumSince={premiumSince ? new Date(premiumSince) : null}
                 premiumGuildSince={boosterSince ? new Date(boosterSince) : null}
             />

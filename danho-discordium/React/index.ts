@@ -6,6 +6,8 @@ export default React;
 export * from './components';
 export * from './hooks';
 
+// Exporing this render instead of ReactDOM.render because DevilBro actually listens to the DOM and removes the component from the React tree when it's not in use
+export const render = window.BDFDB?.ReactUtils.render;
 
 export const {
     useCallback,
@@ -39,7 +41,6 @@ export const {
     findDOMNode,
     flushSync,
     hydrate,
-    render,
     unmountComponentAtNode
 } = ReactDOM;
 

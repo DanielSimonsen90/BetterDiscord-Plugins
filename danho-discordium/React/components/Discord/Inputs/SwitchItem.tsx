@@ -1,3 +1,4 @@
+import { Finder } from "@discordium/api";
 import Input from "./_Input";
 
 export type SwitchItem<Props = {
@@ -5,4 +6,4 @@ export type SwitchItem<Props = {
     checked?: boolean;
     disabled?: boolean;
 }> = Input<boolean, Props>;
-export default SwitchItem;
+export const SwitchItem: SwitchItem = Finder.byName("SwitchItem");

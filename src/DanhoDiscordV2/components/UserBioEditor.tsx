@@ -1,17 +1,41 @@
-const { React, useState, useCallback, useMemo, classNames } = window.BDD.Modules.CompiledReact;
-const { Button } = window.BDD.Components;
-const { DiscordClassModules } = window.BDFDB;
-const { SimpleMarkdown } = window.ZLibrary.DiscordModules;
-const { defaultBlockParse: parse, defaultReactOutput: output } = SimpleMarkdown;
+import { Emoji } from "@discord";
+import DateTimePicker from "@react/components/DateTimePicker";
+import useStateStack from "@react/hooks/useStateStack";
+
+const { parseBioReact, CompiledReact, moment } = window.BDD.Modules;
+const { React, useEffect, useCallback, useMemo, classNames, Components } = CompiledReact;
+const { SuccessButton, CancelButton, ButtonContainer } = Components;
+const { DiscordClassModules, LibraryComponents: {
+    EmojiPickerButton, SvgIcon, PopoutContainer
+} } = window.BDFDB;
+
 
 type UserBioEditorProps = {
     initialValue: string;
     onButtonPressed: (value: string) => void;
 }
 export default function UserBioEditor({ initialValue, onButtonPressed }: UserBioEditorProps) {
-    const [value, setValue] = useState(initialValue);
-    const format = useCallback((value: string) => output(parse(value)), [initialValue, parse, output]);
+    const [value, { push, undo, redo }] = useStateStack(initialValue);
+
     const charsLeft = useMemo(() => 190 - value.length, [value]);
+    const isPastLimit = useMemo(() => charsLeft < 0, [charsLeft]);
+
+    const onEmojiPicked = useCallback((emoji: Emoji) => push(value => value + `<:${emoji.name}:${emoji.id}>`), []);
+    const format = useCallback((value: string) => parseBioReact(value), [parseBioReact]);
+
+    console.log({ value, charsLeft, isPastLimit });
+
+    useEffect(() => {
+        // Handle Ctrl + Z and Ctrl + Y
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.ctrlKey) {
+                if (e.key === 'z') undo();
+                if (e.key === 'y') redo();
+            }
+        }
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [value]);
 
     return (
         <div className={classNames(
@@ -20,30 +44,29 @@ export default function UserBioEditor({ initialValue, onButtonPressed }: UserBio
             DiscordClassModules.Flex.directionColumn,
         )}>
             <hr style={{ width: '100%' }} />
-            {format(value)}
+            <div className="bio-preview">
+                {format(value)}
+            </div>
             <div className="textarea-wrapper">
+                {/* TODO: Change to ChannelTextAreaContainer */}
                 <textarea maxLength={190} rows={8.5} value={value}
-                    onChange={e => setValue(e.target.value)}
+                    onChange={e => push(e.target.value)}
                     className={classNames(
                         DiscordClassModules.ChannelTextArea.channelTextArea,
                         DiscordClassModules.ChannelTextArea.inner,
                         DiscordClassModules.ChannelTextArea.profileBioInput,
                     )}
                 />
-                <span id="chars-left">{charsLeft}</span>
+                <div className="control-panel">
+                    <EmojiPickerButton onSelect={onEmojiPicked} />
+                    <DateTimePicker onSubmit={(date, format) => push(value => value + `<t:${date.unix()}:${format}>`)} />
+                    <span id="chars-left" data-limit-passed={isPastLimit}>{charsLeft}</span>
+                </div>
             </div>
-            <div className={classNames("button-container")}>
-                <Button
-                    look={Button.Looks.OUTLINED}
-                    borderColor={Button.BorderColors.RED}
-                    onClick={() => onButtonPressed(initialValue)}
-                >Cancel</Button>
-                <Button
-                    look={Button.Looks.FILLED}
-                    color={Button.Colors.GREEN}
-                    onClick={() => onButtonPressed(value)}
-                >Save</Button>
-            </div>
+            <ButtonContainer justify="center">
+                <CancelButton onClick={() => onButtonPressed(initialValue)}>Cancel</CancelButton>
+                <SuccessButton disabled={isPastLimit} onClick={() => charsLeft >= 0 && onButtonPressed(value)}>Save</SuccessButton>
+            </ButtonContainer>
         </div>
     )
 }

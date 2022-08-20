@@ -1,3 +1,5 @@
+import { Finder } from "@discordium/api";
+
 type Sizes = `SIZE_${16 | 20 | 24 | 32 | 40 | 56 | 80 | 120}`;
 type AnyNull = any | null;
 enum StatusTypes { DND, IDLE, INVISIBLE, OFFLINE, ONLINE, STEAMING, UNKNOWN }
@@ -25,7 +27,7 @@ type AvatarComponent = React.FunctionComponent<{
     onMouseDown?: (e: React.MouseEvent<HTMLDivElement>) => void,
 }>
 
-export default interface Avatar extends AvatarComponent {
+export interface Avatar extends AvatarComponent {
     AnimatedAvatar: React.FunctionComponent<{
         statusColor: string;
         status: string;
@@ -36,3 +38,5 @@ export default interface Avatar extends AvatarComponent {
     Sizes: Record<Sizes, Sizes>,
     determineIsAnimated(e: AnyNull, t: StatusTypes | null, n: AnyNull, r: AnyNull, i: AnyNull): boolean
 }
+export const Avatar: Avatar = Finder.byProps("AnimatedAvatar");
+export default Avatar;

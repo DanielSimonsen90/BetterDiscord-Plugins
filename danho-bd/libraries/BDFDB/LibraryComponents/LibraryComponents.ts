@@ -10,6 +10,8 @@ import SvgIcon from './SvgIcon';
 import Switch from './Switch';
 import TextInput from './TextInput';
 import TooltipContainer from './TooltipContainer';
+import EmojiPickerButton from './EmojiPickerButton';
+import PopoutContainer from './PopoutContainer';
 
 export type LibraryComponents = {
     Clickable: Clickable,
@@ -17,10 +19,12 @@ export type LibraryComponents = {
     ColorPicker: ColorPicker,
     ColorSwatches: ColorSwatches,
     DateInput: DateInput,
-    // EmojiPickerButton ln. 6050
+    EmojiPickerButton: EmojiPickerButton,
+    // FavButton ln: 6206
+    PopoutContainer: PopoutContainer,
     SettingsItem: SettingsItem,
-    SettingsPanel: SettingsPanel,
     SettingsSaveItem: SettingsSaveItem,
+    SettingsPanel: SettingsPanel,
     SvgIcon: SvgIcon,
     Switch: Switch,
     TextInput: TextInput,

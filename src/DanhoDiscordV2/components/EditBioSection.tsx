@@ -1,18 +1,21 @@
 import EditBioButton from "./EditBioButton";
 import UserBioEditor from "./UserBioEditor";
 
-const { React, useState, useCallback, Components } = window.BDD.Modules.CompiledReact;
+const { CompiledReact } = window.BDD.Modules;
+const { React, useState, useCallback, useEffect, useRef, Components } = CompiledReact;
 const UserProfileSettings = window.BDD.Stores.BetterProfileSettings;
 const { TooltipContainer, SvgIcon } = Components.BDFDB;
 
 type Props = {
     bio: string;
     className: string;
+    containerClassName: string;
     renderType: 'button' | 'pencil' | string;
 }
 
-export default function EditBioSection({ bio, className, renderType }: Props) {
+export default function EditBioSection({ bio, className, containerClassName, renderType }: Props) {
     const [editMode, setEditMode] = useState(false);
+
     const onEditButtonClicked = useCallback((value: string) => {
         if (value !== bio) {
             UserProfileSettings.saveProfileChanges({ bio: value });

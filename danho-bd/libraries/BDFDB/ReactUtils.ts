@@ -15,5 +15,6 @@ type ReactUtils = typeof React & typeof ReactDOM & {
         time?: number;
     }): ComponentFiber | null;
     setChild(parent: React.ReactElement, child: React.ReactElement | string): void;
+    markdownParse(value: string): Array<JSX.Element | string>
 }
 export default ReactUtils;

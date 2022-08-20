@@ -1,5 +1,5 @@
 import { Arrayable } from 'danholibraryjs';
-import { ReactDOM, Utils } from 'discordium'
+import { Utils } from 'discordium'
 import ElementSelector from './ElementSelector';
 import { If, PromisedReturn } from './Utils';
 import { Fiber } from '@react';
@@ -286,6 +286,20 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
         this.element.remove();
     }
 
+    public get hidden() {
+        return this.element.hidden;
+    }
+    public get visible() {
+        return !this.hidden;
+    }
+
+    public hide() {
+        this.element.style.display = 'none';
+    }
+    public show() {
+        this.element.style.display = '';
+    }
+
     public appendHtml(html: string): DQuery<El> {
         this.element.appendChild(createElement(html));
         return this;
@@ -294,12 +308,12 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
         this.element.appendChild(createElement("<></>", wrapperProps));
         const wrapper = this.element.lastChild as HTMLElement;
 
-        ReactDOM.render(component, wrapper);
+        window.BDFDB.ReactUtils.render(component, wrapper);
         return this;
     }
 
     public replaceComponent(component: JSX.Element): DQuery<El> {
-        ReactDOM.render(component, this.element);
+        window.BDFDB.ReactUtils.render(component, this.element);
         return this;
     }
 
@@ -307,7 +321,7 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
         this.element.insertAdjacentElement(position, createElement("<></>"));
         const wrapper = this.parent.children(".bdd-wrapper", true).element as HTMLElement;
 
-        ReactDOM.render(component, wrapper);
+        window.BDFDB.ReactUtils.render(component, wrapper);
         return this;
     }
 
@@ -319,7 +333,7 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
         this.element.insertAdjacentElement('afterbegin', createElement("<></>"));
         const wrapper = this.element.firstChild as HTMLElement;
 
-        ReactDOM.render(component, wrapper);
+        window.BDFDB.ReactUtils.render(component, wrapper);
         return this;
     }
 

@@ -2,7 +2,6 @@ import { DiscordModules } from './Modules';
 import { Libraries } from './Libraries';
 import { CreatePluginUtils } from './PluginUtils';
 import { Utils, UserUtils, GuildUtils } from './Utils';
-// import { Utils } from './Utils';
 
 import { DanhoPlugin } from 'danho-discordium';
 import Settings from '../Settings';

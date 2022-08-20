@@ -1,4 +1,4 @@
-import { Store, User } from '@discord';
+import { User } from '@discord';
 import { PatchReturns } from 'danho-discordium/Patcher';
 import { Roles } from 'danho-discordium/Patcher/UserPopoutBody/roles';
 
@@ -12,8 +12,6 @@ export default window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings 
     const Plugin = Lib.GetPlugin();
     const { CompiledReact, $ } = Lib.Modules;
     const { React } = CompiledReact;
-    // TODO: Change to UserSettingsStore, when it's created
-    const UserSettingsStore = Lib.finder.byProps("getAllSettings", "theme") as Store & Record<string, any>;
 
     return class DanhoDiscordV2 extends Plugin<Settings> {
         async start() {
@@ -26,15 +24,7 @@ export default window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings 
                     },
                 }
             });
-
-            UserSettingsStore.addChangeListener(this.onUserSettingsChanged);
         }
-
-        onUserSettingsChanged = () => {
-            const { theme } = this.finder.byProps("getAllSettings", "theme")?.getAllSettings() || "dark";
-            this.userTheme = theme;
-        }
-        userTheme = UserSettingsStore.theme;
 
         patchUserPopoutBody({ result }: PatchReturns["UserPopoutBody"]) {
             const userPopoutBody = $(`.${result.props.className}`);
@@ -59,14 +49,20 @@ export default window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings 
             const lastChild = () => result.props.children[result.props.children.length - 1] as any;
             if ([componentClassName].includes(lastChild().props?.className)) return;
 
-            result.props.children.push(<EditBioSection renderType={preference} bio={props.userBio} className={componentClassName} />);
+            result.props.children.push(<EditBioSection renderType={preference} bio={props.userBio} className={componentClassName} containerClassName={props.className} />);
         }
 
         patchCreateGuildModal({ args: [props], result }: PatchReturns["CreateGuildModal"]) {
             $('.theme-light', false).map(el => el
                 .removeClass('theme-light')
-                .addClass(this.userTheme)
+                .addClass(Lib.Stores.UserSettingsStore.theme)
             );
+        }
+        patchMessageTimestamp({ args, result, original }: PatchReturns["MessageTimestamps"]) {
+            console.log({
+                args, result, original
+            });
+            return original(...args);
         }
 
         SettingsPanel = SettingsPanel;

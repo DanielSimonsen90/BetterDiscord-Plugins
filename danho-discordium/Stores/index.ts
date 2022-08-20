@@ -14,7 +14,7 @@ export {
 export { default as FolderStore } from '@BDFDB/LibraryModules/FolderStore';
 export { default as LanguageStore } from '@BDFDB/LibraryModules/LanguageStore';
 
-
+export * from './EmojiStore';
 export * from './GuildChannelStore';
 export * from './GuildEmojiStore';
 export * from './SelectedGuildStore';
@@ -22,4 +22,5 @@ export * from './UserMentionStore';
 export * from './UserActivityStore';
 export * from './UserNoteStore';
 export * from './UserSettingsAccountStore';
+export * from './UserSettingsStore';
 export * from './UserTypingStore';

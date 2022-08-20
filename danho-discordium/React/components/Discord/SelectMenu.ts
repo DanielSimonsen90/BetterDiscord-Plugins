@@ -1,3 +1,5 @@
+import { Finder } from "@discordium/api"
+
 type SelectionResult<Type> = {
     newValue: Type, 
     updated: boolean
@@ -14,7 +16,7 @@ type UseSelectStateHooks<Type> = (props: {
     serialize: string
 }
 
-export default interface SelectMenuComponent<Type extends number | string> extends React.FunctionComponent<{
+export interface SelectMenuComponent<Type extends number | string> extends React.FunctionComponent<{
     options: Array<{
         position: number,
         label: string,
@@ -58,3 +60,5 @@ export default interface SelectMenuComponent<Type extends number | string> exten
     useSingleSelectState: UseSelectStateHooks<Type>,
     useVariableSelect: UseSelectStateHooks<Type>,
 }
+export const SelectMenu: SelectMenuComponent<any> = Finder.byProps("Select");
+export default SelectMenu;

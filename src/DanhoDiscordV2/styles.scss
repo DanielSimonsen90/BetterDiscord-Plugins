@@ -1,12 +1,17 @@
+@import '../0DanhoLibrary/styles/utils.scss';
+
+
 .edit-bio-editor {
     gap: 1em;
 }
 
 .textarea-wrapper {
     display: flex;
+    flex-direction: column;
     position: relative;
 
     textarea {
+        box-sizing: border-box;
         background-color: var(--background-secondary);
         color: var(--text-normal);
 
@@ -16,11 +21,20 @@
         min-height: 1rem;
         height: auto;
     }
-
-    #chars-left {
-        position: absolute;
-        inset: auto .5em .5em auto;
+    .control-panel {
+        display: flex;
+        justify-content: space-between;
+        gap: 1em;
+        margin-top: 1em;
     }
+
+    #chars-left[data-limit-passed=true] {
+        color: var(--text-danger);
+    }
+}
+
+@include className("userInfoBody") {
+    position: relative;
 }
 
 .edit-bio-section[data-render-type=pencil] {
@@ -28,4 +42,9 @@
     top: .75rem;
     right: 1em;
     cursor: pointer;
+}
+
+.time-inputs {
+    background-color: var(--background-quinary);
+    padding: 1em;
 }

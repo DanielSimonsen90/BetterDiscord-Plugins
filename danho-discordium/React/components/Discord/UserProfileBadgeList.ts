@@ -1,8 +1,9 @@
 import { User } from "@discord";
-import { FunctionComponent } from "../../";
+import { Finder } from "@discordium/api";
 
 type BadgeSize = Record<`SIZE_${18  | 22 | 24}`, number>
-type UserProfileBadgeListComponent = FunctionComponent<{
+
+export interface UserProfileBadgeList extends React.FunctionComponent<{
     className?: string,
     user: User,
     premiumSince?: Date,
@@ -11,10 +12,8 @@ type UserProfileBadgeListComponent = FunctionComponent<{
     shinkAtCount?: number,
     shrinkToSize?: number,
     size?: number,
-}>
-
-type UserProfileBadgeList = UserProfileBadgeListComponent & {
-    Sizes: BadgeSize,
-    default: UserProfileBadgeListComponent
+}> {
+    Sizes: BadgeSize
 }
+export const UserProfileBadgeList: UserProfileBadgeList = Finder.byName("UserProfileBadgeList");
 export default UserProfileBadgeList;

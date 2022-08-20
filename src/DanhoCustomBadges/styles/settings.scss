@@ -1,4 +1,4 @@
-@import './utils';
+@import '../../0DanhoLibrary/styles/utils.scss';
 
 section.settings {
     @include className(container, div, ">") {

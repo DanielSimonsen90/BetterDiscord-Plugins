@@ -28,6 +28,7 @@ import DMUtils from './DMUtils';
 import ColorUtils from './ColorUtils';
 import DOMUtils from './DOMUtils';
 import { ModalUtils } from './ModalUtils';
+import ObjectUtils from './ObjectUtils';
 
 export type BDFDB = {
     ChannelUtils: ChannelUtils,
@@ -43,6 +44,7 @@ export type BDFDB = {
     LibraryModules: LibraryModules
     MessageUtils: MessageUtils,
     ModalUtils: ModalUtils,
+    ObjectUtils: ObjectUtils,
     PatchUtils: PatchUtils,
     PluginUtils: PluginUtils,
     ReactUtils: ReactUtils,
