@@ -10,10 +10,10 @@ type ButtonContainerProps = React.DetailedHTMLProps<React.HTMLAttributes<HTMLDiv
     align?: 'start' | 'end' | 'center' | 'baseline' | 'stretch';
     justify?: 'start' | 'end' | 'center' | 'between' | 'around' | 'evenly';
     wrap?: boolean | 'reverse';
-    gap?: number;
+    gap?: number | string;
 
-    rowGap?: number;
-    columnGap?: number;
+    rowGap?: number | string;
+    columnGap?: number | string;
     layout?: Arrayable<string>;
 
     // onButtonClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
@@ -30,11 +30,11 @@ export function ButtonContainer({
     const _style: React.CSSProperties = {
         gap, rowGap, columnGap,
         gridTemplateAreas: layout && (Array.isArray(layout) ? `"${layout.join('" "')}"` : `"${layout}"`),
-        ...style || {}
+        ...(style || {})
     }
 
     return (
-        <div className={classNames(
+        <div {...props} className={classNames(
             className,
             'button-container',
             flex ? ClassModules.Flex.flex : ClassModules.Embed.grid,
@@ -42,8 +42,9 @@ export function ButtonContainer({
             align && ClassModules.Flex[`align${pascalCase(align)}`],
             justify && ClassModules.Flex[`justify${pascalCase(justify)}`],
             wrap && ClassModules.Flex[wrap === true ? 'wrap' : 'wrapReverse'],
-        )} style={Object.keys(_style).length && _style} {...props}>
+        )} style={Object.keys(_style).length && _style}>
             {children}
         </div>
     );
 }
+export default ButtonContainer;

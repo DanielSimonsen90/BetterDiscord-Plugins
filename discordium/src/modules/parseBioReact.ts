@@ -1,4 +1,4 @@
-import { Finder } from "@discordium/api"
+import * as Finder from "../api/finder";
 
 export type ParseBioReactModule = {
     parseBioReact: (bio: string, reactElements?: boolean, i?: {}, o?: any) => Array<JSX.Element>

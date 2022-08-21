@@ -1,29 +1,27 @@
 import { Emoji } from "@discord";
-import DateTimePicker from "@react/components/DateTimePicker";
-import useStateStack from "@react/hooks/useStateStack";
 
-const { parseBioReact, CompiledReact, moment } = window.BDD.Modules;
-const { React, useEffect, useCallback, useMemo, classNames, Components } = CompiledReact;
-const { SuccessButton, CancelButton, ButtonContainer } = Components;
-const { DiscordClassModules, LibraryComponents: {
-    EmojiPickerButton, SvgIcon, PopoutContainer
-} } = window.BDFDB;
-
+const { parseBioReact, CompiledReact } = window.BDD.Modules;
+const { React, useEffect, useCallback, useMemo, classNames, Components, Hooks } = CompiledReact;
+const { SuccessButton, PrimaryButton, CancelButton, ButtonContainer, DateTimePicker } = Components;
+const { useStateStack } = Hooks;
+const { DiscordClassModules, LibraryComponents: { EmojiPickerButton } } = window.BDFDB;
 
 type UserBioEditorProps = {
     initialValue: string;
-    onButtonPressed: (value: string) => void;
+    guildProfileMode: boolean;
+    onButtonPressed: (guildProfileMode: boolean, value: string) => void;
+    onBioModeChange: (guildProfileMode: boolean) => void;
 }
-export default function UserBioEditor({ initialValue, onButtonPressed }: UserBioEditorProps) {
-    const [value, { push, undo, redo }] = useStateStack(initialValue);
+
+export default function UserBioEditor({ initialValue, guildProfileMode, onButtonPressed, onBioModeChange }: UserBioEditorProps) {
+    const [value, { push, undo, redo, clear }] = useStateStack(initialValue);
+    const guildExists = useMemo(() => window.BDD.Utils.currentGuild !== null, []);
 
     const charsLeft = useMemo(() => 190 - value.length, [value]);
     const isPastLimit = useMemo(() => charsLeft < 0, [charsLeft]);
 
     const onEmojiPicked = useCallback((emoji: Emoji) => push(value => value + `<:${emoji.name}:${emoji.id}>`), []);
     const format = useCallback((value: string) => parseBioReact(value), [parseBioReact]);
-
-    console.log({ value, charsLeft, isPastLimit });
 
     useEffect(() => {
         // Handle Ctrl + Z and Ctrl + Y
@@ -36,6 +34,10 @@ export default function UserBioEditor({ initialValue, onButtonPressed }: UserBio
         window.addEventListener('keydown', onKeyDown);
         return () => window.removeEventListener('keydown', onKeyDown);
     }, [value]);
+
+    useEffect(() => {
+        push(initialValue);
+    }, [initialValue])
 
     return (
         <div className={classNames(
@@ -55,6 +57,7 @@ export default function UserBioEditor({ initialValue, onButtonPressed }: UserBio
                         DiscordClassModules.ChannelTextArea.channelTextArea,
                         DiscordClassModules.ChannelTextArea.inner,
                         DiscordClassModules.ChannelTextArea.profileBioInput,
+                        DiscordClassModules.Scroller.auto
                     )}
                 />
                 <div className="control-panel">
@@ -63,9 +66,10 @@ export default function UserBioEditor({ initialValue, onButtonPressed }: UserBio
                     <span id="chars-left" data-limit-passed={isPastLimit}>{charsLeft}</span>
                 </div>
             </div>
-            <ButtonContainer justify="center">
-                <CancelButton onClick={() => onButtonPressed(initialValue)}>Cancel</CancelButton>
-                <SuccessButton disabled={isPastLimit} onClick={() => charsLeft >= 0 && onButtonPressed(value)}>Save</SuccessButton>
+            <ButtonContainer justify="center" flex={false} layout={["primary primary", "cancel success"]} rowGap='.5em'>
+                {guildExists && <PrimaryButton onClick={() => onBioModeChange(!guildProfileMode)}>Switch to {guildProfileMode ? 'User' : 'Guild'} Bio</PrimaryButton>}
+                <CancelButton onClick={() => onButtonPressed(guildProfileMode, initialValue)}>Cancel</CancelButton>
+                <SuccessButton disabled={isPastLimit} onClick={() => charsLeft >= 0 && onButtonPressed(guildProfileMode, value)}>Save</SuccessButton>
             </ButtonContainer>
         </div>
     )

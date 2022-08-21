@@ -1,6 +1,5 @@
 import { DiscordTimeFormat } from '@discord';
-import { moment } from '@discordium/modules';
-import { classNames, React, useState, useMemo, useEffect, createRef } from 'danho-discordium/React';
+import { moment, React, classNames } from '@discordium/modules';
 
 import { BetterOmit } from 'danholibraryjs';
 import { BaseProps } from 'danholibraryrjs';
@@ -8,7 +7,8 @@ import { BaseProps } from 'danholibraryrjs';
 import DatePicker from './DatePicker';
 import TimePicker from './TimePicker';
 
-const { PopoutContainer, SvgIcon } = window.BDD.Components.BDFDB;
+const { PopoutContainer, SvgIcon } = window.BDFDB.LibraryComponents;
+const { useState, useMemo, createRef } = React;
 
 type Props = BetterOmit<BaseProps<HTMLFormElement>, 'onSubmit'> & {
     onSubmit(time: moment.Moment, format: DiscordTimeFormat): void,

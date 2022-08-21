@@ -2,23 +2,28 @@ import EditBioButton from "./EditBioButton";
 import UserBioEditor from "./UserBioEditor";
 
 const { CompiledReact } = window.BDD.Modules;
-const { React, useState, useCallback, useEffect, useRef, Components } = CompiledReact;
+const { React, useState, useMemo, useCallback, Components, Hooks } = CompiledReact;
+const { GuildIdentyStore } = window.BDD.Stores;
 const UserProfileSettings = window.BDD.Stores.BetterProfileSettings;
+const { useGuildProfile } = Hooks;
 const { TooltipContainer, SvgIcon } = Components.BDFDB;
 
 type Props = {
-    bio: string;
     className: string;
-    containerClassName: string;
     renderType: 'button' | 'pencil' | string;
 }
 
-export default function EditBioSection({ bio, className, containerClassName, renderType }: Props) {
+export default function EditBioSection({ className, renderType }: Props) {
     const [editMode, setEditMode] = useState(false);
+    const [guildProfileMode, setGuildProfileMode] = useState(window.BDD.Utils.currentGuild !== null);
+    const data = useGuildProfile(window.BDD.Users.me.id, window.BDD.Guilds.current?.id);
+    const bio = useMemo(() => (guildProfileMode ? data._guildMemberProfile?.bio : data._userProfile.bio) || data.bio, [guildProfileMode, data]);
 
-    const onEditButtonClicked = useCallback((value: string) => {
+    const onEditButtonClicked = useCallback((guildProfileMode: boolean, value: string) => {
         if (value !== bio) {
-            UserProfileSettings.saveProfileChanges({ bio: value });
+            guildProfileMode ?
+                GuildIdentyStore.saveGuildIdentityChanges(window.BDD.Utils.currentGuild.id, { bio: value }) :
+                UserProfileSettings.saveProfileChanges({ bio: value });
         }
 
         setEditMode(false);
@@ -27,7 +32,9 @@ export default function EditBioSection({ bio, className, containerClassName, ren
     return (
         <div className={className} data-render-type={!editMode && renderType}>
             {editMode ?
-                <UserBioEditor initialValue={bio} onButtonPressed={onEditButtonClicked} /> :
+                <UserBioEditor initialValue={bio} onButtonPressed={onEditButtonClicked}
+                    guildProfileMode={guildProfileMode} onBioModeChange={setGuildProfileMode}
+                /> :
                 renderType === 'button' ?
                     <EditBioButton onClick={() => setEditMode(true)} /> :
                     <TooltipContainer text="Edit bio">

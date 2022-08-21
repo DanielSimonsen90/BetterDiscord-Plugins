@@ -1,4 +1,5 @@
-import { useMemo } from "@react";
+import { React } from '@discordium/modules';
+const { useMemo } = React;
 
 const DEFAULT_ROW_COUNT = 5;
 

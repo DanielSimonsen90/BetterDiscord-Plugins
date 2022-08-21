@@ -1,12 +1,13 @@
 import { BetterOmit } from 'danholibraryjs';
 import { BaseProps } from 'danholibraryrjs';
 
-import { React, useState, useEffect, useMemo, useCallback, ClassModules } from 'danho-discordium/React';
-import { moment } from '@discordium/modules';
-import { ButtonContainer, PrimaryButton } from '@react/components';
 import { DiscordTimeFormat } from '@discord';
+import { moment, parseBioReact, React } from '@discordium/modules';
+import { ClassModules } from '@react/components/Discord/MiniModules';
+import { PrimaryButton } from '@react/components/Discord/Button';
+import ButtonContainer from '@react/components/ButtonContainer';
 
-const { parseBioReact } = window.BDD.Modules;
+const { useState, useEffect, useMemo, useCallback } = React;
 
 type Props = BetterOmit<BaseProps, 'onChange'> & {
     onTimeSelect(time: moment.Moment, format: DiscordTimeFormat): void,

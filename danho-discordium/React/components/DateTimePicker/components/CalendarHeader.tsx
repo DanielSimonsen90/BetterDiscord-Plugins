@@ -1,6 +1,11 @@
-import { classNames, React, useMemo } from 'danho-discordium/React';
 import { BaseProps } from 'danholibraryrjs';
-import { ClassModules, ButtonContainer, SecondaryButton, BDFDB } from 'danho-discordium/React/components';
+import { React, classNames } from '@discordium/modules';
+import { ClassModules } from '@react/components/Discord/MiniModules';
+import { SecondaryButton } from '@react/components/Discord/Button';
+import ButtonContainer from '@react/components/ButtonContainer';
+
+const { useMemo } = React;
+const BDFDB = window.BDFDB.LibraryComponents;
 
 type Props = BaseProps & {
     date: moment.Moment;

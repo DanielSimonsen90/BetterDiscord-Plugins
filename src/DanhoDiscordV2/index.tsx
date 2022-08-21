@@ -41,15 +41,15 @@ export default window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings 
             });
         }
         patchUserBio({ args: [props], result }: PatchReturns["UserBio"]) {
-            const [user] = $(`.${props.className}`)?.propFromParent<User>("user") ?? [{ id: undefined }];
+            const userId = $(s => s.id("popout").data("user-id")).attr("data-user-id")
             const componentClassName = "edit-bio-section";
             const { preference } = this.settings.current.EditBioElsewhere;
-            if (user?.id !== Lib.Users.me.id) return;
+            if (userId !== Lib.Users.me.id) return;
 
             const lastChild = () => result.props.children[result.props.children.length - 1] as any;
             if ([componentClassName].includes(lastChild().props?.className)) return;
 
-            result.props.children.push(<EditBioSection renderType={preference} bio={props.userBio} className={componentClassName} containerClassName={props.className} />);
+            result.props.children.push(<EditBioSection renderType={preference} className={componentClassName} />);
         }
 
         patchCreateGuildModal({ args: [props], result }: PatchReturns["CreateGuildModal"]) {
@@ -57,12 +57,6 @@ export default window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings 
                 .removeClass('theme-light')
                 .addClass(Lib.Stores.UserSettingsStore.theme)
             );
-        }
-        patchMessageTimestamp({ args, result, original }: PatchReturns["MessageTimestamps"]) {
-            console.log({
-                args, result, original
-            });
-            return original(...args);
         }
 
         SettingsPanel = SettingsPanel;

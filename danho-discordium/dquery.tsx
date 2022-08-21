@@ -276,6 +276,8 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
         KeyExists extends boolean = true,
         ValueExists extends boolean = false
     >(key?: string, value?: string): If<KeyExists, If<ValueExists, this, string>, Array<Attr>> {
+        if (!this.element) return undefined;
+
         if (!key) return [...this.element.attributes] as any
         if (value === undefined) return this.element.getAttribute(key) as any;
         this.element.setAttribute(key, value);

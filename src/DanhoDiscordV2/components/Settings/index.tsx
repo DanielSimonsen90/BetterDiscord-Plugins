@@ -2,7 +2,7 @@ import SettingsProps from "danho-discordium/SettingsProps";
 import { TransformType } from "danholibraryjs";
 import { name } from '../../config.json';
 
-const { React, classNames, Components } = window.BDD.Modules.CompiledReact;
+const { React, Components } = window.BDD.Modules.CompiledReact;
 const {
     MyForm: { Section, Item },
     Form: { FormTitle },

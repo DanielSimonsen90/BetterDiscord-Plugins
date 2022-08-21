@@ -8,11 +8,12 @@ export interface User {
     discriminator: string;
     avatar: string;
     email: string;
-    phone?: any;
+    phone?: string;
 
     accentColor?: any;
     banner?: any;
     bio: string;
+    pronouns?: string;
 
     bot: boolean;
     desktop: boolean;

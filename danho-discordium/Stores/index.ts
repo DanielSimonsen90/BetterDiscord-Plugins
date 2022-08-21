@@ -17,6 +17,7 @@ export { default as LanguageStore } from '@BDFDB/LibraryModules/LanguageStore';
 export * from './EmojiStore';
 export * from './GuildChannelStore';
 export * from './GuildEmojiStore';
+export * from './GuildIdentityStore';
 export * from './SelectedGuildStore';
 export * from './UserMentionStore';
 export * from './UserActivityStore';

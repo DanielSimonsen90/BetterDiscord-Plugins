@@ -1,12 +1,15 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'danho-discordium/React';
+import { React } from '@discordium/modules';
+import { Dispatch, SetStateAction } from 'danho-discordium/React';
 import useDebounce from './useDebounce';
 
+const { useState } = React;
 
 export function useStateStack<State>(initialState: State, stackSize: number = 10): [State, {
   push: Dispatch<SetStateAction<State>>;
   pop: () => void;
   undo: () => void;
   redo: () => void;
+  clear: (state?: State) => void;
 }] {
   const [lastState, setLastState] = useState<State>(initialState);
   const [stack, setStack] = useState<State[]>([initialState]);
@@ -40,6 +43,8 @@ export function useStateStack<State>(initialState: State, stackSize: number = 10
     return prev.slice(0, prev.length - 1);
   });
 
-  return [lastState, { push: setLastState, pop, undo, redo }];
+  const clear = (state?: State) => setStack([state ?? initialState]);
+
+  return [lastState, { push: setLastState, pop, undo, redo, clear }];
 }
 export default useStateStack;

@@ -61,8 +61,8 @@ export interface ButtonComponent extends React.FunctionComponent<ButtonProps> {
 export const Button: ButtonComponent = Finder.byProps("Link", "Hovers");
 export default Button;
 
-export const SuccessButton = (props: ButtonProps) => <Button {...props} color={Button.Colors.GREEN} look={Button.Looks.FILLED} />;
-export const CancelButton = (props: ButtonProps) => <Button {...props} color={Button.Colors.RED} look={Button.Looks.OUTLINED} />;
+export const SuccessButton = (props: ButtonProps) => <Button {...props} color={Button.Colors.GREEN} look={Button.Looks.FILLED} data-type="success" />;
+export const CancelButton = (props: ButtonProps) => <Button {...props} color={Button.Colors.RED} look={Button.Looks.OUTLINED} data-type="cancel" />;
 
-export const PrimaryButton = (props: ButtonProps) => <Button {...props} color={Button.Colors.BRAND} look={Button.Looks.FILLED} />;
-export const SecondaryButton = (props: ButtonProps) => <Button {...props} color={Button.Colors.PRIMARY} look={Button.Looks.OUTLINED} />;
+export const PrimaryButton = (props: ButtonProps) => <Button {...props} color={Button.Colors.BRAND} look={Button.Looks.FILLED} data-type="primary" />;
+export const SecondaryButton = (props: ButtonProps) => <Button {...props} color={Button.Colors.PRIMARY} look={Button.Looks.OUTLINED} data-type="secondary" />;

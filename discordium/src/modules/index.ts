@@ -10,4 +10,6 @@ export * from "./experiment";
 
 export * from "./components";
 
+export * from './parseBioReact';
+
 export type Untyped<T> = T & Record<string, any>;

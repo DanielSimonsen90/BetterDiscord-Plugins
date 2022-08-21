@@ -1,7 +1,7 @@
 import CompiledReact from './CompiledReact';
 import $, { DQuery } from '@dquery';
 import ElementSelector from 'danho-discordium/ElementSelector';
-import parseBioReact from './parseBioReact';
+import parseBioReact from '@discordium/modules/parseBioReact';
 
 type DanhoModules = {
     CompiledReact: CompiledReact,

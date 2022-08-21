@@ -1,11 +1,11 @@
 import { moment } from '@discordium/modules';
-import { React, classNames, useMemo } from 'danho-discordium/React';
 import { BaseProps } from 'danholibraryrjs';
 
 import CalendarDate from './CalendarDate';
-
 import useCalendarDates from '../hooks/useCalendarDates';
 
+import { React, classNames } from '@discordium/modules';
+const { useMemo } = React;
 
 type Props = BaseProps<HTMLTableElement> & {
     selectedDate: moment.Moment;

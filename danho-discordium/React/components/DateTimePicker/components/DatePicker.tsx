@@ -1,5 +1,4 @@
-import { moment } from '@discordium/modules';
-import { React, useCallback, useState, useMemo } from 'danho-discordium/React';
+import { moment, React } from '@discordium/modules';
 
 import { BetterOmit, TransformType } from 'danholibraryjs';
 import { BaseProps } from 'danholibraryrjs';
@@ -16,6 +15,7 @@ type Props = BaseProps & PublicHeaderProps & Require<PublicGridProps, 'onDateSel
     gridProps?: Omit<CalendarGridProps, keyof PublicGridProps>,
 }
 
+const { useCallback, useState, useMemo } = React;
 export function DatePicker({ onDateSelect, headerProps, gridProps, ...props }: Props) {
     const [year, setYear] = useState(moment().year());
     const [month, setMonth] = useState(moment().month());

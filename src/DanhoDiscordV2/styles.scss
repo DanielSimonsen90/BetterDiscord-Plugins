@@ -36,10 +36,14 @@
 @include className("userInfoBody") {
     position: relative;
 }
+@include className("userInfoText") {
+    position: relative;
+}
 
 .edit-bio-section[data-render-type=pencil] {
     position: absolute;
-    top: .75rem;
+    // top: .75rem;
+    top: 0;
     right: 1em;
     cursor: pointer;
 }
@@ -47,4 +51,8 @@
 .time-inputs {
     background-color: var(--background-quinary);
     padding: 1em;
+}
+
+.button-container button[data-type=primary] {
+    grid-area: primary;
 }
