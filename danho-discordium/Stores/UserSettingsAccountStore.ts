@@ -1,4 +1,4 @@
-import { User } from "@discord";
+import { Snowflake, User } from "@discord";
 import { Finder } from "@discordium/api";
 import { Store }from '@discordium/modules/flux';
 
@@ -26,7 +26,7 @@ export type UserProfileSettingsStore = {
     [key in `setPending${Capitalize<keyof Profile>}`]: (value: Profile[keyof Profile]) => void;
 } & {
     resetPendingProfileChanges(): void;
-    saveProfileChanges(changes: Partial<Profile>): void;
+    saveProfileChanges(changes: Partial<Profile>, guildId?: Snowflake): void;
 };
 export const UserProfileSettingsStore = Finder.byProps("saveProfileChanges", "setPendingBio");
 

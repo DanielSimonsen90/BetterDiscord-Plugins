@@ -16,6 +16,7 @@ import { SettingsContainer } from "./components/settings";
 export { Finder, ReactInternals, ReactDOMInternals } from "./api";
 export * as Utils from "./utils";
 export { React, ReactDOM, Flux } from "./modules";
+export * as Modules from "./modules";
 export { version } from "../package.json";
 
 export { Logger, Patcher, Styles, Data, Settings, createStyles } from "./api";

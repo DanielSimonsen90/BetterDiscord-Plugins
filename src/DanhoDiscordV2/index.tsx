@@ -21,8 +21,8 @@ export default window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings 
                         UserPopoutBody: { isModal: true, condition: ({ BetterRoleColors, EditBioElsewhere }) => BetterRoleColors.enabled || EditBioElsewhere.enabled },
                         UserBio: { isModal: true, condition: ({ EditBioElsewhere }) => EditBioElsewhere.enabled },
                         CreateGuildModal: { isModal: true },
-                    },
-                }
+                    }
+                },
             });
         }
 
@@ -46,10 +46,11 @@ export default window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings 
             const { preference } = this.settings.current.EditBioElsewhere;
             if (userId !== Lib.Users.me.id) return;
 
-            const lastChild = () => result.props.children[result.props.children.length - 1] as any;
-            if ([componentClassName].includes(lastChild().props?.className)) return;
+            const resultProps = result.props.children.props;
+            const lastChild = resultProps.children[resultProps.children.length - 1] as any;
+            if ([componentClassName].includes(lastChild.props?.className)) return;
 
-            result.props.children.push(<EditBioSection renderType={preference} className={componentClassName} />);
+            resultProps.children.push(<EditBioSection renderType={preference} className={componentClassName} />);
         }
 
         patchCreateGuildModal({ args: [props], result }: PatchReturns["CreateGuildModal"]) {

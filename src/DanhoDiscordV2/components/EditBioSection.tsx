@@ -21,9 +21,8 @@ export default function EditBioSection({ className, renderType }: Props) {
 
     const onEditButtonClicked = useCallback((guildProfileMode: boolean, value: string) => {
         if (value !== bio) {
-            guildProfileMode ?
-                GuildIdentyStore.saveGuildIdentityChanges(window.BDD.Utils.currentGuild.id, { bio: value }) :
-                UserProfileSettings.saveProfileChanges({ bio: value });
+            if (guildProfileMode) GuildIdentyStore.saveGuildIdentityChanges(window.BDD.Utils.currentGuild.id, { bio: value });
+            UserProfileSettings.saveProfileChanges({ bio: value }, guildProfileMode ? window.BDD.Utils.currentGuild.id : null);
         }
 
         setEditMode(false);
@@ -35,6 +34,7 @@ export default function EditBioSection({ className, renderType }: Props) {
                 <UserBioEditor initialValue={bio} onButtonPressed={onEditButtonClicked}
                     guildProfileMode={guildProfileMode} onBioModeChange={setGuildProfileMode}
                 /> :
+                // <AboutMeSection onBioChange={setPendingBio} currentBio={bio} /> :
                 renderType === 'button' ?
                     <EditBioButton onClick={() => setEditMode(true)} /> :
                     <TooltipContainer text="Edit bio">

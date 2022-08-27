@@ -62,6 +62,11 @@ function findModule(args: Arrayable<string>, returnDisplayNamesOnly = false) {
             module.default?.displayName || module.displayName 
         : module;
 }
+function findModuleById(id: number, returnDefault: boolean = false) {
+    const modules = Object.values(ZLibrary.WebpackModules.getAllModules()).filter(m => m.id === id);
+    const mapped = returnDefault ? modules.map(m => m.default) : modules;
+    return mapped.length === 1 ? mapped[0] : mapped;
+}
 function findStore(storeName: string, allowMultiple = false) {
     const result = Object.values<any>(
         window.BDD.finder.byName("UserSettingsAccountStore")
@@ -117,6 +122,7 @@ export const Utils = {
     findModuleByIncludes,
     findClassModuleContainingClass,
     findModule,
+    findModuleById,
     findUserByTag,
     findStore,
     getPlugin,
@@ -129,8 +135,3 @@ export const Utils = {
 
 export * from './Users';
 export * from './Guilds';
-
-/**
- * Object.values(ZLibrary.WebpackModules.getAllModules()).filter(m => m.id === 401648)[0].exports;
- */
-

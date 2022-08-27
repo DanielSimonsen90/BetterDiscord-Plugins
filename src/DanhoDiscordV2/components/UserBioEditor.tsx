@@ -1,10 +1,12 @@
 import { Emoji } from "@discord";
 
-const { parseBioReact, CompiledReact } = window.BDD.Modules;
-const { React, useEffect, useCallback, useMemo, classNames, Components, Hooks } = CompiledReact;
-const { SuccessButton, PrimaryButton, CancelButton, ButtonContainer, DateTimePicker } = Components;
-const { useStateStack } = Hooks;
+const { CompiledReact, Discord, $, moment } = window.BDD.Modules;
+const { React, useState, useEffect, useCallback, useMemo, useRef, classNames, Components, Hooks } = CompiledReact;
+const { SuccessButton, PrimaryButton, CancelButton, ButtonContainer, DateTimePicker, ChannelEditorContainer, ChatInputTypes } = Components;
 const { DiscordClassModules, LibraryComponents: { EmojiPickerButton } } = window.BDFDB;
+const { ChannelClass } = Discord;
+
+const DISCORD_BIO_LENGTH = 190;
 
 type UserBioEditorProps = {
     initialValue: string;
@@ -13,31 +15,43 @@ type UserBioEditorProps = {
     onBioModeChange: (guildProfileMode: boolean) => void;
 }
 
-export default function UserBioEditor({ initialValue, guildProfileMode, onButtonPressed, onBioModeChange }: UserBioEditorProps) {
-    const [value, { push, undo, redo, clear }] = useStateStack(initialValue);
-    const guildExists = useMemo(() => window.BDD.Utils.currentGuild !== null, []);
+function getEditor() {
+    const el = $(s => s.className('channel-editor-container'));
+    if (!el.element) return null;
 
-    const charsLeft = useMemo(() => 190 - value.length, [value]);
+    const [editor] = el.prop("editor", "children.props");
+    return editor;
+}
+
+export default function UserBioEditor({ initialValue, guildProfileMode, onButtonPressed, onBioModeChange }: UserBioEditorProps) {
+    const guildExists = useMemo(() => window.BDD.Utils.currentGuild !== null, []);
+    const [editor, setEditor] = useState<any>(null);
+    const push = useCallback((value: string) => (editor ?? getEditor()).insertTextData({ getData: () => value }), [editor]);
+
+    const [value, setValue] = useState(initialValue);
+    const charsLeft = useMemo(() => DISCORD_BIO_LENGTH - value.length, [value]);
     const isPastLimit = useMemo(() => charsLeft < 0, [charsLeft]);
 
-    const onEmojiPicked = useCallback((emoji: Emoji) => push(value => value + `<:${emoji.name}:${emoji.id}>`), []);
-    const format = useCallback((value: string) => parseBioReact(value), [parseBioReact]);
+    const onEmojiPicked = useCallback((emoji: Emoji) => push(`<:${emoji.name}:${emoji.id}>`), []);
 
     useEffect(() => {
-        // Handle Ctrl + Z and Ctrl + Y
-        const onKeyDown = (e: KeyboardEvent) => {
-            if (e.ctrlKey) {
-                if (e.key === 'z') undo();
-                if (e.key === 'y') redo();
-            }
+        setEditor(getEditor());
+    }, [])
+
+    useEffect(() => {
+        const _editor = editor ?? getEditor();
+        if (!_editor) return;
+
+        for (let i = 0; i < DISCORD_BIO_LENGTH; i++) {
+            _editor.deleteBackward(_editor);
         }
-        window.addEventListener('keydown', onKeyDown);
-        return () => window.removeEventListener('keydown', onKeyDown);
-    }, [value]);
 
-    useEffect(() => {
-        push(initialValue);
-    }, [initialValue])
+        _editor.insertTextData({ getData: () => initialValue });
+
+        if (_editor && !editor) {
+            setEditor(_editor);
+        }
+    }, [initialValue]);
 
     return (
         <div className={classNames(
@@ -46,23 +60,15 @@ export default function UserBioEditor({ initialValue, guildProfileMode, onButton
             DiscordClassModules.Flex.directionColumn,
         )}>
             <hr style={{ width: '100%' }} />
-            <div className="bio-preview">
-                {format(value)}
-            </div>
             <div className="textarea-wrapper">
-                {/* TODO: Change to ChannelTextAreaContainer */}
-                <textarea maxLength={190} rows={8.5} value={value}
-                    onChange={e => push(e.target.value)}
-                    className={classNames(
-                        DiscordClassModules.ChannelTextArea.channelTextArea,
-                        DiscordClassModules.ChannelTextArea.inner,
-                        DiscordClassModules.ChannelTextArea.profileBioInput,
-                        DiscordClassModules.Scroller.auto
-                    )}
+                <ChannelEditorContainer className="channel-editor-container" channel={new ChannelClass("bio-editor")} onKeyDown={e => {
+                    if (e.key === "Enter" && e.ctrlKey) onButtonPressed(guildProfileMode, value);
+                }}
+                    textValue={value} onChange={(_, v) => setValue(v ?? initialValue)} maxCharacterCount={190} useSlate type={ChatInputTypes.PROFILE_BIO_INPUT}
                 />
                 <div className="control-panel">
                     <EmojiPickerButton onSelect={onEmojiPicked} />
-                    <DateTimePicker onSubmit={(date, format) => push(value => value + `<t:${date.unix()}:${format}>`)} />
+                    <DateTimePicker onSubmit={(date, format) => push(`<t:${date.unix()}:${format}>`)} />
                     <span id="chars-left" data-limit-passed={isPastLimit}>{charsLeft}</span>
                 </div>
             </div>
