@@ -140,10 +140,6 @@ export default async function initializePatches<Settings>(plugin: DumbPlugin<Set
         }
 
         const { module, method, ...option } = moduleGuesses[0];
-        plugin.logger.log('[Patcher]: Interpreting module', {
-            module, method, option, patchType, pluginPropKey
-        });
-
         if (!module) {
             plugin.logger.warn(`[Patcher]: No module found for ${pluginPropKey}`, {
                 moduleGuesses, patchType, pluginPropKey, pluginProp, option, method
@@ -209,7 +205,7 @@ async function patch(plugin: DumbPlugin, option: PatchOptionAndCallbackName, pat
     if (!module) {
         plugin.logger.error("Module not found for", option.selector);
         return null;
-    } else if (methodType !== 'default' && Array.isArray(option.selector)) {
+    } else if (!module[methodType]) {
         module = module[Array.isArray(option.selector) ? option.selector[0] : option.selector];
     }
 
@@ -238,7 +234,13 @@ async function waitForModule(patcher: Patcher, option: Exclude<PatchOptions<true
     return (
         isContextMenu ? patcher.waitForContextMenu(() => getModule(option), { silent: option.silent }) : 
         isModal ? patcher.waitForModal(() => getModule(option), { silent: option.silent }) : 
-        new Promise<Module>(resolve => resolve(getModule(option)))
+        isContextMenu || isModal ? 
+            BdApi.Webpack.waitForModule((m: Module) => 
+                Array.isArray(option.selector) ? 
+                    option.selector.every(prop => m.hasOwnProperty(prop)) :
+                    m.displayName === option.selector
+                ) :
+            new Promise<Module>(resolve => resolve(getModule(option)))
     )
 }
 async function getModule(option: PatchOption<true>): Promise<Module> {

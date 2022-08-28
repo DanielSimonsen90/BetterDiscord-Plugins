@@ -25,7 +25,7 @@ export default window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings 
             });
         }
 
-        patchUserBio({ args: [props], result }: PatchReturns["UserBio"]) {
+        patchUserBio({ result }: PatchReturns["UserBio"]) {
             const userId = $(s => s.id("popout").data("user-id")).attr("data-user-id")
             const componentClassName = "edit-bio-section";
             const { preference } = this.settings.current.EditBioElsewhere;
@@ -38,14 +38,14 @@ export default window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings 
             resultProps.children.push(<EditBioSection renderType={preference} className={componentClassName} />);
         }
 
-        afterCreateGuildModal = ({ args: [props], result }: PatchReturns["CreateGuildModal"]) => {
+        afterCreateGuildModal = () => {
             $('.theme-light', false).map(el => el
                 .removeClass('theme-light')
-                .addClass(Lib.Stores.ThemeStore.theme)
+                .addClass(`theme-${Lib.Stores.ThemeStore.theme}`)
             );
         }
 
-        patchMemberRole({ args: [props], result }: PatchReturns["MemberRole"]) {
+        patchMemberRole({ result }: PatchReturns["MemberRole"]) {
             const roleStyle = result.props.children.props.style;
             if (!roleStyle || !roleStyle.borderColor) return;
 

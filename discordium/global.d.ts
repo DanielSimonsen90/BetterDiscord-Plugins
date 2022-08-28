@@ -31,6 +31,7 @@ declare namespace BdApi {
     }
 
     const Patcher: any;
+    const Webpack: any;
 
     function alert(title: string, content: string | JSX.Element): void;
 
