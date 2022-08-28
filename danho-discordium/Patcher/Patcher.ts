@@ -130,7 +130,7 @@ export default async function initializePatches<Settings>(plugin: DumbPlugin<Set
             return "after";
         })();
         const pluginPropName = pluginPropKey.replace(/^before|instead|after/, '');
-        const moduleGuesses = await findModuleByGuessing(pluginProp, pluginPropName);
+        const moduleGuesses = await findModuleByGuessing(pluginProp, pluginPropName, pluginPropKey, plugin);
 
         // Found 0 or too many modules
         if (moduleGuesses.length != 1) {
@@ -140,6 +140,17 @@ export default async function initializePatches<Settings>(plugin: DumbPlugin<Set
         }
 
         const { module, method, ...option } = moduleGuesses[0];
+        plugin.logger.log('[Patcher]: Interpreting module', {
+            module, method, option, patchType, pluginPropKey
+        });
+
+        if (!module) {
+            plugin.logger.warn(`[Patcher]: No module found for ${pluginPropKey}`, {
+                moduleGuesses, patchType, pluginPropKey, pluginProp, option, method
+            });
+            continue;
+        }
+
         patches.push(await patch(plugin, option, patchType, method, module));
     }
 
@@ -198,6 +209,8 @@ async function patch(plugin: DumbPlugin, option: PatchOptionAndCallbackName, pat
     if (!module) {
         plugin.logger.error("Module not found for", option.selector);
         return null;
+    } else if (methodType !== 'default' && Array.isArray(option.selector)) {
+        module = module[Array.isArray(option.selector) ? option.selector[0] : option.selector];
     }
 
     const previouslyPatched = (plugin.patches ??= []).find(p => p.module === module && p.method === methodType && p.patchType === patchType);
@@ -232,11 +245,11 @@ async function getModule(option: PatchOption<true>): Promise<Module> {
     return Finder.query({ [option.selector instanceof Array ? "props" : "name"]: option.selector }) ??
         Finder.query({ props: option.selector instanceof Array ? option.selector : [option.selector] });
 }
-async function findModuleByGuessing(pluginProp: Function, pluginPropName: string): Promise<Array<PatchOptionAndMethod<true, true>>> {
+async function findModuleByGuessing(pluginProp: Function, pluginPropName: string, pluginPropKey: string, plugin: DumbPlugin): Promise<Array<PatchOptionAndMethod<true, true>>> {
     const guesses = await Promise.all((() => {
         const sharedOption: PatchOptionAndCallbackName = {
             callback: pluginProp,
-            callbackName: `${pluginPropName}`, // remove reference to pluginPropName
+            callbackName: pluginPropKey,
             isModal: pluginPropName.includes("Modal"), 
             isContextMenu: pluginPropName.includes("ContextMenu") 
         }
@@ -264,15 +277,19 @@ async function findModuleByGuessing(pluginProp: Function, pluginPropName: string
         // define method as last sequence of letters after a capital letter
         const renderModule = pluginPropName.match(/[A-Z]{1}[a-z]+$/).reduce((_, method) => ({
             ...sharedOption,
-            method,
+            method: camelCase(method),
             selector: pluginPropName.replace(method, ''),
         }), {} as PatchOptionAndMethod<true>);
 
+        console.log()
         return [defaultModule, defaultModuleProps, renderModule];
-    })().map(({ method, ...option }) => getModule(option)
-    .then<PatchOptionAndMethod<true, true>>(module => ({ 
-        module, method, ...option 
-    }) as PatchOptionAndMethod<true, true>)));
+    })().map(({ method, ...option }) => (
+        option.isContextMenu || option.isModal ? 
+            waitForModule(plugin.patcher, option) : 
+            getModule(option)
+        ).then<PatchOptionAndMethod<true, true>>(module => ({ 
+            module, method, ...option 
+        }) as PatchOptionAndMethod<true, true>)));
 
     return guesses.filter(result => result.module && result.method !== 'invalid');
 }

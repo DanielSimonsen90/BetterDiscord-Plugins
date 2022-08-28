@@ -174,14 +174,14 @@ export const createPatcher = (id: string, Logger: Logger): Patcher => {
         unpatchAll: () => {
             if (rawPatcher.getPatchesByCaller(id).length > 0) {
                 rawPatcher.unpatchAll(id);
-                Logger.log("Unpatched all");
+                // Logger.log("Unpatched all");
             }
         },
         waitForLazy: (object, method, argIndex, callback, options = {}) => new Promise<any>((resolve) => {
             // check load once before we patch
             const found = callback();
             if (found) {
-                if (!options.silent) Logger.log(`Lazy load in ${String(method)} of ${resolveName(object, method)} found from callback`, {found});
+                // if (!options.silent) Logger.log(`Lazy load in ${String(method)} of ${resolveName(object, method)} found from callback`, {found});
                 resolve(found);
             } else {
                 // patch lazy load method
@@ -196,7 +196,7 @@ export const createPatcher = (id: string, Logger: Logger): Patcher => {
                         Promise.resolve().then(() => {
                             const found = callback();
                             if (found) {
-                                if (!options.silent) Logger.log(`Lazy load in ${String(method)} of ${resolveName(object, method)} found from callback`, {found});
+                                // if (!options.silent) Logger.log(`Lazy load in ${String(method)} of ${resolveName(object, method)} found from callback`, {found});
                                 resolve(found);
 
                                 // we dont need the patch anymore

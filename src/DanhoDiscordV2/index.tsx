@@ -1,6 +1,4 @@
-import { User } from '@discord';
 import { PatchReturns } from 'danho-discordium/Patcher';
-import { Roles } from 'danho-discordium/Patcher/UserPopoutBody/roles';
 
 import EditBioSection from './components/EditBioSection';
 
@@ -18,28 +16,15 @@ export default window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings 
             super.start({
                 after: {
                     default: {
-                        UserPopoutBody: { isModal: true, condition: ({ BetterRoleColors, EditBioElsewhere }) => BetterRoleColors.enabled || EditBioElsewhere.enabled },
                         UserBio: { isModal: true, condition: ({ EditBioElsewhere }) => EditBioElsewhere.enabled },
-                        CreateGuildModal: { isModal: true },
+                    },
+                    render: {
+                        MemberRole: { selector: ["MemberRole"], condition: ({ BetterRoleColors }) => BetterRoleColors.enabled },
                     }
                 },
             });
         }
 
-        patchUserPopoutBody({ result }: PatchReturns["UserPopoutBody"]) {
-            const userPopoutBody = $(`.${result.props.className}`);
-            if (!userPopoutBody.element) return;
-
-            const [rolesListProps] = userPopoutBody.propsWith<Roles>("userRoles");
-            if (!rolesListProps) return;
-
-            const rolesList = $(`.${rolesListProps.className}`);
-            if (!rolesList.element) return;
-
-            rolesList.children('* > div[class*="role"]:not(div[class*="addButton"])').forEach((role, i) => {
-                if (role.style?.borderColor) role.style.backgroundColor = role.style.borderColor?.replace('0.6', '0.09');
-            });
-        }
         patchUserBio({ args: [props], result }: PatchReturns["UserBio"]) {
             const userId = $(s => s.id("popout").data("user-id")).attr("data-user-id")
             const componentClassName = "edit-bio-section";
@@ -53,13 +38,19 @@ export default window.BDD.PluginUtils.buildPlugin({ ...config, styles, settings 
             resultProps.children.push(<EditBioSection renderType={preference} className={componentClassName} />);
         }
 
-        patchCreateGuildModal({ args: [props], result }: PatchReturns["CreateGuildModal"]) {
+        afterCreateGuildModal = ({ args: [props], result }: PatchReturns["CreateGuildModal"]) => {
             $('.theme-light', false).map(el => el
                 .removeClass('theme-light')
-                .addClass(Lib.Stores.UserSettingsStore.theme)
+                .addClass(Lib.Stores.ThemeStore.theme)
             );
         }
 
+        patchMemberRole({ args: [props], result }: PatchReturns["MemberRole"]) {
+            const roleStyle = result.props.children.props.style;
+            if (!roleStyle || !roleStyle.borderColor) return;
+
+            result.props.children.props.style.backgroundColor = roleStyle.borderColor.replace('0.6', '0.09');
+        }
         SettingsPanel = SettingsPanel;
     } as any;
 });

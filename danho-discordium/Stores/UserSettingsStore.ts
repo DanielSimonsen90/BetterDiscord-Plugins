@@ -1,6 +1,7 @@
 import { ActivityIndexes, ActivityTypes, GuildFolder, Snowflake, StatusType } from "@discord";
 import { Finder } from "@discordium/api";
 import { Store } from "@discordium/modules/flux";
+import { Theme } from "./ThemeStore";
 
 export interface UserSettingsStore extends Store {
     get locale(): string;
@@ -16,10 +17,12 @@ export interface UserSettingsStore extends Store {
         useForceColors: boolean;
     }
 }
+
+/**
+ * @error This is no longer used in Discord.
+ */
 export const UserSettingsStore: UserSettingsStore = Finder.byName("UserSettingsStore");
 export default UserSettingsStore;
-
-export type Theme = 'dark' | 'light';
 
 type AllUserSettings = {
     afkTimeout: number,

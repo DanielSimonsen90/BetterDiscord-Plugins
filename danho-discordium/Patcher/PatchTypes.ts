@@ -1,7 +1,8 @@
-import { ActivityIndexes, ActivityTypes, Guild, GuildMember, Message, Snowflake, User } from "@discord";
+import { ActivityIndexes, ActivityTypes, Guild, GuildMember, Message, Role, Snowflake, User } from "@discord";
 import UserPopoutBody from "./UserPopoutBody";
 import UserProfileBadgeList from "./UserProfileBadgeList";
 import UserBio from "./UserBio";
+import MemberRole from "./MemberRole";
 
 export type PatchReturns = {
     [Key in keyof PatchProps]: {
@@ -55,6 +56,13 @@ export type PatchProps = {
     UserBio: {
         className: string,
         userBio: string
+    },
+    MemberRole: {
+        canRemove: boolean;
+        className: undefined;
+        guildId: Snowflake;
+        onRemove(): void;
+        role: Role;
     }
 }
 export type OriginalType = {
@@ -64,5 +72,6 @@ export type ResultProps = {
     UserProfileBadgeList: UserProfileBadgeList
     UserPopoutBody: UserPopoutBody,
     Message: Message,
-    UserBio: UserBio
+    UserBio: UserBio,
+    MemberRole: MemberRole,
 }

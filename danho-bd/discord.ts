@@ -432,37 +432,3 @@ export enum PremiumTypes {
     Classic = 1,
     Nitro = 2
 }
-
-type Locale = {
-    ordinal: (e: any) => any,
-    _abbr: string,
-    _calendar: Calendar,
-    _config: LocaleConfig,
-    _dayOfMonthOrdinalParseLenient: RegExp,
-} & {
-    [key in keyof LocaleConfig as `_${key}`]: LocaleConfig[key];
-}
-type Calendar = {
-    lastDay: string,
-    lastWeek: string,
-    nextDay: string,
-    nextWeek: string,
-    sameDay: string,
-    sameElse: string,
-}
-type LocaleConfig = {
-    abbr: string,
-    calendar: Calendar,
-    dayOfMonthOrdinalParse: RegExp,
-    invalidDate: string,
-    longDateFormat: Record<'L' | 'LL' | 'LLL' | 'LLLL' | 'LT' | 'LTS', string>,
-    meridiemParse: RegExp,
-    months: Array<string>,
-    monthsShort: Array<string>,
-    ordinal: (e: any) => any,
-    relativeTime: Record<'M' | 'MM' | 'd' | 'dd' | 'future' | 'h' | 'hh' | 'm' | 'mm' | 'past' | 's' | 'ss' | 'y' | 'yy', string>,
-    week: Record<'dow' | 'doy', number>,
-    weekdays: Array<string>,
-    weekdaysMin: Array<string>,
-    weekdaysShort: Array<string>,
-}
