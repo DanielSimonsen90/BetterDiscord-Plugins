@@ -1,38 +1,12 @@
 {
     "compilerOptions": {
-        "target": "es2020",
+        "target": "es2021",
         "jsx": "react",
         "moduleResolution": "node",
         "esModuleInterop": true,
         "resolveJsonModule": true,
-        "keyofStringsOnly": false,
-        "baseUrl": ".",
         "paths": {
-            "@lib/*": ["./danho-bd/libraries/*"],
-            "@discordium/*": ["./discordium/src/*"],
-            "@dquery": ["./danho-discordium/dquery"],
-            
-            "@BDFDB": ["./danho-bd/libraries/BDFDB/index"],
-            "@BDFDB/*": ["./danho-bd/libraries/BDFDB/*"],
-
-            "@ZLibrary/*": ["./danho-bd/libraries/ZLibrary/*"],
-            "@ZLibrary": ["./danho-bd/libraries/ZLibrary/index"],
-
-            "@discord": ["./danho-discordium/Discord"],
-            "@components": ["danho-discordium/React/components/index"],
-
-            "@actions": ["./danho-discordium/Actions"],
-            "@actions/*": ["./danho-discordium/Actions/*"],
-
-            "@stores": ["./danho-discordium/Stores"],
-            "@stores/*": ["./danho-discordium/Stores/*"],
-
-            "@react": ["./danho-discordium/React/index"],
-            "@react/*": ["./danho-discordium/React/*"],
+            "@dium/*": ["./packages/dium/src/*"]
         }
-    },
-    "ts-node": {
-        "files": true,
-        "require": ["tsconfig-paths/register"]
     }
 }

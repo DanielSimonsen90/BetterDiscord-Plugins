@@ -1,0 +1,9 @@
+{
+    "name": "CollapseEmbeds",
+    "author": "Zerthox",
+    "version": "1.0.1",
+    "description": "Adds a button to collapse embeds & attachments.",
+    "dependencies": {
+        "dium": "*"
+    }
+}
