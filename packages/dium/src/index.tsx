@@ -1,19 +1,19 @@
-import {Logger, Finder, Styles, Patcher} from "./api";
-import {SettingsStore} from "./settings";
-import {React} from "./modules";
-import {SettingsContainer} from "./settings-container";
+import { Logger, Finder, Styles, Patcher } from "./api";
+import { SettingsStore } from "./settings";
+import { React } from "./modules";
+import { SettingsContainer } from "./settings-container";
 import type * as BD from "betterdiscord";
 import type * as Webpack from "./require";
-import {setMeta} from "./meta";
+import { setMeta } from "./meta";
 
 export * from "./api";
-export {createSettings, SettingsStore, SettingsType} from "./settings";
-export {ReactInternals, ReactDOMInternals, Fiber} from "./react-internals";
+export { createSettings, SettingsStore, SettingsType } from "./settings";
+export { ReactInternals, ReactDOMInternals, Fiber } from "./react-internals";
 export * as Utils from "./utils";
-export {React, ReactDOM, Flux} from "./modules";
-export {getMeta, setMeta, Meta} from "./meta";
-export {version} from "../package.json";
-export type {Webpack};
+export { React, ReactDOM, Flux } from "./modules";
+export { getMeta, setMeta, Meta } from "./meta";
+export { version } from "../package.json";
+export type { Webpack };
 
 export interface Plugin<T extends Record<string, any>> {
     /** Called on plugin start. */
@@ -38,7 +38,7 @@ export interface Plugin<T extends Record<string, any>> {
     Settings?: SettingsStore<T>;
 
     /** Settings UI as React component. */
-    SettingsPanel?: React.ComponentType;
+    SettingsPanel?: React.FunctionComponent;
 }
 
 /**
@@ -53,7 +53,7 @@ export const createPlugin = <T extends Record<string, any>>(
     setMeta(meta);
 
     // get plugin info
-    const {start, stop, styles, Settings, SettingsPanel} = (plugin instanceof Function ? plugin(meta) : plugin);
+    const { start, stop, styles, Settings, SettingsPanel } = (plugin instanceof Function ? plugin(meta) : plugin);
 
     // load settings
     Settings?.load();
@@ -74,7 +74,7 @@ export const createPlugin = <T extends Record<string, any>>(
         },
         getSettingsPanel: SettingsPanel ? () => (
             <SettingsContainer name={meta.name} onReset={Settings ? () => Settings.reset() : null}>
-                <SettingsPanel/>
+                <SettingsPanel />
             </SettingsContainer>
         ) : null
     };

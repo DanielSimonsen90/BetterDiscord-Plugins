@@ -1,0 +1,9 @@
+{
+  "name": "danho-discordium",
+  "version": "0.0.1",
+  "description": "Dium but more content",
+  "author": "Danho",
+  "license": "MIT",
+  "private": true,
+  "main": "src/index"
+}

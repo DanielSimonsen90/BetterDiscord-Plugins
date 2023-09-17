@@ -12,6 +12,4 @@ export * from "./popout-window";
 export * from "./router";
 export * from "./user";
 
-export * from './parseBioReact';
-
 export type Untyped<T> = T & Record<string, any>;

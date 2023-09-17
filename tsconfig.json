@@ -6,7 +6,8 @@
         "esModuleInterop": true,
         "resolveJsonModule": true,
         "paths": {
-            "@dium/*": ["./packages/dium/src/*"]
+            "@dium/*": ["./packages/dium/src/*"],
+            "@danho-discordium/*": ["./packages/discordium/src/*"],
         }
     }
 }
