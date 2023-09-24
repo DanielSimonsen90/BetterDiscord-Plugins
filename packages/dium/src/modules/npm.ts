@@ -6,7 +6,7 @@ export const {ReactDOM} = BdApi;
 
 export const ReactSpring: typeof import("@react-spring/web") = /* @__PURE__ */ Finder.byKeys(["SpringContext", "animated"]);
 
-export const classNames: typeof import("classnames") = /* @__PURE__ */ Finder.find(
+export const classNames: (...args: any[]) => string = /* @__PURE__ */ Finder.find(
     (exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1
 );
 
