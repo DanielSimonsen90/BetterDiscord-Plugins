@@ -38,11 +38,6 @@ module.exports = class Plugin {
       gap: 1ch;
     }
 
-    /* Fix badgeList position */
-    ${SELECTORS.userProfileModalInner} ${SELECTORS._userProfileModalHeaderTop} > ${select('badgeList')} {
-      margin-right: unset;
-    }
-
     /* Ignore relationshipButtons in flex layout, if no buttons are present */
     ${SELECTORS.userProfileModalInner} ${SELECTORS._userProfileModalHeaderTop} > ${select('relationshipButtons')}:not(:has(button)) {
       display: none;
@@ -78,6 +73,13 @@ module.exports = class Plugin {
     /* If bot, remove username */
     ${SELECTORS.userProfileModalInner}:has(${select('botTag')}) ${select('nameTag')} {
       display: none;
+    }
+
+    /* Move badgeList */
+    ${SELECTORS.userProfileModalInner} ${select('badgeList')} {
+      position: absolute;
+      right: 0;
+      top: 1.5ch;
     }
   `;
 
@@ -164,9 +166,18 @@ module.exports = class Plugin {
       topSectionHeader.append(status);
     }
 
+    // Process badgeList
+    const badgeList = el.querySelector(select('badgeList'));
+    if (badgeList) {
+      badgeList.remove();
+      const bodyTabBar = el.querySelector(`${select('body')} > ${select('tabBarContainer')} > ${select('tabBar')}`);
+      bodyTabBar.append(badgeList);
+    }
+
     container.remove();
     headerTop.prepend(container);
 
+    // Process pronouns
     const pronouns = headerTop.querySelector(select('pronouns'));
     if (pronouns) this.processPronouns(pronouns);
   }
