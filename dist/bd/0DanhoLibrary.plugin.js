@@ -225,12 +225,12 @@ const clear = () => BdApi.DOM.removeStyle(getMeta().name);
 const ChannelStore = /* @__PURE__ */ byName("ChannelStore");
 const SelectedChannelStore = /* @__PURE__ */ byName("SelectedChannelStore");
 
-const MediaEngineStore = /* @__PURE__ */ byName("MediaEngineStore");
-
 const i18n = /* @__PURE__ */ byKeys(["languages", "getLocale"]);
 
 const GuildStore = /* @__PURE__ */ byName("GuildStore");
 const GuildMemberStore = /* @__PURE__ */ byName("GuildMemberStore");
+
+const MediaEngineStore = /* @__PURE__ */ byName("MediaEngineStore");
 
 const { React: React$1 } = BdApi;
 const { ReactDOM } = BdApi;
@@ -256,15 +256,20 @@ const { FormSection: FormSection$1, FormItem: FormItem$1, FormTitle, FormText, F
 
 const GuildsNav = /* @__PURE__ */ bySource(["guildsnav"], { entries: true });
 
-const { Link, NavLink, LinkRouter } = /* @__PURE__ */ demangle({
-    NavLink: bySource$1(".sensitive", ".to"),
-    Link: bySource$1(".component"),
-    LinkRouter: bySource$1("this.history")
-}, ["NavLink", "Link"]);
+const IconArrow = /* @__PURE__ */ bySource(["d:\"M5.3 9."], { entries: true });
+
+const mapping = {
+    Link: bySource$1(".component", ".to"),
+    BrowserRouter: bySource$1("this.history")
+};
+const { Link, BrowserRouter } = /* @__PURE__ */ demangle(mapping, ["Link", "BrowserRouter"]);
+
+const margins = /* @__PURE__ */ byKeys(["marginBottom40", "marginTop4"]);
 
 const { Menu, Group: MenuGroup, Item: MenuItem, Separator: MenuSeparator, CheckboxItem: MenuCheckboxItem, RadioItem: MenuRadioItem, ControlItem: MenuControlItem } = BdApi.ContextMenu;
 
 const MessageFooter = /* @__PURE__ */ byProtos(["renderRemoveAttachmentConfirmModal"], { entries: true });
+const MediaItem = /* @__PURE__ */ bySource(["getObscureReason", "isSingleMosaicItem"]);
 
 const RadioGroup = Common.RadioGroup;
 
@@ -277,10 +282,9 @@ const Switch = Common.Switch;
 const ChannelTextArea = bySource(["pendingReply"]);
 
 const { TextInput: TextInput$1, InputError } = Common;
+const ImageInput = /* @__PURE__ */ find((target) => typeof target.defaultProps?.multiple === "boolean" && typeof target.defaultProps?.maxFileSizeBytes === "number");
 
 const Text = Common.Text;
-
-const margins = /* @__PURE__ */ byKeys(["marginLarge"]);
 
 function Checkmark({ tooltip }) {
     return (
@@ -480,6 +484,7 @@ function Setting({ setting, settings, set, onChange, titles }) {
 const Components = {
     __proto__: null,
     Avatar,
+    BrowserRouter,
     Button,
     CancelButton,
     ChannelEditorContainer,
@@ -500,10 +505,12 @@ const Components = {
     FormText,
     FormTitle,
     GuildsNav,
+    IconArrow,
     Icons: index$2,
+    ImageInput,
     InputError,
     Link,
-    LinkRouter,
+    MediaItem,
     Menu,
     MenuCheckboxItem,
     MenuControlItem,
@@ -517,7 +524,6 @@ const Components = {
     MessageStandardEmoji,
     MessageTimestamp,
     MyForm: index$1,
-    NavLink,
     PrimaryButton,
     RadioGroup,
     SecondaryButton,
@@ -1356,14 +1362,7 @@ const LibraryPlugin = new class DanhoLibrary {
         this.Actions = Actions;
         this.Components = Components;
     }
-    start() {
-        BdApi.UI.showConfirmationModal("Danho Library", React$1.createElement("div", null,
-            React$1.createElement("h1", null, "Library Plugin"),
-            React$1.createElement("p", null,
-                "Congratulations ",
-                UserStore.getCurrentUser().username,
-                "!")));
-    }
+    start() { }
 };
 const index = createPlugin(LibraryPlugin);
 
