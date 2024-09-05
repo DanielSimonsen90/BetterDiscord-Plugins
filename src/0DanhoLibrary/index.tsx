@@ -1,47 +1,40 @@
-import config from './config.json';
-import { settings } from './Settings';
-import styles from './styles/index.scss';
-import { createPlugin } from 'discordium';
-import DanhoLibrary from './src';
-import { delay } from 'danho-discordium/Utils';
+import { DiscordModules } from './Modules';
+import { Utils, UserUtils, GuildUtils } from './Utils';
 
-class DanhoLibraryGlobal extends DanhoLibrary {
-    async start() {
-        this.on('plugin-start', this.PluginUtils.startPlugins);
-        this.on('plugin-restart', this.PluginUtils.restartPlugins);
-        this.on('plugin-stop', this.PluginUtils.stopPlugins);
+import * as Components from '@danho-lib/React/components';
+import * as Stores from '@danho-lib/Stores';
+import * as Actions from '@danho-lib/Actions';
+import { createPlugin, Plugin } from '@dium/index';
 
-        if (!window.BDFDB || !window.BDFDB_Global.loaded) {
-            this.logger.log('Waiting for BDFDB to load...');
+type Settings = {}
 
-            const waitForBDFDB = async () => {
-                if (!window.BDFDB || !window.BDFDB_Global.loaded) {
-                    return delay(waitForBDFDB, 1000);
-                }
+const LibraryPlugin = new class DanhoLibrary implements Plugin<Settings> {
+    public Modules = DiscordModules
+    
+    public Utils = Utils
 
-                this.logger.log('BDFDB loaded.');
-                if (window.BDD) this.emit('plugin-restart');
-            };
+    public Users = UserUtils;
+    public Guilds = GuildUtils;
 
-            waitForBDFDB();
-        }
-    }
-    stop() {
-        delete window.BDD;
-        this.emit('plugin-stop');
-    }
-}
+    public Stores = Stores;
+    public Actions = Actions;
+    public Components = Components;
 
-declare global {
-    interface Window {
-        BDD: DanhoLibrary;
-        BDD_PluginQueue: Array<string>;
-    }
-}
+    start() {}
+    
+    /*
+    TODO: Update Library:
+    --- Modules from BDFDB & ZLibrary.DiscordModules
+    + Users = UserUtils, UserStore, PresenceStore, RelationshipStore, UserActivityStore, UserNoteStore, UserNoteActions, UserTypingStore, MentionStore, NitroUtils?
+    + Guilds = GuildUtils, GuildStore, MemberStore, FolderStore, ChannelStore/GuildChannelStore, GuildEmojiStore, SelectedGuildStore, VoiceInfo
+    + Media = MediaComponentUtils, IconUtils, EmojiStateUtils, GuildEmojiStore, MediaDeviceInfo, MediaEngineInfo, MediaInfo
+    + Channels = ChannelUtils, UnreadChannelutils, ChannelActions, ChannelSettingsWindow, ChannelStore, SelectedChannelStore, LastChannelStore, PrivateChannelActions
+    + Messages = MessageParser, MessageActions, MessageQueue, MessageStore, ReactionStore
+    + Strings = Strings, StringUtils, StringFormats, LanguageStore
+    + Client = SettingsStore
 
-export default createPlugin({ ...config, settings, styles }, api => {
-    const plugin = new DanhoLibraryGlobal(api);
-    window.BDD ??= plugin;
-    window.BDD.PluginUtils?.restartPlugins();
-    return plugin;
-});
+    + Stores = All store modules
+    */
+};
+
+export default createPlugin(LibraryPlugin);

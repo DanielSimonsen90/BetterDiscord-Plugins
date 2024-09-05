@@ -22,7 +22,14 @@ export default defineConfig({
         scss({
             output: false
         }),
-        typescript(),
+        typescript({
+            exclude: [
+                "node_modules",
+                "dist",
+                "archived",
+                "external plugins modified"
+            ]
+        }),
         cleanup({
             comments: [/[@#]__PURE__/],
             maxEmptyLines: 0,
@@ -34,6 +41,6 @@ export default defineConfig({
         preset: "smallest",
         annotations: true,
         moduleSideEffects: false,
-        propertyReadSideEffects: false
+        propertyReadSideEffects: false,
     }
 });

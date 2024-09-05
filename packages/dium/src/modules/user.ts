@@ -125,11 +125,7 @@ export interface PresenceStore extends Store {
     getApplicationActivity(e, t, n);
     getPrimaryActivity(e, t);
     getState(): PresenceStoreState;
-<<<<<<<< HEAD:discordium/src/modules/user.ts
-    getStatus(user: Snowflake, t?: any, n?: StatusType): StatusType;
-========
     getStatus(user: Snowflake, t?, n?): StatusTypes;
->>>>>>>> upstream/master:packages/dium/src/modules/user.ts
     getUserIds(): Snowflake[];
     isMobileOnline(user: Snowflake): boolean;
     setCurrentUserOnConnectionOpen(e, t);

@@ -5,9 +5,16 @@
         "moduleResolution": "node",
         "esModuleInterop": true,
         "resolveJsonModule": true,
+        "baseUrl": "./",
         "paths": {
+            "@discord/*": ["./packages/discord/*"],
             "@dium/*": ["./packages/dium/src/*"],
-            "@danho-discordium/*": ["./packages/discordium/src/*"],
-        }
+            "@danho-lib/*": ["./packages/danho-lib/src/*"],
+            "@actions/*": ["./packages/danho-lib/src/Actions/*"],
+            "@components/*": ["./packages/danho-lib/src/React/components/*"],
+            "@hooks/*": ["./packages/danho-lib/src/React/hooks/*"],
+            "@stores/*": ["./packages/danho-lib/src/Stores/*"],
+        },
+
     }
 }

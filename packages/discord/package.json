@@ -1,0 +1,7 @@
+{
+  "name": "discord-types",
+  "version": "0.0.1",
+  "author": "danhosaur",
+  "description": "Types for discord",
+  "main": "index.ts"
+}
