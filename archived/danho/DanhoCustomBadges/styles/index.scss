@@ -1,0 +1,12 @@
+@import './settings';
+
+.danho-badge {
+    position: relative;
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+
+    position: relative;
+    top: -2px;
+    left: -2px;
+}

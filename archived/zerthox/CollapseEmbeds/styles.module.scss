@@ -1,0 +1,50 @@
+.container {
+    &.embed {
+        justify-self: stretch;
+        & > article {
+            flex-grow: 1;
+            flex-shrink: 0;
+        }
+    }
+    &.mediaItem.expanded {
+        position: relative;
+        & > .hideButton {
+            position: absolute;
+            right: 2px;
+            bottom: 2px;
+            z-index: 1;
+        }
+    }
+}
+.placeholder + .placeholder {
+    margin-left: 4px;
+}
+.hideButton {
+    margin-bottom: -4px;
+    align-self: flex-end;
+    color: var(--interactive-normal);
+    cursor: pointer;
+    visibility: hidden;
+    &:hover {
+        color: var(--interactive-hover);
+    }
+    .expanded > & {
+        margin-bottom: -6px;
+    }
+    &:hover,
+    :hover + &,
+    .collapsed > & {
+        visibility: visible;
+    }
+}
+.icon {
+    margin: -2px;
+    transition: transform .2s ease-out;
+    &.open {
+        transform: rotate(180deg);
+    }
+}
+
+.attachment, .mediaItemSingle {
+    /* unused */
+}
