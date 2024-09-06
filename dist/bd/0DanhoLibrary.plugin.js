@@ -50,9 +50,18 @@ if (!fso.FolderExists(pluginsPath)) {
 WScript.Quit();
 @else @*/
 
+let meta = {
+  "name": "0danholibrary",
+  "description": "Library for Danho's plugins",
+  "author": "danielsimonsen90",
+  "version": "1.0.0",
+  "dependencies": {
+    "dium": "*",
+    "danho-lib": "*"
+  }
+};
 'use strict';
 
-let meta = null;
 const getMeta = () => {
     if (meta) {
         return meta;

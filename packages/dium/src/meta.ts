@@ -1,9 +1,10 @@
-import type * as BD from "betterdiscord";
+// @ts-nocheck
+import { DanhoMeta } from '../../danho-lib/src/dium/meta';
 
-export type Meta = BD.Meta;
+export type Meta = DanhoMeta;
 
 /** Meta of this plugin. */
-let meta: Meta = null;
+// let meta: Meta = null;
 
 /**
  * Returns the plugin meta.

@@ -1,0 +1,10 @@
+{
+    "name": "0danholibrary",
+    "description": "Library for Danho's plugins",
+    "author": "danielsimonsen90",
+    "version": "1.0.0",
+    "dependencies": {
+        "dium": "*",
+        "danho-lib": "*"
+    }
+}

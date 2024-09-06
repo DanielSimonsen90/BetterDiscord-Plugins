@@ -1,5 +1,5 @@
 @mixin className($name, $tag: div, $selector: '') {
-    #{$tag}[class*="#{$name}"] #{$selector} {
-        @content;
-    }
+  #{$tag}[class*="#{$name}"] #{$selector} {
+    @content;
+  }
 }

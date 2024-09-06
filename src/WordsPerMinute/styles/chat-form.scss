@@ -1,0 +1,31 @@
+@use '../../0DanhoLibrary/styles/utils.scss' as lib;
+
+$WPMCountId: "wpm-count";
+$defaultLeftAlign: '1.5rem';
+
+##{$WPMCountId} {
+  display: none;
+  transition: top .25s ease-in-out 1s;
+}
+
+form:not(:has(span[class*=emptyText])) ##{$WPMCountId} {
+  --leftAlign: $defaultLeftAlign;
+
+  display: block;
+  color: var(--text-message-preview-low-sat);
+  font-size: 12px;
+  font-weight: bold;
+  position: absolute;
+  margin: 0;
+  top: .3rem;
+
+  left: var(--leftAlign, $defaultLeftAlign);
+}
+
+form:has( ##{$WPMCountId }) {
+  position: relative;
+}
+
+div[class*=inner]:has([class*=textArea] [data-slate-string]:not(:empty)) {
+  padding-top: 1rem;
+}

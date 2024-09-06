@@ -1,9 +1,0 @@
-{
-    "name": "DevTools",
-    "author": "Zerthox",
-    "version": "0.5.2",
-    "description": "Utilities for development.",
-    "dependencies": {
-        "dium": "*"
-    }
-}

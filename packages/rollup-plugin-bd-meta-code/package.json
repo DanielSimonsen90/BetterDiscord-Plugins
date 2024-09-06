@@ -1,0 +1,12 @@
+{
+  "name": "rollup-plugin-bd-meta-code",
+  "version": "0.1.0",
+  "description": "Zerthox doesn't import the meta by default for some reason, so this plugin adds it to the code. Ensure that dium/src/meta.ts has let meta commented.",
+  "author": "DanielSimonsen90",
+  "peerDependencies": {
+    "rollup": "^4.0.0"
+  },
+  "devDependencies": {
+    "rollup": "^4.0.0"
+  }
+}

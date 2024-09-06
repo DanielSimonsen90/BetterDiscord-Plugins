@@ -2,137 +2,148 @@
 
 $padding: 1rem;
 
-.date-time-picker, #calendar-picker, #time-picker {
-    --not-selectable-background: var(--interactive-muted);
-    --not-selectable-color: var(--text-muted);
+.date-time-picker,
+#calendar-picker,
+#time-picker {
+  --not-selectable-background: var(--interactive-muted);
+  --not-selectable-color: var(--text-muted);
 
-    --selectable-background: var(--background-quaternary);
-    --selectable-background-hover: #2D2D2D;
-    --selectable-color: var(--interactive-normal);
-    --selectable-color-hover: var(--interactive-active);
-    
-    --selected-background: #303030;
-    --selected-color: var(--interactive-active);
+  --selectable-background: var(--background-quaternary);
+  --selectable-background-hover: #2D2D2D;
+  --selectable-color: var(--interactive-normal);
+  --selectable-color-hover: var(--interactive-active);
+
+  --selected-background: #303030;
+  --selected-color: var(--interactive-active);
 }
 
 $border-radius: .5rem;
 
 .date-time-picker,
 .time-picker-inputs {
-    border-radius: $border-radius;
+  border-radius: $border-radius;
 }
+
 .calendar-grid {
-    tr:first-child td:first-child {
-        border-top-left-radius: $border-radius;
-    }
-    tr:first-child td:last-child {
-        border-top-right-radius: $border-radius;
-    }
-    tr:last-child td:first-child {
-        border-bottom-left-radius: $border-radius;
-    }
-    tr:last-child td:last-child {
-        border-bottom-right-radius: $border-radius;
-    }
+  tr:first-child td:first-child {
+    border-top-left-radius: $border-radius;
+  }
+
+  tr:first-child td:last-child {
+    border-top-right-radius: $border-radius;
+  }
+
+  tr:last-child td:first-child {
+    border-bottom-left-radius: $border-radius;
+  }
+
+  tr:last-child td:last-child {
+    border-bottom-right-radius: $border-radius;
+  }
 }
 
 .date-time-picker {
-    min-width: 15vw;
-    box-shadow: 0 0 1rem 0 #222;
+  min-width: 15vw;
+  box-shadow: 0 0 1rem 0 #222;
 
-    #calendar-picker, #time-picker {
-        padding-bottom: 0;
-    }
+  #calendar-picker,
+  #time-picker {
+    padding-bottom: 0;
+  }
 }
 
 #calendar-picker {
-    display: flex;
-    flex-direction: column;
-    gap: .5em;
-    padding: $padding;
+  display: flex;
+  flex-direction: column;
+  gap: .5em;
+  padding: $padding;
 }
 
 .calendar-header {
-    &-title {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: .5ch;
-    }
+  &-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: .5ch;
+  }
 
-    button {
-        background-color: var(--background-quinary);
-        color: var(--text-muted);
-        display: flex;
-        width: auto;
-        min-width: auto;
-        padding-inline: .25rem;
-    }
+  button {
+    background-color: var(--background-quinary);
+    color: var(--text-muted);
+    display: flex;
+    width: auto;
+    min-width: auto;
+    padding-inline: .25rem;
+  }
 }
 
 .calendar-grid {
-    th, td {
-        color: var(--text-normal);
+
+  th,
+  td {
+    color: var(--text-normal);
+  }
+
+  td {
+    background-color: var(--selectable-background);
+    color: var(--selectable-color);
+    text-align: center;
+    padding: .25em .5em;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--selectable-background-hover);
     }
 
-    td {
-        background-color: var(--selectable-background);
-        color: var(--selectable-color);
-        text-align: center;
-        padding: .25em .5em;
-        cursor: pointer;
+    &[data-selected] {
+      background-color: var(--selected-background);
+      color: var(--selected-color);
+      position: relative;
 
-        &:hover {
-            background-color: var(--selectable-background-hover);
-        }
-
-        &[data-selected] {
-            background-color: var(--selected-background);
-            color: var(--selected-color);
-            position: relative;
-            
-            &::after {
-                content: '';
-                position: absolute;
-                inset: auto 0 0 0;
-                height: 2px;
-                width: 100%;
-                background-color: var(--blurple);
-            }
-        }
-        &[data-selectable=false] {
-            cursor: not-allowed;
-        }
+      &::after {
+        content: '';
+        position: absolute;
+        inset: auto 0 0 0;
+        height: 2px;
+        width: 100%;
+        background-color: var(--blurple);
+      }
     }
+
+    &[data-selectable=false] {
+      cursor: not-allowed;
+    }
+  }
 }
 
 #time-picker {
-    padding: $padding;
+  padding: $padding;
 
-    .time-picker {
-        &-inputs {
-            display: flex;
-            gap: .5em;
-            justify-content: center;
-            align-items: center;
-            padding: .5em;
-            flex-wrap: wrap;
+  .time-picker {
+    &-inputs {
+      display: flex;
+      gap: .5em;
+      justify-content: center;
+      align-items: center;
+      padding: .5em;
+      flex-wrap: wrap;
 
-            background-color: var(--background-quaternary);
+      background-color: var(--background-quaternary);
 
-            @include className("input", '*') {
-                background-color: var(--background-quinary);
-                flex: 1;
-            }
+      @include className("input", '*') {
+        background-color: var(--background-quinary);
+        flex: 1;
+      }
 
-            select {
-                color: var(--selected-color);
-                flex: 1 1 100% !important;
-                padding: .5em .25em;
-            }
-        }
+      select {
+        color: var(--selected-color);
+        flex: 1 1 100% !important;
+        padding: .5em .25em;
+      }
     }
-    .button-container {
-        padding-top: 1rem;
-    }
+  }
+
+  .button-container {
+    padding-top: 1rem;
+  }
 }

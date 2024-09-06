@@ -2,7 +2,7 @@
     "name": "betterdiscord-plugins",
     "version": "0.1.0",
     "description": "Plugins for BetterDiscord.",
-    "author": "Zerthox",
+    "author": "Zerthox & DanielSimonsen90",
     "license": "MIT",
     "private": true,
     "scripts": {
@@ -21,12 +21,13 @@
         "src/*"
     ],
     "dependencies": {
-        "danholibraryjs": "^1.8.0",
-        "danholibraryrjs": "^1.2.0",
         "@types/betterdiscord": "github:zerthox/betterdiscord-types",
         "@types/node": "^16.18.23",
         "@types/react": "^18.0.37",
         "@types/react-dom": "^18.0.11",
+        "danho-lib": "*",
+        "danholibraryjs": "^1.8.0",
+        "danholibraryrjs": "^1.2.0",
         "dium": "*"
     },
     "devDependencies": {
@@ -49,6 +50,7 @@
         "minimist": "^1.2.6",
         "rollup": "^4.12.0",
         "rollup-plugin-bd-meta": "*",
+        "rollup-plugin-bd-meta-code": "^0.1.0",
         "rollup-plugin-bd-wscript": "*",
         "rollup-plugin-cleanup": "^3.2.1",
         "rollup-plugin-scss": "^4.0.0",

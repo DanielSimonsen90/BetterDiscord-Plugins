@@ -1,0 +1,10 @@
+{
+  "name": "words-per-minute",
+  "version": "1.0.0",
+  "description": "View your words per minute while typing your message",
+  "author": "danielsimonsen90",
+  "dependencies": {
+    "dium": "*",
+    "danho-lib": "*"
+  }
+}

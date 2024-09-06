@@ -51,7 +51,7 @@ module.exports = {
             project: ["./tsconfig.json"]
         },
         rules: {
-            "@typescript-eslint/indent": ["error", 4],
+            "@typescript-eslint/indent": ["error", 2],
             "@typescript-eslint/semi": "error",
             "@typescript-eslint/quotes": ["error", "double"],
             "@typescript-eslint/member-delimiter-style": ["error"],
