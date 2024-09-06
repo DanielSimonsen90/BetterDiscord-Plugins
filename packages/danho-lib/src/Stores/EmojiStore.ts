@@ -10,10 +10,10 @@ export interface EmojiStore extends Store {
     get emojiFrecencyWithoutFetchingLatest(): EmojiFrequency
 
     getCustomEmojiById(id: Snowflake): Emoji;
-    getDisambiguatedEmojiContext(e?: any): any; // H.get(t) => e._lastInstance = new e(t)
+    getDisambiguatedEmojiContext(guilId?: Snowflake): { favoriteEmojisWithoutFetchingLatest: Array<Emoji>; }; // H.get(t) => e._lastInstance = new e(t)
     getGuildEmoji(guildId: Snowflake): Array<Emoji>; // x[e]
     getGuilds(): Record<Snowflake, GetGuildsThing>;
-    getSearchResultsOrder(results: Array<any>, search: string, endIndex: number): any;
+    getSearchResultsOrder(results: Array<any>, search: string, endIndex: number): Emoji[];
     getState(): Record<'pendingUsages', Array<any>>;
     getUsableCustomEmojiById(id: Snowflake): Emoji;
     hasPendingUsage(): boolean;

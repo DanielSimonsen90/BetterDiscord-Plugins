@@ -5,6 +5,7 @@ import * as Components from '@danho-lib/React/components';
 import * as Stores from '@danho-lib/Stores';
 import * as Actions from '@danho-lib/Actions';
 import { createPlugin, Plugin } from '@dium/index';
+import { Finder, Filters } from '@dium/index';
 
 type Settings = {}
 
@@ -19,6 +20,8 @@ const LibraryPlugin = new class DanhoLibrary implements Plugin<Settings> {
     public Stores = Stores;
     public Actions = Actions;
     public Components = Components;
+    public Finder = Finder;
+    public Filters = Filters;
 
     start() {}
     
@@ -37,4 +40,6 @@ const LibraryPlugin = new class DanhoLibrary implements Plugin<Settings> {
     */
 };
 
+// @ts-ignore
+window.DL = LibraryPlugin;
 export default createPlugin(LibraryPlugin);
