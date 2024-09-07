@@ -55,12 +55,15 @@ export type ExpressionPickerContextMenuOptions = {
   }) => ExpressionPickerContextMenuFiber
 }
 
-type Callback = (data: ExpressionPickerContextMenuOptions, key: keyof ExpressionPickerContextMenuOptions) => any;
+type Callback = (data: ExpressionPickerContextMenuOptions, key: any) => any;
 
 export function WaitForEmojiPickerContextMenu(callback: Callback) {
   Finder.waitFor(Filters.bySource(...['expression-picker']), { resolve: false }).then(module => {
     const key: keyof ExpressionPickerContextMenuOptions = 'default' in module ? 'default' : Object.keys(module)[0] as any;
-    callback(module, typeof key === 'object' ? 'default' : key);
+    if (!(module[key] instanceof Function)) return;
+    else callback(module, key);
+
+    throw new Error(`Unexpected module structure, [key: ${key}, module: ${JSON.stringify(module)}]`);
   });
 }
 

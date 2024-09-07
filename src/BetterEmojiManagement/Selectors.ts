@@ -1,0 +1,1 @@
+export const ExpressionPickerMenu = "[data-ref-id='emoji-picker-grid']";

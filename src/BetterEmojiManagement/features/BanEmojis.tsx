@@ -10,16 +10,26 @@ import { $ } from "@danho-lib/DOM";
 import Bin from "@components/Discord/Icons/Bin";
 
 import { Settings } from "../Settings";
+import { forceFullRerender } from "@dium/utils";
+import { ExpressionPickerMenu as ExpressionPickerMenuSelector } from "../Selectors";
 
-export const sortBannedEmojis = createPatcherCallback<EmojiStore['getSearchResultsOrder']>(({ args: [emojis, query, n], original: __getStoreSearchResults }) => {
-  const relevantEmojis = __getStoreSearchResults(emojis, query, n);
-  const bannedEmojis = Settings.current.bannedEmojis.map(e => e.id);
-  return relevantEmojis.sort((a, b) => {
-    const aIsBanned = bannedEmojis.includes(a.id);
-    const bIsBanned = bannedEmojis.includes(b.id);
-    return aIsBanned && !bIsBanned ? 1
+/**
+ * Update row emoji order
+ * - Update favorites using {@link EmojiStore#getDisambiguatedEmojiContext().favoriteEmojisWithoutFetchingLatest}
+ */
+
+export const sortBannedEmojis = createPatcherCallback<EmojiStore['getSearchResultsOrder']>(({ args, original: __getStoreSearchResults }) => {
+  const emojis = __getStoreSearchResults(...args);
+  const banned = Settings.current.bannedEmojis.map(e => e.id);
+
+  return emojis.sort((a, b) => {
+    const aIsBanned = banned.includes(a.id);
+    const bIsBanned = banned.includes(b.id);
+    return (
+      aIsBanned && !bIsBanned ? 1
       : !aIsBanned && bIsBanned ? -1
-        : 0;
+      : 0
+    );  
   });
 });
 
@@ -56,6 +66,7 @@ export const renderBanEmojiMenuItem = createPatcherCallback<ExpressionPickerCont
   const attributes = [...props.target.attributes];
   const name = attributes.find(a => a.name === "data-name")?.value;
   const id = attributes.find(a => a.name === "data-id")?.value ?? `default_${name}`;
+
   const result = menu(props);
 
   const isBanned = Settings.current.bannedEmojis.some(e => e.id === id);
@@ -72,7 +83,8 @@ export const renderBanEmojiMenuItem = createPatcherCallback<ExpressionPickerCont
             : [...Settings.current.bannedEmojis, { id, name }]
         });
 
-        $(`[data-id="${id}"]`).attr('data-banned-emoji', isBanned ? 'false' : 'true');
+        $(`[data-id="${id}"]`).attr('data-banned-emoji', isBanned ? undefined : 'true', true);
+        forceFullRerender($(ExpressionPickerMenuSelector).fiber)
       }}
       color={isBanned ? undefined : "danger"}
       icon={isBanned ? undefined : Bin}

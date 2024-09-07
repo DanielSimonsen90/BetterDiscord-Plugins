@@ -5,7 +5,14 @@ import { favorFavoriteEmojis } from "../../features/FavorFavoriteEmojis";
 
 export default function insteadGetSearchResultsOrder() {
   return Patcher.instead(EmojiStore, "getSearchResultsOrder", (data) => {
-    const callbacks = [favorFavoriteEmojis, sortBannedEmojis];
+    const callbacks = [
+      // Push favorite emojis first
+      favorFavoriteEmojis,
+      // Continue original function
+      () => data.original(...data.args), 
+      // Force banned emojis last
+      sortBannedEmojis
+    ];
     let result: ReturnType<EmojiStore['getSearchResultsOrder']> = data.args[0];
 
     for (const callback of callbacks) {

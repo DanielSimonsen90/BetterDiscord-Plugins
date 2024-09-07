@@ -68,7 +68,7 @@ const patch = <Module, Key extends keyof Module>(
 export const instead = <Module, Key extends keyof Module>(
     object: Module,
     method: Key,
-    callback: (data: PatchData<Module[Key], Module>) => unknown,
+    callback: (data: PatchData<Module[Key], Module>) => Module[Key] extends (...args: any) => infer R ? R : Module[Key],
     options: Options = {}
 ): Cancel => patch(
     "instead",

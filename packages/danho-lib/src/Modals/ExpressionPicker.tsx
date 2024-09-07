@@ -1,5 +1,5 @@
 import { Filters, Finder } from "@dium/api";
-import { Emoji } from "@danho-lib/Stores";
+import { CustomEmoji } from "@danho-lib/Stores";
 import { BetterOmit } from "danholibraryjs";
 
 export type ExpressionPickerMenu = {
@@ -9,7 +9,7 @@ export type ExpressionPickerMenu = {
     channelGuildId: string,
     emojiDescriptors: Array<{
       type: number,
-      emoji: Emoji;
+      emoji: CustomEmoji;
       isDisabled: boolean,
       rowIndex: number,
       size: number,

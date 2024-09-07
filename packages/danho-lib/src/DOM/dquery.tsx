@@ -166,7 +166,8 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     }
 
     public get fiber() {
-        return this.element['__reactFiber$'] as Fiber;
+        const key = Object.keys(this.element).find(key => key.startsWith('__reactFiber$'));
+        return key ? this.element[key] as Fiber : undefined;
     }
     public get props() {
         try {
@@ -276,11 +277,16 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     public attr<
         KeyExists extends boolean = true,
         ValueExists extends boolean = false
-    >(key?: string, value?: string): If<KeyExists, If<ValueExists, this, string>, Array<Attr>> {
+    >(key?: string, value?: string, remove?: boolean): If<KeyExists, If<ValueExists, this, string>, Array<Attr>> {
         if (!this.element) return undefined;
 
         if (!key) return [...this.element.attributes] as any
-        if (value === undefined) return this.element.getAttribute(key) as any;
+        if (value === undefined && remove === undefined) return this.element.getAttribute(key) as any;
+        if (remove) {
+            this.element.removeAttribute(key);
+            return this as any;
+        }
+
         this.element.setAttribute(key, value);
         return this as any;
     }

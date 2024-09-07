@@ -1,4 +1,4 @@
-[data-banned-emoji] {
+[data-banned-emoji=true] {
   filter: saturate(.4);
   border: 1px solid var(--button-danger-background);
 }
