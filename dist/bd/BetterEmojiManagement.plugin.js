@@ -1,11 +1,11 @@
 /**
- * @name WordsPerMinute
+ * @name BetterEmojiManagement
  * @version 1.0.0
- * @author danielsimonsen90
- * @authorLink https://github.com/danielsimonsen90
- * @description View your words per minute while typing your message
+ * @author DanielSimonsen90
+ * @authorLink https://github.com/DanielSimonsen90
+ * @description Handle emojis better like favoring favorite emojis on search, removing your bad emojis, and more.
  * @website https://github.com/DanielSimonsen90/BetterDiscord-Plugins
- * @source https://github.com/DanielSimonsen90/BetterDiscord-Plugins/tree/master/src/WordsPerMinute
+ * @source https://github.com/DanielSimonsen90/BetterDiscord-Plugins/tree/master/src/BetterEmojiManagement
 **/
 
 /*@cc_on @if (@_jscript)
@@ -51,14 +51,10 @@ WScript.Quit();
 @else @*/
 
 let meta = {
-  "name": "words-per-minute",
+  "name": "better-emoji-management",
   "version": "1.0.0",
-  "description": "View your words per minute while typing your message",
-  "author": "danielsimonsen90",
-  "dependencies": {
-    "dium": "*",
-    "danho-lib": "*"
-  }
+  "description": "Handle emojis better like favoring favorite emojis on search, removing your bad emojis, and more.",
+  "author": "DanielSimonsen90"
 };
 'use strict';
 
@@ -78,6 +74,9 @@ const load = (key) => BdApi.Data.load(getMeta().name, key);
 const save = (key, value) => BdApi.Data.save(getMeta().name, key, value);
 
 const checkObjectValues = (target) => target !== window && target instanceof Object && target.constructor?.prototype !== target;
+const byName$1 = (name) => {
+    return (target) => (target?.displayName ?? target?.constructor?.displayName) === name;
+};
 const byKeys$1 = (...keys) => {
     return (target) => target instanceof Object && keys.every((key) => key in target);
 };
@@ -136,6 +135,7 @@ const find = (filter, { resolve = true, entries = false } = {}) => BdApi.Webpack
     defaultExport: resolve,
     searchExports: entries
 });
+const byName = (name, options) => find(byName$1(name), options);
 const byKeys = (keys, options) => find(byKeys$1(...keys), options);
 const demangle = (mapping, required, proxy = false) => {
     const req = required ?? Object.keys(mapping);
@@ -150,6 +150,11 @@ const demangle = (mapping, required, proxy = false) => {
     ]));
 };
 let controller = new AbortController();
+const waitFor = (filter, { resolve = true, entries = false } = {}) => BdApi.Webpack.waitForModule(filter, {
+    signal: controller.signal,
+    defaultExport: resolve,
+    searchExports: entries
+});
 const abort = () => {
     controller.abort();
     controller = new AbortController();
@@ -175,6 +180,7 @@ const patch = (type, object, method, callback, options) => {
     return cancel;
 };
 const instead = (object, method, callback, options = {}) => patch("instead", object, method, (cancel, original, context, args) => callback({ cancel, original, context, args }), options);
+const after = (object, method, callback, options = {}) => patch("after", object, method, (cancel, original, context, args, result) => callback({ cancel, original, context, args, result }), options);
 let menuPatches = [];
 const unpatchAll = () => {
     if (menuPatches.length + BdApi.Patcher.getPatchesByCaller(getMeta().name).length > 0) {
@@ -214,6 +220,8 @@ const Flex = /* @__PURE__ */ byKeys(["Child", "Justify"], { entries: true });
 const { FormSection, FormItem, FormTitle, FormText, FormLabel, FormDivider, FormSwitch, FormNotice } = Common;
 
 const margins = /* @__PURE__ */ byKeys(["marginBottom40", "marginTop4"]);
+
+const { Menu, Group: MenuGroup, Item: MenuItem, Separator: MenuSeparator, CheckboxItem: MenuCheckboxItem, RadioItem: MenuRadioItem, ControlItem: MenuControlItem } = BdApi.ContextMenu;
 
 const queryFiber = (fiber, predicate, direction = "up" , depth = 30) => {
     if (depth < 0) {
@@ -363,6 +371,36 @@ const createPlugin = (plugin) => (meta) => {
             React.createElement(SettingsPanel, null))) : null
     };
 };
+
+const EmojiStore = byName("EmojiStore");
+
+function FavorFavoriteEmojis() {
+    instead(EmojiStore, "getSearchResultsOrder", ({ args: [emojis, query, n], original: __getStoreSearchResults }) => {
+        const relevantEmojis = __getStoreSearchResults(emojis, query, n);
+        const favorites = EmojiStore.getDisambiguatedEmojiContext().favoriteEmojisWithoutFetchingLatest;
+        return relevantEmojis.sort((a, b) => {
+            const aIsFavorite = favorites.some(e => e.id === a.id);
+            const bIsFavorite = favorites.some(e => e.id === b.id);
+            return aIsFavorite && !bIsFavorite ? -1
+                : !aIsFavorite && bIsFavorite ? 1
+                    : 0;
+        });
+    });
+}
+
+function WaitForEmojiPickerContextMenu(callback) {
+    waitFor(bySource(...['expression-picker']), { resolve: false }).then(module => {
+        const key = 'default' in module ? 'default' : Object.keys(module)[0];
+        callback(module, key);
+    });
+}
+
+function WaitForEmojiPicker(callback) {
+    waitFor(bySource(...['showEmojiFavoriteTooltip']), { resolve: false }).then(module => {
+        const key = 'default' in module ? 'default' : Object.keys(module)[0];
+        callback(module, key);
+    });
+}
 
 class ElementSelector {
     constructor() {
@@ -736,222 +774,88 @@ function createElement(html, props = {}, target) {
     return element;
 }
 
-let events = [];
-function addEventListener(element, type, listener, options) {
-    element.addEventListener(type, listener, options);
-    events.push({ element, type, listener });
+function BinIcon() {
+    return (React.createElement("svg", { "aria-hidden": false, width: "16", height: "16", viewBox: "0 0 24 24" },
+        React.createElement("path", { fill: "currentColor", fillRule: "evenodd", clipRule: "evenodd", d: "M3 6C3 4.89543 3.89543 4 5 4H19C20.1046 4 21 4.89543 21 6V8H23V10H1V8H3V6ZM5 6H19V8H5V6ZM3 10H21V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V10ZM5 10V20H19V10H5ZM9 12H11V18H9V12ZM13 12H15V18H13V12Z" })));
 }
-function removeAllEventListeners() {
-    for (const { element, type, listener } of events) {
-        element.removeEventListener(type, listener);
-    }
-    events = [];
-}
-
-let injections = [];
-function injectElement(parentSelectorResolve, element, type = 'beforeend') {
-    $(parentSelectorResolve).element?.insertAdjacentElement(type, element);
-    injections.push({ element });
-}
-function removeAllInjections() {
-    injections.forEach(({ element }) => element.remove());
-    injections = [];
-}
-
-const ChatFormSelector = "main[class*=chatContent] form";
-const WPMCountId = 'wpm-count';
-
-function createProperty(options) {
-    const optionsCompiled = typeof options === 'object' ? options : { defaultValue: options };
-    const { defaultValue, beforeGet, beforeSet, afterSet } = optionsCompiled;
-    let value = defaultValue;
-    function get() {
-        return beforeGet?.(value) ?? value;
-    }
-    function set(newValue) {
-        value = beforeSet?.(newValue, false) ?? newValue;
-        afterSet?.(value, false);
-    }
-    function nullableSet(newValue) {
-        if (value === null || value === undefined)
-            return set(newValue);
-    }
-    function reset() {
-        value = defaultValue;
-        afterSet?.(defaultValue, true);
-    }
-    function hasNoValue() {
-        return value === null && value === undefined;
-    }
-    return { get, set, reset, nullableSet, hasNoValue };
-}
-
-const typingStartTime = createProperty(undefined);
-const typingEndTime = createProperty(undefined);
-const wpm = createProperty({
-    defaultValue: 0,
-    beforeSet: value => parseInt(value.toFixed(0)),
-    afterSet: (value) => {
-        const wpmCountElement = document.getElementById(WPMCountId);
-        if (wpmCountElement)
-            wpmCountElement.textContent = `${value} wpm`;
-    }
-});
-function resetProperties() {
-    typingStartTime.reset();
-    typingEndTime.reset();
-    wpm.reset();
-}
-
-const debugLog = (...data) => getMeta().development ? log(...data) : undefined;
 
 const Settings = createSettings({
-    autoResetTime: 1000,
-    leftAlign: '1.5rem'
-}, function onLoad() {
-    Highscores.load();
-});
-const Highscores = createSettings({
-    best: 0,
-    bestDate: new Date().toLocaleDateString(),
-    today: 0,
-    todayDate: new Date().toLocaleDateString()
+    bannedEmojis: new Array(),
 });
 
-function calculateWPM(messageContent) {
-    if (typingStartTime.hasNoValue() || typingEndTime.hasNoValue() || !messageContent)
-        return;
-    const timeDiffMs = typingEndTime.get() - typingStartTime.get();
-    const timeDiffMin = timeDiffMs / 1000 / 60;
-    const wordCount = messageContent.trim().split(/\s+/).length;
-    if (wordCount <= 1 || messageContent.trim() === '')
-        return;
-    wpm.set(wordCount / timeDiffMin);
-}
-function updateHighscores() {
-    const { best, bestDate, today: storedTodayScore, todayDate } = Highscores.current;
-    const current = wpm.get();
-    const today = new Date().toLocaleDateString() === new Date(todayDate).toLocaleDateString() ? storedTodayScore : 0;
-    const notification = (current > best ? `New best highscore! ${current} wpm`
-        : current > today ? `New today's highscore! ${current} wpm`
-            : null);
-    if (!notification)
-        return;
-    Highscores.update({
-        best: Math.max(best, current),
-        bestDate: best > current ? new Date().toLocaleDateString() : new Date(bestDate).toLocaleDateString(),
-        today: Math.max(today, current),
-        todayDate: new Date().toLocaleDateString()
+getMeta().name;
+function BanEmojis() {
+    instead(EmojiStore, "getSearchResultsOrder", ({ args: [emojis, query, n], original: __getStoreSearchResults }) => {
+        const relevantEmojis = __getStoreSearchResults(emojis, query, n);
+        const bannedEmojis = Settings.current.bannedEmojis.map(e => e.id);
+        return relevantEmojis.sort((a, b) => {
+            const aIsBanned = bannedEmojis.includes(a.id);
+            const bIsBanned = bannedEmojis.includes(b.id);
+            return aIsBanned && !bIsBanned ? 1
+                : !aIsBanned && bIsBanned ? -1
+                    : 0;
+        });
     });
-    log(notification, Highscores.current, { best, today, todayDate });
-    BdApi.UI.showToast(notification);
+    WaitForEmojiPicker((emojiPicker, key) => {
+        instead(emojiPicker, key, ({ args: [props], cancel, context, original: emojiPicker }) => {
+            const bannedEmojis = Settings.current.bannedEmojis.map(e => e.id);
+            const result = emojiPicker(props);
+            result.props.children = result.props.children.map((row) => {
+                if (!row.props.descriptor)
+                    return row;
+                const emojiId = row.props.descriptor.emoji.id;
+                const isBanned = bannedEmojis.includes(emojiId);
+                return !isBanned ? row : {
+                    ...row,
+                    props: {
+                        ...row.props,
+                        ['data-banned-emoji']: true
+                    }
+                };
+            });
+            return result;
+        });
+        after(emojiPicker, key, ({ args: [props], result }) => {
+            result.props.children.forEach(row => {
+                if (!('data-banned-emoji' in row.props))
+                    return;
+                const emojiId = row.props.descriptor.emoji.id;
+                $(`[data-id="${emojiId}"]`).attr('data-banned-emoji', 'true');
+            });
+        });
+    });
+    WaitForEmojiPickerContextMenu((menu, key) => {
+        instead(menu, key, ({ args: [props], cancel, context, original: menu }) => {
+            const attributes = [...props.target.attributes];
+            const name = attributes.find(a => a.name === "data-name")?.value;
+            const id = attributes.find(a => a.name === "data-id")?.value ?? `default_${name}`;
+            const result = menu(props);
+            const isBanned = Settings.current.bannedEmojis.some(e => e.id === id);
+            const menuOptions = result.props.children.props.children;
+            menuOptions.splice(menuOptions.length, 0, React.createElement(React.Fragment, null,
+                React.createElement(MenuSeparator, null),
+                React.createElement(MenuItem, { id: `emoji-ban_${id}`, label: isBanned ? "Unban Emoji" : "Ban Emoji", action: () => {
+                        Settings.update({
+                            bannedEmojis: isBanned
+                                ? Settings.current.bannedEmojis.filter(e => e.id !== id)
+                                : [...Settings.current.bannedEmojis, { id, name }]
+                        });
+                        $(`[data-id="${id}"]`).attr('data-banned-emoji', isBanned ? 'false' : 'true');
+                    }, color: isBanned ? undefined : "danger", icon: isBanned ? undefined : BinIcon })));
+            return result;
+        });
+    });
 }
 
-function onKeyDown(event) {
-    if (event.key.length !== 1)
-        return;
-    typingStartTime.nullableSet(Date.now());
-}
-function onKeyUp(event) {
-    typingEndTime.set(Date.now());
-    if (!(event.target instanceof HTMLElement))
-        return;
-    const messageContent = event.target.textContent;
-    calculateWPM(messageContent);
-    debugLog(`[${new Date(typingStartTime.get()).toLocaleTimeString()} - ${new Date(typingEndTime.get()).toLocaleTimeString()}] ${wpm}: ${messageContent}`);
-    if (event.key === 'Enter' || event.key === 'NumpadEnter') {
-        onSubmit();
-    }
-    if (event.key === 'Backspace' && !messageContent.trim()) {
-        debugLog('Reset', event);
-        typingStartTime.reset();
-        wpm.reset();
-    }
-}
-function onSubmit() {
-    typingStartTime.reset();
-    updateHighscores();
-    setTimeout(() => {
-        debugLog('Auto Reset');
-        typingEndTime.reset();
-        wpm.reset();
-    }, Settings.current.autoResetTime);
-}
+const styles = "[data-banned-emoji] {\n  filter: saturate(0.4);\n  border: 1px solid var(--button-danger-background);\n}";
 
-const styles = "@charset \"UTF-8\";\n.words-per-minute-settings {\n  display: flex;\n  flex-direction: column;\n  gap: 1rem;\n}\n.words-per-minute-settings h3 {\n  font-size: 1.25rem;\n  font-weight: bold;\n  color: var(--header-primary);\n  margin-bottom: 0.5rem;\n}\n.words-per-minute-settings input {\n  box-sizing: border-box;\n  width: 100%;\n  padding: 0.25rem;\n  border: 1px solid var(--interactive-normal);\n  border-radius: 0.5rem;\n  font-size: 1rem;\n  background-color: var(--background-modifier-accent);\n  color: var(--text-normal);\n}\n.words-per-minute-settings .words-per-minute-highscores {\n  margin-top: 1rem;\n}\n.words-per-minute-settings .words-per-minute-highscores section {\n  display: grid;\n  grid-template-columns: repeat(2, 1fr);\n  gap: 1rem;\n  place-items: center;\n}\n.words-per-minute-settings .words-per-minute-highscores h3 {\n  font-size: 1.25rem;\n  font-weight: bold;\n  color: var(--header-primary);\n  margin-bottom: 0.5rem;\n  text-align: center;\n}\n.words-per-minute-settings .words-per-minute-highscores h3::after {\n  content: \"\";\n  display: block;\n  width: 100%;\n  height: 1px;\n  background-color: var(--background-modifier-accent);\n  margin-top: 0.5rem;\n}\n.words-per-minute-settings .words-per-minute-highscores h4 {\n  font-size: 1.2rem;\n  font-weight: bold;\n  color: var(--header-secondary);\n  margin-bottom: 0.5rem;\n}\n.words-per-minute-settings .words-per-minute-highscores p {\n  color: var(--text-normal);\n  font-size: 1rem;\n}\n.words-per-minute-settings .words-per-minute-highscores span:first-child {\n  font-weight: bold;\n}\n.words-per-minute-settings .words-per-minute-highscores span:last-child::before {\n  content: \" • \";\n}\n.words-per-minute-settings .words-per-minute-highscores button {\n  padding: 0.5rem;\n  font-size: 0.8rem;\n  border-radius: 0.5rem;\n  margin-inline: auto;\n  color: var(--button-danger-background) !important;\n}\n.words-per-minute-settings .words-per-minute-highscores button:hover {\n  color: var(--white-500) !important;\n}\n\n#wpm-count {\n  display: none;\n  transition: top 0.25s ease-in-out 1s;\n}\n\nform:not(:has(span[class*=emptyText])) #wpm-count {\n  --leftAlign: $defaultLeftAlign;\n  display: block;\n  color: var(--text-message-preview-low-sat);\n  font-size: 12px;\n  font-weight: bold;\n  position: absolute;\n  margin: 0;\n  top: 0.3rem;\n  left: var(--leftAlign, \"1.5rem\");\n}\n\nform:has(#wpm-count) {\n  position: relative;\n}\n\ndiv[class*=inner]:has([class*=textArea] [data-slate-string]:not(:empty)) {\n  padding-top: 1rem;\n}";
-
-const PluginName = getMeta().name;
-const { useMemo } = React;
-const ResetButton = ({ children = 'Reset', onClick, danger }) => (React.createElement("button", { className: `bd-button bd-button-outlined ${danger ? 'bd-button-color-red' : 'bd-button-color-primary'}`, onClick: onClick }, children));
-const SettingsGroup = ({ settingsKey, title, readonly }) => {
-    const [current, defaults, set] = Settings.useStateWithDefaults();
-    return (React.createElement("div", { className: `${PluginName}-${settingsKey}-setting` },
-        React.createElement("h3", null, title),
-        React.createElement("div", { className: "bd-flex bd-flex-horizontal", style: { gap: '.5rem' } },
-            React.createElement("input", { type: typeof defaults[settingsKey] === 'number' ? 'number'
-                    : typeof defaults[settingsKey] === 'boolean' ? 'checkbox'
-                        : 'text', value: current[settingsKey], readOnly: readonly, onChange: event => {
-                    set({ [settingsKey]: event.target.value });
-                } }),
-            React.createElement(ResetButton, { onClick: () => { set({ [settingsKey]: defaults[settingsKey] }); } }))));
-};
-const HighscoresGroup = ({ type }) => {
-    const { best, bestDate, today, todayDate } = Highscores.useCurrent();
-    const [value, date] = useMemo(() => type === 'best'
-        ? [best, new Date(bestDate)]
-        : [today, new Date(todayDate)], [type, best, bestDate, today, todayDate]);
-    return (React.createElement("div", { className: `${PluginName}-${type}` },
-        React.createElement("h3", null,
-            type === 'best' ? 'Best' : `Today's`,
-            " Highscore"),
-        React.createElement("p", null,
-            React.createElement("span", { id: `${PluginName}-${type}` },
-                value,
-                " wpm"),
-            React.createElement("span", { id: `${PluginName}-${type}-date` }, date.toLocaleDateString()))));
-};
-function SettingsPanel() {
-    return (React.createElement("div", { className: `${PluginName}-settings`, style: { width: '100%' } },
-        React.createElement(SettingsGroup, { settingsKey: "autoResetTime", title: "Auto Reset Time (ms)" }),
-        React.createElement(SettingsGroup, { settingsKey: "leftAlign", title: "Left Align" }),
-        React.createElement("div", { className: `${PluginName}-highscores` },
-            React.createElement("h3", null, "Highscores"),
-            React.createElement("section", { className: `${PluginName}-highscores-container` },
-                React.createElement(HighscoresGroup, { type: "best" }),
-                React.createElement(HighscoresGroup, { type: "today" })),
-            React.createElement(ResetButton, { danger: true, onClick: () => Highscores.reset() }, "Reset Highscores"))));
-}
-
-async function initChatForm(chatForm) {
-    if (!chatForm)
-        return;
-    addEventListener(chatForm, 'keydown', onKeyDown);
-    addEventListener(chatForm, 'keyup', onKeyUp);
-    injectElement(chatForm, createElement(`<p id="${WPMCountId}" style="--leftAlign: ${Settings.current.leftAlign}">${wpm.get()} wpm</p>`));
-}
-function checkChatFormMod(forceClear) {
-    const wpmCount = document.getElementById(WPMCountId);
-    if (wpmCount && forceClear)
-        wpm.reset();
-    if (wpmCount)
-        return;
-    const chatForm = document.querySelector(ChatFormSelector);
-    if (chatForm)
-        initChatForm(chatForm);
-}
 const index = createPlugin({
     start() {
-        checkChatFormMod(true);
-        setInterval(checkChatFormMod, 1000);
-    },
-    stop() {
-        resetProperties();
-        removeAllEventListeners();
-        removeAllInjections();
+        FavorFavoriteEmojis();
+        BanEmojis();
     },
     Settings,
-    styles,
-    SettingsPanel
+    styles
 });
 
 module.exports = index;

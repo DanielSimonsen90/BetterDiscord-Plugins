@@ -13,7 +13,7 @@ export interface EmojiStore extends Store {
     getDisambiguatedEmojiContext(guilId?: Snowflake): { favoriteEmojisWithoutFetchingLatest: Array<Emoji>; }; // H.get(t) => e._lastInstance = new e(t)
     getGuildEmoji(guildId: Snowflake): Array<Emoji>; // x[e]
     getGuilds(): Record<Snowflake, GetGuildsThing>;
-    getSearchResultsOrder(results: Array<any>, search: string, endIndex: number): Emoji[];
+    getSearchResultsOrder(results: Array<Emoji>, search: string, endIndex: number): Emoji[];
     getState(): Record<'pendingUsages', Array<any>>;
     getUsableCustomEmojiById(id: Snowflake): Emoji;
     hasPendingUsage(): boolean;

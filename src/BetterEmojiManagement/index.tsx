@@ -1,13 +1,15 @@
 import { createPlugin } from "@dium/index";
-import FavorFavoriteEmojis from "./features/FavorFavoriteEmojis";
-import BanEmojis from "./features/BanEmojis";
+
+import patch from "./patches";
+
 import {Settings} from "./Settings";
+import styles from './styles/index.scss';
 
 export default createPlugin({
   start() {
-    FavorFavoriteEmojis();
-    BanEmojis();
+    patch();
   },
 
-  Settings
+  Settings,
+  styles
 })

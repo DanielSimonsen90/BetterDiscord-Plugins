@@ -29,7 +29,7 @@ type ExpressionPickerContextMenuFiber = {
   }
 }
 
-type ExpressionPickerContextMenuOptions = {
+export type ExpressionPickerContextMenuOptions = {
   default: (props: {
     config: { context: 'APP' },
     context: 'APP',
@@ -55,10 +55,13 @@ type ExpressionPickerContextMenuOptions = {
   }) => ExpressionPickerContextMenuFiber
 }
 
-type Callback = (data: ExpressionPickerContextMenuOptions) => any;
+type Callback = (data: ExpressionPickerContextMenuOptions, key: keyof ExpressionPickerContextMenuOptions) => any;
 
 export function WaitForEmojiPickerContextMenu(callback: Callback) {
-  Finder.waitFor(Filters.bySource(...['expression-picker']), { resolve: false }).then(callback);
+  Finder.waitFor(Filters.bySource(...['expression-picker']), { resolve: false }).then(module => {
+    const key: keyof ExpressionPickerContextMenuOptions = 'default' in module ? 'default' : Object.keys(module)[0] as any;
+    callback(module, typeof key === 'object' ? 'default' : key);
+  });
 }
 
 export default WaitForEmojiPickerContextMenu;

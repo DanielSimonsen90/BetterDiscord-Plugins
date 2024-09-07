@@ -85,6 +85,17 @@ const query$1 = ({ filter, name, keys, protos, source }) => join(...[
     source instanceof Array ? bySource$1(...source) : null
 ].filter(Boolean));
 const checkObjectValues = (target) => target !== window && target instanceof Object && target.constructor?.prototype !== target;
+const byEntry = (filter, every = false) => {
+    return ((target, ...args) => {
+        if (checkObjectValues(target)) {
+            const values = Object.values(target);
+            return values.length > 0 && values[every ? "every" : "some"]((value) => filter(value, ...args));
+        }
+        else {
+            return false;
+        }
+    });
+};
 const byName$1 = (name) => {
     return (target) => (target?.displayName ?? target?.constructor?.displayName) === name;
 };
@@ -108,6 +119,18 @@ const bySource$1 = (...fragments) => {
             return false;
         }
     };
+};
+
+const Filters = {
+    __proto__: null,
+    byEntry,
+    byKeys: byKeys$1,
+    byName: byName$1,
+    byProtos: byProtos$1,
+    bySource: bySource$1,
+    checkObjectValues,
+    join,
+    query: query$1
 };
 
 const confirm = (title, content, options = {}) => BdApi.UI.showConfirmationModal(title, content, options);
@@ -147,10 +170,24 @@ const find = (filter, { resolve = true, entries = false } = {}) => BdApi.Webpack
     searchExports: entries
 });
 const query = (query, options) => find(query$1(query), options);
+const byEntries = (...filters) => find(join(...filters.map((filter) => byEntry(filter))));
 const byName = (name, options) => find(byName$1(name), options);
 const byKeys = (keys, options) => find(byKeys$1(...keys), options);
 const byProtos = (protos, options) => find(byProtos$1(...protos), options);
 const bySource = (contents, options) => find(bySource$1(...contents), options);
+const all = {
+    find: (filter, { resolve = true, entries = false } = {}) => BdApi.Webpack.getModule(filter, {
+        first: false,
+        defaultExport: resolve,
+        searchExports: entries
+    }) ?? [],
+    query: (query, options) => all.find(query$1(query), options),
+    byName: (name, options) => all.find(byName$1(name), options),
+    byKeys: (keys, options) => all.find(byKeys$1(...keys), options),
+    byProtos: (protos, options) => all.find(byProtos$1(...protos), options),
+    bySource: (contents, options) => all.find(bySource$1(...contents), options)
+};
+const resolveKey = (target, filter) => [target, Object.entries(target ?? {}).find(([, value]) => filter(value))?.[0]];
 const demangle = (mapping, required, proxy = false) => {
     const req = required ?? Object.keys(mapping);
     const found = find((target) => (checkObjectValues(target)
@@ -164,9 +201,30 @@ const demangle = (mapping, required, proxy = false) => {
     ]));
 };
 let controller = new AbortController();
+const waitFor = (filter, { resolve = true, entries = false } = {}) => BdApi.Webpack.waitForModule(filter, {
+    signal: controller.signal,
+    defaultExport: resolve,
+    searchExports: entries
+});
 const abort = () => {
     controller.abort();
     controller = new AbortController();
+};
+
+const Finder = {
+    __proto__: null,
+    abort,
+    all,
+    byEntries,
+    byKeys,
+    byName,
+    byProtos,
+    bySource,
+    demangle,
+    find,
+    query,
+    resolveKey,
+    waitFor
 };
 
 const COLOR = "#3a71c1";
@@ -729,7 +787,6 @@ const CompiledReact = {
     Components,
     Hooks,
 };
-const CompiledReact$1 = CompiledReact;
 
 class ElementSelector {
     constructor() {
@@ -786,7 +843,6 @@ class ElementSelector {
         return this.result;
     }
 }
-const ElementSelector$1 = ElementSelector;
 function getElementFromInstance(instance, allowMultiple = false) {
     const selector = new ElementSelector();
     if (instance.type && !instance.type.toString().includes("function"))
@@ -817,9 +873,9 @@ function $(selector, single = true) {
         return new DQuery(selector);
     let elements = (() => {
         if (typeof selector === 'function') {
-            selector = selector(new ElementSelector$1(), $);
+            selector = selector(new ElementSelector(), $);
         }
-        if (selector instanceof ElementSelector$1 || typeof selector === 'string')
+        if (selector instanceof ElementSelector || typeof selector === 'string')
             return [...document.querySelectorAll(selector.toString()).values()];
         else if (selector instanceof DQuery) {
             return [selector.element];
@@ -834,8 +890,8 @@ class DQuery {
         if (selector) {
             const element = (selector instanceof HTMLElement ? selector :
                 selector instanceof DQuery ? selector.element :
-                    selector instanceof ElementSelector$1 || typeof selector === 'string' ? document.querySelector(selector.toString()) :
-                        typeof selector === 'function' ? new DQuery(selector(new ElementSelector$1(), $)).element :
+                    selector instanceof ElementSelector || typeof selector === 'string' ? document.querySelector(selector.toString()) :
+                        typeof selector === 'function' ? new DQuery(selector(new ElementSelector(), $)).element :
                             selector);
             this.element = element;
         }
@@ -895,8 +951,8 @@ class DQuery {
     children(selector, single) {
         if (!selector)
             return single ? new DQuery(this.element.children[0]) : [...this.element.children].map(child => new DQuery(child));
-        selector = typeof selector === 'function' ? selector(new ElementSelector$1(), $) : selector;
-        if (typeof selector === 'string' || selector instanceof ElementSelector$1) {
+        selector = typeof selector === 'function' ? selector(new ElementSelector(), $) : selector;
+        if (typeof selector === 'string' || selector instanceof ElementSelector) {
             const elements = this.element.querySelectorAll(selector.toString());
             return single ? new DQuery(elements[0]) : [...elements.values()].map(child => new DQuery(child));
         }
@@ -1101,23 +1157,15 @@ function createElement(html, props = {}, target) {
     }
     const element = new DOMParser().parseFromString(html, "text/html").body.firstElementChild;
     element.classList.add("bdd-wrapper");
-    if (!target)
-        return element;
-    if (target instanceof Node)
-        return target.appendChild(element);
-    else if (target instanceof DQuery)
-        return target.element.appendChild(element);
-    else if (typeof target === "string" || target instanceof ElementSelector$1 || typeof target === 'function')
-        return document.querySelector(typeof target === 'function' ? target(new ElementSelector$1(), $).toString() : target.toString()).appendChild(element);
+    return element;
 }
 
 const DanhoModules = {
-    CompiledReact: CompiledReact$1,
+    CompiledReact,
     $,
     DQuery,
-    ElementSelector: ElementSelector$1,
+    ElementSelector,
 };
-const DanhoModules$1 = DanhoModules;
 
 const DiscordModules = {
     hljs,
@@ -1126,11 +1174,10 @@ const DiscordModules = {
     moment,
     semver,
     React: React$1, ReactDOM,
-    ...DanhoModules$1
+    ...DanhoModules
 };
 
 const SelectedGuildStore = byKeys(["getLastSelectedGuildId"]);
-const SelectedGuildStore$1 = SelectedGuildStore;
 
 const UserActivityStore = byKeys(["getUser", "getCurrentUser"]);
 
@@ -1159,7 +1206,6 @@ const GuildChannelStore = byKeys(["getTextChannelNameDisambiguations"]);
 const GuildEmojiStore = byKeys(["getEmojis"]);
 
 const VoiceInfo = byKeys(["isSelfMute", "isNoiseCancellationSupported"]);
-const VoiceInfo$1 = VoiceInfo;
 VoiceInfo.getMediaEngine();
 VoiceInfo.getVideoComponent();
 VoiceInfo.getCameraComponent();
@@ -1222,7 +1268,6 @@ var SupportedFeatures;
 })(SupportedFeatures || (SupportedFeatures = {}));
 
 const VoiceStore = byKeys(["getVoiceStateForUser"]);
-const VoiceStore$1 = VoiceStore;
 
 const GuildActions = byKeys(["requestMembers"]);
 
@@ -1231,15 +1276,15 @@ const GuildUtils = {
     ...GuildMemberStore,
     ...GuildChannelStore,
     ...GuildEmojiStore,
-    ...SelectedGuildStore$1,
-    ...VoiceInfo$1,
-    ...VoiceStore$1,
+    ...SelectedGuildStore,
+    ...VoiceInfo,
+    ...VoiceStore,
     ...GuildActions,
     get current() {
-        return GuildStore.getGuild(SelectedGuildStore$1.getGuildId());
+        return GuildStore.getGuild(SelectedGuildStore.getGuildId());
     },
     getSelectedGuildTimestamps() {
-        return SelectedGuildStore$1.getState().selectedGuildTimestampMillis;
+        return SelectedGuildStore.getState().selectedGuildTimestampMillis;
     },
 };
 
@@ -1370,9 +1415,12 @@ const LibraryPlugin = new class DanhoLibrary {
         this.Stores = Stores;
         this.Actions = Actions;
         this.Components = Components;
+        this.Finder = Finder;
+        this.Filters = Filters;
     }
     start() { }
 };
+window.DL = LibraryPlugin;
 const index = createPlugin(LibraryPlugin);
 
 module.exports = index;
