@@ -38,12 +38,16 @@ export interface EmojiStore extends Store {
 
         getById(emojiId: Snowflake): Emoji;
         getByName(emojiName: string): Emoji;
-        getCustomEmoji(): Array<CustomEmoji>;
+        getCustomEmoji(): { [emojiName: string] : CustomEmoji }
         getCustomEmoticonRegex(): RegExp;
         getDisambiguatedEmojiById(): DisambiguatedEmoji;
         getEmojiInPriorityOrderWithoutFetchingLatest(): Array<Emoji>;
         
         get favoriteEmojisWithoutFetchingLatest(): Array<Emoji>; 
+
+        getGroupedCustomEmoji(): {
+            [guildId: Snowflake]: Array<CustomEmoji>
+        }
     };
     getGuildEmoji(guildId: Snowflake): Array<CustomEmoji>;
     getGuilds(): Record<Snowflake, GetGuildsThing>;

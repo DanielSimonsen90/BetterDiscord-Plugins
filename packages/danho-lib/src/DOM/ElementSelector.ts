@@ -2,8 +2,21 @@ import { AriaRole } from "react";
 import { If } from "../Utils";
 
 export class ElementSelector {
-    public getElementFromInstance<Element extends HTMLElement, Multiple extends boolean = false>(instance: React.ReactElement, allowMultiple: Multiple = false as Multiple): If<Multiple, Array<Element>, Element> {
-        return getElementFromInstance<Element, Multiple>(instance, allowMultiple);
+    public getElementFromReactInstance<Element extends HTMLElement, Multiple extends boolean = false>(instance: React.ReactElement, allowMultiple: Multiple = false as Multiple): If<Multiple, Array<Element>, Element> {
+        return getElementFromReactInstance<Element, Multiple>(instance, allowMultiple);
+    }
+    public getSelectorFromElement<Element extends HTMLElement>(element: Element): string {
+        const selector = new ElementSelector();
+        if (element.id) selector.id(element.id).and;
+        if (element.className) selector.className(element.className).and;
+        if (element.getAttribute("aria-label")) selector.ariaLabel(element.getAttribute("aria-label")).and;
+        if (element.getAttribute("role")) selector.role(element.getAttribute("role") as AriaRole).and;
+        if (element.dataset) {
+            for (const prop in element.dataset) {
+                selector.data(prop, element.dataset[prop]).and;
+            }
+        }
+        return selector.toString();
     }
 
     private result = "";
@@ -63,7 +76,7 @@ export class ElementSelector {
 }
 export default ElementSelector;
 
-export function getElementFromInstance<Element extends HTMLElement, Multiple extends boolean = false>(instance: React.ReactElement, allowMultiple: Multiple = false as Multiple): If<Multiple, Array<Element>, Element> {
+export function getElementFromReactInstance<Element extends HTMLElement, Multiple extends boolean = false>(instance: React.ReactElement, allowMultiple: Multiple = false as Multiple): If<Multiple, Array<Element>, Element> {
     const selector = new ElementSelector()
     if (instance.type && !instance.type.toString().includes("function")) selector.tagName(instance.type.toString() as keyof HTMLElementTagNameMap).and;
     if (instance.props) {

@@ -10,12 +10,12 @@ import { $ } from "@danho-lib/DOM";
 import Bin from "@components/Discord/Icons/Bin";
 
 import { Settings } from "../Settings";
-import { forceFullRerender } from "@dium/utils";
-import { ExpressionPickerMenu as ExpressionPickerMenuSelector } from "../Selectors";
 
 /**
  * Update row emoji order
  * - Update favorites using {@link EmojiStore#getDisambiguatedEmojiContext().favoriteEmojisWithoutFetchingLatest}
+ * - Update recent using {@link EmojiStore#getDisambiguatedEmojiContext().getFrequentlyUsedEmojisWithoutFetchingLatest}
+ * - Update guild using {@link EmojiStore#getDisambiguatedEmojiContext().getCustomEmoji()}
  */
 
 export const sortBannedEmojis = createPatcherCallback<EmojiStore['getSearchResultsOrder']>(({ args, original: __getStoreSearchResults }) => {
@@ -27,9 +27,9 @@ export const sortBannedEmojis = createPatcherCallback<EmojiStore['getSearchResul
     const bIsBanned = banned.includes(b.id);
     return (
       aIsBanned && !bIsBanned ? 1
-      : !aIsBanned && bIsBanned ? -1
-      : 0
-    );  
+        : !aIsBanned && bIsBanned ? -1
+          : 0
+    );
   });
 });
 
@@ -83,8 +83,7 @@ export const renderBanEmojiMenuItem = createPatcherCallback<ExpressionPickerCont
             : [...Settings.current.bannedEmojis, { id, name }]
         });
 
-        $(`[data-id="${id}"]`).attr('data-banned-emoji', isBanned ? undefined : 'true', true);
-        forceFullRerender($(ExpressionPickerMenuSelector).fiber)
+        $(`[data-id="${id}"]`).attr<true, true>('data-banned-emoji', isBanned ? undefined : 'true', true).forceUpdate();
       }}
       color={isBanned ? undefined : "danger"}
       icon={isBanned ? undefined : Bin}
