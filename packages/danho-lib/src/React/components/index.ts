@@ -1,3 +1,3 @@
-export * from './Discord';
-export * as MyForm from './Form';
+export * from './Collapsible';
+export * from './Icons';
 export * from './Setting';

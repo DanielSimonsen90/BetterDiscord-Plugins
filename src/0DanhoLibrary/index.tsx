@@ -6,6 +6,7 @@ import * as Stores from '@danho-lib/Stores';
 import * as Actions from '@danho-lib/Actions';
 import { createPlugin, Plugin } from '@dium/index';
 import { Finder, Filters } from '@dium/index';
+import styles from './styles/index.scss';
 
 type Settings = {}
 
@@ -25,19 +26,7 @@ const LibraryPlugin = new class DanhoLibrary implements Plugin<Settings> {
 
     start() {}
     
-    /*
-    TODO: Update Library:
-    --- Modules from BDFDB & ZLibrary.DiscordModules
-    + Users = UserUtils, UserStore, PresenceStore, RelationshipStore, UserActivityStore, UserNoteStore, UserNoteActions, UserTypingStore, MentionStore, NitroUtils?
-    + Guilds = GuildUtils, GuildStore, MemberStore, FolderStore, ChannelStore/GuildChannelStore, GuildEmojiStore, SelectedGuildStore, VoiceInfo
-    + Media = MediaComponentUtils, IconUtils, EmojiStateUtils, GuildEmojiStore, MediaDeviceInfo, MediaEngineInfo, MediaInfo
-    + Channels = ChannelUtils, UnreadChannelutils, ChannelActions, ChannelSettingsWindow, ChannelStore, SelectedChannelStore, LastChannelStore, PrivateChannelActions
-    + Messages = MessageParser, MessageActions, MessageQueue, MessageStore, ReactionStore
-    + Strings = Strings, StringUtils, StringFormats, LanguageStore
-    + Client = SettingsStore
-
-    + Stores = All store modules
-    */
+    styles = styles;
 };
 
 // @ts-ignore

@@ -1,12 +1,14 @@
 import { EmojiStore } from "@danho-lib/Stores";
 import createPatcherCallback from "@danho-lib/Patcher/CreatePatcherCallback";
+import { Settings } from "../Settings";
+
+export const isFavorFavoriteFeatureEnabled = () => Settings.current.enableFavorFavoriteEmojis;
 
 export const favorFavoriteEmojis = createPatcherCallback<EmojiStore['getSearchResultsOrder']>(({
   args,
   original: __getStoreSearchResults
 }) => {
   const emojis = __getStoreSearchResults(...args);
-  const query = args[1];
   const favorites = EmojiStore.getDisambiguatedEmojiContext().favoriteEmojisWithoutFetchingLatest;
 
   return emojis.sort((a, b) => {

@@ -4,13 +4,18 @@ import type { Channel } from '@discord/types/channel';
 import { Finder } from "@dium/api";
 import { Store } from "@dium/modules/flux";
 
+export const getEmojiUrl = (emoji: { id: Snowflake, animated?: boolean }, size = 128) => (
+    `https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? 'gif' : 'webp'}` +
+    `?size=${size}&qualiy=lossless`
+)
+
 export interface EmojiStore extends Store {
     get categories(): Array<EmojiCategoryItem>;
     get diversitySurrogate(): string;
     get emojiFrecencyWithoutFetchingLatest(): EmojiFrequency
 
     getCustomEmojiById(id: Snowflake): CustomEmoji;
-    getDisambiguatedEmojiContext(guilId?: Snowflake): { 
+    getDisambiguatedEmojiContext(guilId?: Snowflake): {
         /** All custom emotes for user */
         customEmojis: Array<CustomEmoji>;
         /** Default emojis */
@@ -48,6 +53,8 @@ export interface EmojiStore extends Store {
         getGroupedCustomEmoji(): {
             [guildId: Snowflake]: Array<CustomEmoji>
         }
+        getEscapedCustomEmoticonNames(): any;
+        getCustomEmoticonRegex(): RegExp;
     };
     getGuildEmoji(guildId: Snowflake): Array<CustomEmoji>;
     getGuilds(): Record<Snowflake, GetGuildsThing>;
@@ -108,7 +115,7 @@ export type CustomEmoji = BaseEmoji & {
     managed: boolean;
     require_colons: boolean;
     roles: [];
-    url: string;
+    type: 1;
 }
 
 export type DisambiguatedEmoji = {
@@ -164,7 +171,3 @@ interface GetGuildsThing {
     getUsableEmoji(emojiId: Snowflake): CustomEmoji;
     isUsable(emojiId: Snowflake): boolean
 }
-
-/**
- * H is defined on line 115062
- */

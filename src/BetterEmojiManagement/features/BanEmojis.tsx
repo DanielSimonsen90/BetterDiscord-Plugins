@@ -1,25 +1,18 @@
 import { MenuItem, MenuSeparator } from "@dium/components";
 import { React } from "@dium/modules";
 
-import { EmojiStore } from "@danho-lib/Stores";
+import { CustomEmoji, Emoji, EmojiStore } from "@danho-lib/Stores";
 import createPatcherCallback, { createPatcherAfterCallback } from "@danho-lib/Patcher/CreatePatcherCallback";
 import { ExpressionPickerContextMenuOptions } from "@danho-lib/ContextMenus/ExpressionPickerItemOptions";
 import { ExpressionPickerMenu } from "@danho-lib/Modals/ExpressionPicker";
 import { $ } from "@danho-lib/DOM";
 
-import Bin from "@components/Discord/Icons/Bin";
+import Bin from "@components/Icons/Bin";
 
 import { Settings } from "../Settings";
 
-/**
- * Update row emoji order
- * - Update favorites using {@link EmojiStore#getDisambiguatedEmojiContext().favoriteEmojisWithoutFetchingLatest}
- * - Update recent using {@link EmojiStore#getDisambiguatedEmojiContext().getFrequentlyUsedEmojisWithoutFetchingLatest}
- * - Update guild using {@link EmojiStore#getDisambiguatedEmojiContext().getCustomEmoji()}
- */
-
-export const sortBannedEmojis = createPatcherCallback<EmojiStore['getSearchResultsOrder']>(({ args, original: __getStoreSearchResults }) => {
-  const emojis = __getStoreSearchResults(...args);
+export const isBanFeatureEnabled = () => Settings.current.enableBannedEmojis;
+export const sortBannedEmojisToEnd = function<TEmoji extends Emoji>(emojis: TEmoji[]) {
   const banned = Settings.current.bannedEmojis.map(e => e.id);
 
   return emojis.sort((a, b) => {
@@ -27,10 +20,15 @@ export const sortBannedEmojis = createPatcherCallback<EmojiStore['getSearchResul
     const bIsBanned = banned.includes(b.id);
     return (
       aIsBanned && !bIsBanned ? 1
-        : !aIsBanned && bIsBanned ? -1
-          : 0
+      : !aIsBanned && bIsBanned ? -1
+      : 0
     );
   });
+}
+
+export const sortBannedEmojisOnSearch = createPatcherCallback<EmojiStore['getSearchResultsOrder']>(({ args, original: __getStoreSearchResults }) => {
+  const emojis = __getStoreSearchResults(...args);
+  return sortBannedEmojisToEnd(emojis);
 });
 
 export const addBannedTagToEmoji = createPatcherCallback<ExpressionPickerMenu[string]>(({ args: [props], original: emojiPicker }) => {
@@ -91,4 +89,30 @@ export const renderBanEmojiMenuItem = createPatcherCallback<ExpressionPickerCont
   </>);
 
   return result;
+});
+
+export const replaceEmojiStore_getDisambiguatedEmojiContext = createPatcherCallback<EmojiStore['getDisambiguatedEmojiContext']>(({ args, original: getDisambiguatedEmojiContext }) => {
+  const result = getDisambiguatedEmojiContext(...args);
+
+  return {
+    _original: result,
+
+    getFrequentlyUsedReactionEmojisWithoutFetchingLatest: function () { return sortBannedEmojisToEnd(result.getFrequentlyUsedReactionEmojisWithoutFetchingLatest()); },
+    getFrequentlyUsedEmojisWithoutFetchingLatest: function () { return sortBannedEmojisToEnd(result.getFrequentlyUsedEmojisWithoutFetchingLatest()); },
+    get favoriteEmojisWithoutFetchingLatest() { return sortBannedEmojisToEnd(result.favoriteEmojisWithoutFetchingLatest); },
+    getGroupedCustomEmoji: function () {
+      const groupedCustomEmojis = result.getGroupedCustomEmoji();
+      return Object.keys(groupedCustomEmojis).reduce((acc, guildId) => {
+        acc[guildId] = sortBannedEmojisToEnd(groupedCustomEmojis[guildId]);
+        return acc;
+      }, {} as Record<string, CustomEmoji[]>);
+    },
+
+    getCustomEmoji: function () { return result.getCustomEmoji(); },
+    isFavoriteEmojiWithoutFetchingLatest: function (emojiId: string) { return result.isFavoriteEmojiWithoutFetchingLatest(emojiId); },
+    getById: function (emojiId: string) { return result.getById(emojiId); },
+    getEscapedCustomEmoticonNames: function () { return result.getEscapedCustomEmoticonNames(); },
+    getCustomEmoticonRegex: function () { return result.getCustomEmoticonRegex(); },
+    getEmojiInPriorityOrderWithoutFetchingLatest: function () { return sortBannedEmojisToEnd(result.getEmojiInPriorityOrderWithoutFetchingLatest()); },
+  } as any
 });

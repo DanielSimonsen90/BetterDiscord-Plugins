@@ -1,5 +1,5 @@
 export * from '@dium/components';
-export * as Icons from './Icons';
+export * as Icons from 'danho-lib/src/React/components/Icons';
 export * from './Emoji';
 
 export * from './Avatar';

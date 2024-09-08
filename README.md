@@ -7,6 +7,8 @@ Library for my BetterDiscord plugins.
 ### [WordsPerMinute](/dist/bd/WordsPerMinute.plugin.js) <sub><sup>`v.1.0.0` *(Updated: 27/05/2022)*</sup></sub>
 While typing, it shows the words per minute you are typing. Saves the highest WPM that can be viewed in settings.
 
+### [BetterEmojiManagement](/dist/bd/BetterEmojiManagement.plugin.js) <sub><sup>`v.1.0.0` *(Updated: 27/05/2022)*</sup></sub>
+
 <br>
 
 ---

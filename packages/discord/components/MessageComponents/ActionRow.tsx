@@ -1,6 +1,6 @@
 import type { ComponentTypes } from '@discord/types/message/components/types';
 import { Components } from '@discord/types/message/components/component';
-import { Button, TextInput } from '../Discord';
+import { Button, TextInput } from '../components';
 import { React } from '@dium/modules';
 
 type ActionRowProps = Omit<ComponentTypes[Components.ActionRow], 'type'>;

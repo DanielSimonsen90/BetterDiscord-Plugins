@@ -1,24 +1,8 @@
-@use './DatePicker.scss';
+@import './components/index.scss';
+@import './Form.scss';
 
 .hidden {
   display: none;
-}
-
-.vertical {
-  flex-direction: column;
-  gap: 1rem;
-
-  .center {
-    place-items: center;
-  }
-}
-
-.horizontal {
-  flex-direction: row;
-
-  .center {
-    place-content: center;
-  }
 }
 
 *[data-error]::after {
