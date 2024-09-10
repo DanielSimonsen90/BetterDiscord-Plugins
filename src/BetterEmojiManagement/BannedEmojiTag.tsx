@@ -1,4 +1,4 @@
-import { EmojiStore, getEmojiUrl } from "@danho-lib/Stores";
+import { EmojiStore, getEmojiUrl } from "@danho-lib/Stores/EmojiStore";
 import { React } from "@dium/modules";
 
 type BannedEmojiTagProps = {

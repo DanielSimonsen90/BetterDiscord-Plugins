@@ -11,8 +11,10 @@ import Bin from "@components/Icons/Bin";
 
 import { Settings } from "../Settings";
 
+const KNOWN_EXPRESSION_PICKER_CONTEXTMENU_ITEMS_COUNT = 2;
+
 export const isBanFeatureEnabled = () => Settings.current.enableBannedEmojis;
-export const sortBannedEmojisToEnd = function<TEmoji extends Emoji>(emojis: TEmoji[]) {
+export const sortBannedEmojisToEnd = function <TEmoji extends Emoji>(emojis: TEmoji[]) {
   const banned = Settings.current.bannedEmojis.map(e => e.id);
 
   return emojis.sort((a, b) => {
@@ -20,11 +22,11 @@ export const sortBannedEmojisToEnd = function<TEmoji extends Emoji>(emojis: TEmo
     const bIsBanned = banned.includes(b.id);
     return (
       aIsBanned && !bIsBanned ? 1
-      : !aIsBanned && bIsBanned ? -1
-      : 0
+        : !aIsBanned && bIsBanned ? -1
+          : 0
     );
   });
-}
+};
 
 export const sortBannedEmojisOnSearch = createPatcherCallback<EmojiStore['getSearchResultsOrder']>(({ args, original: __getStoreSearchResults }) => {
   const emojis = __getStoreSearchResults(...args);
@@ -67,7 +69,7 @@ export const renderBanEmojiMenuItem = function (menu: ExpressionPickerContextMen
 
   const isBanned = Settings.current.bannedEmojis.some(e => e.id === id);
 
-  menu.props.children.props.children.push(<>
+  menu.props.children.props.children.splice(KNOWN_EXPRESSION_PICKER_CONTEXTMENU_ITEMS_COUNT, 2, (<>
     <MenuSeparator />
     <MenuItem id={`emoji-ban_${id}`}
       label={isBanned ? "Unban Emoji" : "Ban Emoji"}
@@ -83,7 +85,7 @@ export const renderBanEmojiMenuItem = function (menu: ExpressionPickerContextMen
       color={isBanned ? undefined : "danger"}
       icon={isBanned ? undefined : Bin}
     />
-  </>);
+  </>));
 
   // return menu;
 };
@@ -111,5 +113,5 @@ export const replaceEmojiStore_getDisambiguatedEmojiContext = createPatcherCallb
     getEscapedCustomEmoticonNames: function () { return result.getEscapedCustomEmoticonNames(); },
     getCustomEmoticonRegex: function () { return result.getCustomEmoticonRegex(); },
     getEmojiInPriorityOrderWithoutFetchingLatest: function () { return sortBannedEmojisToEnd(result.getEmojiInPriorityOrderWithoutFetchingLatest()); },
-  } as any
+  } as any;
 });

@@ -1,16 +1,24 @@
 import { React } from '@dium/modules';
 import { FormDivider, FormLabel, FormSection } from '@dium/components/form';
-import { Collapsible, Setting } from '@danho-lib/React/components';
-import { Settings, titles } from './Settings';
-import BannedEmojiTag from './BannedEmojiTag';
-import { EmojiStore, getEmojiUrl } from '@danho-lib/Stores';
-import { Snowflake } from '@discord/types/base';
-import GuildListItem from '@components/GuildListItem';
-import GuildStore from '@stores/GuildStore';
+
 import { SecondaryButton } from '@discord/components';
 
-export default function SettingsPanel() {
+import { Collapsible, Setting, GuildListItem } from '@components/index';
+import { EmojiStore, getEmojiUrl, GuildStore } from '@stores/index';
+
+import { Settings, titles } from './Settings';
+import BannedEmojiTag from './BannedEmojiTag';
+
+type Props = {
+  updatePatches(): void;
+}
+
+export default function SettingsPanel({ updatePatches }: Props) {
   const [current, defaults, set] = Settings.useStateWithDefaults();
+
+  React.useEffect(() => {
+    updatePatches();
+  }, [current.enableBannedEmojis, current.enableFavorFavoriteEmojis])
 
   return (
     <div className='danho-plugin-settings'>

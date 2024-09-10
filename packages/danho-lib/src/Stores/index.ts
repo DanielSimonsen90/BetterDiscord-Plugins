@@ -1,6 +1,5 @@
 export {
     UserStore,
-    GuildStore,
     ChannelStore,
     PresenceStore,
     PresenceStoreState,    
@@ -13,6 +12,7 @@ export * from './EmojiStore';
 export * from './GuildChannelStore';
 export * from './GuildEmojiStore';
 export * from './GuildIdentityStore';
+export * from './GuildStore';
 export * from './SelectedGuildStore';
 export * from './ThemeStore';
 export * from './UserMentionStore';

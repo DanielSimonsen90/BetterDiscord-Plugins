@@ -1,4 +1,4 @@
-import { createPlugin } from "@dium/index";
+import { createPlugin, Patcher } from "@dium/index";
 
 import patch from "./patches";
 
@@ -6,6 +6,11 @@ import { Settings, titles } from "./Settings";
 import SettingsPanel from "./SettingsPanel";
 import styles from './styles/index.scss';
 import { getMeta } from "@dium/index";
+
+function updatePatches() {
+  Patcher.unpatchAll();
+  patch();
+}
 
 export default createPlugin({
   start() {
@@ -39,5 +44,5 @@ export default createPlugin({
 
   styles,
   Settings,
-  SettingsPanel
+  SettingsPanel: () => SettingsPanel({ updatePatches })
 });

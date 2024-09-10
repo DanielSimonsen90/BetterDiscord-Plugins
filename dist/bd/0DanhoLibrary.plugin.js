@@ -294,7 +294,7 @@ const SelectedChannelStore = /* @__PURE__ */ byName("SelectedChannelStore");
 
 const i18n = /* @__PURE__ */ byKeys(["languages", "getLocale"]);
 
-const GuildStore = /* @__PURE__ */ byName("GuildStore");
+const GuildStore$1 = /* @__PURE__ */ byName("GuildStore");
 const GuildMemberStore = /* @__PURE__ */ byName("GuildMemberStore");
 
 const MediaEngineStore = /* @__PURE__ */ byName("MediaEngineStore");
@@ -332,6 +332,79 @@ function Collapsible({ children, ...props }) {
             isOpen ? TitleOpen ?? Title : Title,
             React$1.createElement("span", { style: { display: 'flex' } })),
         React$1.createElement("div", { className: classNames('collapsible__content', isOpen ? 'visible' : 'hidden') }, children)));
+}
+
+const getEmojiUrl = (emoji, size = 128) => (`https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? 'gif' : 'webp'}` +
+    `?size=${size}&qualiy=lossless`);
+const EmojiStore = byName("EmojiStore");
+
+const GuildChannelStore = byKeys(["getTextChannelNameDisambiguations"]);
+
+const GuildEmojiStore = byKeys(["getEmojis"]);
+
+const GuildIdentyStore = byKeys(["saveGuildIdentityChanges"]);
+
+const GuildStore = byName("GuildStore");
+
+const SelectedGuildStore = byKeys(["getLastSelectedGuildId"]);
+
+const ThemeStore = byKeys(["theme"]);
+
+const UserMentionStore = byKeys(["getMentions", "everyoneFilter"]);
+
+const UserActivityStore = byKeys(["getUser", "getCurrentUser"]);
+
+const UserNoteStore = byKeys(["getNote", "_dispatcher"]);
+
+const UserSettingsAccountStore = byName("UserSettingsAccountStore");
+const UserProfileSettingsStore = byKeys(["saveProfileChanges", "setPendingBio"]);
+const BetterProfileSettings = {
+    ...byKeys(["saveProfileChanges", "setPendingBio"]),
+    ...byName("UserSettingsAccountStore")
+};
+var FormStates;
+(function (FormStates) {
+    FormStates["OPEN"] = "OPEN";
+    FormStates["SUBMITTING"] = "SUBMITTING";
+    FormStates["CLOSED"] = "CLOSED";
+})(FormStates || (FormStates = {}));
+
+const UserTypingStore = byKeys(["getTypingUsers", "isTyping"]);
+
+const Stores = {
+    __proto__: null,
+    BetterProfileSettings,
+    ChannelStore,
+    EmojiStore,
+    GuildChannelStore,
+    GuildEmojiStore,
+    GuildIdentyStore,
+    GuildMemberStore,
+    GuildStore,
+    MediaEngineStore,
+    PresenceStore,
+    SelectedChannelStore,
+    SelectedGuildStore,
+    ThemeStore,
+    UserActivityStore,
+    UserMentionStore,
+    UserNoteStore,
+    UserProfileSettingsStore,
+    UserSettingsAccountStore,
+    UserStore,
+    UserTypingStore,
+    getEmojiUrl
+};
+
+function GuildListItem(props) {
+    const guildId = React$1.useMemo(() => 'guildId' in props ? props.guildId : props.guild.id, [props]);
+    const guild = React$1.useMemo(() => 'guild' in props ? props.guild : GuildStore.getGuild(guildId), [guildId]);
+    const { children } = props;
+    return (React$1.createElement("div", { className: "guild-list-item" },
+        React$1.createElement("img", { className: "guild-list-item__icon", src: window.DL.Guilds.getIconUrl(guild), alt: guild.name }),
+        React$1.createElement("div", { className: "guild-list-item__content-container" },
+            React$1.createElement("span", { className: "guild-list-item__name" }, guild.name),
+            React$1.createElement("span", { className: "guild-list-item__content" }, children))));
 }
 
 function Checkmark({ tooltip }) {
@@ -400,6 +473,7 @@ const Components = {
     Collapsible,
     EditPencil,
     EphemeralEye,
+    GuildListItem,
     Setting
 };
 
@@ -1018,16 +1092,6 @@ const DiscordModules = {
     ...DanhoModules
 };
 
-const SelectedGuildStore = byKeys(["getLastSelectedGuildId"]);
-
-const UserActivityStore = byKeys(["getUser", "getCurrentUser"]);
-
-const UserNoteStore = byKeys(["getNote", "_dispatcher"]);
-
-const UserTypingStore = byKeys(["getTypingUsers", "isTyping"]);
-
-const UserMentionStore = byKeys(["getMentions", "everyoneFilter"]);
-
 const UserNoteActions = byKeys(["updateNote"]);
 
 const UserUtils = {
@@ -1041,10 +1105,6 @@ const UserUtils = {
     ...UserNoteActions,
     getPresenceState: () => PresenceStore.getState()
 };
-
-const GuildChannelStore = byKeys(["getTextChannelNameDisambiguations"]);
-
-const GuildEmojiStore = byKeys(["getEmojis"]);
 
 const VoiceInfo = byKeys(["isSelfMute", "isNoiseCancellationSupported"]);
 VoiceInfo.getMediaEngine();
@@ -1113,7 +1173,7 @@ const VoiceStore = byKeys(["getVoiceStateForUser"]);
 const GuildActions = byKeys(["requestMembers"]);
 
 const GuildUtils = {
-    ...GuildStore,
+    ...GuildStore$1,
     ...GuildMemberStore,
     ...GuildChannelStore,
     ...GuildEmojiStore,
@@ -1122,7 +1182,7 @@ const GuildUtils = {
     ...VoiceStore,
     ...GuildActions,
     get current() {
-        return GuildStore.getGuild(SelectedGuildStore.getGuildId());
+        return GuildStore$1.getGuild(SelectedGuildStore.getGuildId());
     },
     getSelectedGuildTimestamps() {
         return SelectedGuildStore.getState().selectedGuildTimestampMillis;
@@ -1181,7 +1241,7 @@ function findStore(storeName, allowMultiple = false) {
 }
 function currentGuild() {
     const guildId = SelectedGuildStore.getGuildId();
-    return guildId ? GuildStore.getGuild(guildId) : null;
+    return guildId ? GuildStore$1.getGuild(guildId) : null;
 }
 function currentChannel() {
     const channelId = SelectedChannelStore.getChannelId();
@@ -1199,52 +1259,6 @@ const Utils = {
     get currentGuild() { return currentGuild(); },
     get currentChannel() { return currentChannel(); },
     get currentGuildMembers() { return currentGuildMembers(); },
-};
-
-const getEmojiUrl = (emoji, size = 128) => (`https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? 'gif' : 'webp'}` +
-    `?size=${size}&qualiy=lossless`);
-const EmojiStore = byName("EmojiStore");
-
-const GuildIdentyStore = byKeys(["saveGuildIdentityChanges"]);
-
-const ThemeStore = byKeys(["theme"]);
-
-const UserSettingsAccountStore = byName("UserSettingsAccountStore");
-const UserProfileSettingsStore = byKeys(["saveProfileChanges", "setPendingBio"]);
-const BetterProfileSettings = {
-    ...byKeys(["saveProfileChanges", "setPendingBio"]),
-    ...byName("UserSettingsAccountStore")
-};
-var FormStates;
-(function (FormStates) {
-    FormStates["OPEN"] = "OPEN";
-    FormStates["SUBMITTING"] = "SUBMITTING";
-    FormStates["CLOSED"] = "CLOSED";
-})(FormStates || (FormStates = {}));
-
-const Stores = {
-    __proto__: null,
-    BetterProfileSettings,
-    ChannelStore,
-    EmojiStore,
-    GuildChannelStore,
-    GuildEmojiStore,
-    GuildIdentyStore,
-    GuildMemberStore,
-    GuildStore,
-    MediaEngineStore,
-    PresenceStore,
-    SelectedChannelStore,
-    SelectedGuildStore,
-    ThemeStore,
-    UserActivityStore,
-    UserMentionStore,
-    UserNoteStore,
-    UserProfileSettingsStore,
-    UserSettingsAccountStore,
-    UserStore,
-    UserTypingStore,
-    getEmojiUrl
 };
 
 const Actions = {

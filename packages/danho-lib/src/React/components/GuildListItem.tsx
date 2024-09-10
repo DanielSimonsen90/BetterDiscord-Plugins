@@ -11,7 +11,7 @@ type GuildListItemProps = ({
   children?: React.ReactNode;
 }
 
-export default function GuildListItem(props: GuildListItemProps) {
+export function GuildListItem(props: GuildListItemProps) {
   const guildId = React.useMemo(() => 'guildId' in props ? props.guildId : props.guild.id, [props]);
   const guild = React.useMemo(() => 'guild' in props ? props.guild : GuildStore.getGuild(guildId) as any as Guild, [guildId]);
   const { children } = props;
@@ -28,3 +28,5 @@ export default function GuildListItem(props: GuildListItemProps) {
     </div>
   );
 }
+
+export default GuildListItem;

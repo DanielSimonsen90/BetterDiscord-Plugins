@@ -208,8 +208,6 @@ const { default: Legacy, Dispatcher, Store, BatchedStoreListener, useStateFromSt
     useStateFromStores: bySource("useStateFromStores")
 }, ["Store", "Dispatcher", "useStateFromStores"]);
 
-const GuildStore$1 = /* @__PURE__ */ byName("GuildStore");
-
 const { React } = BdApi;
 const classNames = /* @__PURE__ */ find((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
 
@@ -826,6 +824,7 @@ const titles = {
     acceptBannedEmojisBeta: `Notice: The "Banned Emojis" feature is enabled. This may cause crashes to your client.`
 };
 
+const KNOWN_EXPRESSION_PICKER_CONTEXTMENU_ITEMS_COUNT = 2;
 const isBanFeatureEnabled = () => Settings.current.enableBannedEmojis;
 const sortBannedEmojisToEnd = function (emojis) {
     const banned = Settings.current.bannedEmojis.map(e => e.id);
@@ -872,7 +871,7 @@ const renderBanEmojiMenuItem = function (menu, props) {
     const name = attributes.find(a => a.name === "data-name")?.value;
     const id = attributes.find(a => a.name === "data-id")?.value ?? `default_${name}`;
     const isBanned = Settings.current.bannedEmojis.some(e => e.id === id);
-    menu.props.children.props.children.push(React.createElement(React.Fragment, null,
+    menu.props.children.props.children.splice(KNOWN_EXPRESSION_PICKER_CONTEXTMENU_ITEMS_COUNT, 2, (React.createElement(React.Fragment, null,
         React.createElement(MenuSeparator, null),
         React.createElement(MenuItem, { id: `emoji-ban_${id}`, label: isBanned ? "Unban Emoji" : "Ban Emoji", action: () => {
                 Settings.update({
@@ -881,7 +880,7 @@ const renderBanEmojiMenuItem = function (menu, props) {
                         : [...Settings.current.bannedEmojis, { id, name }]
                 });
                 $(`[data-id="${id}"]`).attr('data-banned-emoji', isBanned ? undefined : 'true', true).forceUpdate();
-            }, color: isBanned ? undefined : "danger", icon: isBanned ? undefined : BinIcon })));
+            }, color: isBanned ? undefined : "danger", icon: isBanned ? undefined : BinIcon }))));
 };
 const replaceEmojiStore_getDisambiguatedEmojiContext = createPatcherCallback(({ args, original: getDisambiguatedEmojiContext }) => {
     const result = getDisambiguatedEmojiContext(...args);
@@ -919,6 +918,8 @@ function insteadEmojiPicker() {
 const getEmojiUrl = (emoji, size = 128) => (`https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? 'gif' : 'webp'}` +
     `?size=${size}&qualiy=lossless`);
 const EmojiStore = byName("EmojiStore");
+
+const GuildStore = byName("GuildStore");
 
 function insteadEmojiStore_getDisambiguatedEmojiContext() {
     if (!isBanFeatureEnabled())
@@ -990,29 +991,6 @@ function patch() {
     afterEmojiPicker();
 }
 
-const { useState: useState$1 } = React;
-function Collapsible({ children, ...props }) {
-    const [isOpen, setIsOpen] = useState$1(props.defaultOpen ?? false);
-    const disabled = props.disabled ?? false;
-    const toggle = () => {
-        if (disabled)
-            return;
-        setIsOpen(!isOpen);
-        props.onToggle?.(!isOpen);
-        if (isOpen)
-            props.onClose?.();
-        else
-            props.onOpen?.();
-    };
-    const Title = typeof props.title === 'string' ? React.createElement("h3", null, props.title) : props.title;
-    const TitleOpen = typeof props.titleOpen === 'string' ? React.createElement("h3", null, props.titleOpen) : props.titleOpen;
-    return (React.createElement("div", { className: `collapsible ${props.className ?? ''}`, "data-open": isOpen, "data-disabled": disabled },
-        React.createElement("div", { className: "collapsible__header", onClick: toggle },
-            isOpen ? TitleOpen ?? Title : Title,
-            React.createElement("span", { style: { display: 'flex' } })),
-        React.createElement("div", { className: classNames('collapsible__content', isOpen ? 'visible' : 'hidden') }, children)));
-}
-
 var ButtonLooks;
 (function (ButtonLooks) {
     ButtonLooks[ButtonLooks["BLANK"] = 0] = "BLANK";
@@ -1051,6 +1029,40 @@ const SecondaryButton = (props) => React.createElement(Button, { ...props, color
 
 const TextInput = byName("TextInput");
 
+const { useState: useState$1 } = React;
+function Collapsible({ children, ...props }) {
+    const [isOpen, setIsOpen] = useState$1(props.defaultOpen ?? false);
+    const disabled = props.disabled ?? false;
+    const toggle = () => {
+        if (disabled)
+            return;
+        setIsOpen(!isOpen);
+        props.onToggle?.(!isOpen);
+        if (isOpen)
+            props.onClose?.();
+        else
+            props.onOpen?.();
+    };
+    const Title = typeof props.title === 'string' ? React.createElement("h3", null, props.title) : props.title;
+    const TitleOpen = typeof props.titleOpen === 'string' ? React.createElement("h3", null, props.titleOpen) : props.titleOpen;
+    return (React.createElement("div", { className: `collapsible ${props.className ?? ''}`, "data-open": isOpen, "data-disabled": disabled },
+        React.createElement("div", { className: "collapsible__header", onClick: toggle },
+            isOpen ? TitleOpen ?? Title : Title,
+            React.createElement("span", { style: { display: 'flex' } })),
+        React.createElement("div", { className: classNames('collapsible__content', isOpen ? 'visible' : 'hidden') }, children)));
+}
+
+function GuildListItem(props) {
+    const guildId = React.useMemo(() => 'guildId' in props ? props.guildId : props.guild.id, [props]);
+    const guild = React.useMemo(() => 'guild' in props ? props.guild : GuildStore.getGuild(guildId), [guildId]);
+    const { children } = props;
+    return (React.createElement("div", { className: "guild-list-item" },
+        React.createElement("img", { className: "guild-list-item__icon", src: window.DL.Guilds.getIconUrl(guild), alt: guild.name }),
+        React.createElement("div", { className: "guild-list-item__content-container" },
+            React.createElement("span", { className: "guild-list-item__name" }, guild.name),
+            React.createElement("span", { className: "guild-list-item__content" }, children))));
+}
+
 const { useState } = React;
 function Setting({ setting, settings, set, onChange, titles }) {
     const [v, setV] = useState(settings[setting]);
@@ -1081,21 +1093,11 @@ function BannedEmojiTag({ emojiId, onClick }) {
         React.createElement("img", { className: "emoji jumboable", src: getEmojiUrl(emoji), alt: emoji.name })));
 }
 
-function GuildListItem(props) {
-    const guildId = React.useMemo(() => 'guildId' in props ? props.guildId : props.guild.id, [props]);
-    const guild = React.useMemo(() => 'guild' in props ? props.guild : GuildStore$1.getGuild(guildId), [guildId]);
-    const { children } = props;
-    return (React.createElement("div", { className: "guild-list-item" },
-        React.createElement("img", { className: "guild-list-item__icon", src: window.DL.Guilds.getIconUrl(guild), alt: guild.name }),
-        React.createElement("div", { className: "guild-list-item__content-container" },
-            React.createElement("span", { className: "guild-list-item__name" }, guild.name),
-            React.createElement("span", { className: "guild-list-item__content" }, children))));
-}
-
-const GuildStore = byName("GuildStore");
-
-function SettingsPanel() {
+function SettingsPanel({ updatePatches }) {
     const [current, defaults, set] = Settings.useStateWithDefaults();
+    React.useEffect(() => {
+        updatePatches();
+    }, [current.enableBannedEmojis, current.enableFavorFavoriteEmojis]);
     return (React.createElement("div", { className: 'danho-plugin-settings' },
         React.createElement(FormSection, null,
             React.createElement(FormLabel, null, "Features"),
@@ -1146,6 +1148,10 @@ function BannedEmojiSection() {
 
 const styles = "[data-banned-emoji=true] {\n  filter: saturate(0.4);\n  border: 1px solid var(--button-danger-background);\n}\n\n.banned-emojis__guilds-list {\n  border: 1px solid var(--background-secondary);\n}\n.banned-emojis__guilds-list-item__header {\n  width: 100%;\n  display: flex;\n  justify-content: space-between;\n}\n.banned-emojis__emojis-list {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 0.5rem;\n}";
 
+function updatePatches() {
+    unpatchAll();
+    patch();
+}
 const index = createPlugin({
     start() {
         patch();
@@ -1176,7 +1182,7 @@ const index = createPlugin({
     },
     styles,
     Settings,
-    SettingsPanel
+    SettingsPanel: () => SettingsPanel({ updatePatches })
 });
 
 module.exports = index;
