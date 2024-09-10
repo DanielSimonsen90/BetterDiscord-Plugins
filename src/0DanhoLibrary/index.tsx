@@ -6,7 +6,8 @@ import * as Stores from '@danho-lib/Stores';
 import * as Actions from '@danho-lib/Actions';
 import { createPlugin, Plugin } from '@dium/index';
 import { Finder, Filters } from '@dium/index';
-import styles from './styles/index.scss';
+
+import styles from '../../packages/danho-lib/src/styles/index.scss';
 
 type Settings = {}
 
@@ -29,6 +30,11 @@ const LibraryPlugin = new class DanhoLibrary implements Plugin<Settings> {
     styles = styles;
 };
 
-// @ts-ignore
 window.DL = LibraryPlugin;
 export default createPlugin(LibraryPlugin);
+
+declare global {
+    interface Window {
+        DL: typeof LibraryPlugin
+    }
+}

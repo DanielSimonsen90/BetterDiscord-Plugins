@@ -28,6 +28,7 @@ type CompiledGuildUtils = BetterOmit<FilterStore<GuildStore>
 
     // meFor(guildId: Snowflake): GuildMember
     getSelectedGuildTimestamps(): ReturnType<SelectedGuildStore['getState']>["selectedGuildTimestampMillis"]
+    getIconUrl(guild: Guild): string
 }
 
 export const GuildUtils: CompiledGuildUtils = {
@@ -54,4 +55,7 @@ export const GuildUtils: CompiledGuildUtils = {
     getSelectedGuildTimestamps() {
         return SelectedGuildStore.getState().selectedGuildTimestampMillis;
     },
+    getIconUrl(guild) {
+        return guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp` : 'https://cdn.discordapp.com/embed/avatars/0.png';
+    }
 }

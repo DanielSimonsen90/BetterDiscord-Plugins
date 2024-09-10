@@ -15,7 +15,7 @@
       color: var(--text-primary);
       cursor: pointer;
 
-      span::after {
+      > span::after {
         content: '';
         display: inline-block;
         width: 0;
@@ -37,8 +37,13 @@
       border-top: 1px solid var(--primary-500);
     }
 
-    &[data-open=true] span::after {
+    &[data-open=true] > &__header > span::after {
       border-top: 5px solid transparent;
       border-bottom: 5px solid var(--interactive-normal);
+    }
+
+    &[data-disabled=true] {
+      opacity: 0.5;
+      pointer-events: none;
     }
   }

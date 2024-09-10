@@ -3,8 +3,22 @@
   border: 1px solid var(--button-danger-background);
 }
 
-.banned-emojis-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .5rem;
+.banned-emojis {
+  &__guilds-list {
+    border: 1px solid var(--background-secondary);
+  }
+
+  &__guilds-list-item__header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  &__emojis-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+
+  // .emoji-tag {}
 }

@@ -58,7 +58,7 @@ export interface ButtonComponent extends React.FunctionComponent<ButtonProps> {
     Sizes: Record<keyof typeof ButtonSizes, ButtonSizes>;
 }
 
-export const Button: ButtonComponent = Finder.byKeys(["Link", "Hovers"]);
+export const Button: ButtonComponent = Finder.byKeys(["Button"]).Button;
 export default Button;
 
 export const SuccessButton = (props: ButtonProps) => <Button {...props} color={Button.Colors.GREEN} look={Button.Looks.FILLED} data-type="success" />;
