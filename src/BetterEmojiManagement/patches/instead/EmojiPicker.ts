@@ -5,7 +5,7 @@ import { addBannedTagToEmoji, isBanFeatureEnabled } from "../../features/BanEmoj
 export default function insteadEmojiPicker() {
   if (!isBanFeatureEnabled()) return;
   
-  WaitForEmojiPicker((emojiPicker, key) => {
+  return WaitForEmojiPicker((emojiPicker, key) => {
     Patcher.instead(emojiPicker, key, data => {
       return addBannedTagToEmoji(data);
     });

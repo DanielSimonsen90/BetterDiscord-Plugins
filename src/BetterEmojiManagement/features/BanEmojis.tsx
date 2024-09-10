@@ -3,7 +3,7 @@ import { React } from "@dium/modules";
 
 import { CustomEmoji, Emoji, EmojiStore } from "@danho-lib/Stores";
 import createPatcherCallback, { createPatcherAfterCallback } from "@danho-lib/Patcher/CreatePatcherCallback";
-import { ExpressionPickerContextMenuOptions } from "@danho-lib/ContextMenus/ExpressionPickerItemOptions";
+import { ExpressionPickerContextMenuFiber, ExpressionPickerContextMenuTargetProps } from "@danho-lib/ContextMenus/ExpressionPickerItemOptions";
 import { ExpressionPickerMenu } from "@danho-lib/Modals/ExpressionPicker";
 import { $ } from "@danho-lib/DOM";
 
@@ -60,17 +60,14 @@ export const addBannedDataTagToEmojiElement = createPatcherAfterCallback<Express
   });
 });
 
-export const renderBanEmojiMenuItem = createPatcherCallback<ExpressionPickerContextMenuOptions['default']>(({ args: [props], original: menu }) => {
+export const renderBanEmojiMenuItem = function (menu: ExpressionPickerContextMenuFiber, props: ExpressionPickerContextMenuTargetProps) {
   const attributes = [...props.target.attributes];
   const name = attributes.find(a => a.name === "data-name")?.value;
   const id = attributes.find(a => a.name === "data-id")?.value ?? `default_${name}`;
 
-  const result = menu(props);
-
   const isBanned = Settings.current.bannedEmojis.some(e => e.id === id);
 
-  const menuOptions = result.props.children.props.children;
-  menuOptions.splice(menuOptions.length, 0, <>
+  menu.props.children.props.children.push(<>
     <MenuSeparator />
     <MenuItem id={`emoji-ban_${id}`}
       label={isBanned ? "Unban Emoji" : "Ban Emoji"}
@@ -88,8 +85,8 @@ export const renderBanEmojiMenuItem = createPatcherCallback<ExpressionPickerCont
     />
   </>);
 
-  return result;
-});
+  // return menu;
+};
 
 export const replaceEmojiStore_getDisambiguatedEmojiContext = createPatcherCallback<EmojiStore['getDisambiguatedEmojiContext']>(({ args, original: getDisambiguatedEmojiContext }) => {
   const result = getDisambiguatedEmojiContext(...args);

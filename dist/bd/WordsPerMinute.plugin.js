@@ -368,8 +368,25 @@ class ElementSelector {
     constructor() {
         this.result = "";
     }
-    getElementFromInstance(instance, allowMultiple = false) {
-        return getElementFromInstance(instance, allowMultiple);
+    getElementFromReactInstance(instance, allowMultiple = false) {
+        return getElementFromReactInstance(instance, allowMultiple);
+    }
+    getSelectorFromElement(element) {
+        const selector = new ElementSelector();
+        if (element.id)
+            selector.id(element.id).and;
+        if (element.className)
+            selector.className(element.className).and;
+        if (element.getAttribute("aria-label"))
+            selector.ariaLabel(element.getAttribute("aria-label")).and;
+        if (element.getAttribute("role"))
+            selector.role(element.getAttribute("role")).and;
+        if (element.dataset) {
+            for (const prop in element.dataset) {
+                selector.data(prop, element.dataset[prop]).and;
+            }
+        }
+        return selector.toString();
     }
     id(id, tagName) {
         this.result += `${tagName ?? ''}[id*="${id}"] `;
@@ -419,7 +436,7 @@ class ElementSelector {
         return this.result;
     }
 }
-function getElementFromInstance(instance, allowMultiple = false) {
+function getElementFromReactInstance(instance, allowMultiple = false) {
     const selector = new ElementSelector();
     if (instance.type && !instance.type.toString().includes("function"))
         selector.tagName(instance.type.toString()).and;
@@ -552,8 +569,27 @@ class DQuery {
         const children = this.children();
         return children[children.length - 1];
     }
+    ancestor(selector) {
+        const getAnscestorSelector = () => {
+            const _selector = typeof selector === 'function' ? selector(new ElementSelector(), $) : selector;
+            if (typeof _selector === 'string')
+                return _selector;
+            if (_selector instanceof ElementSelector)
+                return _selector.toString();
+            if (_selector instanceof DQuery)
+                return new ElementSelector().getSelectorFromElement(_selector.element);
+            if (_selector instanceof HTMLElement)
+                return new ElementSelector().getSelectorFromElement(_selector);
+            return undefined;
+        };
+        const anscestorSelector = getAnscestorSelector();
+        if (!anscestorSelector)
+            return undefined;
+        return new DQuery(this.element.closest(anscestorSelector));
+    }
     get fiber() {
-        return this.element['__reactFiber$'];
+        const key = Object.keys(this.element).find(key => key.startsWith('__reactFiber$'));
+        return key ? this.element[key] : undefined;
     }
     get props() {
         try {
@@ -658,13 +694,17 @@ class DQuery {
             return [undefined, undefined];
         }
     }
-    attr(key, value) {
+    attr(key, value, remove) {
         if (!this.element)
-            return undefined;
+            return this;
         if (!key)
             return [...this.element.attributes];
-        if (value === undefined)
+        if (value === undefined && remove === undefined)
             return this.element.getAttribute(key);
+        if (remove) {
+            this.element.removeAttribute(key);
+            return this;
+        }
         this.element.setAttribute(key, value);
         return this;
     }
@@ -685,6 +725,12 @@ class DQuery {
     }
     appendHtml(html) {
         this.element.appendChild(createElement(html));
+        return this;
+    }
+    appendElements(elements) {
+        elements.forEach(element => {
+            this.element.appendChild(element instanceof DQuery ? element.element : element);
+        });
         return this;
     }
     appendComponent(component, wrapperProps) {
@@ -731,8 +777,14 @@ function createElement(html, props = {}, target) {
             return result + `${key}="${value}" `;
         }, "")}></div>`;
     }
-    const element = new DOMParser().parseFromString(html, "text/html").body.firstElementChild;
-    element.classList.add("bdd-wrapper");
+    const element = (() => {
+        if (html.startsWith('<')) {
+            const element = new DOMParser().parseFromString(html, "text/html").body.firstElementChild;
+            element.classList.add("bdd-wrapper");
+            return element;
+        }
+        return Object.assign(document.createElement(html), props);
+    })();
     return element;
 }
 

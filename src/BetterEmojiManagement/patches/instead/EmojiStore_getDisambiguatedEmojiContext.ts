@@ -5,7 +5,7 @@ import { isBanFeatureEnabled, replaceEmojiStore_getDisambiguatedEmojiContext } f
 export default function insteadEmojiStore_getDisambiguatedEmojiContext() {
   if (!isBanFeatureEnabled()) return;
 
-  Patcher.instead(EmojiStore, 'getDisambiguatedEmojiContext', (data) => {
+  return Patcher.instead(EmojiStore, 'getDisambiguatedEmojiContext', (data) => {
     return replaceEmojiStore_getDisambiguatedEmojiContext(data);
   });
 }

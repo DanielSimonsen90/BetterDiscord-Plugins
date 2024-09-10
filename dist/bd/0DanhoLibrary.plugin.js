@@ -311,47 +311,28 @@ const UserStore = /* @__PURE__ */ byName("UserStore");
 const PresenceStore = /* @__PURE__ */ byName("PresenceStore");
 const RelationshipStore = /* @__PURE__ */ byName("RelationshipStore");
 
-const Common = /* @__PURE__ */ byKeys(["Button", "Switch", "Select"]);
-
-const Button$1 = Common.Button;
-
-const Embed = /* @__PURE__ */ byProtos(["renderSuppressButton"], { entries: true });
-
-const Flex = /* @__PURE__ */ byKeys(["Child", "Justify"], { entries: true });
-
-const { FormSection: FormSection$1, FormItem: FormItem$1, FormTitle, FormText, FormLabel, FormDivider, FormSwitch, FormNotice } = Common;
-
-const GuildsNav = /* @__PURE__ */ bySource(["guildsnav"], { entries: true });
-
-const IconArrow = /* @__PURE__ */ bySource(["d:\"M5.3 9."], { entries: true });
-
-const mapping = {
-    Link: bySource$1(".component", ".to"),
-    BrowserRouter: bySource$1("this.history")
-};
-const { Link, BrowserRouter } = /* @__PURE__ */ demangle(mapping, ["Link", "BrowserRouter"]);
-
-const margins = /* @__PURE__ */ byKeys(["marginBottom40", "marginTop4"]);
-
-const { Menu, Group: MenuGroup, Item: MenuItem, Separator: MenuSeparator, CheckboxItem: MenuCheckboxItem, RadioItem: MenuRadioItem, ControlItem: MenuControlItem } = BdApi.ContextMenu;
-
-const MessageFooter = /* @__PURE__ */ byProtos(["renderRemoveAttachmentConfirmModal"], { entries: true });
-const MediaItem = /* @__PURE__ */ bySource(["getObscureReason", "isSingleMosaicItem"]);
-
-const RadioGroup = Common.RadioGroup;
-
-const { Select, SingleSelect } = Common;
-
-const Slider = Common.Slider;
-
-const Switch = Common.Switch;
-
-const ChannelTextArea = bySource(["pendingReply"]);
-
-const { TextInput: TextInput$1, InputError } = Common;
-const ImageInput = /* @__PURE__ */ find((target) => typeof target.defaultProps?.multiple === "boolean" && typeof target.defaultProps?.maxFileSizeBytes === "number");
-
-const Text = Common.Text;
+const { useState: useState$4 } = React$1;
+function Collapsible({ children, ...props }) {
+    const [isOpen, setIsOpen] = useState$4(props.defaultOpen ?? false);
+    const disabled = props.disabled ?? false;
+    const toggle = () => {
+        if (disabled)
+            return;
+        setIsOpen(!isOpen);
+        props.onToggle?.(!isOpen);
+        if (isOpen)
+            props.onClose?.();
+        else
+            props.onOpen?.();
+    };
+    const Title = typeof props.title === 'string' ? React$1.createElement("h3", null, props.title) : props.title;
+    const TitleOpen = typeof props.titleOpen === 'string' ? React$1.createElement("h3", null, props.titleOpen) : props.titleOpen;
+    return (React$1.createElement("div", { className: `collapsible ${props.className ?? ''}`, "data-open": isOpen, "data-disabled": disabled },
+        React$1.createElement("div", { className: "collapsible__header", onClick: toggle },
+            isOpen ? TitleOpen ?? Title : Title,
+            React$1.createElement("span", { style: { display: 'flex' } })),
+        React$1.createElement("div", { className: classNames('collapsible__content', isOpen ? 'visible' : 'hidden') }, children)));
+}
 
 function Checkmark({ tooltip }) {
     return (
@@ -376,159 +357,23 @@ function EphemeralEye() {
         React$1.createElement("path", { fill: "currentColor", d: "M12 14C13.1046 14 14 13.1046 14 12C14 10.8954 13.1046 10 12 10C10.8954 10 10 10.8954 10 12C10 13.1046 10.8954 14 12 14Z" })));
 }
 
-const index$2 = {
-    __proto__: null,
-    Checkmark,
-    CloseButton,
-    EditPencil,
-    EphemeralEye
-};
+const Common = /* @__PURE__ */ byKeys(["Button", "Switch", "Select"]);
 
-const MessageStandardEmoji = byName("MessageCustomEmoji");
-const MessageCustomEmoji = byName("MessageCustomEmoji");
-function MessageEmoji(props) {
-    return props.isCustom ? React$1.createElement(MessageCustomEmoji, { ...props }) : React$1.createElement(MessageStandardEmoji, { ...props });
-}
+const Button = Common.Button;
 
-var StatusTypes;
-(function (StatusTypes) {
-    StatusTypes[StatusTypes["DND"] = 0] = "DND";
-    StatusTypes[StatusTypes["IDLE"] = 1] = "IDLE";
-    StatusTypes[StatusTypes["INVISIBLE"] = 2] = "INVISIBLE";
-    StatusTypes[StatusTypes["OFFLINE"] = 3] = "OFFLINE";
-    StatusTypes[StatusTypes["ONLINE"] = 4] = "ONLINE";
-    StatusTypes[StatusTypes["STEAMING"] = 5] = "STEAMING";
-    StatusTypes[StatusTypes["UNKNOWN"] = 6] = "UNKNOWN";
-})(StatusTypes || (StatusTypes = {}));
-const Avatar = byKeys(["AnimatedAvatar"]);
+const Flex = /* @__PURE__ */ byKeys(["Child", "Justify"], { entries: true });
 
-var ButtonLooks;
-(function (ButtonLooks) {
-    ButtonLooks[ButtonLooks["BLANK"] = 0] = "BLANK";
-    ButtonLooks[ButtonLooks["FILLED"] = 1] = "FILLED";
-    ButtonLooks[ButtonLooks["INVERTED"] = 2] = "INVERTED";
-    ButtonLooks[ButtonLooks["LINK"] = 3] = "LINK";
-    ButtonLooks[ButtonLooks["OUTLINED"] = 4] = "OUTLINED";
-})(ButtonLooks || (ButtonLooks = {}));
-var ButtonSizes;
-(function (ButtonSizes) {
-    ButtonSizes[ButtonSizes["ICON"] = 0] = "ICON";
-    ButtonSizes[ButtonSizes["LARGE"] = 1] = "LARGE";
-    ButtonSizes[ButtonSizes["MAX"] = 2] = "MAX";
-    ButtonSizes[ButtonSizes["MEDIUM"] = 3] = "MEDIUM";
-    ButtonSizes[ButtonSizes["MIN"] = 4] = "MIN";
-    ButtonSizes[ButtonSizes["NONE"] = 5] = "NONE";
-    ButtonSizes[ButtonSizes["SMALL"] = 6] = "SMALL";
-    ButtonSizes[ButtonSizes["TINY"] = 7] = "TINY";
-    ButtonSizes[ButtonSizes["XLARGE"] = 8] = "XLARGE";
-})(ButtonSizes || (ButtonSizes = {}));
-var Colors$1;
-(function (Colors) {
-    Colors[Colors["BLACK"] = 0] = "BLACK";
-    Colors[Colors["BRAND"] = 1] = "BRAND";
-    Colors[Colors["BRAND_NEW"] = 2] = "BRAND_NEW";
-    Colors[Colors["GREEN"] = 3] = "GREEN";
-    Colors[Colors["LINK"] = 4] = "LINK";
-    Colors[Colors["PRIMARY"] = 5] = "PRIMARY";
-    Colors[Colors["RED"] = 6] = "RED";
-    Colors[Colors["TRANSPARENT"] = 7] = "TRANSPARENT";
-    Colors[Colors["WHITE"] = 8] = "WHITE";
-    Colors[Colors["YELLOW"] = 9] = "YELLOW";
-})(Colors$1 || (Colors$1 = {}));
-const Button = byKeys(["Link", "Hovers"]);
-const SuccessButton = (props) => React$1.createElement(Button, { ...props, color: Button.Colors.GREEN, look: Button.Looks.FILLED, "data-type": "success" });
-const CancelButton = (props) => React$1.createElement(Button, { ...props, color: Button.Colors.RED, look: Button.Looks.OUTLINED, "data-type": "cancel" });
-const PrimaryButton = (props) => React$1.createElement(Button, { ...props, color: Button.Colors.BRAND, look: Button.Looks.FILLED, "data-type": "primary" });
-const SecondaryButton = (props) => React$1.createElement(Button, { ...props, color: Button.Colors.PRIMARY, look: Button.Looks.OUTLINED, "data-type": "secondary" });
+const { FormSection, FormItem, FormTitle, FormText, FormLabel, FormDivider, FormSwitch, FormNotice } = Common;
 
-const ChannelEditorContainer = byName("ChannelEditorContainer");
-
-const Clickable = byName("Clickable");
-
-const DiscordTag = byName("DiscordTag");
-
-var FormNoticeTypes;
-(function (FormNoticeTypes) {
-    FormNoticeTypes[FormNoticeTypes["BRAND"] = 0] = "BRAND";
-    FormNoticeTypes[FormNoticeTypes["CUSTOM"] = 1] = "CUSTOM";
-    FormNoticeTypes[FormNoticeTypes["DANGER"] = 2] = "DANGER";
-    FormNoticeTypes[FormNoticeTypes["PRIMARY"] = 3] = "PRIMARY";
-    FormNoticeTypes[FormNoticeTypes["SUCCESS"] = 4] = "SUCCESS";
-    FormNoticeTypes[FormNoticeTypes["WARNING"] = 5] = "WARNING";
-})(FormNoticeTypes || (FormNoticeTypes = {}));
-var FormTextTypes;
-(function (FormTextTypes) {
-    FormTextTypes[FormTextTypes["DEFAULT"] = 0] = "DEFAULT";
-    FormTextTypes[FormTextTypes["DESCRIPTION"] = 1] = "DESCRIPTION";
-    FormTextTypes[FormTextTypes["ERROR"] = 2] = "ERROR";
-    FormTextTypes[FormTextTypes["INPUT_PLACEHOLDER"] = 3] = "INPUT_PLACEHOLDER";
-    FormTextTypes[FormTextTypes["LABEL_BOLD"] = 4] = "LABEL_BOLD";
-    FormTextTypes[FormTextTypes["LABEL_DESCRIPTION"] = 5] = "LABEL_DESCRIPTION";
-    FormTextTypes[FormTextTypes["LABEL_SELECTED"] = 6] = "LABEL_SELECTED";
-    FormTextTypes[FormTextTypes["SUCCESS"] = 7] = "SUCCESS";
-})(FormTextTypes || (FormTextTypes = {}));
-const Form = byKeys(["FormItem", "FormSection", "FormDivider"]);
-
-const SwitchItem = byName("SwitchItem");
+const margins = /* @__PURE__ */ byKeys(["marginBottom40", "marginTop4"]);
 
 const TextInput = byName("TextInput");
-
-const DateInput = byName("DateInput");
-
-const TimeInput = byName("TimeInput");
-
-const MessageTimestamp = byName("MessageTimestamp");
-
-var Colors;
-(function (Colors) {
-    Colors[Colors["BLACK"] = 0] = "BLACK";
-    Colors[Colors["BRAND"] = 1] = "BRAND";
-    Colors[Colors["CUSTOM"] = 2] = "CUSTOM";
-    Colors[Colors["GREEN"] = 3] = "GREEN";
-    Colors[Colors["GREY"] = 4] = "GREY";
-    Colors[Colors["PRIMARY"] = 5] = "PRIMARY";
-    Colors[Colors["RED"] = 6] = "RED";
-    Colors[Colors["YELLOW"] = 7] = "YELLOW";
-})(Colors || (Colors = {}));
-var Positions;
-(function (Positions) {
-    Positions[Positions["BOTTOM"] = 0] = "BOTTOM";
-    Positions[Positions["CENTER"] = 1] = "CENTER";
-    Positions[Positions["LEFT"] = 2] = "LEFT";
-    Positions[Positions["RIGHT"] = 3] = "RIGHT";
-    Positions[Positions["WINDOW_CENTER"] = 4] = "WINDOW_CENTER";
-})(Positions || (Positions = {}));
-const TooltipModule = byKeys(["TooltipContainer"]);
-const Tooltip = TooltipModule;
-const TooltipContainer = TooltipModule.TooltipContainer;
-const TooltipLayer = TooltipModule.TooltipLayer;
-
-const SelectMenu = byKeys(["Select"]);
-
-const Shakeable = byName("Shakeable");
-
-const SystemMessage = byName("SystemMessage");
-
-const UserProfileBadgeList = byName("UserProfileBadgeList");
-
-const { FormSection } = Form;
-const Section = ({ title, children, className }) => (React$1.createElement(FormSection, { tag: 'h1', title: title, className: classNames('settings', className) }, children));
-
-const { FormItem } = Form;
-const Item = ({ direction, children, className, ...props }) => (React$1.createElement(FormItem, { className: classNames(direction, 'center', 'settings-item', className), ...props }, children));
-
-const index$1 = {
-    __proto__: null,
-    Item,
-    Section
-};
 
 const { useState: useState$3 } = React$1;
 function Setting({ setting, settings, set, onChange, titles }) {
     const [v, setV] = useState$3(settings[setting]);
-    console.log({ setting, settings, v, titles });
     switch (typeof v) {
-        case 'boolean': return React$1.createElement(SwitchItem, { key: setting.toString(), title: titles[setting.toString()], value: v, onChange: checked => {
+        case 'boolean': return React$1.createElement(FormSwitch, { className: 'danho-form-switch', key: setting.toString(), note: titles[setting.toString()], value: v, hideBorder: true, onChange: checked => {
                 set({ [setting]: checked });
                 onChange?.(checked);
                 setV(checked);
@@ -550,68 +395,12 @@ function Setting({ setting, settings, set, onChange, titles }) {
 
 const Components = {
     __proto__: null,
-    Avatar,
-    BrowserRouter,
-    Button,
-    CancelButton,
-    ChannelEditorContainer,
-    ChannelTextArea,
-    Clickable,
-    Common,
-    DateInput,
-    DiscordTag,
-    Embed,
-    Flex,
-    Form,
-    FormDivider,
-    FormItem: FormItem$1,
-    FormLabel,
-    FormNotice,
-    FormSection: FormSection$1,
-    FormSwitch,
-    FormText,
-    FormTitle,
-    GuildsNav,
-    IconArrow,
-    Icons: index$2,
-    ImageInput,
-    InputError,
-    Link,
-    MediaItem,
-    Menu,
-    MenuCheckboxItem,
-    MenuControlItem,
-    MenuGroup,
-    MenuItem,
-    MenuRadioItem,
-    MenuSeparator,
-    MessageCustomEmoji,
-    MessageEmoji,
-    MessageFooter,
-    MessageStandardEmoji,
-    MessageTimestamp,
-    MyForm: index$1,
-    PrimaryButton,
-    RadioGroup,
-    SecondaryButton,
-    Select,
-    SelectMenu,
-    Setting,
-    Shakeable,
-    SingleSelect,
-    Slider,
-    SuccessButton,
-    Switch,
-    SwitchItem,
-    SystemMessage,
-    Text,
-    TextInput,
-    TimeInput,
-    Tooltip,
-    TooltipContainer,
-    TooltipLayer,
-    UserProfileBadgeList,
-    margins
+    Checkmark,
+    CloseButton,
+    Collapsible,
+    EditPencil,
+    EphemeralEye,
+    Setting
 };
 
 const { useEffect: useEffect$2 } = React$1;
@@ -675,12 +464,12 @@ const forceFullRerender = (fiber) => new Promise((resolve) => {
     }
 });
 
-const SettingsContainer = ({ name, children, onReset }) => (React$1.createElement(FormSection$1, null,
+const SettingsContainer = ({ name, children, onReset }) => (React$1.createElement(FormSection, null,
     children,
     onReset ? (React$1.createElement(React$1.Fragment, null,
         React$1.createElement(FormDivider, { className: classNames(margins.marginTop20, margins.marginBottom20) }),
         React$1.createElement(Flex, { justify: Flex.Justify.END },
-            React$1.createElement(Button$1, { size: Button$1.Sizes.SMALL, onClick: () => confirm(name, "Reset all settings?", {
+            React$1.createElement(Button, { size: Button.Sizes.SMALL, onClick: () => confirm(name, "Reset all settings?", {
                     onConfirm: () => onReset()
                 }) }, "Reset")))) : null));
 
@@ -792,8 +581,25 @@ class ElementSelector {
     constructor() {
         this.result = "";
     }
-    getElementFromInstance(instance, allowMultiple = false) {
-        return getElementFromInstance(instance, allowMultiple);
+    getElementFromReactInstance(instance, allowMultiple = false) {
+        return getElementFromReactInstance(instance, allowMultiple);
+    }
+    getSelectorFromElement(element) {
+        const selector = new ElementSelector();
+        if (element.id)
+            selector.id(element.id).and;
+        if (element.className)
+            selector.className(element.className).and;
+        if (element.getAttribute("aria-label"))
+            selector.ariaLabel(element.getAttribute("aria-label")).and;
+        if (element.getAttribute("role"))
+            selector.role(element.getAttribute("role")).and;
+        if (element.dataset) {
+            for (const prop in element.dataset) {
+                selector.data(prop, element.dataset[prop]).and;
+            }
+        }
+        return selector.toString();
     }
     id(id, tagName) {
         this.result += `${tagName ?? ''}[id*="${id}"] `;
@@ -843,7 +649,7 @@ class ElementSelector {
         return this.result;
     }
 }
-function getElementFromInstance(instance, allowMultiple = false) {
+function getElementFromReactInstance(instance, allowMultiple = false) {
     const selector = new ElementSelector();
     if (instance.type && !instance.type.toString().includes("function"))
         selector.tagName(instance.type.toString()).and;
@@ -976,8 +782,27 @@ class DQuery {
         const children = this.children();
         return children[children.length - 1];
     }
+    ancestor(selector) {
+        const getAnscestorSelector = () => {
+            const _selector = typeof selector === 'function' ? selector(new ElementSelector(), $) : selector;
+            if (typeof _selector === 'string')
+                return _selector;
+            if (_selector instanceof ElementSelector)
+                return _selector.toString();
+            if (_selector instanceof DQuery)
+                return new ElementSelector().getSelectorFromElement(_selector.element);
+            if (_selector instanceof HTMLElement)
+                return new ElementSelector().getSelectorFromElement(_selector);
+            return undefined;
+        };
+        const anscestorSelector = getAnscestorSelector();
+        if (!anscestorSelector)
+            return undefined;
+        return new DQuery(this.element.closest(anscestorSelector));
+    }
     get fiber() {
-        return this.element['__reactFiber$'];
+        const key = Object.keys(this.element).find(key => key.startsWith('__reactFiber$'));
+        return key ? this.element[key] : undefined;
     }
     get props() {
         try {
@@ -1082,13 +907,17 @@ class DQuery {
             return [undefined, undefined];
         }
     }
-    attr(key, value) {
+    attr(key, value, remove) {
         if (!this.element)
-            return undefined;
+            return this;
         if (!key)
             return [...this.element.attributes];
-        if (value === undefined)
+        if (value === undefined && remove === undefined)
             return this.element.getAttribute(key);
+        if (remove) {
+            this.element.removeAttribute(key);
+            return this;
+        }
         this.element.setAttribute(key, value);
         return this;
     }
@@ -1109,6 +938,12 @@ class DQuery {
     }
     appendHtml(html) {
         this.element.appendChild(createElement(html));
+        return this;
+    }
+    appendElements(elements) {
+        elements.forEach(element => {
+            this.element.appendChild(element instanceof DQuery ? element.element : element);
+        });
         return this;
     }
     appendComponent(component, wrapperProps) {
@@ -1155,8 +990,14 @@ function createElement(html, props = {}, target) {
             return result + `${key}="${value}" `;
         }, "")}></div>`;
     }
-    const element = new DOMParser().parseFromString(html, "text/html").body.firstElementChild;
-    element.classList.add("bdd-wrapper");
+    const element = (() => {
+        if (html.startsWith('<')) {
+            const element = new DOMParser().parseFromString(html, "text/html").body.firstElementChild;
+            element.classList.add("bdd-wrapper");
+            return element;
+        }
+        return Object.assign(document.createElement(html), props);
+    })();
     return element;
 }
 
@@ -1286,6 +1127,9 @@ const GuildUtils = {
     getSelectedGuildTimestamps() {
         return SelectedGuildStore.getState().selectedGuildTimestampMillis;
     },
+    getIconUrl(guild) {
+        return guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp` : 'https://cdn.discordapp.com/embed/avatars/0.png';
+    }
 };
 
 function findNodeByIncludingClassName(className, node = document.body) {
@@ -1357,6 +1201,8 @@ const Utils = {
     get currentGuildMembers() { return currentGuildMembers(); },
 };
 
+const getEmojiUrl = (emoji, size = 128) => (`https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? 'gif' : 'webp'}` +
+    `?size=${size}&qualiy=lossless`);
 const EmojiStore = byName("EmojiStore");
 
 const GuildIdentyStore = byKeys(["saveGuildIdentityChanges"]);
@@ -1397,7 +1243,8 @@ const Stores = {
     UserProfileSettingsStore,
     UserSettingsAccountStore,
     UserStore,
-    UserTypingStore
+    UserTypingStore,
+    getEmojiUrl
 };
 
 const Actions = {
@@ -1405,6 +1252,8 @@ const Actions = {
     GuildActions,
     UserNoteActions
 };
+
+const styles = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.danho-form-switch {\n  flex-direction: row-reverse;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
 
 const LibraryPlugin = new class DanhoLibrary {
     constructor() {
@@ -1417,6 +1266,7 @@ const LibraryPlugin = new class DanhoLibrary {
         this.Components = Components;
         this.Finder = Finder;
         this.Filters = Filters;
+        this.styles = styles;
     }
     start() { }
 };

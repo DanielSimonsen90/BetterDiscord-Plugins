@@ -6,11 +6,11 @@ import insteadEmojiPickerContextMenu from "../instead/EmojiPickerContextMenu";
 export default function afterEmojiPicker() {
   if (!isBanFeatureEnabled()) return;
 
-  WaitForEmojiPicker((emojiPicker, key) => {
-    Patcher.after(emojiPicker, key, data => {
+  return WaitForEmojiPicker((emojiPicker, key) => {
+    const cancel = Patcher.after(emojiPicker, key, data => {
       addBannedDataTagToEmojiElement(data);
     });
     
-    insteadEmojiPickerContextMenu();
+    return [cancel, insteadEmojiPickerContextMenu()];
   });
 }

@@ -1,4 +1,4 @@
-import { Filters, Finder } from "@dium/api";
+import { Patcher } from "@dium/api";
 
 type MenuItemFiber = {
   props: {
@@ -9,10 +9,11 @@ type MenuItemFiber = {
     focusedClassName?: undefined,
     icon?: (e: any) => any,
     iconLeft?: undefined,
-  }
-}
+  };
+};
 
-type ExpressionPickerContextMenuFiber = {
+
+export type ExpressionPickerContextMenuFiber = {
   props: {
     'aria-label': 'Expression Picker Actions',
     children: {
@@ -20,51 +21,44 @@ type ExpressionPickerContextMenuFiber = {
         children: [
           UnfavoriteAction: MenuItemFiber,
           DevCopyIdAction?: MenuItemFiber,
-        ]
-      }
-    }
+        ];
+      };
+    };
     navId: 'expression-picker',
     onClose: (e: any) => void,
-    onSelect: undefined
-  }
+    onSelect: undefined;
+  };
 }
 
-export type ExpressionPickerContextMenuOptions = {
-  default: (props: {
-    config: { context: 'APP' },
-    context: 'APP',
-    onHeightUpdate(): void,
-    position: string,
-    target: HTMLButtonElement & {
-      attributes: [
-        tabIndex: Attr,
-        className: Attr,
-        dataType: Attr,
-        dataName: Attr,
-        dataSurrogates: Attr,
-      ] | [
-        tabIndex: Attr,
-        className: Attr,
-        dataType: Attr,
-        dataId: Attr,
-        dataName: Attr,
-        dataAnimated?: Attr,
-      ]
-    }
-    theme: string,
-  }) => ExpressionPickerContextMenuFiber
-}
+export type ExpressionPickerContextMenuTargetProps = {
+  config: { context: 'APP'; },
+  context: 'APP',
+  onHeightUpdate(): void,
+  position: string,
+  target: HTMLButtonElement & {
+    attributes: [
+      tabIndex: Attr,
+      className: Attr,
+      dataType: Attr,
+      dataName: Attr,
+      dataSurrogates: Attr,
+    ] | [
+      tabIndex: Attr,
+      className: Attr,
+      dataType: Attr,
+      dataId: Attr,
+      dataName: Attr,
+      dataAnimated?: Attr,
+    ];
+  };
+  theme: string,
+};
 
-type Callback = (data: ExpressionPickerContextMenuOptions, key: any) => any;
+
+type Callback = (menu: ExpressionPickerContextMenuFiber, targetProps: ExpressionPickerContextMenuTargetProps) => void;
 
 export function WaitForEmojiPickerContextMenu(callback: Callback) {
-  Finder.waitFor(Filters.bySource(...['expression-picker']), { resolve: false }).then(module => {
-    const key: keyof ExpressionPickerContextMenuOptions = 'default' in module ? 'default' : Object.keys(module)[0] as any;
-    if (!(module[key] instanceof Function)) return;
-    else callback(module, key);
-
-    throw new Error(`Unexpected module structure, [key: ${key}, module: ${JSON.stringify(module)}]`);
-  });
+  return BdApi.ContextMenu.patch('expression-picker', callback);
 }
 
 export default WaitForEmojiPickerContextMenu;

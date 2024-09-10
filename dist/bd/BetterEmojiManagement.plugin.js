@@ -164,7 +164,7 @@ const COLOR = "#3a71c1";
 const print = (output, ...data) => output(`%c[${getMeta().name}] %c${getMeta().version ? `(v${getMeta().version})` : ""}`, `color: ${COLOR}; font-weight: 700;`, "color: #666; font-size: .8em;", ...data);
 const log = (...data) => print(console.log, ...data);
 
-const patch = (type, object, method, callback, options) => {
+const patch$1 = (type, object, method, callback, options) => {
     const original = object?.[method];
     if (!(original instanceof Function)) {
         throw TypeError(`patch target ${original} is not a function`);
@@ -179,8 +179,8 @@ const patch = (type, object, method, callback, options) => {
     }
     return cancel;
 };
-const instead = (object, method, callback, options = {}) => patch("instead", object, method, (cancel, original, context, args) => callback({ cancel, original, context, args }), options);
-const after = (object, method, callback, options = {}) => patch("after", object, method, (cancel, original, context, args, result) => callback({ cancel, original, context, args, result }), options);
+const instead = (object, method, callback, options = {}) => patch$1("instead", object, method, (cancel, original, context, args) => callback({ cancel, original, context, args }), options);
+const after = (object, method, callback, options = {}) => patch$1("after", object, method, (cancel, original, context, args, result) => callback({ cancel, original, context, args, result }), options);
 let menuPatches = [];
 const unpatchAll = () => {
     if (menuPatches.length + BdApi.Patcher.getPatchesByCaller(getMeta().name).length > 0) {
@@ -208,12 +208,14 @@ const { default: Legacy, Dispatcher, Store, BatchedStoreListener, useStateFromSt
     useStateFromStores: bySource("useStateFromStores")
 }, ["Store", "Dispatcher", "useStateFromStores"]);
 
+const GuildStore$1 = /* @__PURE__ */ byName("GuildStore");
+
 const { React } = BdApi;
 const classNames = /* @__PURE__ */ find((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
 
 const Common = /* @__PURE__ */ byKeys(["Button", "Switch", "Select"]);
 
-const Button = Common.Button;
+const Button$1 = Common.Button;
 
 const Flex = /* @__PURE__ */ byKeys(["Child", "Justify"], { entries: true });
 
@@ -273,7 +275,7 @@ const SettingsContainer = ({ name, children, onReset }) => (React.createElement(
     onReset ? (React.createElement(React.Fragment, null,
         React.createElement(FormDivider, { className: classNames(margins.marginTop20, margins.marginBottom20) }),
         React.createElement(Flex, { justify: Flex.Justify.END },
-            React.createElement(Button, { size: Button.Sizes.SMALL, onClick: () => confirm(name, "Reset all settings?", {
+            React.createElement(Button$1, { size: Button$1.Sizes.SMALL, onClick: () => confirm(name, "Reset all settings?", {
                     onConfirm: () => onReset()
                 }) }, "Reset")))) : null));
 
@@ -372,42 +374,39 @@ const createPlugin = (plugin) => (meta) => {
     };
 };
 
-const EmojiStore = byName("EmojiStore");
-
-function FavorFavoriteEmojis() {
-    instead(EmojiStore, "getSearchResultsOrder", ({ args: [emojis, query, n], original: __getStoreSearchResults }) => {
-        const relevantEmojis = __getStoreSearchResults(emojis, query, n);
-        const favorites = EmojiStore.getDisambiguatedEmojiContext().favoriteEmojisWithoutFetchingLatest;
-        return relevantEmojis.sort((a, b) => {
-            const aIsFavorite = favorites.some(e => e.id === a.id);
-            const bIsFavorite = favorites.some(e => e.id === b.id);
-            return aIsFavorite && !bIsFavorite ? -1
-                : !aIsFavorite && bIsFavorite ? 1
-                    : 0;
-        });
-    });
-}
-
-function WaitForEmojiPickerContextMenu(callback) {
-    waitFor(bySource(...['expression-picker']), { resolve: false }).then(module => {
+async function WaitForEmojiPicker(callback) {
+    return waitFor(bySource(...['showEmojiFavoriteTooltip']), { resolve: false }).then(module => {
         const key = 'default' in module ? 'default' : Object.keys(module)[0];
-        callback(module, key);
+        return callback(module, key);
     });
 }
 
-function WaitForEmojiPicker(callback) {
-    waitFor(bySource(...['showEmojiFavoriteTooltip']), { resolve: false }).then(module => {
-        const key = 'default' in module ? 'default' : Object.keys(module)[0];
-        callback(module, key);
-    });
-}
+const createPatcherCallback = (callback) => callback;
+const createPatcherAfterCallback = (callback) => callback;
 
 class ElementSelector {
     constructor() {
         this.result = "";
     }
-    getElementFromInstance(instance, allowMultiple = false) {
-        return getElementFromInstance(instance, allowMultiple);
+    getElementFromReactInstance(instance, allowMultiple = false) {
+        return getElementFromReactInstance(instance, allowMultiple);
+    }
+    getSelectorFromElement(element) {
+        const selector = new ElementSelector();
+        if (element.id)
+            selector.id(element.id).and;
+        if (element.className)
+            selector.className(element.className).and;
+        if (element.getAttribute("aria-label"))
+            selector.ariaLabel(element.getAttribute("aria-label")).and;
+        if (element.getAttribute("role"))
+            selector.role(element.getAttribute("role")).and;
+        if (element.dataset) {
+            for (const prop in element.dataset) {
+                selector.data(prop, element.dataset[prop]).and;
+            }
+        }
+        return selector.toString();
     }
     id(id, tagName) {
         this.result += `${tagName ?? ''}[id*="${id}"] `;
@@ -457,7 +456,7 @@ class ElementSelector {
         return this.result;
     }
 }
-function getElementFromInstance(instance, allowMultiple = false) {
+function getElementFromReactInstance(instance, allowMultiple = false) {
     const selector = new ElementSelector();
     if (instance.type && !instance.type.toString().includes("function"))
         selector.tagName(instance.type.toString()).and;
@@ -590,8 +589,27 @@ class DQuery {
         const children = this.children();
         return children[children.length - 1];
     }
+    ancestor(selector) {
+        const getAnscestorSelector = () => {
+            const _selector = typeof selector === 'function' ? selector(new ElementSelector(), $) : selector;
+            if (typeof _selector === 'string')
+                return _selector;
+            if (_selector instanceof ElementSelector)
+                return _selector.toString();
+            if (_selector instanceof DQuery)
+                return new ElementSelector().getSelectorFromElement(_selector.element);
+            if (_selector instanceof HTMLElement)
+                return new ElementSelector().getSelectorFromElement(_selector);
+            return undefined;
+        };
+        const anscestorSelector = getAnscestorSelector();
+        if (!anscestorSelector)
+            return undefined;
+        return new DQuery(this.element.closest(anscestorSelector));
+    }
     get fiber() {
-        return this.element['__reactFiber$'];
+        const key = Object.keys(this.element).find(key => key.startsWith('__reactFiber$'));
+        return key ? this.element[key] : undefined;
     }
     get props() {
         try {
@@ -696,13 +714,17 @@ class DQuery {
             return [undefined, undefined];
         }
     }
-    attr(key, value) {
+    attr(key, value, remove) {
         if (!this.element)
-            return undefined;
+            return this;
         if (!key)
             return [...this.element.attributes];
-        if (value === undefined)
+        if (value === undefined && remove === undefined)
             return this.element.getAttribute(key);
+        if (remove) {
+            this.element.removeAttribute(key);
+            return this;
+        }
         this.element.setAttribute(key, value);
         return this;
     }
@@ -723,6 +745,12 @@ class DQuery {
     }
     appendHtml(html) {
         this.element.appendChild(createElement(html));
+        return this;
+    }
+    appendElements(elements) {
+        elements.forEach(element => {
+            this.element.appendChild(element instanceof DQuery ? element.element : element);
+        });
         return this;
     }
     appendComponent(component, wrapperProps) {
@@ -769,8 +797,14 @@ function createElement(html, props = {}, target) {
             return result + `${key}="${value}" `;
         }, "")}></div>`;
     }
-    const element = new DOMParser().parseFromString(html, "text/html").body.firstElementChild;
-    element.classList.add("bdd-wrapper");
+    const element = (() => {
+        if (html.startsWith('<')) {
+            const element = new DOMParser().parseFromString(html, "text/html").body.firstElementChild;
+            element.classList.add("bdd-wrapper");
+            return element;
+        }
+        return Object.assign(document.createElement(html), props);
+    })();
     return element;
 }
 
@@ -781,81 +815,368 @@ function BinIcon() {
 
 const Settings = createSettings({
     bannedEmojis: new Array(),
+    enableFavorFavoriteEmojis: true,
+    enableBannedEmojis: true,
+    acceptBannedEmojisBeta: false,
+});
+const titles = {
+    enableBannedEmojis: 'Ban your bad emojis (push them to the end)',
+    enableFavorFavoriteEmojis: 'Push favorite emojis first on search results',
+    bannedEmojis: 'Banned emojis',
+    acceptBannedEmojisBeta: `Notice: The "Banned Emojis" feature is enabled. This may cause crashes to your client.`
+};
+
+const isBanFeatureEnabled = () => Settings.current.enableBannedEmojis;
+const sortBannedEmojisToEnd = function (emojis) {
+    const banned = Settings.current.bannedEmojis.map(e => e.id);
+    return emojis.sort((a, b) => {
+        const aIsBanned = banned.includes(a.id);
+        const bIsBanned = banned.includes(b.id);
+        return (aIsBanned && !bIsBanned ? 1
+            : !aIsBanned && bIsBanned ? -1
+                : 0);
+    });
+};
+const sortBannedEmojisOnSearch = createPatcherCallback(({ args, original: __getStoreSearchResults }) => {
+    const emojis = __getStoreSearchResults(...args);
+    return sortBannedEmojisToEnd(emojis);
+});
+const addBannedTagToEmoji = createPatcherCallback(({ args: [props], original: emojiPicker }) => {
+    const bannedEmojis = Settings.current.bannedEmojis.map(e => e.id);
+    const result = emojiPicker(props);
+    result.props.children = result.props.children.map((row) => {
+        if (!row.props.descriptor)
+            return row;
+        const emojiId = row.props.descriptor.emoji.id;
+        const isBanned = bannedEmojis.includes(emojiId);
+        return !isBanned ? row : {
+            ...row,
+            props: {
+                ...row.props,
+                ['data-banned-emoji']: true
+            }
+        };
+    });
+    return result;
+});
+const addBannedDataTagToEmojiElement = createPatcherAfterCallback(({ result }) => {
+    result.props.children.forEach(row => {
+        if (!('data-banned-emoji' in row.props))
+            return;
+        const emojiId = row.props.descriptor.emoji.id;
+        $(`[data-id="${emojiId}"]`).attr('data-banned-emoji', 'true');
+    });
+});
+const renderBanEmojiMenuItem = function (menu, props) {
+    const attributes = [...props.target.attributes];
+    const name = attributes.find(a => a.name === "data-name")?.value;
+    const id = attributes.find(a => a.name === "data-id")?.value ?? `default_${name}`;
+    const isBanned = Settings.current.bannedEmojis.some(e => e.id === id);
+    menu.props.children.props.children.push(React.createElement(React.Fragment, null,
+        React.createElement(MenuSeparator, null),
+        React.createElement(MenuItem, { id: `emoji-ban_${id}`, label: isBanned ? "Unban Emoji" : "Ban Emoji", action: () => {
+                Settings.update({
+                    bannedEmojis: isBanned
+                        ? Settings.current.bannedEmojis.filter(e => e.id !== id)
+                        : [...Settings.current.bannedEmojis, { id, name }]
+                });
+                $(`[data-id="${id}"]`).attr('data-banned-emoji', isBanned ? undefined : 'true', true).forceUpdate();
+            }, color: isBanned ? undefined : "danger", icon: isBanned ? undefined : BinIcon })));
+};
+const replaceEmojiStore_getDisambiguatedEmojiContext = createPatcherCallback(({ args, original: getDisambiguatedEmojiContext }) => {
+    const result = getDisambiguatedEmojiContext(...args);
+    return {
+        _original: result,
+        getFrequentlyUsedReactionEmojisWithoutFetchingLatest: function () { return sortBannedEmojisToEnd(result.getFrequentlyUsedReactionEmojisWithoutFetchingLatest()); },
+        getFrequentlyUsedEmojisWithoutFetchingLatest: function () { return sortBannedEmojisToEnd(result.getFrequentlyUsedEmojisWithoutFetchingLatest()); },
+        get favoriteEmojisWithoutFetchingLatest() { return sortBannedEmojisToEnd(result.favoriteEmojisWithoutFetchingLatest); },
+        getGroupedCustomEmoji: function () {
+            const groupedCustomEmojis = result.getGroupedCustomEmoji();
+            return Object.keys(groupedCustomEmojis).reduce((acc, guildId) => {
+                acc[guildId] = sortBannedEmojisToEnd(groupedCustomEmojis[guildId]);
+                return acc;
+            }, {});
+        },
+        getCustomEmoji: function () { return result.getCustomEmoji(); },
+        isFavoriteEmojiWithoutFetchingLatest: function (emojiId) { return result.isFavoriteEmojiWithoutFetchingLatest(emojiId); },
+        getById: function (emojiId) { return result.getById(emojiId); },
+        getEscapedCustomEmoticonNames: function () { return result.getEscapedCustomEmoticonNames(); },
+        getCustomEmoticonRegex: function () { return result.getCustomEmoticonRegex(); },
+        getEmojiInPriorityOrderWithoutFetchingLatest: function () { return sortBannedEmojisToEnd(result.getEmojiInPriorityOrderWithoutFetchingLatest()); },
+    };
 });
 
-getMeta().name;
-function BanEmojis() {
-    instead(EmojiStore, "getSearchResultsOrder", ({ args: [emojis, query, n], original: __getStoreSearchResults }) => {
-        const relevantEmojis = __getStoreSearchResults(emojis, query, n);
-        const bannedEmojis = Settings.current.bannedEmojis.map(e => e.id);
-        return relevantEmojis.sort((a, b) => {
-            const aIsBanned = bannedEmojis.includes(a.id);
-            const bIsBanned = bannedEmojis.includes(b.id);
-            return aIsBanned && !bIsBanned ? 1
-                : !aIsBanned && bIsBanned ? -1
-                    : 0;
-        });
-    });
-    WaitForEmojiPicker((emojiPicker, key) => {
-        instead(emojiPicker, key, ({ args: [props], cancel, context, original: emojiPicker }) => {
-            const bannedEmojis = Settings.current.bannedEmojis.map(e => e.id);
-            const result = emojiPicker(props);
-            result.props.children = result.props.children.map((row) => {
-                if (!row.props.descriptor)
-                    return row;
-                const emojiId = row.props.descriptor.emoji.id;
-                const isBanned = bannedEmojis.includes(emojiId);
-                return !isBanned ? row : {
-                    ...row,
-                    props: {
-                        ...row.props,
-                        ['data-banned-emoji']: true
-                    }
-                };
-            });
-            return result;
-        });
-        after(emojiPicker, key, ({ args: [props], result }) => {
-            result.props.children.forEach(row => {
-                if (!('data-banned-emoji' in row.props))
-                    return;
-                const emojiId = row.props.descriptor.emoji.id;
-                $(`[data-id="${emojiId}"]`).attr('data-banned-emoji', 'true');
-            });
-        });
-    });
-    WaitForEmojiPickerContextMenu((menu, key) => {
-        instead(menu, key, ({ args: [props], cancel, context, original: menu }) => {
-            const attributes = [...props.target.attributes];
-            const name = attributes.find(a => a.name === "data-name")?.value;
-            const id = attributes.find(a => a.name === "data-id")?.value ?? `default_${name}`;
-            const result = menu(props);
-            const isBanned = Settings.current.bannedEmojis.some(e => e.id === id);
-            const menuOptions = result.props.children.props.children;
-            menuOptions.splice(menuOptions.length, 0, React.createElement(React.Fragment, null,
-                React.createElement(MenuSeparator, null),
-                React.createElement(MenuItem, { id: `emoji-ban_${id}`, label: isBanned ? "Unban Emoji" : "Ban Emoji", action: () => {
-                        Settings.update({
-                            bannedEmojis: isBanned
-                                ? Settings.current.bannedEmojis.filter(e => e.id !== id)
-                                : [...Settings.current.bannedEmojis, { id, name }]
-                        });
-                        $(`[data-id="${id}"]`).attr('data-banned-emoji', isBanned ? 'false' : 'true');
-                    }, color: isBanned ? undefined : "danger", icon: isBanned ? undefined : BinIcon })));
-            return result;
+function insteadEmojiPicker() {
+    if (!isBanFeatureEnabled())
+        return;
+    return WaitForEmojiPicker((emojiPicker, key) => {
+        instead(emojiPicker, key, data => {
+            return addBannedTagToEmoji(data);
         });
     });
 }
 
-const styles = "[data-banned-emoji] {\n  filter: saturate(0.4);\n  border: 1px solid var(--button-danger-background);\n}";
+const getEmojiUrl = (emoji, size = 128) => (`https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? 'gif' : 'webp'}` +
+    `?size=${size}&qualiy=lossless`);
+const EmojiStore = byName("EmojiStore");
+
+function insteadEmojiStore_getDisambiguatedEmojiContext() {
+    if (!isBanFeatureEnabled())
+        return;
+    return instead(EmojiStore, 'getDisambiguatedEmojiContext', (data) => {
+        return replaceEmojiStore_getDisambiguatedEmojiContext(data);
+    });
+}
+
+function WaitForEmojiPickerContextMenu(callback) {
+    return BdApi.ContextMenu.patch('expression-picker', callback);
+}
+
+function insteadEmojiPickerContextMenu() {
+    if (!isBanFeatureEnabled())
+        return;
+    return WaitForEmojiPickerContextMenu((menu, targetProps) => {
+        renderBanEmojiMenuItem(menu, targetProps);
+    });
+}
+
+const isFavorFavoriteFeatureEnabled = () => Settings.current.enableFavorFavoriteEmojis;
+const favorFavoriteEmojis = createPatcherCallback(({ args, original: __getStoreSearchResults }) => {
+    const emojis = __getStoreSearchResults(...args);
+    const favorites = EmojiStore.getDisambiguatedEmojiContext().favoriteEmojisWithoutFetchingLatest;
+    return emojis.sort((a, b) => {
+        const aIsFavorite = favorites.some(e => e.id === a.id);
+        const bIsFavorite = favorites.some(e => e.id === b.id);
+        return (aIsFavorite && !bIsFavorite ? -1
+            : !aIsFavorite && bIsFavorite ? 1
+                : 0);
+    });
+});
+
+function insteadGetSearchResultsOrder() {
+    if (!isBanFeatureEnabled() && !isFavorFavoriteFeatureEnabled())
+        return;
+    return instead(EmojiStore, "getSearchResultsOrder", (data) => {
+        const callbacks = [
+            isFavorFavoriteFeatureEnabled() && favorFavoriteEmojis,
+            () => data.original(...data.args),
+            isBanFeatureEnabled() && sortBannedEmojisOnSearch
+        ].filter(Boolean);
+        let result = data.args[0];
+        for (const callback of callbacks) {
+            let args = [...data.args].slice(1);
+            result = callback({ ...data, args: [result, ...args] });
+        }
+        return result;
+    });
+}
+
+function afterEmojiPicker() {
+    if (!isBanFeatureEnabled())
+        return;
+    return WaitForEmojiPicker((emojiPicker, key) => {
+        const cancel = after(emojiPicker, key, data => {
+            addBannedDataTagToEmojiElement(data);
+        });
+        return [cancel, insteadEmojiPickerContextMenu()];
+    });
+}
+
+function patch() {
+    insteadEmojiPicker();
+    insteadEmojiStore_getDisambiguatedEmojiContext();
+    insteadEmojiPickerContextMenu();
+    insteadGetSearchResultsOrder();
+    afterEmojiPicker();
+}
+
+const { useState: useState$1 } = React;
+function Collapsible({ children, ...props }) {
+    const [isOpen, setIsOpen] = useState$1(props.defaultOpen ?? false);
+    const disabled = props.disabled ?? false;
+    const toggle = () => {
+        if (disabled)
+            return;
+        setIsOpen(!isOpen);
+        props.onToggle?.(!isOpen);
+        if (isOpen)
+            props.onClose?.();
+        else
+            props.onOpen?.();
+    };
+    const Title = typeof props.title === 'string' ? React.createElement("h3", null, props.title) : props.title;
+    const TitleOpen = typeof props.titleOpen === 'string' ? React.createElement("h3", null, props.titleOpen) : props.titleOpen;
+    return (React.createElement("div", { className: `collapsible ${props.className ?? ''}`, "data-open": isOpen, "data-disabled": disabled },
+        React.createElement("div", { className: "collapsible__header", onClick: toggle },
+            isOpen ? TitleOpen ?? Title : Title,
+            React.createElement("span", { style: { display: 'flex' } })),
+        React.createElement("div", { className: classNames('collapsible__content', isOpen ? 'visible' : 'hidden') }, children)));
+}
+
+var ButtonLooks;
+(function (ButtonLooks) {
+    ButtonLooks[ButtonLooks["BLANK"] = 0] = "BLANK";
+    ButtonLooks[ButtonLooks["FILLED"] = 1] = "FILLED";
+    ButtonLooks[ButtonLooks["INVERTED"] = 2] = "INVERTED";
+    ButtonLooks[ButtonLooks["LINK"] = 3] = "LINK";
+    ButtonLooks[ButtonLooks["OUTLINED"] = 4] = "OUTLINED";
+})(ButtonLooks || (ButtonLooks = {}));
+var ButtonSizes;
+(function (ButtonSizes) {
+    ButtonSizes[ButtonSizes["ICON"] = 0] = "ICON";
+    ButtonSizes[ButtonSizes["LARGE"] = 1] = "LARGE";
+    ButtonSizes[ButtonSizes["MAX"] = 2] = "MAX";
+    ButtonSizes[ButtonSizes["MEDIUM"] = 3] = "MEDIUM";
+    ButtonSizes[ButtonSizes["MIN"] = 4] = "MIN";
+    ButtonSizes[ButtonSizes["NONE"] = 5] = "NONE";
+    ButtonSizes[ButtonSizes["SMALL"] = 6] = "SMALL";
+    ButtonSizes[ButtonSizes["TINY"] = 7] = "TINY";
+    ButtonSizes[ButtonSizes["XLARGE"] = 8] = "XLARGE";
+})(ButtonSizes || (ButtonSizes = {}));
+var Colors;
+(function (Colors) {
+    Colors[Colors["BLACK"] = 0] = "BLACK";
+    Colors[Colors["BRAND"] = 1] = "BRAND";
+    Colors[Colors["BRAND_NEW"] = 2] = "BRAND_NEW";
+    Colors[Colors["GREEN"] = 3] = "GREEN";
+    Colors[Colors["LINK"] = 4] = "LINK";
+    Colors[Colors["PRIMARY"] = 5] = "PRIMARY";
+    Colors[Colors["RED"] = 6] = "RED";
+    Colors[Colors["TRANSPARENT"] = 7] = "TRANSPARENT";
+    Colors[Colors["WHITE"] = 8] = "WHITE";
+    Colors[Colors["YELLOW"] = 9] = "YELLOW";
+})(Colors || (Colors = {}));
+const Button = byKeys(["Button"]).Button;
+const SecondaryButton = (props) => React.createElement(Button, { ...props, color: Button.Colors.PRIMARY, look: Button.Looks.OUTLINED, "data-type": "secondary" });
+
+const TextInput = byName("TextInput");
+
+const { useState } = React;
+function Setting({ setting, settings, set, onChange, titles }) {
+    const [v, setV] = useState(settings[setting]);
+    switch (typeof v) {
+        case 'boolean': return React.createElement(FormSwitch, { className: 'danho-form-switch', key: setting.toString(), note: titles[setting.toString()], value: v, hideBorder: true, onChange: checked => {
+                set({ [setting]: checked });
+                onChange?.(checked);
+                setV(checked);
+            } });
+        case 'number':
+        case 'string': return React.createElement(TextInput, { key: setting.toString(), title: titles[setting], value: v, onChange: value => {
+                set({ [setting]: value });
+                onChange?.(value);
+                setV(value);
+            } });
+        default: return (React.createElement("div", { className: 'settings-error' },
+            React.createElement("h1", null, "Unknown value type"),
+            React.createElement("h3", null,
+                "Recieved ",
+                typeof v),
+            React.createElement("h5", null, JSON.stringify(v))));
+    }
+}
+
+function BannedEmojiTag({ emojiId, onClick }) {
+    const emoji = EmojiStore.getDisambiguatedEmojiContext().getById(emojiId);
+    return (React.createElement("li", { id: `banned-emoji__${emoji.id}`, className: "banned-emoji-tag", onClick: onClick },
+        React.createElement("img", { className: "emoji jumboable", src: getEmojiUrl(emoji), alt: emoji.name })));
+}
+
+function GuildListItem(props) {
+    const guildId = React.useMemo(() => 'guildId' in props ? props.guildId : props.guild.id, [props]);
+    const guild = React.useMemo(() => 'guild' in props ? props.guild : GuildStore$1.getGuild(guildId), [guildId]);
+    const { children } = props;
+    return (React.createElement("div", { className: "guild-list-item" },
+        React.createElement("img", { className: "guild-list-item__icon", src: window.DL.Guilds.getIconUrl(guild), alt: guild.name }),
+        React.createElement("div", { className: "guild-list-item__content-container" },
+            React.createElement("span", { className: "guild-list-item__name" }, guild.name),
+            React.createElement("span", { className: "guild-list-item__content" }, children))));
+}
+
+const GuildStore = byName("GuildStore");
+
+function SettingsPanel() {
+    const [current, defaults, set] = Settings.useStateWithDefaults();
+    return (React.createElement("div", { className: 'danho-plugin-settings' },
+        React.createElement(FormSection, null,
+            React.createElement(FormLabel, null, "Features"),
+            React.createElement(Setting, { settings: Settings.current, setting: 'enableBannedEmojis', set: set, titles: titles }),
+            React.createElement(Setting, { settings: Settings.current, setting: 'enableFavorFavoriteEmojis', set: set, titles: titles })),
+        current.enableBannedEmojis && (React.createElement(React.Fragment, null,
+            React.createElement(FormDivider, null),
+            React.createElement(BannedEmojiSection, null)))));
+}
+function BannedEmojiSection() {
+    const [current, defaults, set] = Settings.useStateWithDefaults();
+    const emojiStoreContext = EmojiStore.getDisambiguatedEmojiContext();
+    const bannedEmojis = current.bannedEmojis.map(({ id }) => emojiStoreContext.getById(id));
+    const guilds = React.useMemo(() => bannedEmojis.map(({ guildId }) => ({
+        id: guildId,
+        guild: GuildStore.getGuild(guildId),
+        bannedEmojis: bannedEmojis.filter(({ guildId: id }) => id === guildId)
+    })), [bannedEmojis]);
+    const disableCollapsible = bannedEmojis.length === 0;
+    return (React.createElement(FormSection, { className: 'banned-emojis' },
+        React.createElement(FormLabel, null, "Banned emojis"),
+        React.createElement(Collapsible, { title: disableCollapsible ? 'There are no banned emojis.' : 'View banned emojis', disabled: disableCollapsible },
+            React.createElement("ul", { className: "banned-emojis__guilds-list" }, guilds.map(({ guild, bannedEmojis }) => (React.createElement("li", { key: guild.id, className: "banned-emojis__guild-list-item" },
+                React.createElement(Collapsible, { title: React.createElement("div", { className: 'banned-emojis__guilds-list-item__header' },
+                        React.createElement(GuildListItem, { guild: guild },
+                            React.createElement("span", { className: "banned-emojis-count" },
+                                bannedEmojis.length,
+                                " banned emoji",
+                                bannedEmojis.length === 1 ? '' : 's')),
+                        React.createElement(SecondaryButton, { onClick: () => {
+                                set({
+                                    bannedEmojis: current.bannedEmojis
+                                        .filter(e => !bannedEmojis.map(e => e.id).includes(e.id))
+                                });
+                                BdApi.UI.showToast(`Unbanned all emojis from ${guild.name}.`, { type: 'success' });
+                            } }, "Unban all")) },
+                    React.createElement("ul", { className: "banned-emojis__emojis-list" }, bannedEmojis.map(({ id, name }) => (React.createElement(BannedEmojiTag, { key: id, emojiId: id, onClick: () => BdApi.UI.showConfirmationModal(`Unban ${name}`, React.createElement("div", { className: 'bd-flex bd-flex-column bd-flex-center' },
+                            React.createElement("img", { src: getEmojiUrl({ id }), alt: name, className: 'emoji jumboable' }),
+                            React.createElement("p", { style: { color: 'var(--text-primary)', marginLeft: '1ch' } },
+                                "Are you sure you want to unban ",
+                                name,
+                                "?")), {
+                            danger: true,
+                            confirmText: 'Unban',
+                            onConfirm: () => set({ bannedEmojis: current.bannedEmojis.filter(e => e.id !== id) })
+                        }) }))))))))))));
+}
+
+const styles = "[data-banned-emoji=true] {\n  filter: saturate(0.4);\n  border: 1px solid var(--button-danger-background);\n}\n\n.banned-emojis__guilds-list {\n  border: 1px solid var(--background-secondary);\n}\n.banned-emojis__guilds-list-item__header {\n  width: 100%;\n  display: flex;\n  justify-content: space-between;\n}\n.banned-emojis__emojis-list {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 0.5rem;\n}";
 
 const index = createPlugin({
     start() {
-        FavorFavoriteEmojis();
-        BanEmojis();
+        patch();
+        if (Settings.current.enableBannedEmojis && !Settings.current.acceptBannedEmojisBeta) {
+            const closeNotice = BdApi.UI.showNotice(titles.acceptBannedEmojisBeta, {
+                type: 'warning',
+                buttons: [{
+                        label: 'Disable plugin',
+                        onClick: () => {
+                            BdApi.Plugins.disable(getMeta().name);
+                            closeNotice(false);
+                        }
+                    }, {
+                        label: 'Disable feature',
+                        onClick: () => {
+                            Settings.update({ enableBannedEmojis: false });
+                            closeNotice(false);
+                        }
+                    }, {
+                        label: 'I understand',
+                        onClick: () => {
+                            Settings.update({ acceptBannedEmojisBeta: true });
+                            closeNotice(false);
+                        }
+                    }]
+            });
+        }
     },
+    styles,
     Settings,
-    styles
+    SettingsPanel
 });
 
 module.exports = index;
