@@ -1,4 +1,3 @@
-import { log } from "@dium/api/logger";
 import { createSettings } from "@dium/settings";
 
 export type Settings = {

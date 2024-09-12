@@ -1,4 +1,3 @@
-import { SettingsContainer } from '@dium/settings-container';
 import { Settings, Highscores } from './settings';
 import { getMeta } from '@dium/meta';
 import { React } from '@dium/modules';

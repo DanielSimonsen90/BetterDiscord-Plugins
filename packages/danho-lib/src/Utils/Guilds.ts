@@ -1,5 +1,4 @@
 import { BetterOmit } from "danholibraryjs";
-import { FilterStore } from "@danho-lib/Utils";
 
 import { GuildStore, GuildMemberStore } from "@dium/modules/guild";
 import GuildChannelStore from "@danho-lib/Stores/GuildChannelStore";
@@ -11,7 +10,8 @@ import VoiceStore from "@stores/VoiceStore";
 import GuildActions from "@actions/GuildActions";
 import { Guild } from "@discord/types/guild";
 import { GuildMember } from "@discord/types/guild/member";
-import { Snowflake } from "@discord/types/base";
+
+import { FilterStore } from "./types";
 
 type CompiledGuildUtils = BetterOmit<FilterStore<GuildStore>
     & FilterStore<GuildMemberStore>

@@ -1,5 +1,5 @@
 import { BetterOmit } from 'danholibraryjs';
-import { FilterStore } from "@danho-lib/Utils";
+import { FilterStore } from "./types";
 
 import { UserStore, PresenceStore, RelationshipStore, User, StatusTypes } from '@dium/modules/user';
 
