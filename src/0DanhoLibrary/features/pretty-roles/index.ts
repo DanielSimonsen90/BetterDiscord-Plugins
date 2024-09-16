@@ -8,6 +8,8 @@ import { Guild } from '@discord/types/guild';
 import { GuildMember } from '@discord/types/guild/member';
 
 import afterRoleContextMenu from '../patches/after/roleContextMenu';
+import { Snowflake } from '@dium/modules';
+import { $ } from '@danho-lib/DOM';
 export { default as styles } from './pretty-roles.scss';
 
 export const isPrettyRolesEnabled = () => Settings.current.prettyRoles;
@@ -36,6 +38,19 @@ type RolesListModule = {
 
 export const PrettyRolesManager = new class PrettyRolesManager {
   context: ReturnType<RolesListModule['RolesList']>['props']['children']['props']
+  role: Role
+
+  getRole(roleId: Snowflake) {
+    return this.context.roles.find(r => r.id === roleId);
+  }
+  removeRole() {
+    if (!this.role) return;
+    this.context.onRemoveRole(this.role);
+  }
+  canRemoveRole() {
+    if (!this.role) return false;
+    return this.context.canManageRoles && this.context.highestRole.id !== this.role.id;
+  }
 }
 
 export default function Feature() {
@@ -51,6 +66,20 @@ export default function Feature() {
     
     PrettyRolesManager.context = result.props.children.props;
     return result;
+  });
+  Patcher.after(RolesListModule, 'RolesList', () => {
+    $(s => s.role('list', 'div').and.ariaLabelContains('Role')).children().forEach(el => {
+      const roleId = el.attr('data-list-item-id')?.split('_').pop();
+      if (!roleId) return;
+
+      const roleColor = (() => {
+        const roleColorHex = PrettyRolesManager.getRole(roleId).colorString;
+        if (!roleColorHex) return;
+        const color = parseInt(roleColorHex.slice(1), 16);
+        return `${(color >> 16) & 0xff}, ${(color >> 8) & 0xff}, ${color & 0xff}`;
+      })()
+      el.setStyleProperty('--role-color', roleColor);
+    })
   });
 
   afterRoleContextMenu();

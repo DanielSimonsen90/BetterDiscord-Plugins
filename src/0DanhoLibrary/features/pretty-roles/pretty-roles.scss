@@ -6,33 +6,33 @@
   z-index: 1;
 }
 
-*[role=list][aria-label=Roles]>div,
-*[role=list][aria-label=Role]>div {
+*[role=list][data-list-id*=roles]>div {
   // Assumed to be role
+  --role-color: #000; // This is replaced in "after RolesList" patch
+  --role-color-alpha: .125;
+
   position: relative;
+  border: 1px solid rgb(var(--role-color));
+  background-color: rgba(var(--role-color), var(--role-color-alpha));
 
-  div:has([class*=roleRemoveButton][role=button]) {
+  div:has([class*=roleRemoveButton][role=button]),
+  [class*=roleRemoveButton][role=button],
+  [class*=roleFlowerStar],
+  [class*=roleCircle] {
     @extend %absolute-wide;
+  }
 
-    [class*=roleRemoveButton][role=button] {
-      @extend %absolute-wide;
-    }
+  [class*=roleCircle],
+  [class*=roleRemoveIcon] {
+    height: 100%;
+    width: 100%;
+  }
 
-    @include className('roleFlowerStar') {
-      @extend %absolute-wide;
-    }
+  @include className('roleCircle', span) {
+    background-color: unset !important;
+  }
 
-    @include className('roleCircle', span) {
-      @extend %absolute-wide;
-      height: 100%;
-      width: 100%;
-      background-color: unset !important;
-    }
-
-    @include className('roleRemoveIcon', svg) {
-      display: none;
-      height: 100%;
-      width: 100%;
-    }
+  @include className('roleRemoveIcon', svg) {
+    display: none;
   }
 }

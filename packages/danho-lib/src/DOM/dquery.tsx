@@ -1,7 +1,7 @@
 import { Arrayable } from 'danholibraryjs';
 import { Utils } from '@dium/index';
 import ElementSelector from './ElementSelector';
-import { If, PromisedReturn } from '../Utils';
+import { If, PromisedReturn } from '../Utils/types';
 
 type Fiber = any;
 
@@ -111,6 +111,15 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     for (const key in value) {
       this.element.style[key] = value[key];
     }
+  }
+  public setStyleProperty(key: keyof CSSStyleDeclaration | string, value: string) {
+    key = key.toString();
+    const style = this.attr('style') ?? '';
+    if (!style.includes(key)) return this.attr('style', `${this.attr('style') ?? ''}${key as string}: ${value};`, false);
+
+    const regex = new RegExp(`${key}: [^;]*;`, 'g');
+    this.attr('style', style.replace(regex, `${key}: ${value};`), false);
+    return;
   }
 
   public addClass(className: string) {
