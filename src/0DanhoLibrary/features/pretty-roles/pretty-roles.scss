@@ -8,12 +8,16 @@
 
 *[role=list][data-list-id*=roles]>div {
   // Assumed to be role
-  --role-color: #000; // This is replaced in "after RolesList" patch
+  --role-color--default: rgb(86, 105, 118); // This is replaced in "after RolesList" patch
+  --role-color: var(--role-color--default);
   --role-color-alpha: .125;
 
   position: relative;
-  border: 1px solid rgb(var(--role-color));
-  background-color: rgba(var(--role-color), var(--role-color-alpha));
+  border: 1px solid rgb(var(--role-color, --role-color--default));
+  background-color: rgba(var(--role-color, --role-color--default), var(--role-color-alpha));
+  border-radius: .25rem;
+  height: 25px;
+  box-sizing: border-box;
 
   div:has([class*=roleRemoveButton][role=button]),
   [class*=roleRemoveButton][role=button],

@@ -1,7 +1,7 @@
 import { Snowflake } from "@discord/types/base";
 import { React } from '@dium/modules';
 import { Finder } from "@dium/api";
-import { If } from "../../../Utils";
+import { If } from "@danho-lib/Utils/types";
 
 type EmojiNode = {
     name: string,

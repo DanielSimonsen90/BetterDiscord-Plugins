@@ -1,57 +1,17 @@
 import { Filters, Finder, Logger, Patcher } from '@dium/api';
 
-import { Settings } from '../../Settings';
+import { $ } from '@danho-lib/DOM';
 
-import { Role } from '@discord/types/guild/role';
-import { User } from '@discord/types/user';
-import { Guild } from '@discord/types/guild';
-import { GuildMember } from '@discord/types/guild/member';
+import { DEFAULT_DISCORD_ROLE_COLOR, Settings } from '../../Settings';
 
 import afterRoleContextMenu from '../patches/after/roleContextMenu';
-import { Snowflake } from '@dium/modules';
-import { $ } from '@danho-lib/DOM';
+import { RolesListModule } from './types';
+import { PrettyRolesManager } from './manager';
+import { hexToRgb, RGB, rgbToHex } from '@danho-lib/Utils/Colors';
+
 export { default as styles } from './pretty-roles.scss';
 
 export const isPrettyRolesEnabled = () => Settings.current.prettyRoles;
-
-type Fiber<Props> = { props: Props }
-type RolesListModule = {
-  RolesList: (props: RolesListModule['RolesListProps']) => Fiber<{
-    children: Fiber<{
-      canManageRoles: boolean;
-      currentUser: User;
-      guild: Guild;
-      guildMember: GuildMember;
-      highestRole: Role;
-      roles: Role[];
-      user: User;
-      onAddRole: (role: Role) => void;
-      onRemoveRole: (role: Role) => void;
-    }>
-  }>;
-  RolesListProps?: {
-    user: User;
-    currentUser: User;
-    guild: Guild;
-  }
-}
-
-export const PrettyRolesManager = new class PrettyRolesManager {
-  context: ReturnType<RolesListModule['RolesList']>['props']['children']['props']
-  role: Role
-
-  getRole(roleId: Snowflake) {
-    return this.context.roles.find(r => r.id === roleId);
-  }
-  removeRole() {
-    if (!this.role) return;
-    this.context.onRemoveRole(this.role);
-  }
-  canRemoveRole() {
-    if (!this.role) return false;
-    return this.context.canManageRoles && this.context.highestRole.id !== this.role.id;
-  }
-}
 
 export default function Feature() {
   if (!isPrettyRolesEnabled()) return;
@@ -62,8 +22,6 @@ export default function Feature() {
 
   Patcher.instead(RolesListModule, 'RolesList', ({ args, original }) => {
     const result = original(...args);
-    Logger.log('RolesList', { args, result });
-    
     PrettyRolesManager.context = result.props.children.props;
     return result;
   });
@@ -72,13 +30,7 @@ export default function Feature() {
       const roleId = el.attr('data-list-item-id')?.split('_').pop();
       if (!roleId) return;
 
-      const roleColor = (() => {
-        const roleColorHex = PrettyRolesManager.getRole(roleId).colorString;
-        if (!roleColorHex) return;
-        const color = parseInt(roleColorHex.slice(1), 16);
-        return `${(color >> 16) & 0xff}, ${(color >> 8) & 0xff}, ${color & 0xff}`;
-      })()
-      el.setStyleProperty('--role-color', roleColor);
+      el.setStyleProperty('--role-color', hexToRgb(PrettyRolesManager.getRole(roleId).colorString ?? rgbToHex(DEFAULT_DISCORD_ROLE_COLOR.split(',').map(Number) as RGB)).join(','));
     })
   });
 

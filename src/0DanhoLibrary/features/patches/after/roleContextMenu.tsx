@@ -1,7 +1,7 @@
 import { Patcher } from "@dium/api";
 import { MenuGroup, MenuItem } from '@dium/components/menu';
 import { React } from "@dium/modules";
-import { PrettyRolesManager } from "../../pretty-roles";
+import { PrettyRolesManager } from "../../pretty-roles/manager";
 
 export default function afterRoleContextMenu() {
   Patcher.contextMenu('dev-context', result => {

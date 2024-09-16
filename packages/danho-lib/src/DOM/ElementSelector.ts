@@ -1,5 +1,5 @@
 import { AriaRole } from "react";
-import { If } from "../Utils";
+import { If } from "../Utils/types";
 
 export class ElementSelector {
     public getElementFromReactInstance<Element extends HTMLElement, Multiple extends boolean = false>(instance: React.ReactElement, allowMultiple: Multiple = false as Multiple): If<Multiple, Array<Element>, Element> {
