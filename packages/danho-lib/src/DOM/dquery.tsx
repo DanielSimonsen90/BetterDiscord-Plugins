@@ -145,6 +145,7 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     Select extends Selector<El> = Selector<El>,
     Single extends Select extends string ? boolean : never = Select extends string ? false : never
   >(selector?: Selector<El>, single?: Single): If<Single, DQuery<El>, Array<DQuery<El>>> {
+    if (!this.element) return single ? undefined : [] as any;
     if (!selector) return single ? new DQuery<El>(this.element.children[0] as El) : [...this.element.children].map(child => new DQuery<El>(child as El)) as any;
 
     selector = typeof selector === 'function' ? selector(new ElementSelector(), $) as El : selector;

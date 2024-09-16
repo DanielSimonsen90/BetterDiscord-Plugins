@@ -8,8 +8,8 @@
 
 *[role=list][data-list-id*=roles]>div {
   // Assumed to be role
-  --role-color--default: rgb(86, 105, 118); // This is replaced in "after RolesList" patch
-  --role-color: var(--role-color--default);
+  --role-color--default: rgb(86, 105, 118); 
+  --role-color: var(--role-color--default); // This is replaced in "after RolesList" patch
   --role-color-alpha: .125;
 
   position: relative;
@@ -38,5 +38,15 @@
 
   @include className('roleRemoveIcon', svg) {
     display: none;
+  }
+
+  div:has(svg[class*=roleVerifiedIcon]) {
+    position: absolute;
+    top: -.5rem;
+    left: -.75rem;
+  }
+
+  &:hover svg[class*=roleVerifiedIcon] {
+    display: inline-block !important;
   }
 }
