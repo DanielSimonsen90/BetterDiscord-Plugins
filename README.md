@@ -40,3 +40,5 @@ npm run build -- BetterFolders BetterVolume
 # build plugin to BetterDiscord folder & watch for changes
 npm run dev -- BetterFolders
 ```
+## Developer notes
+DevilBro has been so kind to make an enitre list of [Discord Modules](https://github.com/mwittrien/BetterDiscordAddons/blob/b6d959f98ce429d97c68c58fba29392bd25ff6f5/Library/_res/0BDFDB.data.json#L394)
