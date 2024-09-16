@@ -126,6 +126,9 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     this.element.classList.add(className);
     return this;
   }
+  public hasClass(className: string) {
+    return this.element.classList.contains(className);
+  }
   public removeClass(className: string) {
     this.element.classList.remove(className);
     return this;

@@ -1,6 +1,7 @@
 @use './utils.scss' as *;
 
 .danho-form-switch {
+  display: flex;
   flex-direction: row-reverse;
 
   @include className('note') {

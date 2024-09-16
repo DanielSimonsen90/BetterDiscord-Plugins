@@ -34,13 +34,14 @@ function PrettyRolesSettings(props: SettingProps) {
   return (<>
     <FormDivider />
     <FormSection>
-      <FormLabel>Default Role Color</FormLabel>
+      <FormLabel>Pretty Roles</FormLabel>
       <Setting setting="defaultRoleColor" type="color" {...props}
         // formatValue={rgbString => color('hex', { rgb: rgbString.split(',').map(Number) as ColorReturns<'rgb'> })}
         // beforeChange={hex => color('rgb', { hex }).reduce((acc, c, i) => acc + `${i ? `, ${c}` : ''}`, '')}
         formatValue={rgbString => "#" + rgbToHex(rgbString.split(',').map(Number) as [number, number, number])}
         beforeChange={hex => hexToRgb(hex).join(',')}
       />
+      <Setting setting="groupRoles" {...props} />
     </FormSection>
   </>)
 }

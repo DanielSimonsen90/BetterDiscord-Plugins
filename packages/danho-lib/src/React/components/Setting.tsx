@@ -1,6 +1,6 @@
 import { React } from '@dium/modules';
 import { Update } from '@dium/settings';
-import { FormSwitch, TextInput } from '@discord/components';
+import { FormSwitch, FormText, TextInput } from '@discord/components';
 
 const { useState } = React;
 
@@ -16,12 +16,12 @@ type SettingProps<Settings extends Record<string, any>, SettingsKey extends keyo
   type?: 'switch' | 'text' | 'number' | React.HTMLInputTypeAttribute;
 };
 export function Setting<
-  Settings, 
+  Settings,
   SettingsKey extends keyof Settings
->({ 
-  setting, settings, 
-  set, titles, 
-  ...props 
+>({
+  setting, settings,
+  set, titles,
+  ...props
 }: SettingProps<Settings, SettingsKey>) {
   const { beforeChange, onChange, formatValue, type } = props;
   const [v, _setV] = useState(formatValue ? formatValue(settings[setting]) : settings[setting]);
@@ -54,13 +54,16 @@ export function Setting<
     }} />
   );
   if (type) return (
-    <input type={type} key={setting.toString()} value={v as string} onChange={e => {
-      const value = beforeChange ? beforeChange(e.target.value as Settings[SettingsKey]) : e.target.value;
-      set({ [setting]: value } as any);
-      onChange?.(value as any);
-      setV(value as any);
-    }} />
-  )
+    <div className="danho-form-switch" key={setting.toString()}>
+      <input type={type} key={setting.toString()} value={v as string} onChange={e => {
+        const value = beforeChange ? beforeChange(e.target.value as Settings[SettingsKey]) : e.target.value;
+        set({ [setting]: value } as any);
+        onChange?.(value as any);
+        setV(value as any);
+      }} />
+      <FormText className='note'>{titles[setting]}</FormText>
+    </div>
+  );
 
   return (
     <div className='settings-error'>

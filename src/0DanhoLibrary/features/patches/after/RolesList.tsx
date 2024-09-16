@@ -3,7 +3,7 @@ import { RolesListModule } from "../../pretty-roles/types";
 import { $ } from "@danho-lib/DOM";
 import { hexToRgb, RGB, rgbToHex } from "@danho-lib/Utils/Colors";
 import { PrettyRolesManager } from "../../pretty-roles/manager";
-import { DEFAULT_DISCORD_ROLE_COLOR } from "../../../Settings";
+import { DEFAULT_DISCORD_ROLE_COLOR, Settings } from "../../../Settings";
 
 export default function afterRolesList(RolesListModule: RolesListModule) {
   Patcher.after(RolesListModule, 'RolesList', () => {
@@ -11,10 +11,16 @@ export default function afterRolesList(RolesListModule: RolesListModule) {
       const roleId = el.attr('data-list-item-id')?.split('_').pop();
       if (!roleId) return;
 
+      const role = PrettyRolesManager.getRole(roleId);
       el.setStyleProperty('--role-color', 
-        hexToRgb(PrettyRolesManager.getRole(roleId).colorString 
+        hexToRgb(role.colorString 
         ?? rgbToHex(DEFAULT_DISCORD_ROLE_COLOR.split(',').map(Number) as RGB)).join(',')
       );
+
+      if (Settings.current.groupRoles) {
+        const isGroupRole = role.name.toLowerCase().includes('roles');
+        if (isGroupRole) el.addClass('danho-library__pretty-roles__group-role');
+      }
     });
   });
 }
