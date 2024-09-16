@@ -48,5 +48,5 @@ export interface GuildActions {
     updateRole(guildId: Snowflake, roleId: Snowflake, update: Role): void;
     updateRolePermissions(guildId: Snowflake, roleId: Snowflake, permissions: Array<bigint>): void;
 }
-export const GuildActions: GuildActions = Finder.byKeys(["requestMembers"]); // WARN: Might be outdated
+export const GuildActions: GuildActions = Finder.byKeys(["requestMembers"]);
 export default GuildActions;

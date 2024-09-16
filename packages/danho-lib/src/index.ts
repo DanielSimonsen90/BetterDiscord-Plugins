@@ -2,15 +2,15 @@ import { Utils, UserUtils, GuildUtils } from '@danho-lib/Utils/index';
 import * as Stores from '@danho-lib/Stores';
 import * as Actions from '@danho-lib/Actions';
 
-import { createPlugin, Plugin } from '@dium/index';
-import { Finder, Filters } from '@dium/index';
+import { createPlugin, Plugin, Finder, Filters, createSettings, Logger } from '@dium/index';
+import { React } from '@dium/modules';
 
 import styles from './styles/index.scss';
 
 export * as Components from './React/components';
 export * as Patcher from './Patcher';
 
-const LibraryPlugin = new class DanhoLibrary implements Plugin<{}> {
+class DanhoLibrary implements Plugin<{}> {
   public Utils = Utils;
 
   public Users = UserUtils;
@@ -21,17 +21,21 @@ const LibraryPlugin = new class DanhoLibrary implements Plugin<{}> {
   public Finder = Finder;
   public Filters = Filters;
 
-  start() {}
-
   styles = styles;
 };
 
+const LibraryPlugin: DanhoLibrary & Plugin<any> = new DanhoLibrary();
 window.DL = LibraryPlugin;
-export default createPlugin(LibraryPlugin);
-
 
 declare global {
   interface Window {
-    DL: typeof LibraryPlugin;
+    DL: DanhoLibrary;
   }
+}
+
+export default function buildPlugin<TSettings extends {}>(plugin: Plugin<TSettings>) {
+  const built: typeof LibraryPlugin & Plugin<TSettings> = Object.assign({}, LibraryPlugin, plugin);
+  built.styles = [LibraryPlugin.styles, plugin.styles].join('\n\n');
+
+  return createPlugin(built);
 }

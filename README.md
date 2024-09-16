@@ -2,10 +2,16 @@
 ## Forked from [Zerthox/BetterDiscord-Plugins](https://github.com/Zerthox/BetterDiscord-Plugins)
 
 ### [0DanhoLibrary](/dist/bd/0DanhoLibrary.plugin.js) <sub><sup>`v.1.0.0` *(Updated: 20/05/2022)*</sup></sub>
-Library for my BetterDiscord plugins.
+General Discord changes and improvements including:
+* [PrettyRoles]: Make roles look better
+* TODO: ActivityTab: Replace Guild Members aside with Tabbar of members and activities
+* TODO: Order Forum posts by Author
 
 ### [WordsPerMinute](/dist/bd/WordsPerMinute.plugin.js) <sub><sup>`v.1.0.0` *(Updated: 06/09/2024)*</sup></sub>
 While typing, it shows the words per minute you are typing. Saves the highest WPM that can be viewed in settings.
+
+#### Bugs
+- WPM counter doesn't show on sub-chats (vc, threads, stage?)
 
 ### [BetterEmojiManagement - BETA](/dist/bd/BetterEmojiManagement.plugin.js) <sub><sup>`v.1.0.0` *(Updated: 10/09/2024)*</sup></sub>
 Have better emoji management control.

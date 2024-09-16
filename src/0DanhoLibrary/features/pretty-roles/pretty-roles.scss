@@ -1,0 +1,38 @@
+@use '../../../../packages/danho-lib/src/styles/utils.scss' as *;
+
+%absolute-wide {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+*[role=list][aria-label=Roles]>div,
+*[role=list][aria-label=Role]>div {
+  // Assumed to be role
+  position: relative;
+
+  div:has([class*=roleRemoveButton][role=button]) {
+    @extend %absolute-wide;
+
+    [class*=roleRemoveButton][role=button] {
+      @extend %absolute-wide;
+    }
+
+    @include className('roleFlowerStar') {
+      @extend %absolute-wide;
+    }
+
+    @include className('roleCircle', span) {
+      @extend %absolute-wide;
+      height: 100%;
+      width: 100%;
+      background-color: unset !important;
+    }
+
+    @include className('roleRemoveIcon', svg) {
+      display: none;
+      height: 100%;
+      width: 100%;
+    }
+  }
+}

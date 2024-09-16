@@ -14,7 +14,7 @@ type Props = {
 }
 
 export default function SettingsPanel({ updatePatches }: Props) {
-  const [current, defaults, set] = Settings.useStateWithDefaults();
+  const [current, set] = Settings.useState();
 
   React.useEffect(() => {
     updatePatches();
@@ -36,7 +36,7 @@ export default function SettingsPanel({ updatePatches }: Props) {
 }
 
 function BannedEmojiSection() {
-  const [current, defaults, set] = Settings.useStateWithDefaults();
+  const [current, set] = Settings.useState();
   const emojiStoreContext = EmojiStore.getDisambiguatedEmojiContext();
   const bannedEmojis = current.bannedEmojis.map(({ id }) => emojiStoreContext.getById(id));
   const guilds = React.useMemo(() => bannedEmojis.map(({ guildId }) => ({
