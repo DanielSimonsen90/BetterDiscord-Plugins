@@ -10,6 +10,7 @@ export * from './DiscordTag';
 export * from './Form';
 export * from './Inputs';
 export * from './MessageTimestamp';
+export * from './Scroller';
 export * from './Tooltip';
 export * from './SelectMenu';
 export * from './Shakeable';

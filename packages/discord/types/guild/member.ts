@@ -1,15 +1,21 @@
+import { Snowflake } from "@dium/modules";
 import type { User } from "../user";
 
-export type GuildMember = Pick<User, 'avatar' | 'banner' | 'bio' | 'flags'> & {
+export type GuildMember = Pick<User, 'avatar' | 'flags'> & {
+  avatarDecoration: undefined,
+  colorRoleId: Snowflake,
   colorString: string,
-  communicatinDisabledUntil?: string,
+  communicatinDisabledUntil: null,
   fullProfileLoadedTimestamp: number,
-  guildId: string,
-  iconRoleId: string,
+  guildId: Snowflake,
+  highestRoleId: Snowflake;
+  hoistRoleId: Snowflake;
+  iconRoleId: Snowflake | undefined,
   isPending: boolean,
   joinedAt: string,
-  nick?: string,
-  premiumSince?: string,
-  roles: Array<string>,
-  userId: string,
+  nick: string | null,
+  premiumSince: string | null,
+  roles: Array<Snowflake>,
+  unusualDMActivityUntil: null,
+  userId: Snowflake,
 };

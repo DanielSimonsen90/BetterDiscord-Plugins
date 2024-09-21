@@ -1,5 +1,5 @@
 import { Arrayable } from 'danholibraryjs';
-import { Utils } from '@dium/index';
+import { Logger, Utils } from '@dium/index';
 import ElementSelector from './ElementSelector';
 import { If, PromisedReturn } from '../Utils/types';
 
@@ -18,8 +18,11 @@ export function $<
   Single extends boolean = true,
   T extends HTMLElement = HTMLElement,
   El extends Single extends true ? T : Array<T> = Single extends true ? T : Array<T>,
->(selector: Selector<El>, single: Single = true as Single): If<Single, DQuery<T>, Array<DQuery<T>>> {
-  if (single) return new DQuery(selector as Selector<T>) as any;
+>(selector: Selector<El>, single: Single = true as Single): If<Single, DQuery<T>, Array<DQuery<T>>> | undefined {
+  if (single) {
+    const dq = new DQuery(selector as Selector<T>) as any;
+    return dq.element ? dq : undefined;
+  }
 
   let elements = (() => {
     if (typeof selector === 'function') {
@@ -33,7 +36,7 @@ export function $<
     return (Array.isArray(selector) ? selector : [selector]) as Array<T>;
   })();
 
-  return elements.map(el => new DQuery<T>(el)) as any;
+  return elements.filter(Boolean).map(el => new DQuery<T>(el)) as any;
 }
 export async function $p<
   Single extends boolean = true,
@@ -177,6 +180,18 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     const children = this.children();
     return children[children.length - 1];
   }
+  public hasChildren() {
+    return this.element.children.length > 0;
+  }
+
+  public grandChildren<
+    El extends HTMLElement = HTMLElement,
+    Select extends Selector<El> = Selector<El>,
+    Single extends Select extends string ? boolean : never = Select extends string ? false : never
+  >(selector?: Selector<El>, single?: Single): If<Single, DQuery<El>, Array<DQuery<El>>> {
+    const grandChildren = this.children().map(child => child.children(selector, single)).flat();
+    return (single ? grandChildren[0] : grandChildren) as any;
+  }
 
   public ancestor<El extends HTMLElement = HTMLElement>(selector: Selector<El>): DQuery<El> {
     const getAnscestorSelector = () => {
@@ -185,8 +200,8 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
       if (typeof _selector === 'string') return _selector;
       if (_selector instanceof ElementSelector) return _selector.toString();
 
-      if (_selector instanceof DQuery) return new ElementSelector().getSelectorFromElement(_selector.element);
-      if (_selector instanceof HTMLElement) return new ElementSelector().getSelectorFromElement(_selector);
+      if (_selector instanceof DQuery) return ElementSelector.getSelectorFromElement(_selector.element);
+      if (_selector instanceof HTMLElement) return ElementSelector.getSelectorFromElement(_selector);
 
       return undefined;
     };
@@ -203,7 +218,14 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
   }
   public get props() {
     try {
-      return this.fiber.memoizedProps as Record<string, any>;
+      if (!this.fiber) return null;
+      const fiberProps = this.fiber.memoizedProps as Record<string, any>;
+      if (fiberProps) return fiberProps;
+
+      const propsKey = Object.keys(this.element).find(key => key.startsWith('__reactProps$'));
+      if (propsKey) return this.element[propsKey];
+
+      return null;
     }
     catch (err) {
       console.error(err, this);
@@ -225,28 +247,52 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
    * @returns [prop: T, path: Array<string>]
    */
   public prop<T extends any = any>(key: string, ...cycleThrough: Array<string>): [prop: T, path: Array<string>] | undefined {
-    const getProp = (obj: Record<string, Partial<Record<'props' | 'children' | string, any>>>, path: Array<string>) => {
+    const getPropThroughFiber = (obj: Record<string, Partial<Record<'props' | 'children' | string, any>>>, path: Array<string>) => {
       if (obj === undefined || obj === null) return undefined;
       else if (obj[key]) return [obj[key], path];
 
       if (obj.children) {
         if (Array.isArray(obj.children)) {
           for (let i = 0; i < obj.children.length; i++) {
-            const result = getProp(obj.children[i], [...path, `children`, i.toString()]);
+            const result = getPropThroughFiber(obj.children[i], [...path, `children`, i.toString()]);
             if (result) return result;
           }
         } else {
-          const result = getProp(obj.children, [...path, 'children']);
+          const result = getPropThroughFiber(obj.children, [...path, 'children']);
           if (result) return result;
         }
       }
       if (obj.props) {
-        const result = getProp(obj.props, [...path, 'props']);
+        const result = getPropThroughFiber(obj.props, [...path, 'props']);
         if (result) return result;
       }
       if (cycleThrough) {
         for (const prop of cycleThrough) {
-          const result = getProp(obj[prop], [...path, prop]);
+          const result = getPropThroughFiber(obj[prop], [...path, prop]);
+          if (result) return result;
+        }
+      }
+      return undefined;
+    };
+    const getPropThroughDOM = (el: Element, path: Array<string>) => {
+      if (el === undefined || el === null) return undefined;
+      
+      const dq = el instanceof HTMLElement ? new DQuery(el) : new DQuery(ElementSelector.getSelectorFromElement(el));
+      if (!dq.element) return undefined;
+      
+      const props = dq.props;
+      if (!props) return undefined;
+      else if (props[key]) return [props[key], path];
+
+      if (dq.hasChildren()) {
+        for (let i = 0; i < el.children.length; i++) {
+          const result = getPropThroughDOM(el.children[i], [...path, i.toString()]);
+          if (result) return result;
+        }
+      }
+      if (cycleThrough) {
+        for (const prop of cycleThrough) {
+          const result = getPropThroughDOM(el[prop], [...path, prop]);
           if (result) return result;
         }
       }
@@ -254,10 +300,12 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     };
 
     try {
-      return getProp(this.fiber.memoizedProps, []) ?? [undefined, undefined];
+      if (!this.element) return undefined;
+      return getPropThroughFiber(this.fiber.memoizedProps, [])
+        ?? getPropThroughDOM(this.element, []);
     } catch (err) {
       console.error(err, this);
-      return [undefined, undefined];
+      return undefined;
     }
   }
   // same as prop<T>(key: string) but returns the parent of the found property

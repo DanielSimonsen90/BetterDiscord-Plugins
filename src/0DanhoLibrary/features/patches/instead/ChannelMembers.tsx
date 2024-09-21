@@ -1,35 +1,93 @@
-import { findBySourceStrings } from '@danho-lib/dium/api/finder';
-import { Filters, Finder, Logger, Patcher } from '@dium/api';
-import { React } from '@dium/modules';
+import Finder from '@danho-lib/dium/api/finder';
+import { $ } from '@danho-lib/DOM';
 
-const TabBar = Finder.byKeys(["TabBar"]).TabBar;
-const { Header, Item, Panel, Separator } = TabBar;
+import { Logger, Patcher } from '@dium/api';
+import { React, SelectedChannelStore, Snowflake } from '@dium/modules';
+
+import { TabBar } from '@components/TabBar';
+import { SelectedGuildStore, ChannelMemberStore, ContentInventoryStore } from '@danho-lib/Stores';
+
+import { ActivityIndexes } from '@discord/types/user/activity';
+import { Channel } from '@discord/types/channel';
+
+import { PluginState } from '../../../Settings';
 
 export default function insteadChannelMembers() {
-  const result = findBySourceStrings('function ei', 'channel');
+  const ActivityComponent: React.MemoExoticComponent<React.FC<{
+    channel: Channel;
+    entry: any;
+    index: number;
+    requestId: string;
+    type: 'CONTENT_INVENTORY';
+  }>> = Finder.bySource(["requestId", "renderPopout"]);
+  
+  Finder.findComponentBySourceStrings('MEMBERS_LIST_LANDMARK_LABEL', 'whos-online').then(ChannelMembers => {
+    Patcher.after(ChannelMembers.prototype, 'render', ({ result: memberListResult }) => {
+      return React.createElement(function DanhoMemberListTabBar() {
+        const [{ activeTab }, setPluginState] = PluginState.useState()
+        const [members, setMembers] = React.useState([]);
+        const [activities, setActivities] = React.useState([]);
 
-  Patcher.instead(result, 'Z', ({ args, original }) => {
-    const MemberList = () => original(args);
-    const result = React.createElement(function () {
-      const [selectedItem, setSelectedItem] = React.useState('channel-member-list');
-      return (<>
-        <TabBar type="top" selectedItem={selectedItem} onItemSelect={e => { setSelectedItem(e); }}>
-          <Item id="channel-member-list">
-            {/* <MemberList /> */}
-            <p>MemberList</p>
-          </Item>
-          <Item id="channel-activity-list">
-            {/* Activities */}
-            <p>Activities</p>
-          </Item>
-        </TabBar>
-        <p>Selected {selectedItem}</p>
-      </>
-      );
-    });
+        const toggleActivities = React.useCallback(() => {
+          const showActivities = activeTab === 'activities';
+          const membersList = $(s => s.className('tab-bar__content').tagName('div').and.role('list').and.ariaLabel('Members'));
+          if (!membersList) return;
 
-    Logger.log('MemberListTabBar', { args, result });
+          let didHideLabel = false;
+          membersList.children().map(c => ({ c,
+            shouldUnmount: !showActivities && c.prop('nudgeAlignIntoViewport') && (!c.attr('style') || c.attr('style').includes('display: none')),
+          })).filter(c => c.shouldUnmount).forEach(({ c }) => {
+            if (!didHideLabel && !showActivities) {
+              didHideLabel = true;
+              c.previousSibling.setStyleProperty('display', 'none');
+            } else if (showActivities) {
+              c.previousSibling.setStyleProperty('display', 'unset');
+            }
 
-    return result;
-  }, { name: 'ChannelMemberList' });
+            showActivities ? c.setStyleProperty('display', 'unset') : c.setStyleProperty('display', 'none');
+          });
+        }, [activeTab]);
+
+        React.useEffect(() => {
+          const cancel = Patcher.after(ActivityComponent, 'type', toggleActivities, { silent: true });
+          return () => cancel();
+        }, [activeTab]);
+
+        React.useEffect(() => {
+          const channelId = SelectedChannelStore.getChannelId();
+          if (!channelId) return;
+
+          const guildId = SelectedGuildStore.getGuildId();
+          if (!guildId) return;
+
+          const setState = () => {
+            const currentMembers = ChannelMemberStore.getProps(guildId, channelId).rows.filter(row => row.type === 'MEMBER');
+            const currentActivities = currentMembers.filter(m => m.activities.filter(a => a.type !== ActivityIndexes.CUSTOM)).map(m => m.activities).flat(10);
+
+            if (members.length !== currentMembers.length) setMembers(currentMembers);
+            if (activities.length !== currentActivities.length) setActivities(currentActivities);
+          };
+
+          setState();
+          // ChannelMemberStore.addChangeListener(setState);
+        }, []);
+
+        return (
+          <TabBar onTabChange={tab => setPluginState({ activeTab: tab })} defaultTab={activeTab as 'members'} tabs={[
+            ['members', `Members (${members.length})`],
+            ['activities', `Activities (${activities.length})`],
+          ]} 
+            members={memberListResult}
+            activities={() => { 
+              // const feeds = ContentInventoryStore.getFeeds();
+              // const activityMembers = new Set<Snowflake>(feeds.get('global feed').entries.map(entry => entry.content.participants).flat(10));
+              // Logger.log({ activityMembers, feeds });
+              return memberListResult;
+            }}
+            noContentBackground noTabsBackground 
+          />
+        );
+      });
+    }, { name: 'ChannelMemberList' });
+  });
 }

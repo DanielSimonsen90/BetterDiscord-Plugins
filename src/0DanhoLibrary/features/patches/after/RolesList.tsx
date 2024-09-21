@@ -7,7 +7,7 @@ import { DEFAULT_DISCORD_ROLE_COLOR, Settings } from "../../../Settings";
 
 export default function afterRolesList(RolesListModule: RolesListModule) {
   Patcher.after(RolesListModule, 'RolesList', () => {
-    $(s => s.role('list', 'div').and.ariaLabelContains('Role')).children().forEach(el => {
+    $(s => s.role('list', 'div').and.ariaLabelContains('Role'))?.children().forEach(el => {
       const roleId = el.attr('data-list-item-id')?.split('_').pop();
       if (!roleId) return;
 

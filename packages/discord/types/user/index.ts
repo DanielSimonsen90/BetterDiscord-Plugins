@@ -8,6 +8,10 @@ export type User = {
   globalName?: string;
   discriminator: string;
   avatar: string;
+  avatarDecorationData: {
+    asset: string;
+    skuId: string;
+  }
   email: string;
   phone?: string;
 

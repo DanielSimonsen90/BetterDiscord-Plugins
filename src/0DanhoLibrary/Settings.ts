@@ -8,6 +8,13 @@ export const Settings = createSettings({
   groupRoles: true,
 
   memberListTabBar: true,
+  countMembers: true,
+  countActivities: true,
+  defaultTab: `members`,
+});
+
+export const PluginState = createSettings({
+  activeTab: `members`,
 });
 
 export const titles: Record<keyof typeof Settings.current, string> = {
@@ -16,4 +23,7 @@ export const titles: Record<keyof typeof Settings.current, string> = {
   groupRoles: `Widen roles that include "roles" in their name to make them stand out as a group`,
 
   memberListTabBar: `Create a tab bar for the Channel Members list`,
+  countMembers: `Display members count in the "Members" tab`,
+  countActivities: `Display activities count in the "Activities" tab`,
+  defaultTab: `Default tab for the Channel Members list`,
 };

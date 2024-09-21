@@ -114,7 +114,7 @@ export const ChannelStore: ChannelStore = /* @__PURE__ */ Finder.byName("Channel
 export const ChannelActions: ActionModule = /* @__PURE__ */ Finder.byKeys(["selectChannel"]);
 
 export interface SelectedChannelStore extends Store {
-    getChannelId(e);
+    getChannelId(e?: any): Snowflake;
     getCurrentlySelectedChannelId(e);
     getLastChannelFollowingDestination();
     getLastSelectedChannelId(e?: any): Snowflake;

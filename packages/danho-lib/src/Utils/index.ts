@@ -21,13 +21,20 @@ export function findModule(args: Arrayable<string>, returnDisplayNamesOnly = fal
         : module;
 }
 export function findStore(storeName: string, allowMultiple = false) {
-    const result = Object.values<any>(
+    const result = Object.values<{
+        name: string,
+        band: number,
+        actionHandler: Record<string, any>,
+        storeDidChange: (e: any) => void;
+    }>(
         Finder.byName("UserSettingsAccountStore")
         ._dispatcher._actionHandlers._dependencyGraph.nodes
     ).sort((a, b) => a.name.localeCompare(b.name))
-    .filter(s => s.name.toLowerCase().includes(storeName.toLowerCase()));
+    .filter(s => s.name.toLowerCase().includes(storeName.toLowerCase()))
 
-    return allowMultiple ? result : result[0];
+    return allowMultiple 
+        ? result.map(store => [store.name, Finder.byName(store.name) ?? new class InvalidStore { node = store; }]) 
+        : result.map(store => Finder.byName(store.name) ?? new class InvalidStore { node = store; })[0];
 }
 
 export function currentGuild() {
@@ -35,7 +42,6 @@ export function currentGuild() {
     return guildId ? GuildStore.getGuild(guildId) : null;
 }
 export function currentChannel() {
-    // @ts-ignore WARN: what is "e"
     const channelId = SelectedChannelStore.getChannelId(); 
     return channelId ? ChannelStore.getChannel(channelId) : null;
 }

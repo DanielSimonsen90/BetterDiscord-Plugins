@@ -119,11 +119,11 @@ export interface PresenceStoreState {
 
 export interface PresenceStore extends Store {
     findActivity(e, t, n);
-    getActivities(e, t);
+    getActivities(e: any, t?: any);
     getActivityMetadata(e);
     getAllApplicationActivities(e);
     getApplicationActivity(e, t, n);
-    getPrimaryActivity(e, t);
+    getPrimaryActivity(userId: Snowflake, t?: any);
     getState(): PresenceStoreState;
     getStatus(user: Snowflake, t?, n?): StatusTypes;
     getUserIds(): Snowflake[];

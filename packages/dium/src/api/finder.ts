@@ -3,7 +3,7 @@ import {mappedProxy} from "../utils/general";
 import type {Query, TypeOrPredicate} from "./filters";
 import type {Module, Exports} from "../require";
 
-export type Filter = (exports: Exports, module: Module, id: string) => boolean;
+export type Filter = (exports: Exports, module?: Module, id?: string) => boolean;
 
 export interface FindOptions {
     /** Whether to resolve the matching export or return the whole exports object. */

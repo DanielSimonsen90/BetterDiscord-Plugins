@@ -2,16 +2,16 @@ import { AriaRole } from "react";
 import { If } from "../Utils/types";
 
 export class ElementSelector {
-    public getElementFromReactInstance<Element extends HTMLElement, Multiple extends boolean = false>(instance: React.ReactElement, allowMultiple: Multiple = false as Multiple): If<Multiple, Array<Element>, Element> {
+    public static getElementFromReactInstance<Element extends HTMLElement, Multiple extends boolean = false>(instance: React.ReactElement, allowMultiple: Multiple = false as Multiple): If<Multiple, Array<Element>, Element> {
         return getElementFromReactInstance<Element, Multiple>(instance, allowMultiple);
     }
-    public getSelectorFromElement<Element extends HTMLElement>(element: Element): string {
-        const selector = new ElementSelector();
+    public static getSelectorFromElement<El extends Element>(element: El): string {
+        const selector = new ElementSelector().tagName(element.tagName.toLowerCase() as keyof HTMLElementTagNameMap).and;
         if (element.id) selector.id(element.id).and;
         if (element.className) selector.className(element.className).and;
         if (element.getAttribute("aria-label")) selector.ariaLabel(element.getAttribute("aria-label")).and;
         if (element.getAttribute("role")) selector.role(element.getAttribute("role") as AriaRole).and;
-        if (element.dataset) {
+        if ('dataset' in element && element.dataset instanceof DOMStringMap) {
             for (const prop in element.dataset) {
                 selector.data(prop, element.dataset[prop]).and;
             }

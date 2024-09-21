@@ -1,9 +1,10 @@
 import { Utils, UserUtils, GuildUtils } from '@danho-lib/Utils/index';
 import * as Stores from '@danho-lib/Stores';
 import * as Actions from '@danho-lib/Actions';
+import * as DOM from '@danho-lib/DOM';
 
-import { createPlugin, Plugin, Finder, Filters, createSettings, Logger } from '@dium/index';
-import { React } from '@dium/modules';
+import { createPlugin, Plugin, Filters } from '@dium/index';
+import * as Finder from '@danho-lib/dium/api/finder';
 
 import styles from './styles/index.scss';
 
@@ -12,9 +13,9 @@ export * as Patcher from './Patcher';
 
 class DanhoLibrary implements Plugin<{}> {
   public Utils = Utils;
-
   public Users = UserUtils;
   public Guilds = GuildUtils;
+  public DOM = DOM;
 
   public Stores = Stores;
   public Actions = Actions;

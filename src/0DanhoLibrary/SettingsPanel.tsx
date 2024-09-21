@@ -15,7 +15,7 @@ type SettingProps = {
 
 export default function SettingsPanel() {
   const [settings, set] = Settings.useState();
-  const prettyRolesEnabled = React.useMemo(() => settings.prettyRoles, [settings.prettyRoles]);
+  const features = Settings.useSelector(({ prettyRoles, memberListTabBar }) => ({ prettyRoles, memberListTabBar }));
 
   const settingProps: SettingProps = { settings, set, titles };
 
@@ -24,8 +24,10 @@ export default function SettingsPanel() {
       <FormSection>
         <FormLabel>Features</FormLabel>
         <Setting setting="prettyRoles" {...settingProps} />
+        <Setting setting="memberListTabBar" {...settingProps} />
       </FormSection>
-      {prettyRolesEnabled && <PrettyRolesSettings {...settingProps} />}
+      {features.prettyRoles && <PrettyRolesSettings {...settingProps} />}
+      {features.memberListTabBar && <MemberListTabbar {...settingProps} />}
     </div>
   );
 }
@@ -36,12 +38,21 @@ function PrettyRolesSettings(props: SettingProps) {
     <FormSection>
       <FormLabel>Pretty Roles</FormLabel>
       <Setting setting="defaultRoleColor" type="color" {...props}
-        // formatValue={rgbString => color('hex', { rgb: rgbString.split(',').map(Number) as ColorReturns<'rgb'> })}
-        // beforeChange={hex => color('rgb', { hex }).reduce((acc, c, i) => acc + `${i ? `, ${c}` : ''}`, '')}
         formatValue={rgbString => "#" + rgbToHex(rgbString.split(',').map(Number) as [number, number, number])}
         beforeChange={hex => hexToRgb(hex).join(',')}
       />
       <Setting setting="groupRoles" {...props} />
+    </FormSection>
+  </>)
+}
+
+function MemberListTabbar(props: SettingProps) {
+  return (<>
+    <FormDivider />
+    <FormSection>
+      <FormLabel>Member List Tab Bar</FormLabel>
+      <Setting setting="countMembers" {...props} />
+      <Setting setting="countActivities" {...props} />
     </FormSection>
   </>)
 }
