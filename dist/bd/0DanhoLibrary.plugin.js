@@ -74,6 +74,9 @@ const setMeta = (newMeta) => {
     meta = newMeta;
 };
 
+const load = (key) => BdApi.Data.load(getMeta().name, key);
+const save = (key, value) => BdApi.Data.save(getMeta().name, key, value);
+
 const join = (...filters) => {
     return ((...args) => filters.every((filter) => filter(...args)));
 };
@@ -165,16 +168,16 @@ const mappedProxy = (target, mapping) => {
     });
 };
 
-const find = (filter, { resolve = true, entries = false } = {}) => BdApi.Webpack.getModule(filter, {
+const find$1 = (filter, { resolve = true, entries = false } = {}) => BdApi.Webpack.getModule(filter, {
     defaultExport: resolve,
     searchExports: entries
 });
-const query = (query, options) => find(query$1(query), options);
-const byEntries = (...filters) => find(join(...filters.map((filter) => byEntry(filter))));
-const byName = (name, options) => find(byName$1(name), options);
-const byKeys = (keys, options) => find(byKeys$1(...keys), options);
-const byProtos = (protos, options) => find(byProtos$1(...protos), options);
-const bySource = (contents, options) => find(bySource$1(...contents), options);
+const query = (query, options) => find$1(query$1(query), options);
+const byEntries = (...filters) => find$1(join(...filters.map((filter) => byEntry(filter))));
+const byName = (name, options) => find$1(byName$1(name), options);
+const byKeys = (keys, options) => find$1(byKeys$1(...keys), options);
+const byProtos = (protos, options) => find$1(byProtos$1(...protos), options);
+const bySource = (contents, options) => find$1(bySource$1(...contents), options);
 const all = {
     find: (filter, { resolve = true, entries = false } = {}) => BdApi.Webpack.getModule(filter, {
         first: false,
@@ -190,7 +193,7 @@ const all = {
 const resolveKey = (target, filter) => [target, Object.entries(target ?? {}).find(([, value]) => filter(value))?.[0]];
 const demangle = (mapping, required, proxy = false) => {
     const req = required ?? Object.keys(mapping);
-    const found = find((target) => (checkObjectValues(target)
+    const found = find$1((target) => (checkObjectValues(target)
         && req.every((req) => Object.values(target).some((value) => mapping[req](value)))));
     return proxy ? mappedProxy(found, Object.fromEntries(Object.entries(mapping).map(([key, filter]) => [
         key,
@@ -211,7 +214,7 @@ const abort = () => {
     controller = new AbortController();
 };
 
-const Finder = {
+const DiumFinder = {
     __proto__: null,
     abort,
     all,
@@ -221,7 +224,7 @@ const Finder = {
     byProtos,
     bySource,
     demangle,
-    find,
+    find: find$1,
     query,
     resolveKey,
     waitFor
@@ -230,6 +233,7 @@ const Finder = {
 const COLOR = "#3a71c1";
 const print = (output, ...data) => output(`%c[${getMeta().name}] %c${getMeta().version ? `(v${getMeta().version})` : ""}`, `color: ${COLOR}; font-weight: 700;`, "color: #666; font-size: .8em;", ...data);
 const log = (...data) => print(console.log, ...data);
+const warn = (...data) => print(console.warn, ...data);
 
 const patch = (type, object, method, callback, options) => {
     const original = object?.[method];
@@ -247,7 +251,6 @@ const patch = (type, object, method, callback, options) => {
     return cancel;
 };
 const instead = (object, method, callback, options = {}) => patch("instead", object, method, (cancel, original, context, args) => callback({ cancel, original, context, args }), options);
-const before = (object, method, callback, options = {}) => patch("before", object, method, (cancel, original, context, args) => callback({ cancel, original, context, args }), options);
 const after = (object, method, callback, options = {}) => patch("after", object, method, (cancel, original, context, args, result) => callback({ cancel, original, context, args, result }), options);
 let menuPatches = [];
 const contextMenu = (navId, callback, options = {}) => {
@@ -273,15 +276,6 @@ const unpatchAll = () => {
     }
 };
 
-const Patcher = {
-    __proto__: null,
-    after,
-    before,
-    contextMenu,
-    instead,
-    unpatchAll
-};
-
 const inject = (styles) => {
     if (typeof styles === "string") {
         BdApi.DOM.addStyle(getMeta().name, styles);
@@ -289,50 +283,54 @@ const inject = (styles) => {
 };
 const clear = () => BdApi.DOM.removeStyle(getMeta().name);
 
-const ChannelStore = /* @__PURE__ */ byName("ChannelStore");
-const SelectedChannelStore = /* @__PURE__ */ byName("SelectedChannelStore");
-
-const i18n = /* @__PURE__ */ byKeys(["languages", "getLocale"]);
-
 const GuildStore$1 = /* @__PURE__ */ byName("GuildStore");
 const GuildMemberStore = /* @__PURE__ */ byName("GuildMemberStore");
 
-const MediaEngineStore = /* @__PURE__ */ byName("MediaEngineStore");
+const ChannelStore = /* @__PURE__ */ byName("ChannelStore");
+const SelectedChannelStore = /* @__PURE__ */ byName("SelectedChannelStore");
 
-const { React: React$1 } = BdApi;
-const { ReactDOM } = BdApi;
-const classNames = /* @__PURE__ */ find((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
-const lodash = /* @__PURE__ */ byKeys(["cloneDeep", "flattenDeep"]);
-const semver = /* @__PURE__ */ byKeys(["SemVer"]);
-const moment = /* @__PURE__ */ byKeys(["utc", "months"]);
-const hljs = /* @__PURE__ */ byKeys(["highlight", "highlightBlock"]);
+const SelectedGuildStore = byKeys(["getLastSelectedGuildId"]);
 
 const UserStore = /* @__PURE__ */ byName("UserStore");
-const PresenceStore = /* @__PURE__ */ byName("PresenceStore");
+const PresenceStore$1 = /* @__PURE__ */ byName("PresenceStore");
 const RelationshipStore = /* @__PURE__ */ byName("RelationshipStore");
 
-const { useState: useState$4 } = React$1;
-function Collapsible({ children, ...props }) {
-    const [isOpen, setIsOpen] = useState$4(props.defaultOpen ?? false);
-    const disabled = props.disabled ?? false;
-    const toggle = () => {
-        if (disabled)
-            return;
-        setIsOpen(!isOpen);
-        props.onToggle?.(!isOpen);
-        if (isOpen)
-            props.onClose?.();
-        else
-            props.onOpen?.();
-    };
-    const Title = typeof props.title === 'string' ? React$1.createElement("h3", null, props.title) : props.title;
-    const TitleOpen = typeof props.titleOpen === 'string' ? React$1.createElement("h3", null, props.titleOpen) : props.titleOpen;
-    return (React$1.createElement("div", { className: `collapsible ${props.className ?? ''}`, "data-open": isOpen, "data-disabled": disabled },
-        React$1.createElement("div", { className: "collapsible__header", onClick: toggle },
-            isOpen ? TitleOpen ?? Title : Title,
-            React$1.createElement("span", { style: { display: 'flex' } })),
-        React$1.createElement("div", { className: classNames('collapsible__content', isOpen ? 'visible' : 'hidden') }, children)));
-}
+const UserActivityStore = byKeys(["getUser", "getCurrentUser"]);
+
+const UserNoteStore = byKeys(["getNote", "_dispatcher"]);
+
+const UserTypingStore = byKeys(["getTypingUsers", "isTyping"]);
+
+const UserMentionStore = byKeys(["getMentions", "everyoneFilter"]);
+
+const UserNoteActions = byKeys(["updateNote"]);
+
+const UserUtils = {
+    ...UserStore,
+    ...PresenceStore$1,
+    ...RelationshipStore,
+    ...UserActivityStore,
+    ...UserNoteStore,
+    ...UserTypingStore,
+    ...UserMentionStore,
+    ...UserNoteActions,
+    getPresenceState: () => PresenceStore$1.getState()
+};
+
+const { default: Legacy, Dispatcher, Store, BatchedStoreListener, useStateFromStores } = /* @__PURE__ */ demangle({
+    default: byKeys$1("Store", "connectStores"),
+    Dispatcher: byProtos$1("dispatch"),
+    Store: byProtos$1("emitChange"),
+    BatchedStoreListener: byProtos$1("attach", "detach"),
+    useStateFromStores: bySource$1("useStateFromStores")
+}, ["Store", "Dispatcher", "useStateFromStores"]);
+
+const MediaEngineStore = /* @__PURE__ */ byName("MediaEngineStore");
+
+const { React } = BdApi;
+const classNames = /* @__PURE__ */ find$1((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
+
+const ChannelMemberStore = byName('ChannelMemberStore');
 
 const getEmojiUrl = (emoji, size = 128) => (`https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? 'gif' : 'webp'}` +
     `?size=${size}&qualiy=lossless`);
@@ -346,15 +344,11 @@ const GuildIdentyStore = byKeys(["saveGuildIdentityChanges"]);
 
 const GuildStore = byName("GuildStore");
 
-const SelectedGuildStore = byKeys(["getLastSelectedGuildId"]);
+const ContentInventoryStore = byName("ContentInventoryStore");
+
+const PresenceStore = /* @__PURE__ */ byName("PresenceStore");
 
 const ThemeStore = byKeys(["theme"]);
-
-const UserMentionStore = byKeys(["getMentions", "everyoneFilter"]);
-
-const UserActivityStore = byKeys(["getUser", "getCurrentUser"]);
-
-const UserNoteStore = byKeys(["getNote", "_dispatcher"]);
 
 const UserSettingsAccountStore = byName("UserSettingsAccountStore");
 const UserProfileSettingsStore = byKeys(["saveProfileChanges", "setPendingBio"]);
@@ -369,22 +363,92 @@ var FormStates;
     FormStates["CLOSED"] = "CLOSED";
 })(FormStates || (FormStates = {}));
 
-const UserTypingStore = byKeys(["getTypingUsers", "isTyping"]);
+const VoiceInfo = byKeys(["isSelfMute", "isNoiseCancellationSupported"]);
+const MediaEngine = VoiceInfo.getMediaEngine();
+const VideoComponent = VoiceInfo.getVideoComponent();
+const CameraComponent = VoiceInfo.getCameraComponent();
+var MediaEngineContextTypes;
+(function (MediaEngineContextTypes) {
+    MediaEngineContextTypes["DEFAULT"] = "default";
+    MediaEngineContextTypes["STREAM"] = "stream";
+})(MediaEngineContextTypes || (MediaEngineContextTypes = {}));
+var MediaEngineEvent;
+(function (MediaEngineEvent) {
+    MediaEngineEvent[MediaEngineEvent["VoiceActivity"] = 0] = "VoiceActivity";
+    MediaEngineEvent[MediaEngineEvent["DeviceChange"] = 1] = "DeviceChange";
+    MediaEngineEvent[MediaEngineEvent["VideoInputInitialized"] = 2] = "VideoInputInitialized";
+})(MediaEngineEvent || (MediaEngineEvent = {}));
+var AudioSubSystems;
+(function (AudioSubSystems) {
+    AudioSubSystems[AudioSubSystems["LEGACY"] = 0] = "LEGACY";
+})(AudioSubSystems || (AudioSubSystems = {}));
+var SupportedFeatures;
+(function (SupportedFeatures) {
+    SupportedFeatures[SupportedFeatures["LEGACY_AUDIO_SUBSYSTEM"] = 0] = "LEGACY_AUDIO_SUBSYSTEM";
+    SupportedFeatures[SupportedFeatures["EXPERIMENTAL_AUDIO_SUBSYSTEM"] = 1] = "EXPERIMENTAL_AUDIO_SUBSYSTEM";
+    SupportedFeatures[SupportedFeatures["DEBUG_LOGGING"] = 2] = "DEBUG_LOGGING";
+    SupportedFeatures[SupportedFeatures["SOUNDSHARE"] = 3] = "SOUNDSHARE";
+    SupportedFeatures[SupportedFeatures["ELEVATED_HOOK"] = 4] = "ELEVATED_HOOK";
+    SupportedFeatures[SupportedFeatures["LOOPBACK"] = 5] = "LOOPBACK";
+    SupportedFeatures[SupportedFeatures["WUMPUS_VIDEO"] = 6] = "WUMPUS_VIDEO";
+    SupportedFeatures[SupportedFeatures["HYBRID_VIDEO"] = 7] = "HYBRID_VIDEO";
+    SupportedFeatures[SupportedFeatures["ATTENUATION"] = 8] = "ATTENUATION";
+    SupportedFeatures[SupportedFeatures["VIDEO_HOOK"] = 9] = "VIDEO_HOOK";
+    SupportedFeatures[SupportedFeatures["GRAPHICS_CAPTURE"] = 10] = "GRAPHICS_CAPTURE";
+    SupportedFeatures[SupportedFeatures["EXPERIMENTAL_SOUNDSHARE"] = 11] = "EXPERIMENTAL_SOUNDSHARE";
+    SupportedFeatures[SupportedFeatures["OPEN_H246"] = 12] = "OPEN_H246";
+    SupportedFeatures[SupportedFeatures["REMOVE_LOCUS_NETWORK_CONTROL"] = 13] = "REMOVE_LOCUS_NETWORK_CONTROL";
+    SupportedFeatures[SupportedFeatures["SCREEN_PREVIEWS"] = 14] = "SCREEN_PREVIEWS";
+    SupportedFeatures[SupportedFeatures["AUDIO_DEBUG_STATE"] = 15] = "AUDIO_DEBUG_STATE";
+    SupportedFeatures[SupportedFeatures["CONNECTION_REPLAY"] = 16] = "CONNECTION_REPLAY";
+    SupportedFeatures[SupportedFeatures["SIMULCAST"] = 17] = "SIMULCAST";
+    SupportedFeatures[SupportedFeatures["RTC_REGION_RANKING"] = 18] = "RTC_REGION_RANKING";
+    SupportedFeatures[SupportedFeatures["DIRECT_VIDEO"] = 19] = "DIRECT_VIDEO";
+    SupportedFeatures[SupportedFeatures["ELECTRON_VIDEO"] = 20] = "ELECTRON_VIDEO";
+    SupportedFeatures[SupportedFeatures["MEDIAPIPE"] = 21] = "MEDIAPIPE";
+    SupportedFeatures[SupportedFeatures["FIXED_KEYFRAME_INTERVAL"] = 22] = "FIXED_KEYFRAME_INTERVAL";
+    SupportedFeatures[SupportedFeatures["DIAGNOSTICS"] = 23] = "DIAGNOSTICS";
+    SupportedFeatures[SupportedFeatures["NATIVE_PING"] = 24] = "NATIVE_PING";
+    SupportedFeatures[SupportedFeatures["AUTOMATIC_VAD"] = 25] = "AUTOMATIC_VAD";
+    SupportedFeatures[SupportedFeatures["AUDIO_INPUT_DEVICE"] = 26] = "AUDIO_INPUT_DEVICE";
+    SupportedFeatures[SupportedFeatures["AUDIO_OUTPUT_DEVICE"] = 27] = "AUDIO_OUTPUT_DEVICE";
+    SupportedFeatures[SupportedFeatures["QOS"] = 28] = "QOS";
+    SupportedFeatures[SupportedFeatures["VOICE_PROCESSING"] = 29] = "VOICE_PROCESSING";
+    SupportedFeatures[SupportedFeatures["AUTO_ENABLE"] = 30] = "AUTO_ENABLE";
+    SupportedFeatures[SupportedFeatures["VIDEO"] = 31] = "VIDEO";
+    SupportedFeatures[SupportedFeatures["DESKTOP_CAPTURE"] = 32] = "DESKTOP_CAPTURE";
+    SupportedFeatures[SupportedFeatures["DESKTOP_CAPTURE_FORMAT"] = 33] = "DESKTOP_CAPTURE_FORMAT";
+    SupportedFeatures[SupportedFeatures["DESKTOP_CAPTURE_APPLICATIONS"] = 34] = "DESKTOP_CAPTURE_APPLICATIONS";
+    SupportedFeatures[SupportedFeatures["VOICE_PANNING"] = 35] = "VOICE_PANNING";
+    SupportedFeatures[SupportedFeatures["AEC_DUMP"] = 36] = "AEC_DUMP";
+    SupportedFeatures[SupportedFeatures["DISABLE_VIDEO"] = 37] = "DISABLE_VIDEO";
+    SupportedFeatures[SupportedFeatures["SAMPLE_PLAYBACK"] = 38] = "SAMPLE_PLAYBACK";
+})(SupportedFeatures || (SupportedFeatures = {}));
+
+const VoiceStore = byKeys(["getVoiceStateForUser"]);
 
 const Stores = {
     __proto__: null,
+    get AudioSubSystems () { return AudioSubSystems; },
     BetterProfileSettings,
+    CameraComponent,
+    ChannelMemberStore,
     ChannelStore,
+    ContentInventoryStore,
     EmojiStore,
     GuildChannelStore,
     GuildEmojiStore,
     GuildIdentyStore,
     GuildMemberStore,
     GuildStore,
+    MediaEngine,
+    get MediaEngineContextTypes () { return MediaEngineContextTypes; },
+    get MediaEngineEvent () { return MediaEngineEvent; },
     MediaEngineStore,
     PresenceStore,
     SelectedChannelStore,
     SelectedGuildStore,
+    get SupportedFeatures () { return SupportedFeatures; },
     ThemeStore,
     UserActivityStore,
     UserMentionStore,
@@ -393,42 +457,98 @@ const Stores = {
     UserSettingsAccountStore,
     UserStore,
     UserTypingStore,
+    VideoComponent,
+    VoiceInfo,
+    VoiceStore,
     getEmojiUrl
 };
 
-function GuildListItem(props) {
-    const guildId = React$1.useMemo(() => 'guildId' in props ? props.guildId : props.guild.id, [props]);
-    const guild = React$1.useMemo(() => 'guild' in props ? props.guild : GuildStore.getGuild(guildId), [guildId]);
-    const { children } = props;
-    return (React$1.createElement("div", { className: "guild-list-item" },
-        React$1.createElement("img", { className: "guild-list-item__icon", src: window.DL.Guilds.getIconUrl(guild), alt: guild.name }),
-        React$1.createElement("div", { className: "guild-list-item__content-container" },
-            React$1.createElement("span", { className: "guild-list-item__name" }, guild.name),
-            React$1.createElement("span", { className: "guild-list-item__content" }, children))));
-}
+const GuildActions = byKeys(["requestMembers"]);
 
-function Checkmark({ tooltip }) {
-    return (
-    React$1.createElement("svg", { "aria-label": tooltip, className: 'botTagVerified', "aria-hidden": false, width: "16", height: "16", viewBox: "0 0 16 15.2" },
-        React$1.createElement("path", { d: "M7.4,11.17,4,8.62,5,7.26l2,1.53L10.64,4l1.36,1Z", fill: "currentColor" })));
-}
+const GuildUtils = {
+    ...GuildStore,
+    ...GuildMemberStore,
+    ...GuildChannelStore,
+    ...GuildEmojiStore,
+    ...SelectedGuildStore,
+    ...VoiceInfo,
+    ...VoiceStore,
+    ...GuildActions,
+    get current() {
+        return GuildStore.getGuild(SelectedGuildStore.getGuildId());
+    },
+    get me() {
+        return GuildMemberStore.getMember(SelectedGuildStore.getGuildId(), UserStore.getCurrentUser().id);
+    },
+    meFor(guildId) {
+        return GuildMemberStore.getMember(guildId, UserStore.getCurrentUser().id);
+    },
+    getSelectedGuildTimestamps() {
+        return SelectedGuildStore.getState().selectedGuildTimestampMillis;
+    },
+    getIconUrl(guild) {
+        return guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp` : 'https://cdn.discordapp.com/embed/avatars/0.png';
+    },
+    getMembers(guild) {
+        return GuildMemberStore.getMembers(guild);
+    },
+};
 
-function CloseButton() {
-    return (React$1.createElement("svg", { "aria-hidden": false, width: "16", height: "16", viewBox: "0 0 24 24" },
-        React$1.createElement("path", { fill: "currentColor", d: "M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" })));
+function findNodeByIncludingClassName(className, node = document.body) {
+    return node.querySelector(`[class*="${className}"]`);
 }
+function findModule$1(args, returnDisplayNamesOnly = false) {
+    const module = typeof args === 'string' ? query({ name: args }) : query({ keys: args });
+    if (!module)
+        return module;
+    return returnDisplayNamesOnly ?
+        Array.isArray(module) ?
+            module.map(m => m.default?.displayName || m.displayName) :
+            module.default?.displayName || module.displayName
+        : module;
+}
+function findStore(storeName, allowMultiple = false) {
+    const result = Object.values(byName("UserSettingsAccountStore")
+        ._dispatcher._actionHandlers._dependencyGraph.nodes).sort((a, b) => a.name.localeCompare(b.name))
+        .filter(s => s.name.toLowerCase().includes(storeName.toLowerCase()));
+    return allowMultiple
+        ? result.map(store => [store.name, byName(store.name) ?? new class InvalidStore {
+                constructor() {
+                    this.node = store;
+                }
+            }])
+        : result.map(store => byName(store.name) ?? new class InvalidStore {
+            constructor() {
+                this.node = store;
+            }
+        })[0];
+}
+function currentGuild() {
+    const guildId = SelectedGuildStore.getGuildId();
+    return guildId ? GuildStore$1.getGuild(guildId) : null;
+}
+function currentChannel() {
+    const channelId = SelectedChannelStore.getChannelId();
+    return channelId ? ChannelStore.getChannel(channelId) : null;
+}
+function currentGuildMembers() {
+    const guildId = currentGuild()?.id;
+    return guildId ? GuildMemberStore.getMembers(guildId) : null;
+}
+const Utils = {
+    findNodeByIncludingClassName,
+    findModule: findModule$1,
+    findStore,
+    get currentGuild() { return currentGuild(); },
+    get currentChannel() { return currentChannel(); },
+    get currentGuildMembers() { return currentGuildMembers(); },
+};
 
-function EditPencil() {
-    return (React$1.createElement("svg", { className: "icon-E4cW1l", "aria-hidden": "true", role: "img", width: "16", height: "16", viewBox: "0 0 24 24" },
-        React$1.createElement("path", { "fill-rule": "evenodd", "clip-rule": "evenodd", d: "M19.2929 9.8299L19.9409 9.18278C21.353 7.77064 21.353 5.47197 19.9409 4.05892C18.5287 2.64678 16.2292 2.64678 14.817 4.05892L14.1699 4.70694L19.2929 9.8299ZM12.8962 5.97688L5.18469 13.6906L10.3085 18.813L18.0201 11.0992L12.8962 5.97688ZM4.11851 20.9704L8.75906 19.8112L4.18692 15.239L3.02678 19.8796C2.95028 20.1856 3.04028 20.5105 3.26349 20.7337C3.48669 20.9569 3.8116 21.046 4.11851 20.9704Z", fill: "currentColor" })));
-}
-
-function EphemeralEye() {
-    return (
-    React$1.createElement("svg", { className: 'MessageLocalBot.icon', "aria-hidden": false, width: "16", height: "16", viewBox: "0 0 24 24" },
-        React$1.createElement("path", { fill: "currentColor", d: "M12 5C5.648 5 1 12 1 12C1 12 5.648 19 12 19C18.352 19 23 12 23 12C23 12 18.352 5 12 5ZM12 16C9.791 16 8 14.21 8 12C8 9.79 9.791 8 12 8C14.209 8 16 9.79 16 12C16 14.21 14.209 16 12 16Z" }),
-        React$1.createElement("path", { fill: "currentColor", d: "M12 14C13.1046 14 14 13.1046 14 12C14 10.8954 13.1046 10 12 10C10.8954 10 10 10.8954 10 12C10 13.1046 10.8954 14 12 14Z" })));
-}
+const Actions = {
+    __proto__: null,
+    GuildActions,
+    UserNoteActions
+};
 
 const Common = /* @__PURE__ */ byKeys(["Button", "Switch", "Select"]);
 
@@ -440,58 +560,7 @@ const { FormSection, FormItem, FormTitle, FormText, FormLabel, FormDivider, Form
 
 const margins = /* @__PURE__ */ byKeys(["marginBottom40", "marginTop4"]);
 
-const TextInput = byName("TextInput");
-
-const { useState: useState$3 } = React$1;
-function Setting({ setting, settings, set, onChange, titles }) {
-    const [v, setV] = useState$3(settings[setting]);
-    switch (typeof v) {
-        case 'boolean': return React$1.createElement(FormSwitch, { className: 'danho-form-switch', key: setting.toString(), note: titles[setting.toString()], value: v, hideBorder: true, onChange: checked => {
-                set({ [setting]: checked });
-                onChange?.(checked);
-                setV(checked);
-            } });
-        case 'number':
-        case 'string': return React$1.createElement(TextInput, { key: setting.toString(), title: titles[setting], value: v, onChange: value => {
-                set({ [setting]: value });
-                onChange?.(value);
-                setV(value);
-            } });
-        default: return (React$1.createElement("div", { className: 'settings-error' },
-            React$1.createElement("h1", null, "Unknown value type"),
-            React$1.createElement("h3", null,
-                "Recieved ",
-                typeof v),
-            React$1.createElement("h5", null, JSON.stringify(v))));
-    }
-}
-
-const Components = {
-    __proto__: null,
-    Checkmark,
-    CloseButton,
-    Collapsible,
-    EditPencil,
-    EphemeralEye,
-    GuildListItem,
-    Setting
-};
-
-const { useEffect: useEffect$2 } = React$1;
-function useCtrlZY({ onCtrlY, onCtrlZ }) {
-    useEffect$2(() => {
-        const onKeyDown = (e) => {
-            if (e.ctrlKey && e.key === 'z') {
-                onCtrlZ();
-            }
-            else if (e.ctrlKey && e.key === 'y') {
-                onCtrlY();
-            }
-        };
-        window.addEventListener('keydown', onKeyDown);
-        return () => window.removeEventListener('keydown', onKeyDown);
-    }, [onCtrlZ, onCtrlY]);
-}
+const { Menu, Group: MenuGroup, Item: MenuItem, Separator: MenuSeparator, CheckboxItem: MenuCheckboxItem, RadioItem: MenuRadioItem, ControlItem: MenuControlItem } = BdApi.ContextMenu;
 
 const queryFiber = (fiber, predicate, direction = "up" , depth = 30) => {
     if (depth < 0) {
@@ -524,7 +593,7 @@ const queryFiber = (fiber, predicate, direction = "up" , depth = 30) => {
     return null;
 };
 const findOwner = (fiber, depth = 50) => {
-    return queryFiber(fiber, (node) => node?.stateNode instanceof React$1.Component, "up" , depth);
+    return queryFiber(fiber, (node) => node?.stateNode instanceof React.Component, "up" , depth);
 };
 const forceFullRerender = (fiber) => new Promise((resolve) => {
     const owner = findOwner(fiber);
@@ -538,14 +607,87 @@ const forceFullRerender = (fiber) => new Promise((resolve) => {
     }
 });
 
-const SettingsContainer = ({ name, children, onReset }) => (React$1.createElement(FormSection, null,
+const SettingsContainer = ({ name, children, onReset }) => (React.createElement(FormSection, null,
     children,
-    onReset ? (React$1.createElement(React$1.Fragment, null,
-        React$1.createElement(FormDivider, { className: classNames(margins.marginTop20, margins.marginBottom20) }),
-        React$1.createElement(Flex, { justify: Flex.Justify.END },
-            React$1.createElement(Button, { size: Button.Sizes.SMALL, onClick: () => confirm(name, "Reset all settings?", {
+    onReset ? (React.createElement(React.Fragment, null,
+        React.createElement(FormDivider, { className: classNames(margins.marginTop20, margins.marginBottom20) }),
+        React.createElement(Flex, { justify: Flex.Justify.END },
+            React.createElement(Button, { size: Button.Sizes.SMALL, onClick: () => confirm(name, "Reset all settings?", {
                     onConfirm: () => onReset()
                 }) }, "Reset")))) : null));
+
+class SettingsStore {
+    constructor(defaults, onLoad) {
+        this.listeners = new Set();
+        this.update = (settings) => {
+            Object.assign(this.current, typeof settings === "function" ? settings(this.current) : settings);
+            this._dispatch(true);
+        };
+        this.addReactChangeListener = this.addListener;
+        this.removeReactChangeListener = this.removeListener;
+        this.defaults = defaults;
+        this.onLoad = onLoad;
+    }
+    load() {
+        this.current = { ...this.defaults, ...load("settings") };
+        this.onLoad?.();
+        this._dispatch(false);
+    }
+    _dispatch(save$1) {
+        for (const listener of this.listeners) {
+            listener(this.current);
+        }
+        if (save$1) {
+            save("settings", this.current);
+        }
+    }
+    reset() {
+        this.current = { ...this.defaults };
+        this._dispatch(true);
+    }
+    delete(...keys) {
+        for (const key of keys) {
+            delete this.current[key];
+        }
+        this._dispatch(true);
+    }
+    useCurrent() {
+        return useStateFromStores([this], () => this.current, undefined, () => false);
+    }
+    useSelector(selector, deps, compare) {
+        return useStateFromStores([this], () => selector(this.current), deps, compare);
+    }
+    useState() {
+        return useStateFromStores([this], () => [
+            this.current,
+            this.update
+        ]);
+    }
+    useStateWithDefaults() {
+        return useStateFromStores([this], () => [
+            this.current,
+            this.defaults,
+            this.update
+        ]);
+    }
+    useListener(listener, deps) {
+        React.useEffect(() => {
+            this.addListener(listener);
+            return () => this.removeListener(listener);
+        }, deps ?? [listener]);
+    }
+    addListener(listener) {
+        this.listeners.add(listener);
+        return listener;
+    }
+    removeListener(listener) {
+        this.listeners.delete(listener);
+    }
+    removeAllListeners() {
+        this.listeners.clear();
+    }
+}
+const createSettings = (defaults, onLoad) => new SettingsStore(defaults, onLoad);
 
 const createPlugin = (plugin) => (meta) => {
     setMeta(meta);
@@ -564,102 +706,20 @@ const createPlugin = (plugin) => (meta) => {
             stop?.();
             log("Disabled");
         },
-        getSettingsPanel: SettingsPanel ? () => (React$1.createElement(SettingsContainer, { name: meta.name, onReset: Settings ? () => Settings.reset() : null },
-            React$1.createElement(SettingsPanel, null))) : null
+        getSettingsPanel: SettingsPanel ? () => (React.createElement(SettingsContainer, { name: meta.name, onReset: Settings ? () => Settings.reset() : null },
+            React.createElement(SettingsPanel, null))) : null
     };
-};
-
-const { useState: useState$2, useEffect: useEffect$1 } = React$1;
-function usePatcher(module, type, patch, callback, config) {
-    const { once } = config;
-    const repatchDeps = config.repatchDeps ?? [];
-    const [patched, setPatched] = useState$2(false);
-    const [cancel, setCancel] = useState$2(() => () => { });
-    useEffect$1(() => {
-        setCancel(Patcher[type](module, patch, callback, { once }));
-        setPatched(true);
-        return cancel;
-    }, repatchDeps);
-    return [patched, cancel];
-}
-
-const { useState: useState$1, useMemo } = React$1;
-function useMemoedState(initialState, factory, dependencies = []) {
-    const [state, setState] = useState$1(initialState);
-    const memo = useMemo(() => factory(state), [state, ...dependencies]);
-    return [memo, setState, state];
-}
-
-const { useEffect, useRef } = React$1;
-function useDebounce(callback, delay, dependencies) {
-    const callbackRef = useRef(callback);
-    useEffect(() => {
-        callbackRef.current = callback;
-    }, [callback]);
-    useEffect(() => {
-        const handler = setTimeout(() => callbackRef.current(), delay);
-        return () => clearTimeout(handler);
-    }, dependencies);
-}
-
-const { useState, useCallback } = React$1;
-function useStateStack(initialState) {
-    const [lastState, setLastState] = useState(initialState);
-    const [stack, setStack] = useState([initialState]);
-    useDebounce(() => setStack((prev) => {
-        if (prev[prev.length - 1] === lastState)
-            return prev;
-        return [...prev, lastState];
-    }), 1000, [lastState]);
-    const pop = useCallback((amount = 0) => setStack((prev) => {
-        if (prev.length === 1)
-            return prev;
-        return prev.slice(0, prev.length - 1 - amount);
-    }), []);
-    const undo = useCallback(() => setStack((prev) => {
-        if (prev.length === 1)
-            return prev;
-        setLastState(prev[prev.length - 2]);
-        return prev.slice(0, prev.length - 1);
-    }), []);
-    const redo = useCallback(() => setStack((prev) => {
-        if (prev.length === 1)
-            return prev;
-        setLastState(prev[prev.length - 1]);
-        return prev.slice(0, prev.length - 1);
-    }), []);
-    const clear = useCallback((state) => {
-        setLastState(state ?? initialState);
-        setStack([state ?? initialState]);
-    }, [initialState]);
-    return [lastState, { push: setLastState, pop, undo, redo, clear }];
-}
-
-const Hooks = {
-    __proto__: null,
-    useCtrlZY,
-    useDebounce,
-    useMemoedState,
-    usePatcher,
-    useStateStack
-};
-
-const { React } = BdApi;
-const CompiledReact = {
-    ...React,
-    Components,
-    Hooks,
 };
 
 class ElementSelector {
     constructor() {
         this.result = "";
     }
-    getElementFromReactInstance(instance, allowMultiple = false) {
+    static getElementFromReactInstance(instance, allowMultiple = false) {
         return getElementFromReactInstance(instance, allowMultiple);
     }
-    getSelectorFromElement(element) {
-        const selector = new ElementSelector();
+    static getSelectorFromElement(element) {
+        const selector = new ElementSelector().tagName(element.tagName.toLowerCase()).and;
         if (element.id)
             selector.id(element.id).and;
         if (element.className)
@@ -668,7 +728,7 @@ class ElementSelector {
             selector.ariaLabel(element.getAttribute("aria-label")).and;
         if (element.getAttribute("role"))
             selector.role(element.getAttribute("role")).and;
-        if (element.dataset) {
+        if ('dataset' in element && element.dataset instanceof DOMStringMap) {
             for (const prop in element.dataset) {
                 selector.data(prop, element.dataset[prop]).and;
             }
@@ -749,8 +809,10 @@ function getElementFromReactInstance(instance, allowMultiple = false) {
 }
 
 function $(selector, single = true) {
-    if (single)
-        return new DQuery(selector);
+    if (single) {
+        const dq = new DQuery(selector);
+        return dq.element ? dq : undefined;
+    }
     let elements = (() => {
         if (typeof selector === 'function') {
             selector = selector(new ElementSelector(), $);
@@ -761,6 +823,20 @@ function $(selector, single = true) {
             return [selector.element];
         }
         return (Array.isArray(selector) ? selector : [selector]);
+    })();
+    return elements.filter(Boolean).map(el => new DQuery(el));
+}
+async function $p(selector, single = true) {
+    const resolved = await selector(new ElementSelector(), $);
+    if (single)
+        return new DQuery(resolved);
+    let elements = (() => {
+        if (resolved instanceof ElementSelector || typeof resolved === 'string')
+            return [...document.querySelectorAll(resolved.toString()).values()];
+        else if (resolved instanceof DQuery) {
+            return [resolved.element];
+        }
+        return (Array.isArray(resolved) ? resolved : [resolved]);
     })();
     return elements.map(el => new DQuery(el));
 }
@@ -809,9 +885,21 @@ class DQuery {
             this.element.style[key] = value[key];
         }
     }
+    setStyleProperty(key, value) {
+        key = key.toString();
+        const style = this.attr('style') ?? '';
+        if (!style.includes(key))
+            return this.attr('style', `${this.attr('style') ?? ''}${key}: ${value};`, false);
+        const regex = new RegExp(`${key}: [^;]*;`, 'g');
+        this.attr('style', style.replace(regex, `${key}: ${value};`), false);
+        return;
+    }
     addClass(className) {
         this.element.classList.add(className);
         return this;
+    }
+    hasClass(className) {
+        return this.element.classList.contains(className);
     }
     removeClass(className) {
         this.element.classList.remove(className);
@@ -829,6 +917,8 @@ class DQuery {
         return false;
     }
     children(selector, single) {
+        if (!this.element)
+            return single ? undefined : [];
         if (!selector)
             return single ? new DQuery(this.element.children[0]) : [...this.element.children].map(child => new DQuery(child));
         selector = typeof selector === 'function' ? selector(new ElementSelector(), $) : selector;
@@ -856,6 +946,13 @@ class DQuery {
         const children = this.children();
         return children[children.length - 1];
     }
+    hasChildren() {
+        return this.element.children.length > 0;
+    }
+    grandChildren(selector, single) {
+        const grandChildren = this.children().map(child => child.children(selector, single)).flat();
+        return (single ? grandChildren[0] : grandChildren);
+    }
     ancestor(selector) {
         const getAnscestorSelector = () => {
             const _selector = typeof selector === 'function' ? selector(new ElementSelector(), $) : selector;
@@ -864,9 +961,9 @@ class DQuery {
             if (_selector instanceof ElementSelector)
                 return _selector.toString();
             if (_selector instanceof DQuery)
-                return new ElementSelector().getSelectorFromElement(_selector.element);
+                return ElementSelector.getSelectorFromElement(_selector.element);
             if (_selector instanceof HTMLElement)
-                return new ElementSelector().getSelectorFromElement(_selector);
+                return ElementSelector.getSelectorFromElement(_selector);
             return undefined;
         };
         const anscestorSelector = getAnscestorSelector();
@@ -880,7 +977,15 @@ class DQuery {
     }
     get props() {
         try {
-            return this.fiber.memoizedProps;
+            if (!this.fiber)
+                return null;
+            const fiberProps = this.fiber.memoizedProps;
+            if (fiberProps)
+                return fiberProps;
+            const propsKey = Object.keys(this.element).find(key => key.startsWith('__reactProps$'));
+            if (propsKey)
+                return this.element[propsKey];
+            return null;
         }
         catch (err) {
             console.error(err, this);
@@ -891,7 +996,7 @@ class DQuery {
         this.fiber.pendingProps = value;
     }
     prop(key, ...cycleThrough) {
-        const getProp = (obj, path) => {
+        const getPropThroughFiber = (obj, path) => {
             if (obj === undefined || obj === null)
                 return undefined;
             else if (obj[key])
@@ -899,25 +1004,52 @@ class DQuery {
             if (obj.children) {
                 if (Array.isArray(obj.children)) {
                     for (let i = 0; i < obj.children.length; i++) {
-                        const result = getProp(obj.children[i], [...path, `children`, i.toString()]);
+                        const result = getPropThroughFiber(obj.children[i], [...path, `children`, i.toString()]);
                         if (result)
                             return result;
                     }
                 }
                 else {
-                    const result = getProp(obj.children, [...path, 'children']);
+                    const result = getPropThroughFiber(obj.children, [...path, 'children']);
                     if (result)
                         return result;
                 }
             }
             if (obj.props) {
-                const result = getProp(obj.props, [...path, 'props']);
+                const result = getPropThroughFiber(obj.props, [...path, 'props']);
                 if (result)
                     return result;
             }
             if (cycleThrough) {
                 for (const prop of cycleThrough) {
-                    const result = getProp(obj[prop], [...path, prop]);
+                    const result = getPropThroughFiber(obj[prop], [...path, prop]);
+                    if (result)
+                        return result;
+                }
+            }
+            return undefined;
+        };
+        const getPropThroughDOM = (el, path) => {
+            if (el === undefined || el === null)
+                return undefined;
+            const dq = el instanceof HTMLElement ? new DQuery(el) : new DQuery(ElementSelector.getSelectorFromElement(el));
+            if (!dq.element)
+                return undefined;
+            const props = dq.props;
+            if (!props)
+                return undefined;
+            else if (props[key])
+                return [props[key], path];
+            if (dq.hasChildren()) {
+                for (let i = 0; i < el.children.length; i++) {
+                    const result = getPropThroughDOM(el.children[i], [...path, i.toString()]);
+                    if (result)
+                        return result;
+                }
+            }
+            if (cycleThrough) {
+                for (const prop of cycleThrough) {
+                    const result = getPropThroughDOM(el[prop], [...path, prop]);
                     if (result)
                         return result;
                 }
@@ -925,11 +1057,14 @@ class DQuery {
             return undefined;
         };
         try {
-            return getProp(this.fiber.memoizedProps, []) ?? [undefined, undefined];
+            if (!this.element)
+                return undefined;
+            return getPropThroughFiber(this.fiber.memoizedProps, [])
+                ?? getPropThroughDOM(this.element, []);
         }
         catch (err) {
             console.error(err, this);
-            return [undefined, undefined];
+            return undefined;
         }
     }
     propsWith(key, ...cycleThrough) {
@@ -1072,220 +1207,472 @@ function createElement(html, props = {}, target) {
         }
         return Object.assign(document.createElement(html), props);
     })();
-    return element;
+    if (!target)
+        return element;
+    if (target instanceof Node)
+        return target.appendChild(element);
+    else if (target instanceof DQuery)
+        return target.element.appendChild(element);
+    else if (typeof target === "string" || target instanceof ElementSelector || typeof target === 'function')
+        return document.querySelector(typeof target === 'function' ? target(new ElementSelector(), $).toString() : target.toString()).appendChild(element);
 }
 
-const DanhoModules = {
-    CompiledReact,
-    $,
-    DQuery,
-    ElementSelector,
-};
-
-const DiscordModules = {
-    hljs,
-    i18n,
-    lodash,
-    moment,
-    semver,
-    React: React$1, ReactDOM,
-    ...DanhoModules
-};
-
-const UserNoteActions = byKeys(["updateNote"]);
-
-const UserUtils = {
-    ...UserStore,
-    ...PresenceStore,
-    ...RelationshipStore,
-    ...UserActivityStore,
-    ...UserNoteStore,
-    ...UserTypingStore,
-    ...UserMentionStore,
-    ...UserNoteActions,
-    getPresenceState: () => PresenceStore.getState()
-};
-
-const VoiceInfo = byKeys(["isSelfMute", "isNoiseCancellationSupported"]);
-VoiceInfo.getMediaEngine();
-VoiceInfo.getVideoComponent();
-VoiceInfo.getCameraComponent();
-var MediaEngineContextTypes;
-(function (MediaEngineContextTypes) {
-    MediaEngineContextTypes["DEFAULT"] = "default";
-    MediaEngineContextTypes["STREAM"] = "stream";
-})(MediaEngineContextTypes || (MediaEngineContextTypes = {}));
-var MediaEngineEvent;
-(function (MediaEngineEvent) {
-    MediaEngineEvent[MediaEngineEvent["VoiceActivity"] = 0] = "VoiceActivity";
-    MediaEngineEvent[MediaEngineEvent["DeviceChange"] = 1] = "DeviceChange";
-    MediaEngineEvent[MediaEngineEvent["VideoInputInitialized"] = 2] = "VideoInputInitialized";
-})(MediaEngineEvent || (MediaEngineEvent = {}));
-var AudioSubSystems;
-(function (AudioSubSystems) {
-    AudioSubSystems[AudioSubSystems["LEGACY"] = 0] = "LEGACY";
-})(AudioSubSystems || (AudioSubSystems = {}));
-var SupportedFeatures;
-(function (SupportedFeatures) {
-    SupportedFeatures[SupportedFeatures["LEGACY_AUDIO_SUBSYSTEM"] = 0] = "LEGACY_AUDIO_SUBSYSTEM";
-    SupportedFeatures[SupportedFeatures["EXPERIMENTAL_AUDIO_SUBSYSTEM"] = 1] = "EXPERIMENTAL_AUDIO_SUBSYSTEM";
-    SupportedFeatures[SupportedFeatures["DEBUG_LOGGING"] = 2] = "DEBUG_LOGGING";
-    SupportedFeatures[SupportedFeatures["SOUNDSHARE"] = 3] = "SOUNDSHARE";
-    SupportedFeatures[SupportedFeatures["ELEVATED_HOOK"] = 4] = "ELEVATED_HOOK";
-    SupportedFeatures[SupportedFeatures["LOOPBACK"] = 5] = "LOOPBACK";
-    SupportedFeatures[SupportedFeatures["WUMPUS_VIDEO"] = 6] = "WUMPUS_VIDEO";
-    SupportedFeatures[SupportedFeatures["HYBRID_VIDEO"] = 7] = "HYBRID_VIDEO";
-    SupportedFeatures[SupportedFeatures["ATTENUATION"] = 8] = "ATTENUATION";
-    SupportedFeatures[SupportedFeatures["VIDEO_HOOK"] = 9] = "VIDEO_HOOK";
-    SupportedFeatures[SupportedFeatures["GRAPHICS_CAPTURE"] = 10] = "GRAPHICS_CAPTURE";
-    SupportedFeatures[SupportedFeatures["EXPERIMENTAL_SOUNDSHARE"] = 11] = "EXPERIMENTAL_SOUNDSHARE";
-    SupportedFeatures[SupportedFeatures["OPEN_H246"] = 12] = "OPEN_H246";
-    SupportedFeatures[SupportedFeatures["REMOVE_LOCUS_NETWORK_CONTROL"] = 13] = "REMOVE_LOCUS_NETWORK_CONTROL";
-    SupportedFeatures[SupportedFeatures["SCREEN_PREVIEWS"] = 14] = "SCREEN_PREVIEWS";
-    SupportedFeatures[SupportedFeatures["AUDIO_DEBUG_STATE"] = 15] = "AUDIO_DEBUG_STATE";
-    SupportedFeatures[SupportedFeatures["CONNECTION_REPLAY"] = 16] = "CONNECTION_REPLAY";
-    SupportedFeatures[SupportedFeatures["SIMULCAST"] = 17] = "SIMULCAST";
-    SupportedFeatures[SupportedFeatures["RTC_REGION_RANKING"] = 18] = "RTC_REGION_RANKING";
-    SupportedFeatures[SupportedFeatures["DIRECT_VIDEO"] = 19] = "DIRECT_VIDEO";
-    SupportedFeatures[SupportedFeatures["ELECTRON_VIDEO"] = 20] = "ELECTRON_VIDEO";
-    SupportedFeatures[SupportedFeatures["MEDIAPIPE"] = 21] = "MEDIAPIPE";
-    SupportedFeatures[SupportedFeatures["FIXED_KEYFRAME_INTERVAL"] = 22] = "FIXED_KEYFRAME_INTERVAL";
-    SupportedFeatures[SupportedFeatures["DIAGNOSTICS"] = 23] = "DIAGNOSTICS";
-    SupportedFeatures[SupportedFeatures["NATIVE_PING"] = 24] = "NATIVE_PING";
-    SupportedFeatures[SupportedFeatures["AUTOMATIC_VAD"] = 25] = "AUTOMATIC_VAD";
-    SupportedFeatures[SupportedFeatures["AUDIO_INPUT_DEVICE"] = 26] = "AUDIO_INPUT_DEVICE";
-    SupportedFeatures[SupportedFeatures["AUDIO_OUTPUT_DEVICE"] = 27] = "AUDIO_OUTPUT_DEVICE";
-    SupportedFeatures[SupportedFeatures["QOS"] = 28] = "QOS";
-    SupportedFeatures[SupportedFeatures["VOICE_PROCESSING"] = 29] = "VOICE_PROCESSING";
-    SupportedFeatures[SupportedFeatures["AUTO_ENABLE"] = 30] = "AUTO_ENABLE";
-    SupportedFeatures[SupportedFeatures["VIDEO"] = 31] = "VIDEO";
-    SupportedFeatures[SupportedFeatures["DESKTOP_CAPTURE"] = 32] = "DESKTOP_CAPTURE";
-    SupportedFeatures[SupportedFeatures["DESKTOP_CAPTURE_FORMAT"] = 33] = "DESKTOP_CAPTURE_FORMAT";
-    SupportedFeatures[SupportedFeatures["DESKTOP_CAPTURE_APPLICATIONS"] = 34] = "DESKTOP_CAPTURE_APPLICATIONS";
-    SupportedFeatures[SupportedFeatures["VOICE_PANNING"] = 35] = "VOICE_PANNING";
-    SupportedFeatures[SupportedFeatures["AEC_DUMP"] = 36] = "AEC_DUMP";
-    SupportedFeatures[SupportedFeatures["DISABLE_VIDEO"] = 37] = "DISABLE_VIDEO";
-    SupportedFeatures[SupportedFeatures["SAMPLE_PLAYBACK"] = 38] = "SAMPLE_PLAYBACK";
-})(SupportedFeatures || (SupportedFeatures = {}));
-
-const VoiceStore = byKeys(["getVoiceStateForUser"]);
-
-const GuildActions = byKeys(["requestMembers"]);
-
-const GuildUtils = {
-    ...GuildStore$1,
-    ...GuildMemberStore,
-    ...GuildChannelStore,
-    ...GuildEmojiStore,
-    ...SelectedGuildStore,
-    ...VoiceInfo,
-    ...VoiceStore,
-    ...GuildActions,
-    get current() {
-        return GuildStore$1.getGuild(SelectedGuildStore.getGuildId());
-    },
-    getSelectedGuildTimestamps() {
-        return SelectedGuildStore.getState().selectedGuildTimestampMillis;
-    },
-    getIconUrl(guild) {
-        return guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp` : 'https://cdn.discordapp.com/embed/avatars/0.png';
+let events = [];
+function addEventListener(element, type, listener, options) {
+    element.addEventListener(type, listener, options);
+    events.push({ element, type, listener });
+}
+function removeAllEventListeners() {
+    for (const { element, type, listener } of events) {
+        element.removeEventListener(type, listener);
     }
-};
+    events = [];
+}
 
-function findNodeByIncludingClassName(className, node = document.body) {
-    return node.querySelector(`[class*="${className}"]`);
+let injections = [];
+function injectElement(parentSelectorResolve, element, type = 'beforeend') {
+    $(parentSelectorResolve).element?.insertAdjacentElement(type, element);
+    injections.push({ element });
 }
-function findClassModuleContainingClass(className) {
-    const DiscordClassModules = ["ZLibrary", "BDFDB"].map(name => [name, window[name].DiscordClassModules]);
-    const findModule = (key, lib) => {
-        const module = lib[key];
-        if (!module)
-            return null;
-        const filtered = Object.entries(module).map(([moduleKey, value]) => {
-            return value.toLowerCase().includes(className.toLowerCase()) && [moduleKey, value];
-        }).filter(v => v);
-        if (!filtered.length)
-            return null;
-        return [key, filtered.reduce((result, [item, value]) => {
-                result[item] = value;
-                return result;
-            }, {})];
-    };
-    return DiscordClassModules.map(([name, lib]) => [name, Object
-            .keys(lib)
-            .map(k => findModule(k, lib))
-            .filter(v => v)
-            .reduce((result, [moduleTitle, module]) => {
-            result[moduleTitle] = module;
-            return result;
-        }, {})]).reduce((result, [name, modules]) => {
-        result[name] = modules;
-        return result;
-    }, {});
+function removeAllInjections() {
+    injections.forEach(({ element }) => element.remove());
+    injections = [];
 }
-function findModule(args, returnDisplayNamesOnly = false) {
-    const module = typeof args === 'string' ? query({ name: args }) : query({ keys: args });
-    if (!module)
-        return module;
-    return returnDisplayNamesOnly ?
-        Array.isArray(module) ?
-            module.map(m => m.default?.displayName || m.displayName) :
-            module.default?.displayName || module.displayName
-        : module;
-}
-function findStore(storeName, allowMultiple = false) {
-    const result = Object.values(byName("UserSettingsAccountStore")
-        ._dispatcher._actionHandlers._dependencyGraph.nodes).sort((a, b) => a.name.localeCompare(b.name))
-        .filter(s => s.name.toLowerCase().includes(storeName.toLowerCase()));
-    return allowMultiple ? result : result[0];
-}
-function currentGuild() {
-    const guildId = SelectedGuildStore.getGuildId();
-    return guildId ? GuildStore$1.getGuild(guildId) : null;
-}
-function currentChannel() {
-    const channelId = SelectedChannelStore.getChannelId();
-    return channelId ? ChannelStore.getChannel(channelId) : null;
-}
-function currentGuildMembers() {
-    const guildId = currentGuild()?.id;
-    return guildId ? GuildMemberStore.getMembers(guildId) : null;
-}
-const Utils = {
-    findNodeByIncludingClassName,
-    findClassModuleContainingClass,
-    findModule,
-    findStore,
-    get currentGuild() { return currentGuild(); },
-    get currentChannel() { return currentChannel(); },
-    get currentGuildMembers() { return currentGuildMembers(); },
-};
 
-const Actions = {
+const DOM = {
     __proto__: null,
-    GuildActions,
-    UserNoteActions
+    $,
+    $p,
+    DQuery,
+    addEventListener,
+    createElement,
+    injectElement,
+    removeAllEventListeners,
+    removeAllInjections
 };
 
-const styles = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.danho-form-switch {\n  flex-direction: row-reverse;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
+class GlobalReq {
+    static get instance() {
+        if (!GlobalReq._instance) {
+            const id = "WebModules_" + Math.floor(Math.random() * 1000000000000);
+            let req;
+            window.webpackChunkdiscord_app.push([[id], {}, r => { if (r.c)
+                    req = r; }]);
+            delete req.m[id];
+            delete req.c[id];
+            GlobalReq._instance = req;
+        }
+        return GlobalReq._instance;
+    }
+    constructor() { }
+}
+const Cache = {
+    modules: {}
+};
+function BDFDB_findByString(strings, config = {}) {
+    strings = strings.flat(10);
+    return findModule("string", JSON.stringify(strings), m => checkModuleStrings(m, strings) && m, config);
+}
+function checkModuleStrings(module, strings, config = {}) {
+    const check = (s1, s2) => {
+        s1 = config.ignoreCase ? s1.toString().toLowerCase() : s1.toString();
+        return config.hasNot ? s1.indexOf(s2) == -1 : s1.indexOf(s2) > -1;
+    };
+    return [strings].flat(10).filter(n => typeof n == "string").map(config.ignoreCase ? (n => n.toLowerCase()) : (n => n)).every(string => module && ((typeof module == "function" || typeof module == "string") && (check(module, string) || typeof module.__originalFunction == "function" && check(module.__originalFunction, string)) || typeof module.type == "function" && check(module.type, string) || (typeof module == "function" || typeof module == "object") && module.prototype && Object.keys(module.prototype).filter(n => n.indexOf("render") == 0).some(n => check(module.prototype[n], string))));
+}
+function findModule(type, cacheString, filter, config = {}) {
+    if (!isObject(Cache.modules[type]))
+        Cache.modules[type] = { module: {}, export: {} };
+    let defaultExport = typeof config.defaultExport != "boolean" ? true : config.defaultExport;
+    if (!config.all && defaultExport && Cache.modules[type].export[cacheString])
+        return Cache.modules[type].export[cacheString];
+    else if (!config.all && !defaultExport && Cache.modules[type].module[cacheString])
+        return Cache.modules[type].module[cacheString];
+    else {
+        let m = find(filter, config);
+        if (m) {
+            if (!config.all) {
+                if (defaultExport)
+                    Cache.modules[type].export[cacheString] = m;
+                else
+                    Cache.modules[type].module[cacheString] = m;
+            }
+            return m;
+        }
+        else if (!config.noWarnings)
+            warn(`${cacheString} [${type}] not found in WebModules`);
+    }
+}
+function find(filter, config = {}) {
+    let defaultExport = typeof config.defaultExport != "boolean" ? true : config.defaultExport;
+    let onlySearchUnloaded = typeof config.onlySearchUnloaded != "boolean" ? false : config.onlySearchUnloaded;
+    let all = typeof config.all != "boolean" ? false : config.all;
+    const req = GlobalReq.instance;
+    const found = [];
+    if (!onlySearchUnloaded)
+        for (let i in req.c)
+            if (req.c.hasOwnProperty(i) && req.c[i].exports != window) {
+                let m = req.c[i].exports, r = null;
+                if (m && (typeof m == "object" || typeof m == "function")) {
+                    if (!!(r = filter(m))) {
+                        if (all)
+                            found.push(defaultExport ? r : req.c[i]);
+                        else
+                            return defaultExport ? r : req.c[i];
+                    }
+                    else if (Object.keys(m).length < 400)
+                        for (let key of Object.keys(m))
+                            try {
+                                if (m[key] && !!(r = filter(m[key]))) {
+                                    if (all)
+                                        found.push(defaultExport ? r : req.c[i]);
+                                    else
+                                        return defaultExport ? r : req.c[i];
+                                }
+                            }
+                            catch (err) { }
+                }
+                if (config.moduleName && m && m[config.moduleName] && (typeof m[config.moduleName] == "object" || typeof m[config.moduleName] == "function")) {
+                    if (!!(r = filter(m[config.moduleName]))) {
+                        if (all)
+                            found.push(defaultExport ? r : req.c[i]);
+                        else
+                            return defaultExport ? r : req.c[i];
+                    }
+                    else if (m[config.moduleName].type && (typeof m[config.moduleName].type == "object" || typeof m[config.moduleName].type == "function") && !!(r = filter(m[config.moduleName].type))) {
+                        if (all)
+                            found.push(defaultExport ? r : req.c[i]);
+                        else
+                            return defaultExport ? r : req.c[i];
+                    }
+                }
+                if (m && m.__esModule && m.default && (typeof m.default == "object" || typeof m.default == "function")) {
+                    if (!!(r = filter(m.default))) {
+                        if (all)
+                            found.push(defaultExport ? r : req.c[i]);
+                        else
+                            return defaultExport ? r : req.c[i];
+                    }
+                    else if (m.default.type && (typeof m.default.type == "object" || typeof m.default.type == "function") && !!(r = filter(m.default.type))) {
+                        if (all)
+                            found.push(defaultExport ? r : req.c[i]);
+                        else
+                            return defaultExport ? r : req.c[i];
+                    }
+                }
+            }
+    for (let i in req.m)
+        if (req.m.hasOwnProperty(i)) {
+            let m = req.m[i];
+            if (m && typeof m == "function") {
+                if (req.c[i] && !onlySearchUnloaded && filter(m)) {
+                    if (all)
+                        found.push(defaultExport ? req.c[i].exports : req.c[i]);
+                    else
+                        return defaultExport ? req.c[i].exports : req.c[i];
+                }
+                if (!req.c[i] && onlySearchUnloaded && filter(m)) {
+                    const resolved = {}, resolved2 = {};
+                    m(resolved, resolved2, req);
+                    const trueResolved = resolved2 && Object.getOwnPropertyNames(resolved2).length == 0 ? resolved : resolved2;
+                    if (all)
+                        found.push(defaultExport ? trueResolved.exports : trueResolved);
+                    else
+                        return defaultExport ? trueResolved.exports : trueResolved;
+                }
+            }
+        }
+    if (all)
+        return found;
+}
+function isObject(obj) {
+    return obj && typeof obj === "object" && obj.constructor === Object;
+}
 
-const LibraryPlugin = new class DanhoLibrary {
+const BDFDB_Finder = {
+    __proto__: null,
+    BDFDB_findByString
+};
+
+const findBySourceStrings = (...keywords) => BdApi.Webpack.getModule(m => m
+    && Object.keys(m).length
+    && Object.keys(m).some(k => typeof m[k] === 'function' && keywords.every(keyword => m[k].toString().includes(keyword))), { defaultExport: false, searchExports: true });
+const findComponentBySourceStrings = async (...keywords) => {
+    const jsxModule = Finder.byKeys(['jsx']);
+    const ReactModule = Finder.byKeys(['createElement', 'cloneElement']);
+    const component = await new Promise((resolve, reject) => {
+        try {
+            const cancelJsx = after(jsxModule, 'jsx', ({ args: [component] }) => {
+                if (typeof component === 'function' && keywords.every(keyword => component.toString().includes(keyword))) {
+                    cancelJsx();
+                    cancelCE();
+                    resolve(component);
+                }
+            }, { silent: true });
+            const cancelCE = after(ReactModule, 'createElement', ({ args: [component] }) => {
+                if (typeof component === 'function' && keywords.every(keyword => component.toString().includes(keyword))) {
+                    cancelJsx();
+                    cancelCE();
+                    resolve(component);
+                }
+            }, { silent: true });
+        }
+        catch (err) {
+            reject(err);
+        }
+    });
+    if (typeof component !== 'object')
+        return component;
+    if ('prototype' in component
+        && typeof component.prototype === 'object'
+        && 'render' in component.prototype
+        && typeof component.prototype.render === 'function') {
+        component.prototype.render = component.prototype.render.bind(component);
+        return component;
+    }
+    return component;
+};
+const Finder = {
+    ...DiumFinder,
+    ...BDFDB_Finder,
+    findBySourceStrings,
+    findComponentBySourceStrings
+};
+
+const Finder$1 = {
+    __proto__: null,
+    BDFDB_findByString,
+    Finder,
+    abort,
+    all,
+    byEntries,
+    byKeys,
+    byName,
+    byProtos,
+    bySource,
+    default: Finder,
+    demangle,
+    find: find$1,
+    findBySourceStrings,
+    findComponentBySourceStrings,
+    query,
+    resolveKey,
+    waitFor
+};
+
+const styles$1 = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
+
+const TextInput = byName("TextInput");
+
+const { useState } = React;
+function Setting({ setting, settings, set, titles, ...props }) {
+    const { beforeChange, onChange, formatValue, type } = props;
+    const [v, _setV] = useState(formatValue ? formatValue(settings[setting]) : settings[setting]);
+    const setV = (value) => _setV(formatValue ? formatValue(value) : value);
+    if (type === undefined ? typeof v === 'boolean' : type === 'switch')
+        return (React.createElement(FormSwitch, { className: 'danho-form-switch', key: setting.toString(), note: titles[setting.toString()], value: Boolean(v), hideBorder: true, onChange: inputValue => {
+                const checked = beforeChange ? beforeChange(inputValue) : inputValue;
+                set({ [setting]: checked });
+                onChange?.(checked);
+                setV(checked);
+            } }));
+    if (type === undefined ? typeof v === 'number' : type === 'number')
+        return (React.createElement(TextInput, { key: setting.toString(), title: titles[setting], value: v, onChange: inputValue => {
+                const value = beforeChange ? beforeChange(Number(inputValue)) : Number(inputValue);
+                set({ [setting]: value });
+                onChange?.(value);
+                setV(value);
+            } }));
+    if (type === undefined ? typeof v === 'string' : type === 'text')
+        return (React.createElement(TextInput, { key: setting.toString(), title: titles[setting], value: v, onChange: inputValue => {
+                const value = beforeChange ? beforeChange(inputValue) : inputValue;
+                set({ [setting]: value });
+                onChange?.(value);
+                setV(value);
+            } }));
+    if (type)
+        return (React.createElement("div", { className: "danho-form-switch", key: setting.toString() },
+            React.createElement("input", { type: type, key: setting.toString(), value: v, onChange: e => {
+                    const value = beforeChange ? beforeChange(e.target.value) : e.target.value;
+                    set({ [setting]: value });
+                    onChange?.(value);
+                    setV(value);
+                } }),
+            React.createElement(FormText, { className: 'note' }, titles[setting])));
+    return (React.createElement("div", { className: 'settings-error' },
+        React.createElement("h1", null, "Unknown value type"),
+        React.createElement("h3", null,
+            "Recieved ",
+            typeof v),
+        React.createElement("h5", null, JSON.stringify(v))));
+}
+
+class DanhoLibrary {
     constructor() {
-        this.Modules = DiscordModules;
         this.Utils = Utils;
         this.Users = UserUtils;
         this.Guilds = GuildUtils;
+        this.DOM = DOM;
         this.Stores = Stores;
         this.Actions = Actions;
-        this.Components = Components;
-        this.Finder = Finder;
+        this.Finder = Finder$1;
         this.Filters = Filters;
-        this.styles = styles;
+        this.styles = styles$1;
     }
-    start() { }
-};
+}
+const LibraryPlugin = new DanhoLibrary();
 window.DL = LibraryPlugin;
-const index = createPlugin(LibraryPlugin);
+function buildPlugin(plugin) {
+    const built = Object.assign({}, LibraryPlugin, plugin);
+    built.styles = [LibraryPlugin.styles, plugin.styles].join('\n\n');
+    return createPlugin(built);
+}
+
+const DEFAULT_DISCORD_ROLE_COLOR = `153, 170, 181`;
+const Settings = createSettings({
+    prettyRoles: true,
+    defaultRoleColor: DEFAULT_DISCORD_ROLE_COLOR,
+    groupRoles: true,
+});
+const titles = {
+    prettyRoles: `Remove role circle, add more color to the roles`,
+    defaultRoleColor: `Default role color`,
+    groupRoles: `Widen roles that include "roles" in their name to make them stand out as a group`,
+};
+
+function rgbToHex(rgb) {
+    const integer = (((Math.round(rgb[0]) & 0xFF) << 16)
+        + ((Math.round(rgb[1]) & 0xFF) << 8)
+        + (Math.round(rgb[2]) & 0xFF));
+    const string = integer.toString(16).toUpperCase();
+    return '000000'.substring(string.length) + string;
+}
+function hexToRgb(hex) {
+    if (!hex)
+        return [0, 0, 0];
+    const match = hex.match(/[a-f0-9]{6}|[a-f0-9]{3}/i);
+    if (!match)
+        return [0, 0, 0];
+    let colorString = match[0];
+    if (match[0].length === 3)
+        colorString = colorString.split('').map(char => char + char).join('');
+    const integer = parseInt(colorString, 16);
+    const r = (integer >> 16) & 0xFF;
+    const g = (integer >> 8) & 0xFF;
+    const b = integer & 0xFF;
+    return [r, g, b];
+}
+
+function SettingsPanel() {
+    const [settings, set] = Settings.useState();
+    const features = Settings.useSelector(({ prettyRoles }) => ({ prettyRoles }));
+    const settingProps = { settings, set, titles };
+    return (React.createElement("div", { className: "danho-plugin-settings" },
+        React.createElement(FormSection, null,
+            React.createElement(FormLabel, null, "Features"),
+            React.createElement(Setting, { setting: "prettyRoles", ...settingProps })),
+        features.prettyRoles && React.createElement(PrettyRolesSettings, { ...settingProps })));
+}
+function PrettyRolesSettings(props) {
+    return (React.createElement(React.Fragment, null,
+        React.createElement(FormDivider, null),
+        React.createElement(FormSection, null,
+            React.createElement(FormLabel, null, "Pretty Roles"),
+            React.createElement(Setting, { setting: "defaultRoleColor", type: "color", ...props, formatValue: rgbString => "#" + rgbToHex(rgbString.split(',').map(Number)), beforeChange: hex => hexToRgb(hex).join(',') }),
+            React.createElement(Setting, { setting: "groupRoles", ...props }))));
+}
+
+const PrettyRolesManager = new class PrettyRolesManager {
+    getRole(roleId) {
+        return this.context.roles.find(r => r.id === roleId);
+    }
+    removeRole() {
+        if (!this.role)
+            return;
+        this.context.onRemoveRole(this.role);
+    }
+    canRemoveRole() {
+        if (!this.role)
+            return false;
+        return this.context.canManageRoles && this.context.highestRole.id !== this.role.id;
+    }
+};
+
+function afterRoleContextMenu() {
+    contextMenu('dev-context', result => {
+        if (!PrettyRolesManager.context)
+            return result;
+        const roleId = result.props.children.props.id.split('-').pop();
+        const role = PrettyRolesManager.getRole(roleId);
+        PrettyRolesManager.role = role;
+        if (!PrettyRolesManager.canRemoveRole())
+            return result;
+        result.props.children = [
+            React.createElement(MenuGroup, null,
+                React.createElement(MenuItem, { color: 'danger', id: "pretty-roles__remove-role", label: `Remove role`, action: () => {
+                        PrettyRolesManager.removeRole();
+                    } })),
+            result.props.children,
+        ];
+        return result;
+    });
+}
+
+function insteadRolesList(RolesListModule) {
+    instead(RolesListModule, 'RolesList', ({ args, original }) => {
+        const result = original(...args);
+        PrettyRolesManager.context = result.props.children.props;
+        return result;
+    });
+}
+
+function afterRolesList(RolesListModule) {
+    after(RolesListModule, 'RolesList', () => {
+        $(s => s.role('list', 'div').and.ariaLabelContains('Role'))?.children().forEach(el => {
+            const roleId = el.attr('data-list-item-id')?.split('_').pop();
+            if (!roleId)
+                return;
+            const role = PrettyRolesManager.getRole(roleId);
+            el.setStyleProperty('--role-color', hexToRgb(role.colorString
+                ?? rgbToHex(DEFAULT_DISCORD_ROLE_COLOR.split(',').map(Number))).join(','));
+            if (Settings.current.groupRoles) {
+                const isGroupRole = role.name.toLowerCase().includes('roles');
+                if (isGroupRole)
+                    el.addClass('danho-library__pretty-roles__group-role');
+            }
+        });
+    });
+}
+
+const prettyRoles = "*[role=list][data-list-id*=roles] > div div:has([class*=roleRemoveButton][role=button]),\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveButton][role=button],\n*[role=list][data-list-id*=roles] > div [class*=roleFlowerStar],\n*[role=list][data-list-id*=roles] > div [class*=roleCircle] {\n  position: absolute;\n  inset: 0;\n  z-index: 1;\n}\n\n*[role=list][data-list-id*=roles] {\n  padding: 1rem;\n}\n*[role=list][data-list-id*=roles]:has(.danho-library__pretty-roles__group-role) div:has([class*=expandButton]) {\n  flex: 1 1 50%;\n}\n\n*[role=list][data-list-id*=roles] > div {\n  --role-color--default: rgb(86, 105, 118);\n  --role-color: var(--role-color--default);\n  --role-color-alpha: .125;\n  position: relative;\n  border: 1px solid rgb(var(--role-color, --role-color--default));\n  background-color: rgba(var(--role-color, --role-color--default), var(--role-color-alpha));\n  border-radius: 0.25rem;\n  height: 25px;\n  box-sizing: border-box;\n  justify-content: center;\n}\n*[role=list][data-list-id*=roles] > div [class*=roleCircle],\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveIcon] {\n  height: 100%;\n  width: 100%;\n}\n*[role=list][data-list-id*=roles] > div span[class*=roleCircle] {\n  background-color: unset !important;\n}\n*[role=list][data-list-id*=roles] > div svg[class*=roleRemoveIcon] {\n  display: none;\n}\n*[role=list][data-list-id*=roles] > div div:has(svg[class*=roleVerifiedIcon]) {\n  position: absolute;\n  top: -0.5rem;\n  left: -0.75rem;\n}\n*[role=list][data-list-id*=roles] > div:hover svg[class*=roleVerifiedIcon] {\n  display: inline-block !important;\n}\n\n.danho-library__pretty-roles__group-role {\n  flex: 1 1 100% !important;\n  margin-inline: -1rem;\n}";
+
+const isPrettyRolesEnabled = () => Settings.current.prettyRoles;
+function Feature() {
+    if (!isPrettyRolesEnabled())
+        return;
+    const RolesListModule = demangle({
+        RolesList: bySource$1('onAddRole')
+    }, null, true);
+    insteadRolesList(RolesListModule);
+    afterRolesList(RolesListModule);
+    afterRoleContextMenu();
+}
+
+function Features() {
+    Feature();
+}
+const styles = [
+    prettyRoles,
+].join("\n\n");
+
+const index = buildPlugin({
+    start() {
+        Features();
+    },
+    styles,
+    Settings,
+    SettingsPanel
+});
 
 module.exports = index;
 

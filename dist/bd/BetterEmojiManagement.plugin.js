@@ -386,11 +386,11 @@ class ElementSelector {
     constructor() {
         this.result = "";
     }
-    getElementFromReactInstance(instance, allowMultiple = false) {
+    static getElementFromReactInstance(instance, allowMultiple = false) {
         return getElementFromReactInstance(instance, allowMultiple);
     }
-    getSelectorFromElement(element) {
-        const selector = new ElementSelector();
+    static getSelectorFromElement(element) {
+        const selector = new ElementSelector().tagName(element.tagName.toLowerCase()).and;
         if (element.id)
             selector.id(element.id).and;
         if (element.className)
@@ -399,7 +399,7 @@ class ElementSelector {
             selector.ariaLabel(element.getAttribute("aria-label")).and;
         if (element.getAttribute("role"))
             selector.role(element.getAttribute("role")).and;
-        if (element.dataset) {
+        if ('dataset' in element && element.dataset instanceof DOMStringMap) {
             for (const prop in element.dataset) {
                 selector.data(prop, element.dataset[prop]).and;
             }
@@ -480,8 +480,10 @@ function getElementFromReactInstance(instance, allowMultiple = false) {
 }
 
 function $(selector, single = true) {
-    if (single)
-        return new DQuery(selector);
+    if (single) {
+        const dq = new DQuery(selector);
+        return dq.element ? dq : undefined;
+    }
     let elements = (() => {
         if (typeof selector === 'function') {
             selector = selector(new ElementSelector(), $);
@@ -493,7 +495,7 @@ function $(selector, single = true) {
         }
         return (Array.isArray(selector) ? selector : [selector]);
     })();
-    return elements.map(el => new DQuery(el));
+    return elements.filter(Boolean).map(el => new DQuery(el));
 }
 class DQuery {
     constructor(selector) {
@@ -540,9 +542,21 @@ class DQuery {
             this.element.style[key] = value[key];
         }
     }
+    setStyleProperty(key, value) {
+        key = key.toString();
+        const style = this.attr('style') ?? '';
+        if (!style.includes(key))
+            return this.attr('style', `${this.attr('style') ?? ''}${key}: ${value};`, false);
+        const regex = new RegExp(`${key}: [^;]*;`, 'g');
+        this.attr('style', style.replace(regex, `${key}: ${value};`), false);
+        return;
+    }
     addClass(className) {
         this.element.classList.add(className);
         return this;
+    }
+    hasClass(className) {
+        return this.element.classList.contains(className);
     }
     removeClass(className) {
         this.element.classList.remove(className);
@@ -560,6 +574,8 @@ class DQuery {
         return false;
     }
     children(selector, single) {
+        if (!this.element)
+            return single ? undefined : [];
         if (!selector)
             return single ? new DQuery(this.element.children[0]) : [...this.element.children].map(child => new DQuery(child));
         selector = typeof selector === 'function' ? selector(new ElementSelector(), $) : selector;
@@ -587,6 +603,13 @@ class DQuery {
         const children = this.children();
         return children[children.length - 1];
     }
+    hasChildren() {
+        return this.element.children.length > 0;
+    }
+    grandChildren(selector, single) {
+        const grandChildren = this.children().map(child => child.children(selector, single)).flat();
+        return (single ? grandChildren[0] : grandChildren);
+    }
     ancestor(selector) {
         const getAnscestorSelector = () => {
             const _selector = typeof selector === 'function' ? selector(new ElementSelector(), $) : selector;
@@ -595,9 +618,9 @@ class DQuery {
             if (_selector instanceof ElementSelector)
                 return _selector.toString();
             if (_selector instanceof DQuery)
-                return new ElementSelector().getSelectorFromElement(_selector.element);
+                return ElementSelector.getSelectorFromElement(_selector.element);
             if (_selector instanceof HTMLElement)
-                return new ElementSelector().getSelectorFromElement(_selector);
+                return ElementSelector.getSelectorFromElement(_selector);
             return undefined;
         };
         const anscestorSelector = getAnscestorSelector();
@@ -611,7 +634,15 @@ class DQuery {
     }
     get props() {
         try {
-            return this.fiber.memoizedProps;
+            if (!this.fiber)
+                return null;
+            const fiberProps = this.fiber.memoizedProps;
+            if (fiberProps)
+                return fiberProps;
+            const propsKey = Object.keys(this.element).find(key => key.startsWith('__reactProps$'));
+            if (propsKey)
+                return this.element[propsKey];
+            return null;
         }
         catch (err) {
             console.error(err, this);
@@ -622,7 +653,7 @@ class DQuery {
         this.fiber.pendingProps = value;
     }
     prop(key, ...cycleThrough) {
-        const getProp = (obj, path) => {
+        const getPropThroughFiber = (obj, path) => {
             if (obj === undefined || obj === null)
                 return undefined;
             else if (obj[key])
@@ -630,25 +661,52 @@ class DQuery {
             if (obj.children) {
                 if (Array.isArray(obj.children)) {
                     for (let i = 0; i < obj.children.length; i++) {
-                        const result = getProp(obj.children[i], [...path, `children`, i.toString()]);
+                        const result = getPropThroughFiber(obj.children[i], [...path, `children`, i.toString()]);
                         if (result)
                             return result;
                     }
                 }
                 else {
-                    const result = getProp(obj.children, [...path, 'children']);
+                    const result = getPropThroughFiber(obj.children, [...path, 'children']);
                     if (result)
                         return result;
                 }
             }
             if (obj.props) {
-                const result = getProp(obj.props, [...path, 'props']);
+                const result = getPropThroughFiber(obj.props, [...path, 'props']);
                 if (result)
                     return result;
             }
             if (cycleThrough) {
                 for (const prop of cycleThrough) {
-                    const result = getProp(obj[prop], [...path, prop]);
+                    const result = getPropThroughFiber(obj[prop], [...path, prop]);
+                    if (result)
+                        return result;
+                }
+            }
+            return undefined;
+        };
+        const getPropThroughDOM = (el, path) => {
+            if (el === undefined || el === null)
+                return undefined;
+            const dq = el instanceof HTMLElement ? new DQuery(el) : new DQuery(ElementSelector.getSelectorFromElement(el));
+            if (!dq.element)
+                return undefined;
+            const props = dq.props;
+            if (!props)
+                return undefined;
+            else if (props[key])
+                return [props[key], path];
+            if (dq.hasChildren()) {
+                for (let i = 0; i < el.children.length; i++) {
+                    const result = getPropThroughDOM(el.children[i], [...path, i.toString()]);
+                    if (result)
+                        return result;
+                }
+            }
+            if (cycleThrough) {
+                for (const prop of cycleThrough) {
+                    const result = getPropThroughDOM(el[prop], [...path, prop]);
                     if (result)
                         return result;
                 }
@@ -656,11 +714,14 @@ class DQuery {
             return undefined;
         };
         try {
-            return getProp(this.fiber.memoizedProps, []) ?? [undefined, undefined];
+            if (!this.element)
+                return undefined;
+            return getPropThroughFiber(this.fiber.memoizedProps, [])
+                ?? getPropThroughDOM(this.element, []);
         }
         catch (err) {
             console.error(err, this);
-            return [undefined, undefined];
+            return undefined;
         }
     }
     propsWith(key, ...cycleThrough) {
@@ -1064,27 +1125,46 @@ function GuildListItem(props) {
 }
 
 const { useState } = React;
-function Setting({ setting, settings, set, onChange, titles }) {
-    const [v, setV] = useState(settings[setting]);
-    switch (typeof v) {
-        case 'boolean': return React.createElement(FormSwitch, { className: 'danho-form-switch', key: setting.toString(), note: titles[setting.toString()], value: v, hideBorder: true, onChange: checked => {
+function Setting({ setting, settings, set, titles, ...props }) {
+    const { beforeChange, onChange, formatValue, type } = props;
+    const [v, _setV] = useState(formatValue ? formatValue(settings[setting]) : settings[setting]);
+    const setV = (value) => _setV(formatValue ? formatValue(value) : value);
+    if (type === undefined ? typeof v === 'boolean' : type === 'switch')
+        return (React.createElement(FormSwitch, { className: 'danho-form-switch', key: setting.toString(), note: titles[setting.toString()], value: Boolean(v), hideBorder: true, onChange: inputValue => {
+                const checked = beforeChange ? beforeChange(inputValue) : inputValue;
                 set({ [setting]: checked });
                 onChange?.(checked);
                 setV(checked);
-            } });
-        case 'number':
-        case 'string': return React.createElement(TextInput, { key: setting.toString(), title: titles[setting], value: v, onChange: value => {
+            } }));
+    if (type === undefined ? typeof v === 'number' : type === 'number')
+        return (React.createElement(TextInput, { key: setting.toString(), title: titles[setting], value: v, onChange: inputValue => {
+                const value = beforeChange ? beforeChange(Number(inputValue)) : Number(inputValue);
                 set({ [setting]: value });
                 onChange?.(value);
                 setV(value);
-            } });
-        default: return (React.createElement("div", { className: 'settings-error' },
-            React.createElement("h1", null, "Unknown value type"),
-            React.createElement("h3", null,
-                "Recieved ",
-                typeof v),
-            React.createElement("h5", null, JSON.stringify(v))));
-    }
+            } }));
+    if (type === undefined ? typeof v === 'string' : type === 'text')
+        return (React.createElement(TextInput, { key: setting.toString(), title: titles[setting], value: v, onChange: inputValue => {
+                const value = beforeChange ? beforeChange(inputValue) : inputValue;
+                set({ [setting]: value });
+                onChange?.(value);
+                setV(value);
+            } }));
+    if (type)
+        return (React.createElement("div", { className: "danho-form-switch", key: setting.toString() },
+            React.createElement("input", { type: type, key: setting.toString(), value: v, onChange: e => {
+                    const value = beforeChange ? beforeChange(e.target.value) : e.target.value;
+                    set({ [setting]: value });
+                    onChange?.(value);
+                    setV(value);
+                } }),
+            React.createElement(FormText, { className: 'note' }, titles[setting])));
+    return (React.createElement("div", { className: 'settings-error' },
+        React.createElement("h1", null, "Unknown value type"),
+        React.createElement("h3", null,
+            "Recieved ",
+            typeof v),
+        React.createElement("h5", null, JSON.stringify(v))));
 }
 
 function BannedEmojiTag({ emojiId, onClick }) {
@@ -1094,7 +1174,7 @@ function BannedEmojiTag({ emojiId, onClick }) {
 }
 
 function SettingsPanel({ updatePatches }) {
-    const [current, defaults, set] = Settings.useStateWithDefaults();
+    const [current, set] = Settings.useState();
     React.useEffect(() => {
         updatePatches();
     }, [current.enableBannedEmojis, current.enableFavorFavoriteEmojis]);
@@ -1108,7 +1188,7 @@ function SettingsPanel({ updatePatches }) {
             React.createElement(BannedEmojiSection, null)))));
 }
 function BannedEmojiSection() {
-    const [current, defaults, set] = Settings.useStateWithDefaults();
+    const [current, set] = Settings.useState();
     const emojiStoreContext = EmojiStore.getDisambiguatedEmojiContext();
     const bannedEmojis = current.bannedEmojis.map(({ id }) => emojiStoreContext.getById(id));
     const guilds = React.useMemo(() => bannedEmojis.map(({ guildId }) => ({
