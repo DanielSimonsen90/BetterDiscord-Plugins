@@ -15,7 +15,7 @@ type SettingProps = {
 
 export default function SettingsPanel() {
   const [settings, set] = Settings.useState();
-  const features = Settings.useSelector(({ prettyRoles, memberListTabBar }) => ({ prettyRoles, memberListTabBar }));
+  const features = Settings.useSelector(({ prettyRoles }) => ({ prettyRoles }));
 
   const settingProps: SettingProps = { settings, set, titles };
 
@@ -24,10 +24,8 @@ export default function SettingsPanel() {
       <FormSection>
         <FormLabel>Features</FormLabel>
         <Setting setting="prettyRoles" {...settingProps} />
-        <Setting setting="memberListTabBar" {...settingProps} />
       </FormSection>
       {features.prettyRoles && <PrettyRolesSettings {...settingProps} />}
-      {features.memberListTabBar && <MemberListTabbar {...settingProps} />}
     </div>
   );
 }
@@ -42,17 +40,6 @@ function PrettyRolesSettings(props: SettingProps) {
         beforeChange={hex => hexToRgb(hex).join(',')}
       />
       <Setting setting="groupRoles" {...props} />
-    </FormSection>
-  </>)
-}
-
-function MemberListTabbar(props: SettingProps) {
-  return (<>
-    <FormDivider />
-    <FormSection>
-      <FormLabel>Member List Tab Bar</FormLabel>
-      <Setting setting="countMembers" {...props} />
-      <Setting setting="countActivities" {...props} />
     </FormSection>
   </>)
 }
