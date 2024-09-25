@@ -69,6 +69,10 @@ export class ElementSelector {
         this.result += `${tagName ?? ''}[role="${role}"] `;
         return this;
     }
+    public nth(index: number) {
+        this.result += `:nth-child(${index}) `;
+        return this;
+    }
 
     public toString() {
         return this.result;

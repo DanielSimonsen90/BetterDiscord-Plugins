@@ -1,6 +1,6 @@
 import { UserProfileBadgeList, BadgeTypes } from "@discord/components";
 import { Patcher } from "@dium/api";
-import { Settings } from '../../../Settings';
+import { Settings } from '../../../Settings/Settings';
 
 export default function insteadBadgeList() {
   const { badges: badgesEnabled, movePremiumBadge } = Settings.current;

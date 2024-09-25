@@ -3,6 +3,7 @@
 .danho-form-switch {
   display: flex;
   flex-direction: row-reverse;
+  align-items: center;
 
   @include className('note') {
     margin-top: unset;

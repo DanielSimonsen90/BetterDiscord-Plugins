@@ -3,7 +3,8 @@ import { RolesListModule } from "../../pretty-roles/types";
 import { $ } from "@danho-lib/DOM";
 import { hexToRgb, RGB, rgbToHex } from "@danho-lib/Utils/Colors";
 import { PrettyRolesManager } from "../../pretty-roles/manager";
-import { DEFAULT_DISCORD_ROLE_COLOR, Settings } from "../../../Settings";
+import { Settings } from "../../../Settings/Settings";
+import { DEFAULT_DISCORD_ROLE_COLOR } from "../../../constants";
 
 export default function afterRolesList(RolesListModule: RolesListModule) {
   Patcher.after(RolesListModule, 'RolesList', () => {

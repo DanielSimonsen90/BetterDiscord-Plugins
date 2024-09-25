@@ -1,9 +1,8 @@
 import { createSettings } from "@dium/settings";
-import { CustomBadgeData, CustomBadgeProps } from "./features/badges/components/CustomBadge";
-import { USER_TAGS } from "./constants";
 import { BadgeTypes } from "@discord/components";
 
-export const DEFAULT_DISCORD_ROLE_COLOR = `153, 170, 181`;
+import { CustomBadgeData } from "../features/badges/components/CustomBadge";
+import { DEFAULT_DISCORD_ROLE_COLOR, USER_TAGS } from "../constants";
 
 export const Settings = createSettings({
   prettyRoles: true,
@@ -12,6 +11,7 @@ export const Settings = createSettings({
 
   badges: true,
   movePremiumBadge: true,
+  useClientCustomBadges: true
 });
 
 export const titles: Record<keyof typeof Settings.current, string> = {
@@ -21,6 +21,7 @@ export const titles: Record<keyof typeof Settings.current, string> = {
 
   badges: `User badge modifications`,
   movePremiumBadge: `Move the Nitro badge before the Server Boosting badge again`,
+  useClientCustomBadges: `Use your own custom badges`
 };
 
 export const Badges = createSettings({

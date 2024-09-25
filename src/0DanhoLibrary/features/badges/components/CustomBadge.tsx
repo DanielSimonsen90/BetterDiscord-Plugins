@@ -69,6 +69,8 @@ export function insertBadges(result: ReturnType<UserProfileBadgeList<true>>, bad
   function checkUserId(userTags: Snowflake[]) {
     const userTag = $(s => s.role('dialog'))?.attr('aria-label') // Modal/Popout
       ?? $(s => s.className('userProfileOuter').className('userTag'))?.value.toString() // DM sidebar
+      ?? $(s => s.className('accountProfileCard').className('usernameInnerRow'), false)
+        .map(dq => dq.children(undefined, true).value.toString())[1]; // User Settings -- Discord uses "usernameInnerRow" on "Display Name" and "Username"
 
     return userTags.includes(userTag);
   }

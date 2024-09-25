@@ -1,6 +1,6 @@
 import { RenderedUserProfileBadgeList } from "@discord/components";
 import { Patcher } from "@dium/api";
-import { Settings, Badges } from '../../../Settings';
+import { Settings, Badges } from '../../../Settings/Settings';
 import { CustomBadge, insertBadges, patchBadgeComponent } from '../../badges/components/CustomBadge';
 
 export default function afterBadgeList() {
