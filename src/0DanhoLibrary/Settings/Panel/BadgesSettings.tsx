@@ -1,7 +1,11 @@
 import CreateSettingsGroup from "./_CreateSettingsGroup";
 
-export default CreateSettingsGroup((React, props, Setting, { FormSection }) => (
-  <FormSection title="Badges Settings">
-    <Setting setting="movePremiumBadge" {...props} />
-  </FormSection>
-))
+export default CreateSettingsGroup((React, props, Setting, { FormSection }) => {
+  return (
+    <FormSection title="Badges Settings">
+      <Setting setting="movePremiumBadge" {...props} />
+    </FormSection>
+  );
+
+  // TODO: Add ability to add custom badges to the settings panel
+});
