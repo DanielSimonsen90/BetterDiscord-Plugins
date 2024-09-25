@@ -14,9 +14,6 @@ General Discord changes and improvements including:
 ### [WordsPerMinute](/dist/bd/WordsPerMinute.plugin.js) <sub><sup>`v.1.0.0` *(Updated: 06/09/2024)*</sup></sub>
 While typing, it shows the words per minute you are typing. Saves the highest WPM that can be viewed in settings.
 
-#### Bugs
-- WPM counter doesn't show on sub-chats (vc, threads, stage?)
-
 ### [BetterEmojiManagement - BETA](/dist/bd/BetterEmojiManagement.plugin.js) <sub><sup>`v.1.0.0` *(Updated: 10/09/2024)*</sup></sub>
 Have better emoji management control.
 

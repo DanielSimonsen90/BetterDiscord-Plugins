@@ -1,6 +1,6 @@
 /**
  * @name WordsPerMinute
- * @version 1.0.1
+ * @version 1.0.2
  * @author danielsimonsen90
  * @authorLink https://github.com/danielsimonsen90
  * @description View your words per minute while typing your message
@@ -52,7 +52,7 @@ WScript.Quit();
 
 let meta = {
   "name": "words-per-minute",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "View your words per minute while typing your message",
   "author": "danielsimonsen90",
   "dependencies": {
@@ -875,7 +875,7 @@ function removeAllInjections() {
     injections = [];
 }
 
-const ChatFormSelector = "main[class*=chatContent] form";
+const ChatFormSelector = "[class*=chatContent] form";
 const WPMCountId = 'wpm-count';
 
 function createProperty(options) {
@@ -1050,7 +1050,7 @@ async function initChatForm(chatForm) {
     addEventListener(chatForm, 'keyup', onKeyUp);
     injectElement(chatForm, createElement(`<p id="${WPMCountId}" style="--leftAlign: ${Settings.current.leftAlign}">${wpm.get()} wpm</p>`));
 }
-function checkChatFormMod(forceClear) {
+async function checkChatFormMod(forceClear) {
     const wpmCount = document.getElementById(WPMCountId);
     if (wpmCount && forceClear)
         wpm.reset();

@@ -22,7 +22,7 @@ async function initChatForm(chatForm: HTMLElement) {
   injectElement(chatForm, createElement(`<p id="${WPMCountId}" style="--leftAlign: ${Settings.current.leftAlign}">${wpm.get()} wpm</p>`));
 }
 
-function checkChatFormMod(forceClear: boolean) {
+async function checkChatFormMod(forceClear: boolean) {
   const wpmCount = document.getElementById(WPMCountId);
   // If the wpm count is already set and forceClear is true, clear it 
   if (wpmCount && forceClear) wpm.reset();
