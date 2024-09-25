@@ -1,6 +1,6 @@
 /**
  * @name WordsPerMinute
- * @version 1.0.0
+ * @version 1.0.1
  * @author danielsimonsen90
  * @authorLink https://github.com/danielsimonsen90
  * @description View your words per minute while typing your message
@@ -52,7 +52,7 @@ WScript.Quit();
 
 let meta = {
   "name": "words-per-minute",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "View your words per minute while typing your message",
   "author": "danielsimonsen90",
   "dependencies": {
@@ -1028,6 +1028,10 @@ const HighscoresGroup = ({ type }) => {
             React.createElement("span", { id: `${PluginName}-${type}-date` }, date.toLocaleDateString()))));
 };
 function SettingsPanel() {
+    const { todayDate } = Highscores.current;
+    if (new Date(todayDate).toLocaleDateString() !== new Date().toLocaleDateString()) {
+        Highscores.update({ today: 0, todayDate: new Date().toLocaleDateString() });
+    }
     return (React.createElement("div", { className: `${PluginName}-settings`, style: { width: '100%' } },
         React.createElement(SettingsGroup, { settingsKey: "autoResetTime", title: "Auto Reset Time (ms)" }),
         React.createElement(SettingsGroup, { settingsKey: "leftAlign", title: "Left Align" }),

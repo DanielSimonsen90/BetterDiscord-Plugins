@@ -46,9 +46,9 @@ const HighscoresGroup: React.FC<{
   type: 'best' | 'today';
 }> = ({ type }) => {
   const { best, bestDate, today, todayDate } = Highscores.useCurrent();
-  const [value, date] = useMemo(() => type === 'best' 
-    ? [best, new Date(bestDate)] 
-    : [today, new Date(todayDate)], 
+  const [value, date] = useMemo(() => type === 'best'
+    ? [best, new Date(bestDate)]
+    : [today, new Date(todayDate)],
     [type, best, bestDate, today, todayDate]
   );
 
@@ -61,9 +61,15 @@ const HighscoresGroup: React.FC<{
       </p>
     </div>
   );
-}
+};
 
 export default function SettingsPanel() {
+  const { todayDate } = Highscores.current;
+
+  if (new Date(todayDate).toLocaleDateString() !== new Date().toLocaleDateString()) {
+    Highscores.update({ today: 0, todayDate: new Date().toLocaleDateString() });
+  }
+
   return (
     <div className={`${PluginName}-settings`} style={{ width: '100%' }}>
       <SettingsGroup settingsKey="autoResetTime" title="Auto Reset Time (ms)" />
