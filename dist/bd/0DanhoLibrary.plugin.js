@@ -1,6 +1,6 @@
 /**
  * @name 0Danholibrary
- * @version 1.0.0
+ * @version 1.3.0
  * @author danielsimonsen90
  * @authorLink https://github.com/danielsimonsen90
  * @description Library for Danho's plugins
@@ -54,7 +54,7 @@ let meta = {
   "name": "0danholibrary",
   "description": "Library for Danho's plugins",
   "author": "danielsimonsen90",
-  "version": "1.0.0",
+  "version": "1.3.0",
   "dependencies": {
     "dium": "*",
     "danho-lib": "*"
@@ -246,7 +246,7 @@ const patch = (type, object, method, callback, options) => {
         return result;
     } : (...args) => callback(cancel, original, ...args));
     if (!options.silent) {
-        log(`Patched ${options.name ?? String(method)}`);
+        log(`Patched ${type} ${options.name ?? String(method)}`);
     }
     return cancel;
 };
@@ -558,6 +558,18 @@ const Flex = /* @__PURE__ */ byKeys(["Child", "Justify"], { entries: true });
 
 const { FormSection, FormItem, FormTitle, FormText, FormLabel, FormDivider, FormSwitch, FormNotice } = Common;
 
+const FormElements = {
+    __proto__: null,
+    FormDivider,
+    FormItem,
+    FormLabel,
+    FormNotice,
+    FormSection,
+    FormSwitch,
+    FormText,
+    FormTitle
+};
+
 const margins = /* @__PURE__ */ byKeys(["marginBottom40", "marginTop4"]);
 
 const { Menu, Group: MenuGroup, Item: MenuItem, Separator: MenuSeparator, CheckboxItem: MenuCheckboxItem, RadioItem: MenuRadioItem, ControlItem: MenuControlItem } = BdApi.ContextMenu;
@@ -777,6 +789,10 @@ class ElementSelector {
     }
     role(role, tagName) {
         this.result += `${tagName ?? ''}[role="${role}"] `;
+        return this;
+    }
+    nth(index) {
+        this.result += `:nth-child(${index}) `;
         return this;
     }
     toString() {
@@ -1269,7 +1285,7 @@ class GlobalReq {
 const Cache = {
     modules: {}
 };
-function BDFDB_findByString(strings, config = {}) {
+function BDFDB_findByStrings(strings, config = {}) {
     strings = strings.flat(10);
     return findModule("string", JSON.stringify(strings), m => checkModuleStrings(m, strings) && m, config);
 }
@@ -1391,12 +1407,15 @@ function isObject(obj) {
 
 const BDFDB_Finder = {
     __proto__: null,
-    BDFDB_findByString
+    BDFDB_findByStrings
 };
 
 const findBySourceStrings = (...keywords) => BdApi.Webpack.getModule(m => m
+    && m != window
     && Object.keys(m).length
-    && Object.keys(m).some(k => typeof m[k] === 'function' && keywords.every(keyword => m[k].toString().includes(keyword))), { defaultExport: false, searchExports: true });
+    && (
+    Object.keys(m).some(k => typeof m[k] === 'function' && keywords.every(keyword => m[k].toString().includes(keyword))
+        || Object.keys(m).some(k => typeof m[k] === 'object' && m[k] && 'render' in m[k] && keywords.every(keyword => m[k].render.toString().includes(keyword))))), { defaultExport: false, searchExports: true });
 const findComponentBySourceStrings = async (...keywords) => {
     const jsxModule = Finder.byKeys(['jsx']);
     const ReactModule = Finder.byKeys(['createElement', 'cloneElement']);
@@ -1415,7 +1434,7 @@ const findComponentBySourceStrings = async (...keywords) => {
                     cancelCE();
                     resolve(component);
                 }
-            }, { silent: true });
+            }, { name: `findComponentBySourceStrings([${keywords.join(',')}])`, });
         }
         catch (err) {
             reject(err);
@@ -1441,7 +1460,7 @@ const Finder = {
 
 const Finder$1 = {
     __proto__: null,
-    BDFDB_findByString,
+    BDFDB_findByStrings,
     Finder,
     abort,
     all,
@@ -1460,9 +1479,82 @@ const Finder$1 = {
     waitFor
 };
 
-const styles$1 = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
+const styles$1 = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
 
 const TextInput = byName("TextInput");
+
+const ScrollerLooks = byKeys(['thin', 'fade']);
+const ScrollerAuto = byKeys(['ScrollerAuto']).ScrollerAuto;
+
+const UserProfileBadgeList = Finder.BDFDB_findByStrings(['QUEST_CONTENT_VIEWED', '"PRESS_BADGE"', 'PROFILE_USER_BADGES'], { defaultExport: false }).exports;
+const RenderedUserProfileBadgeList = UserProfileBadgeList;
+var BadgeTypes;
+(function (BadgeTypes) {
+    BadgeTypes["NITRO_ANY"] = "premium";
+    BadgeTypes["NITRO_BRONZE"] = "premium_tenure_1_month";
+    BadgeTypes["NITRO_SILVER"] = "premium_tenure_3_month";
+    BadgeTypes["NITRO_GOLD"] = "premium_tenure_6_month";
+    BadgeTypes["NITRO_PLATINUM"] = "premium_tenure_12_month";
+    BadgeTypes["NITRO_DIAMOND"] = "premium_tenure_24_month";
+    BadgeTypes["NITRO_EMERALD"] = "premium_tenure_36_month";
+    BadgeTypes["NITRO_RUBY"] = "premium_tenure_60_month";
+    BadgeTypes["NITRO_FIRE"] = "premium_tenure_72_month";
+    BadgeTypes["GUILD_BOOST_ANY"] = "booster";
+    BadgeTypes["GUILD_BOOST_1"] = "guild_booster_lvl1";
+    BadgeTypes["GUILD_BOOST_2"] = "guild_booster_lvl2";
+    BadgeTypes["GUILD_BOOST_3"] = "guild_booster_lvl3";
+    BadgeTypes["GUILD_BOOST_4"] = "guild_booster_lvl4";
+    BadgeTypes["GUILD_BOOST_5"] = "guild_booster_lvl5";
+    BadgeTypes["GUILD_BOOST_6"] = "guild_booster_lvl6";
+    BadgeTypes["GUILD_BOOST_7"] = "guild_booster_lvl7";
+    BadgeTypes["GUILD_BOOST_8"] = "guild_booster_lvl8";
+    BadgeTypes["GUILD_BOOST_9"] = "guild_booster_lvl9";
+    BadgeTypes["EARLY_SUPPORTER"] = "early_supporter";
+    BadgeTypes["HYPESQUAD_EVENTS"] = "hypesquad";
+    BadgeTypes["HYPESQUAD_BRAVERY"] = "hypesquad_house_1";
+    BadgeTypes["HYPESQUAD_BRILLIANCE"] = "hypesquad_house_2";
+    BadgeTypes["HYPESQUAD_BALANCE"] = "hypesquad_house_3";
+    BadgeTypes["ACTIVE_DEVELOPER"] = "active_developer";
+    BadgeTypes["SLASH_COMMANDS"] = "bot_commands";
+    BadgeTypes["EARLY_VERIFIED_DEVELOPER"] = "verified_developer";
+    BadgeTypes["BUG_HUNTER_GREEN"] = "bug_hunter_level_1";
+    BadgeTypes["BUG_HUNTER_GOLD"] = "bug_hunter_level_2";
+    BadgeTypes["STAFF"] = "staff";
+    BadgeTypes["MODERATOR"] = "certified_moderator";
+    BadgeTypes["PARTNER"] = "partner";
+    BadgeTypes["AUTO_MOD"] = "automod";
+    BadgeTypes["QUEST"] = "quest_completed";
+    BadgeTypes["LEGACY_USERNAME"] = "legacy_username";
+})(BadgeTypes || (BadgeTypes = {}));
+var BadgeIconIds;
+(function (BadgeIconIds) {
+    BadgeIconIds["active_developer"] = "6bdc42827a38498929a4920da12695d9";
+    BadgeIconIds["automod"] = "f2459b691ac7453ed6039bbcfaccbfcd";
+    BadgeIconIds["bot_commands"] = "6f9e37f9029ff57aef81db857890005e";
+    BadgeIconIds["bug_hunter_lvl1"] = "2717692c7dca7289b35297368a940dd0";
+    BadgeIconIds["bug_hunter_lvl2"] = "848f79194d4be5ff5f81505cbd0ce1e6";
+    BadgeIconIds["certified_moderator"] = "fee1624003e2fee35cb398e125dc479b";
+    BadgeIconIds["guild_booster_lvl1"] = "51040c70d4f20a921ad6674ff86fc95c";
+    BadgeIconIds["guild_booster_lvl2"] = "0e4080d1d333bc7ad29ef6528b6f2fb7";
+    BadgeIconIds["guild_booster_lvl3"] = "72bed924410c304dbe3d00a6e593ff59";
+    BadgeIconIds["guild_booster_lvl4"] = "df199d2050d3ed4ebf84d64ae83989f8";
+    BadgeIconIds["guild_booster_lvl5"] = "996b3e870e8a22ce519b3a50e6bdd52f";
+    BadgeIconIds["guild_booster_lvl6"] = "991c9f39ee33d7537d9f408c3e53141e";
+    BadgeIconIds["guild_booster_lvl7"] = "cb3ae83c15e970e8f3d410bc62cb8b99";
+    BadgeIconIds["guild_booster_lvl8"] = "7142225d31238f6387d9f09efaa02759";
+    BadgeIconIds["guild_booster_lvl9"] = "ec92202290b48d0879b7413d2dde3bab";
+    BadgeIconIds["hypesquad"] = "bf01d1073931f921909045f3a39fd264";
+    BadgeIconIds["hypesquad_house_1"] = "8a88d63823d8a71cd5e390baa45efa02";
+    BadgeIconIds["hypesquad_house_2"] = "011940fd013da3f7fb926e4a1cd2e618";
+    BadgeIconIds["hypesquad_house_3"] = "3aa41de486fa12454c3761e8e223442e";
+    BadgeIconIds["legacy_username"] = "6de6d34650760ba5551a79732e98ed60";
+    BadgeIconIds["partner"] = "3f9748e53446a137a052f3454e2de41e";
+    BadgeIconIds["premium"] = "2ba85e8026a8614b640c2837bcdfe21b";
+    BadgeIconIds["premium_early_supporter"] = "7060786766c9c840eb3019e725d2b358";
+    BadgeIconIds["quest_completed"] = "7d9ae358c8c5e118768335dbe68b4fb8";
+    BadgeIconIds["staff"] = "5e74e9b61934fc1f67c65515d1f7e60d";
+    BadgeIconIds["verified_developer"] = "6df5892e0f35b051f8b61eace34f4967";
+})(BadgeIconIds || (BadgeIconIds = {}));
 
 const { useState } = React;
 function Setting({ setting, settings, set, titles, ...props }) {
@@ -1507,6 +1599,33 @@ function Setting({ setting, settings, set, titles, ...props }) {
         React.createElement("h5", null, JSON.stringify(v))));
 }
 
+function TabBar({ tabs, ...props }) {
+    const { noTabsBackground, noContentBackground } = props;
+    const [activeTab, _setActiveTab] = React.useState((props.defaultTab ?? tabs.some(([key, value]) => typeof value === 'string' ? value === props.defaultTab : key === props.defaultTab)) ? props.defaultTab : tabs[0][0]);
+    const TabContent = typeof props[activeTab] === 'function'
+        ? props[activeTab]
+        : () => props[activeTab];
+    const setActiveTab = React.useCallback((tab) => {
+        if (props.beforeTabChange)
+            props.beforeTabChange(tab);
+        _setActiveTab(tab);
+    }, [props.beforeTabChange, props.onTabChange, tabs]);
+    React.useEffect(() => {
+        if (props.onTabChange)
+            props.onTabChange(activeTab);
+    }, [activeTab, props.onTabChange]);
+    React.useEffect(() => {
+        if (!tabs.find(([key]) => key === activeTab)?.[1]) {
+            _setActiveTab(tabs[0][0]);
+        }
+    }, [tabs]);
+    return (React.createElement("div", { className: "tab-bar" },
+        React.createElement("div", { className: classNames('tab-bar__tabs', noTabsBackground && 'tab-bar__tabs--no-color') }, tabs.map(([tab, title]) => title && React.createElement("button", { className: classNames("tab-bar__tab", activeTab === tab && 'tab-bar__tab--active'), key: tab, onClick: () => setActiveTab(tab) }, title))),
+        React.createElement("div", { className: classNames('tab-bar__content', noContentBackground && 'tab-bar__content--no-color') },
+            React.createElement(ScrollerAuto, { className: classNames(ScrollerLooks.auto, ScrollerLooks.thin, ScrollerLooks.fade) },
+                React.createElement(TabContent, null)))));
+}
+
 class DanhoLibrary {
     constructor() {
         this.Utils = Utils;
@@ -1528,17 +1647,51 @@ function buildPlugin(plugin) {
     return createPlugin(built);
 }
 
+const USER_TAGS = {
+    DANHO: 'danhosaur'
+};
 const DEFAULT_DISCORD_ROLE_COLOR = `153, 170, 181`;
+
 const Settings = createSettings({
     prettyRoles: true,
     defaultRoleColor: DEFAULT_DISCORD_ROLE_COLOR,
     groupRoles: true,
+    badges: true,
+    movePremiumBadge: true,
+    useClientCustomBadges: true,
+    pronounsPageLinks: true,
 });
 const titles = {
     prettyRoles: `Remove role circle, add more color to the roles`,
     defaultRoleColor: `Default role color`,
     groupRoles: `Widen roles that include "roles" in their name to make them stand out as a group`,
+    badges: `User badge modifications`,
+    movePremiumBadge: `Move the Nitro badge before the Server Boosting badge again`,
+    useClientCustomBadges: `Use your own custom badges`,
+    pronounsPageLinks: `Turn pronouns.page links into clickable links`,
 };
+const Badges = createSettings({
+    developer: {
+        name: 'Plugin Developer',
+        iconUrl: 'https://media.discordapp.net/attachments/1005212649212100720/1288452741307433060/PinguDev.png?ex=66f53c9f&is=66f3eb1f&hm=f89e366a09bf6e9a50374e204b680beaca65de941c9f0cc8177f8f4021ec87c7&=&format=webp&quality=lossless&width=18&height=18',
+        userTags: [USER_TAGS.DANHO],
+        position: {
+            before: BadgeTypes.ACTIVE_DEVELOPER,
+            default: 0
+        },
+        size: '16px'
+    },
+});
+
+function CreateSettingsGroup(callback) {
+    return function SettingsGroup(props) {
+        const { FormDivider } = FormElements;
+        const children = callback(React, props, Setting, FormElements);
+        return (React.createElement(React.Fragment, null,
+            React.createElement(FormDivider, null),
+            children));
+    };
+}
 
 function rgbToHex(rgb) {
     const integer = (((Math.round(rgb[0]) & 0xFF) << 16)
@@ -1563,23 +1716,28 @@ function hexToRgb(hex) {
     return [r, g, b];
 }
 
+const PrettyRolesSettings = CreateSettingsGroup((React, props, Setting, { FormSection }) => (React.createElement(FormSection, { title: "PrettyRoles Settings" },
+    React.createElement(Setting, { setting: "defaultRoleColor", type: "color", ...props, formatValue: rgbString => "#" + rgbToHex(rgbString.split(',').map(Number)), beforeChange: hex => hexToRgb(hex).join(',') }),
+    React.createElement(Setting, { setting: "groupRoles", ...props }))));
+
+const BadgesSettings = CreateSettingsGroup((React, props, Setting, { FormSection }) => {
+    return (React.createElement(FormSection, { title: "Badges Settings" },
+        React.createElement(Setting, { setting: "movePremiumBadge", ...props })));
+});
+
 function SettingsPanel() {
     const [settings, set] = Settings.useState();
-    const features = Settings.useSelector(({ prettyRoles }) => ({ prettyRoles }));
+    const tabs = Settings.useSelector(({ prettyRoles, badges }) => [
+        ['prettyRoles', prettyRoles ? 'Pretty Roles' : null],
+        ['badges', badges ? 'Badges' : null]
+    ]);
     const settingProps = { settings, set, titles };
     return (React.createElement("div", { className: "danho-plugin-settings" },
-        React.createElement(FormSection, null,
+        React.createElement(FormSection, { title: "Danho Library Features" },
             React.createElement(FormLabel, null, "Features"),
-            React.createElement(Setting, { setting: "prettyRoles", ...settingProps })),
-        features.prettyRoles && React.createElement(PrettyRolesSettings, { ...settingProps })));
-}
-function PrettyRolesSettings(props) {
-    return (React.createElement(React.Fragment, null,
-        React.createElement(FormDivider, null),
-        React.createElement(FormSection, null,
-            React.createElement(FormLabel, null, "Pretty Roles"),
-            React.createElement(Setting, { setting: "defaultRoleColor", type: "color", ...props, formatValue: rgbString => "#" + rgbToHex(rgbString.split(',').map(Number)), beforeChange: hex => hexToRgb(hex).join(',') }),
-            React.createElement(Setting, { setting: "groupRoles", ...props }))));
+            React.createElement(Setting, { setting: "prettyRoles", ...settingProps }),
+            React.createElement(Setting, { setting: "badges", ...settingProps })),
+        tabs.some(([_, value]) => value) && (React.createElement(TabBar, { tabs: tabs, prettyRoles: React.createElement(PrettyRolesSettings, { ...settingProps }), badges: React.createElement(BadgesSettings, { ...settingProps }) }))));
 }
 
 const PrettyRolesManager = new class PrettyRolesManager {
@@ -1618,7 +1776,11 @@ function afterRoleContextMenu() {
     });
 }
 
-function insteadRolesList(RolesListModule) {
+const RolesListModule = demangle({
+    RolesList: bySource$1('onAddRole')
+}, null, true);
+
+function insteadRolesList() {
     instead(RolesListModule, 'RolesList', ({ args, original }) => {
         const result = original(...args);
         PrettyRolesManager.context = result.props.children.props;
@@ -1626,7 +1788,7 @@ function insteadRolesList(RolesListModule) {
     });
 }
 
-function afterRolesList(RolesListModule) {
+function afterRolesList() {
     after(RolesListModule, 'RolesList', () => {
         $(s => s.role('list', 'div').and.ariaLabelContains('Role'))?.children().forEach(el => {
             const roleId = el.attr('data-list-item-id')?.split('_').pop();
@@ -1647,18 +1809,125 @@ function afterRolesList(RolesListModule) {
 const prettyRoles = "*[role=list][data-list-id*=roles] > div div:has([class*=roleRemoveButton][role=button]),\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveButton][role=button],\n*[role=list][data-list-id*=roles] > div [class*=roleFlowerStar],\n*[role=list][data-list-id*=roles] > div [class*=roleCircle] {\n  position: absolute;\n  inset: 0;\n  z-index: 1;\n}\n\n*[role=list][data-list-id*=roles] {\n  padding: 1rem;\n}\n*[role=list][data-list-id*=roles]:has(.danho-library__pretty-roles__group-role) div:has([class*=expandButton]) {\n  flex: 1 1 50%;\n}\n\n*[role=list][data-list-id*=roles] > div {\n  --role-color--default: rgb(86, 105, 118);\n  --role-color: var(--role-color--default);\n  --role-color-alpha: .125;\n  position: relative;\n  border: 1px solid rgb(var(--role-color, --role-color--default));\n  background-color: rgba(var(--role-color, --role-color--default), var(--role-color-alpha));\n  border-radius: 0.25rem;\n  height: 25px;\n  box-sizing: border-box;\n  justify-content: center;\n}\n*[role=list][data-list-id*=roles] > div [class*=roleCircle],\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveIcon] {\n  height: 100%;\n  width: 100%;\n}\n*[role=list][data-list-id*=roles] > div span[class*=roleCircle] {\n  background-color: unset !important;\n}\n*[role=list][data-list-id*=roles] > div svg[class*=roleRemoveIcon] {\n  display: none;\n}\n*[role=list][data-list-id*=roles] > div div:has(svg[class*=roleVerifiedIcon]) {\n  position: absolute;\n  top: -0.5rem;\n  left: -0.75rem;\n}\n*[role=list][data-list-id*=roles] > div:hover svg[class*=roleVerifiedIcon] {\n  display: inline-block !important;\n}\n\n.danho-library__pretty-roles__group-role {\n  flex: 1 1 100% !important;\n  margin-inline: -1rem;\n}";
 
 const isPrettyRolesEnabled = () => Settings.current.prettyRoles;
-function Feature() {
+function Feature$2() {
     if (!isPrettyRolesEnabled())
         return;
-    const RolesListModule = demangle({
-        RolesList: bySource$1('onAddRole')
-    }, null, true);
-    insteadRolesList(RolesListModule);
-    afterRolesList(RolesListModule);
+    insteadRolesList();
+    afterRolesList();
     afterRoleContextMenu();
 }
 
+let CustomBadge = null;
+function patchBadgeComponent(result) {
+    const TooltipWrapper = result.props.children[0].type;
+    const TooltipContent = result.props.children[0].props.children.type;
+    CustomBadge = ({ name, iconUrl, style }) => {
+        if (!name || !iconUrl)
+            return null;
+        return (React.createElement(TooltipWrapper, { text: name },
+            React.createElement(TooltipContent, null,
+                React.createElement("img", { src: iconUrl, alt: name, className: result.props.children[0].props.children.props.children[0].props.className, style: style }),
+                false)));
+    };
+}
+function insertBadges(result, badgeData) {
+    if (result.props.children.some(badge => badge.type === CustomBadge))
+        return;
+    const badges = result.props.children;
+    const newBadges = badgeData
+        .filter(({ userTags }) => userTags ? checkUserId(userTags) : true)
+        .sort((a, b) => getPosition(a.position) - getPosition(b.position))
+        .map(({ size, position, ...props }) => [position, React.createElement(CustomBadge, { key: props.name, ...props, style: { width: size, height: size } })]);
+    for (const [position, badge] of newBadges) {
+        badges.splice(getPosition(position), 0, badge);
+    }
+    function checkUserId(userTags) {
+        const userTag = $(s => s.role('dialog').className('userTag'))?.value.toString()
+            ?? $(s => s.className('userProfileOuter').className('userTag'))?.value.toString()
+            ?? $(s => s.className('accountProfileCard').className('usernameInnerRow'), false)
+                .map(dq => dq.children(undefined, true).value.toString())[1];
+        return userTags.includes(userTag);
+    }
+    function getPosition(position) {
+        if (position === undefined || position === 'end')
+            return badges.length;
+        if (position === 'start')
+            return 0;
+        if (typeof position === 'number')
+            return position;
+        const [startIndex, endIndex] = [position.before, position.after].map((badgeType, i) => badgeType
+            ? badges.findIndex(badge => badge.props.text.toLowerCase().includes(badgeType.toLowerCase())) + i
+            : -1);
+        return startIndex === -1 && endIndex === -1 && position.default === undefined ? badges.length
+            : startIndex === -1 && position.default === undefined ? endIndex
+                : endIndex === -1 && position.default === undefined ? startIndex
+                    : position.default === undefined ? Math.max(startIndex, endIndex) - Math.min(startIndex, endIndex)
+                        : position.default ?? badges.length;
+    }
+}
+
+function afterBadgeList() {
+    const { badges: badgesEnabled } = Settings.current;
+    if (!badgesEnabled)
+        return;
+    after(RenderedUserProfileBadgeList, 'Z', ({ result }) => {
+        if (!CustomBadge)
+            return patchBadgeComponent(result);
+        insertBadges(result, Object.values(Badges.current));
+    }, { name: 'BadgeList' });
+}
+
+function insteadBadgeList() {
+    const { badges: badgesEnabled, movePremiumBadge } = Settings.current;
+    if (!badgesEnabled || !movePremiumBadge)
+        return;
+    instead(UserProfileBadgeList, 'Z', ({ args: [props], original: BadgeList }) => {
+        if (movePremiumBadge)
+            movePremiumBeforeBoost();
+        return BadgeList(props);
+        function movePremiumBeforeBoost() {
+            const nitroBadge = props.badges.find(badge => badge.id.includes(BadgeTypes.NITRO_ANY));
+            const boosterBadgePos = props.badges.findIndex(badge => badge.id.includes('booster'));
+            if (!nitroBadge || boosterBadgePos === -1)
+                return BadgeList(props);
+            props.badges.splice(props.badges.indexOf(nitroBadge), 1);
+            props.badges.splice(boosterBadgePos - 1, 0, nitroBadge);
+        }
+    }, { name: 'BadgeList' });
+}
+
+function Feature$1() {
+    if (!Settings.current.badges)
+        return;
+    Badges.load();
+    insteadBadgeList();
+    afterBadgeList();
+}
+
+const TextModule = Finder.findBySourceStrings('lineClamp', 'tabularNumbers', 'scaleFontToUserSetting');
+
+function afterTextModule() {
+    after(TextModule, 'render', ({ args: [props], result }) => {
+        const { className, children: text } = props;
+        if (!className || !className.includes('pronounsText'))
+            return;
+        const regex = text.match(/pronouns\.page\/@(\w+)/);
+        if (!regex)
+            return;
+        const [matched, username] = regex;
+        result.props.children = (React.createElement("a", { href: `https://pronouns.page/@${username}`, target: "_blank", rel: "noreferrer noopener" }, matched));
+    }, { name: 'TextModule--Pronouns' });
+}
+
+function Feature() {
+    if (!Settings.current.pronounsPageLinks)
+        return;
+    afterTextModule();
+}
+
 function Features() {
+    Feature$2();
+    Feature$1();
     Feature();
 }
 const styles = [

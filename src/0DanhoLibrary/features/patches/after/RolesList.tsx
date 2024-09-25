@@ -1,12 +1,12 @@
 import { Patcher } from "@dium/api";
-import { RolesListModule } from "../../pretty-roles/types";
 import { $ } from "@danho-lib/DOM";
 import { hexToRgb, RGB, rgbToHex } from "@danho-lib/Utils/Colors";
 import { PrettyRolesManager } from "../../pretty-roles/manager";
 import { Settings } from "../../../Settings/Settings";
 import { DEFAULT_DISCORD_ROLE_COLOR } from "../../../constants";
+import RolesListModule from "@danho-lib/Patcher/RolesList";
 
-export default function afterRolesList(RolesListModule: RolesListModule) {
+export default function afterRolesList() {
   Patcher.after(RolesListModule, 'RolesList', () => {
     $(s => s.role('list', 'div').and.ariaLabelContains('Role'))?.children().forEach(el => {
       const roleId = el.attr('data-list-item-id')?.split('_').pop();

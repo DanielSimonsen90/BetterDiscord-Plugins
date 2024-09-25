@@ -170,7 +170,7 @@ const patch = (type, object, method, callback, options) => {
         return result;
     } : (...args) => callback(cancel, original, ...args));
     if (!options.silent) {
-        log(`Patched ${options.name ?? String(method)}`);
+        log(`Patched ${type} ${options.name ?? String(method)}`);
     }
     return cancel;
 };
@@ -430,6 +430,10 @@ class ElementSelector {
     }
     role(role, tagName) {
         this.result += `${tagName ?? ''}[role="${role}"] `;
+        return this;
+    }
+    nth(index) {
+        this.result += `:nth-child(${index}) `;
         return this;
     }
     toString() {

@@ -58,7 +58,7 @@ const patch = <Module, Key extends keyof Module>(
     );
 
     if (!options.silent) {
-        Logger.log(`Patched ${options.name ?? String(method)}`);
+        Logger.log(`Patched ${type} ${options.name ?? String(method)}`);
     }
 
     return cancel;

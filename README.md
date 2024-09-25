@@ -4,8 +4,12 @@
 ### [0DanhoLibrary](/dist/bd/0DanhoLibrary.plugin.js) <sub><sup>`v.1.0.0` *(Updated: 20/05/2022)*</sup></sub>
 General Discord changes and improvements including:
 * [PrettyRoles]: Make roles look better
+* [Badges]: Move Nitro badge back to after boost badge + add Plugin Developer badge
+* [Pronouns.page links]: Make pronouns.page links clickable
 * TODO: Order Forum posts by Author
-* ~~ActivityTab: Replace Guild Members aside with Tabbar of members and activities~~ - *Removed due to mass component updates, making patches glitchy*
+
+**Removed**
+* ActivityTab: Replace Guild Members aside with Tabbar of members and activities - *Removed due to mass component updates, making patches glitchy*
 
 ### [WordsPerMinute](/dist/bd/WordsPerMinute.plugin.js) <sub><sup>`v.1.0.0` *(Updated: 06/09/2024)*</sup></sub>
 While typing, it shows the words per minute you are typing. Saves the highest WPM that can be viewed in settings.

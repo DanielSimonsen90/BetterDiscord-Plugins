@@ -11,5 +11,5 @@ export default function afterBadgeList() {
     if (!CustomBadge) return patchBadgeComponent(result);
 
     insertBadges(result, Object.values(Badges.current));
-  });
+  }, { name: 'BadgeList' });
 }

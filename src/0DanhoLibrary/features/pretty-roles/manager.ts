@@ -1,6 +1,6 @@
+import RolesListModule from '@danho-lib/Patcher/RolesList';
 import { Snowflake } from '@discord/types/base';
 import { Role } from '@discord/types/guild/role';
-import { RolesListModule } from './types';
 
 export const PrettyRolesManager = new class PrettyRolesManager {
   context: ReturnType<RolesListModule['RolesList']>['props']['children']['props'];

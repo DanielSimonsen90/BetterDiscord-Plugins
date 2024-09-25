@@ -1,8 +1,8 @@
 import { Patcher } from "@dium/api";
-import { RolesListModule } from "../../pretty-roles/types";
 import { PrettyRolesManager } from "../../pretty-roles/manager";
+import RolesListModule from "@danho-lib/Patcher/RolesList";
 
-export default function insteadRolesList(RolesListModule: RolesListModule) {
+export default function insteadRolesList() {
   Patcher.instead(RolesListModule, 'RolesList', ({ args, original }) => {
     const result = original(...args);
     PrettyRolesManager.context = result.props.children.props;

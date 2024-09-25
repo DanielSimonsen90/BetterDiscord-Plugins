@@ -7,9 +7,15 @@ export * from './bdfdb';
 
 export const findBySourceStrings = <TResult = any>(...keywords: string[]) => BdApi.Webpack.getModule(m =>
   m
+  && m != window
   && Object.keys(m).length
-  && Object.keys(m).some(k => typeof m[k] === 'function' && keywords.every(keyword => m[k].toString().includes(keyword)))
-  , { defaultExport: false, searchExports: true }
+  && (
+    // Exported property is a function
+    Object.keys(m).some(k => typeof m[k] === 'function' && keywords.every(keyword => m[k].toString().includes(keyword))
+    // Exported property is an object with a render function
+    || Object.keys(m).some(k => typeof m[k] === 'object' && m[k] && 'render' in m[k] && keywords.every(keyword => m[k].render.toString().includes(keyword)))
+  )
+), { defaultExport: false, searchExports: true }
 ) as TResult;
 
 export const findComponentBySourceStrings = async <TResult = any>(...keywords: string[]) => {
@@ -18,7 +24,7 @@ export const findComponentBySourceStrings = async <TResult = any>(...keywords: s
 
   const component = await new Promise<TResult>((resolve, reject) => {
     try {
-
+      // According to actual plugin developers, custom comonents are rendered using the `jsx` module
       const cancelJsx = Patcher.after(jsxModule, 'jsx', ({ args: [component] }) => {
         if (typeof component === 'function' && keywords.every(keyword => component.toString().includes(keyword))) {
           cancelJsx();
@@ -27,13 +33,14 @@ export const findComponentBySourceStrings = async <TResult = any>(...keywords: s
         }
       }, { silent: true });
 
+      // According to actual plugin developers, default components are rendered using the `React` module
       const cancelCE = Patcher.after(ReactModule, 'createElement', ({ args: [component] }) => {
         if (typeof component === 'function' && keywords.every(keyword => component.toString().includes(keyword))) {
           cancelJsx();
           cancelCE();
           resolve(component);
         }
-      }, { silent: true });
+      }, { name: `findComponentBySourceStrings([${keywords.join(',')}])`,  });
     }
     catch (err) {
       reject(err);

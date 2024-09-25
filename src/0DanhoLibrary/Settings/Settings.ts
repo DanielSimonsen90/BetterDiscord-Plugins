@@ -11,7 +11,9 @@ export const Settings = createSettings({
 
   badges: true,
   movePremiumBadge: true,
-  useClientCustomBadges: true
+  useClientCustomBadges: true,
+
+  pronounsPageLinks: true,
 });
 
 export const titles: Record<keyof typeof Settings.current, string> = {
@@ -21,7 +23,9 @@ export const titles: Record<keyof typeof Settings.current, string> = {
 
   badges: `User badge modifications`,
   movePremiumBadge: `Move the Nitro badge before the Server Boosting badge again`,
-  useClientCustomBadges: `Use your own custom badges`
+  useClientCustomBadges: `Use your own custom badges`,
+
+  pronounsPageLinks: `Turn pronouns.page links into clickable links`,
 };
 
 export const Badges = createSettings({

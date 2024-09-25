@@ -1,6 +1,3 @@
-import { Filters, Finder } from '@dium/api';
-
-import { RolesListModule } from './types';
 import afterRoleContextMenu from '../patches/after/roleContextMenu';
 import insteadRolesList from '../patches/instead/RolesList';
 import afterRolesList from '../patches/after/RolesList';
@@ -12,11 +9,7 @@ export const isPrettyRolesEnabled = () => Settings.current.prettyRoles;
 export default function Feature() {
   if (!isPrettyRolesEnabled()) return;
 
-  const RolesListModule: RolesListModule = Finder.demangle({
-    RolesList: Filters.bySource('onAddRole')
-  }, null, true);
-
-  insteadRolesList(RolesListModule);
-  afterRolesList(RolesListModule);
+  insteadRolesList();
+  afterRolesList();
   afterRoleContextMenu();
 }
