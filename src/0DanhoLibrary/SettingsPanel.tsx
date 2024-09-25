@@ -15,7 +15,7 @@ type SettingProps = {
 
 export default function SettingsPanel() {
   const [settings, set] = Settings.useState();
-  const features = Settings.useSelector(({ prettyRoles }) => ({ prettyRoles }));
+  const features = Settings.useSelector(({ prettyRoles, badges }) => ({ prettyRoles, badges }));
 
   const settingProps: SettingProps = { settings, set, titles };
 
@@ -24,8 +24,10 @@ export default function SettingsPanel() {
       <FormSection>
         <FormLabel>Features</FormLabel>
         <Setting setting="prettyRoles" {...settingProps} />
+        <Setting setting="badges" {...settingProps} />
       </FormSection>
       {features.prettyRoles && <PrettyRolesSettings {...settingProps} />}
+      {features.badges && <BadgesSettings {...settingProps} />}
     </div>
   );
 }
@@ -40,6 +42,16 @@ function PrettyRolesSettings(props: SettingProps) {
         beforeChange={hex => hexToRgb(hex).join(',')}
       />
       <Setting setting="groupRoles" {...props} />
+    </FormSection>
+  </>)
+}
+
+function BadgesSettings(props: SettingProps) {
+  return (<>
+    <FormDivider />
+    <FormSection>
+      <FormLabel>Badges</FormLabel>
+      <Setting setting="movePremiumBadge" {...props} />
     </FormSection>
   </>)
 }

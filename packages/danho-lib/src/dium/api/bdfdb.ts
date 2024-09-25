@@ -39,7 +39,7 @@ const Cache = {
   modules: {}
 };
 
-export function BDFDB_findByString<TModule extends any = Module>(strings: string[], config: FinderConfig = {}): TModule {
+export function BDFDB_findByStrings<TModule extends any = Module>(strings: string[], config: FinderConfig = {}): TModule {
   strings = strings.flat(10);
   return findModule("string", JSON.stringify(strings), m => checkModuleStrings(m, strings) && m, config) as TModule;
 };
