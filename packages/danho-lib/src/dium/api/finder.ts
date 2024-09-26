@@ -2,13 +2,20 @@ import * as DiumFinder from '@dium/api/finder';
 import * as BDFDB_Finder from './bdfdb';
 import * as Logger from './logger';
 import { Patcher } from '@dium/api';
+import { SearchOptions } from 'betterdiscord';
 
 export * from '@dium/api/finder';
 export * from './bdfdb';
 
-export const findBySourceStrings = <TResult = any>(...keywords: (string | `backupId=${number}`)[]): TResult => {
-  const backupIdKeyword = keywords.find(k => k.startsWith('backupId='));
-  const backupId = backupIdKeyword ? backupIdKeyword.split('=')[1] : null;
+type AdditionalFindArgs = `backupId={number}` | SearchOptions<boolean>;
+type FindBySourceStringsArgs = [...string[]] | [...string[], AdditionalFindArgs];
+
+export const findBySourceStrings = <TResult = any>(...keywords: FindBySourceStringsArgs): TResult => {
+  const searchOptions = keywords.find(k => typeof k === 'object') as SearchOptions<boolean>;
+  if (searchOptions) keywords.splice(keywords.indexOf(searchOptions as any), 1);
+
+  const backupIdKeyword = keywords.find(k => k.toString().startsWith('backupId=')) as `backupId={number}`;
+  const backupId = backupIdKeyword ? backupIdKeyword.toString().split('=')[1] : null;
   const backupIdKeywordIndex = keywords.indexOf(backupIdKeyword);
   if (backupIdKeywordIndex > -1) keywords.splice(backupIdKeywordIndex, 1);
   if (backupId) Logger.log(`[findBySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
@@ -30,7 +37,7 @@ export const findBySourceStrings = <TResult = any>(...keywords: (string | `backu
 
     if (!filter && id === backupId) Logger.log(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, e);
     return filter;
-  }, { defaultExport: true, searchExports: true });
+  }, searchOptions ?? { searchExports: true });
 };
 
 export const findComponentBySourceStrings = async <TResult = JSX.BD.FC>(...keywords: string[]) => {

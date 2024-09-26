@@ -171,7 +171,7 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
       }
       return undefined;
     };
-    return getElement(this.element) ? new DQuery<El>(getElement(this.element) as El) as any : undefined;
+    return getElement(this.element) ? $(getElement(this.element) as El) as any : undefined;
   }
   public get firstChild() {
     return this.children()[0];
@@ -409,7 +409,7 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     return this;
   }
 
-  public replaceComponent(component: JSX.Element): DQuery<El> {
+  public replaceWithComponent(component: JSX.Element): DQuery<El> {
     BdApi.ReactDOM.render(component, this.element);
     return this;
   }
@@ -434,8 +434,8 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     return this;
   }
 
-  public on<E extends keyof HTMLElementEventMap>(event: E, listener: (this: DQuery<El>, ev: HTMLElementEventMap[E]) => any | Promise<any>): DQuery<El> {
-    this.element.addEventListener(event, listener.bind(this));
+  public on<E extends keyof HTMLElementEventMap>(event: E, listener: (this: DQuery<El>, ev: HTMLElementEventMap[E]) => any | Promise<any>, options?: AddEventListenerOptions): DQuery<El> {
+    this.element.addEventListener(event, listener.bind(this), options);
     return this;
   }
   public off<E extends keyof HTMLElementEventMap>(event: E, listener: (this: DQuery<El>, ev: HTMLElementEventMap[E]) => any | Promise<any>): DQuery<El> {

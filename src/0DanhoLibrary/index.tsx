@@ -3,10 +3,14 @@ import { Settings } from './Settings/Settings';
 import SettingsPanel from './Settings/Panel';
 
 import { Features, styles } from './features';
+import { ActionsEmitter } from '@danho-lib/Actions';
 
 export default DanhoLibrary({
   start() {
     Features();
+  },
+  stop() {
+    ActionsEmitter.removeAllListeners();
   },
 
   styles,

@@ -57,16 +57,20 @@ export class ElementSelector {
         this.result = this.result.substring(0, this.result.length - 1);
         return this;
     }
-    public mutationManagerId(id: string, tagName?: keyof HTMLElementTagNameMap) {
-        this.result += `${tagName ?? ''}[data-mutation-manager-id="${id}"] `;
-        return this;
-    }
     public data(prop: string, value?: string) {
         this.result += `[data-${prop}${value ? `="${value}"` : ''}] `;
         return this;
     }
+    public dataIncludes(prop: string, value: string) {
+        this.result += `[data-${prop}*="${value}"] `;
+        return this;
+    }
     public role(role: AriaRole, tagName?: keyof HTMLElementTagNameMap) {
         this.result += `${tagName ?? ''}[role="${role}"] `;
+        return this;
+    }
+    public type(type: string, tagName?: keyof HTMLElementTagNameMap) {
+        this.result += `${tagName ?? ''}[type="${type}"] `;
         return this;
     }
     public nth(index: number) {
