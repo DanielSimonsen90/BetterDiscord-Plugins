@@ -1,10 +1,10 @@
-import { EmojiStore } from "@danho-lib/Stores";
+import { Emoji, EmojiStore } from "@danho-lib/Stores";
 import createPatcherCallback from "@danho-lib/Patcher/CreatePatcherCallback";
 import { Settings } from "../Settings";
 
 export const isFavorFavoriteFeatureEnabled = () => Settings.current.enableFavorFavoriteEmojis;
 
-export const favorFavoriteEmojis = createPatcherCallback<EmojiStore['getSearchResultsOrder']>(({
+export const favorFavoriteEmojis = createPatcherCallback<EmojiStore['getSearchResultsOrder'], Emoji[]>(({
   args,
   original: __getStoreSearchResults
 }) => {

@@ -1,16 +1,15 @@
 import WaitForEmojiPicker from "@danho-lib/Modals/ExpressionPicker";
 import { Patcher } from "@dium/api";
-import { addBannedDataTagToEmojiElement, isBanFeatureEnabled } from "../../features/BanEmojis";
+import { addBannedDataTagToEmojiElement, addBannedTagToEmoji, isBanFeatureEnabled } from "../../features/BanEmojis";
 import insteadEmojiPickerContextMenu from "../instead/EmojiPickerContextMenu";
 
 export default function afterEmojiPicker() {
   if (!isBanFeatureEnabled()) return;
 
   return WaitForEmojiPicker((emojiPicker, key) => {
-    const cancel = Patcher.after(emojiPicker, key, data => {
+    Patcher.after(emojiPicker, key, data => {
+      addBannedTagToEmoji(data);
       addBannedDataTagToEmojiElement(data);
     }, { name: 'EmojiPicker' });
-    
-    return [cancel, insteadEmojiPickerContextMenu()];
   });
 }

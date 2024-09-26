@@ -1,49 +1,53 @@
-  .collapsible {
+.collapsible {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border: 1px solid var(--primary-500);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 1rem 0;
+
+  &__header {
     display: flex;
-    flex-direction: column;
-    width: 100%;
-    border: 1px solid var(--primary-500);
-    border-radius: 4px;
-    overflow: hidden;
-    margin: 1rem 0;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    color: var(--text-primary);
+    cursor: pointer;
 
-    &__header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.5rem 1rem;
-      color: var(--text-primary);
-      cursor: pointer;
+    >span::after {
+      content: '';
+      display: inline-block;
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 5px solid var(--interactive-muted);
+      margin-left: .5rem;
 
-      > span::after {
-        content: '';
-        display: inline-block;
-        width: 0;
-        height: 0;
-        border-left: 5px solid transparent;
-        border-right: 5px solid transparent;
-        border-top: 5px solid var(--interactive-muted);
-        margin-left: .5rem;
-
-        &:hover {
-          border-top-color: var(--interactive-hover);
-        }
+      &:hover {
+        border-top-color: var(--interactive-hover);
       }
     }
+  }
 
-    &__content {
-      padding: 0.5rem 1rem;
-      background-color: var(--background-secondary);
-      border-top: 1px solid var(--primary-500);
-    }
+  &__content {
+    padding: 0.5rem 1rem;
+    background-color: var(--background-secondary);
+    border-top: 1px solid var(--primary-500);
 
-    &[data-open=true] > &__header > span::after {
-      border-top: 5px solid transparent;
-      border-bottom: 5px solid var(--interactive-normal);
-    }
-
-    &[data-disabled=true] {
-      opacity: 0.5;
-      pointer-events: none;
+    &.hidden {
+      display: none;
     }
   }
+
+  &[data-open=true]>&__header>span::after {
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid var(--interactive-normal);
+  }
+
+  &[data-disabled=true] {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}

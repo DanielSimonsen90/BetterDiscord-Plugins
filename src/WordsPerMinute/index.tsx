@@ -36,13 +36,14 @@ async function checkChatFormMod(forceClear: boolean) {
 export default createPlugin({
   start() {
     checkChatFormMod(true);
-    setInterval(checkChatFormMod, 1000);
+    this.interval = setInterval(checkChatFormMod, 1000);
   },
 
   stop() {
     resetProperties();
     removeAllEventListeners();
     removeAllInjections();
+    clearInterval(this.interval);
   },
 
   Settings,

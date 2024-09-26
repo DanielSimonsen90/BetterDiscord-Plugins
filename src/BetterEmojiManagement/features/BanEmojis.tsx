@@ -28,14 +28,13 @@ export const sortBannedEmojisToEnd = function <TEmoji extends Emoji>(emojis: TEm
   });
 };
 
-export const sortBannedEmojisOnSearch = createPatcherCallback<EmojiStore['getSearchResultsOrder']>(({ args, original: __getStoreSearchResults }) => {
+export const sortBannedEmojisOnSearch = createPatcherCallback<EmojiStore['getSearchResultsOrder'], Emoji[]>(({ args, original: __getStoreSearchResults }) => {
   const emojis = __getStoreSearchResults(...args);
   return sortBannedEmojisToEnd(emojis);
 });
 
-export const addBannedTagToEmoji = createPatcherCallback<ExpressionPickerMenu[string]>(({ args: [props], original: emojiPicker }) => {
+export const addBannedTagToEmoji = createPatcherAfterCallback<ExpressionPickerMenu[string]>(({ result }) => {
   const bannedEmojis = Settings.current.bannedEmojis.map(e => e.id);
-  const result = emojiPicker(props);
   result.props.children = result.props.children.map((row) => {
     if (!row.props.descriptor) return row;
     const emojiId = row.props.descriptor.emoji.id;
@@ -49,8 +48,6 @@ export const addBannedTagToEmoji = createPatcherCallback<ExpressionPickerMenu[st
       }
     };
   });
-
-  return result;
 });
 
 export const addBannedDataTagToEmojiElement = createPatcherAfterCallback<ExpressionPickerMenu[string]>(({ result }) => {
@@ -58,7 +55,8 @@ export const addBannedDataTagToEmojiElement = createPatcherAfterCallback<Express
     if (!('data-banned-emoji' in row.props)) return;
 
     const emojiId = row.props.descriptor.emoji.id;
-    $(`[data-id="${emojiId}"]`).attr('data-banned-emoji', 'true');
+    if (!emojiId) return;
+    $(`[data-id="${emojiId}"]`)?.attr('data-banned-emoji', 'true');
   });
 });
 
@@ -90,7 +88,7 @@ export const renderBanEmojiMenuItem = function (menu: ExpressionPickerContextMen
   // return menu;
 };
 
-export const replaceEmojiStore_getDisambiguatedEmojiContext = createPatcherCallback<EmojiStore['getDisambiguatedEmojiContext']>(({ args, original: getDisambiguatedEmojiContext }) => {
+export const replaceEmojiStore_getDisambiguatedEmojiContext = createPatcherCallback<EmojiStore['getDisambiguatedEmojiContext'], any>(({ args, original: getDisambiguatedEmojiContext }) => {
   const result = getDisambiguatedEmojiContext(...args);
 
   return {

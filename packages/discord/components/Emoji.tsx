@@ -22,7 +22,7 @@ export const MessageStandardEmoji: MessageStandardEmoji = Finder.byName("Message
 export type MessageCustomEmoji = React.FunctionComponent<Props<EmojiNode>>;
 export const MessageCustomEmoji: MessageCustomEmoji = Finder.byName("MessageCustomEmoji");
 
-type MessageEmojiProps<IsCustom> = { isCustom: IsCustom } & If<IsCustom, Props<EmojiNode>, Props>;
+type MessageEmojiProps<IsCustom extends boolean> = { isCustom: IsCustom } & If<IsCustom, Props<EmojiNode>, Props>;
 export function MessageEmoji<IsCustom extends boolean = false>(props: MessageEmojiProps<IsCustom>) {
     return props.isCustom ? <MessageCustomEmoji {...props as Props<EmojiNode>} /> : <MessageStandardEmoji {...props as Props} />;
 }

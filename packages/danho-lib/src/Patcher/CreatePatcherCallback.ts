@@ -4,10 +4,10 @@ import { Patcher } from "@dium/api";
 //  callback: (data: Patcher.PatchData<TModule[TKey]>) => any
 // ) => callback;
 
-export const createPatcherCallback = <Data>(
-  callback: (data: Patcher.PatchData<Data>) => any
+export const createPatcherCallback = <TData, TResult = any>(
+  callback: (data: Patcher.PatchData<TData>) => TResult
 ) => callback;
-export const createPatcherAfterCallback = <Data>(
-  callback: (data: Patcher.PatchDataWithResult<Data>) => any
+export const createPatcherAfterCallback = <TData, TResult = void>(
+  callback: (data: Patcher.PatchDataWithResult<TData>) => TResult
 ) => callback;
 export default createPatcherCallback;

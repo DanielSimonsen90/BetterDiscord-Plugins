@@ -13,6 +13,8 @@ export default createPatcherAfterCallback<RolesListModule['RolesList']>(() => {
     if (!roleId) return;
 
     const role = PrettyRolesManager.getRole(roleId);
+    if (!role) return;
+
     el.setStyleProperty('--role-color',
       hexToRgb(role.colorString
         ?? rgbToHex(DEFAULT_DISCORD_ROLE_COLOR.split(',').map(Number) as RGB)).join(',')

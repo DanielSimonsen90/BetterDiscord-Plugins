@@ -52,7 +52,7 @@ function BannedEmojiSection() {
       <Collapsible title={disableCollapsible ? 'There are no banned emojis.' : 'View banned emojis'} disabled={disableCollapsible}>
         <ul className="banned-emojis__guilds-list">
           {guilds.map(({ guild, bannedEmojis }) => (
-            <li key={guild.id} className="banned-emojis__guild-list-item">
+            <li key={guild.id} className="banned-emojis__guilds-list-item">
               <Collapsible title={
                 <div className='banned-emojis__guilds-list-item__header'>
                   <GuildListItem guild={guild}>
