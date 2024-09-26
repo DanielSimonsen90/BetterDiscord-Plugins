@@ -1,6 +1,6 @@
 /**
  * @name 0Danholibrary
- * @version 1.3.0
+ * @version 1.5.0
  * @author danielsimonsen90
  * @authorLink https://github.com/danielsimonsen90
  * @description Library for Danho's plugins
@@ -54,7 +54,8 @@ let meta = {
   "name": "0danholibrary",
   "description": "Library for Danho's plugins",
   "author": "danielsimonsen90",
-  "version": "1.3.0",
+  "version": "1.5.0",
+  "development": true,
   "dependencies": {
     "dium": "*",
     "danho-lib": "*"
@@ -136,6 +137,7 @@ const Filters = {
     query: query$1
 };
 
+const sleep = (duration) => new Promise((resolve) => setTimeout(resolve, duration));
 const confirm = (title, content, options = {}) => BdApi.UI.showConfirmationModal(title, content, options);
 const mappedProxy = (target, mapping) => {
     const map = new Map(Object.entries(mapping));
@@ -168,16 +170,16 @@ const mappedProxy = (target, mapping) => {
     });
 };
 
-const find$1 = (filter, { resolve = true, entries = false } = {}) => BdApi.Webpack.getModule(filter, {
+const find$2 = (filter, { resolve = true, entries = false } = {}) => BdApi.Webpack.getModule(filter, {
     defaultExport: resolve,
     searchExports: entries
 });
-const query = (query, options) => find$1(query$1(query), options);
-const byEntries = (...filters) => find$1(join(...filters.map((filter) => byEntry(filter))));
-const byName = (name, options) => find$1(byName$1(name), options);
-const byKeys = (keys, options) => find$1(byKeys$1(...keys), options);
-const byProtos = (protos, options) => find$1(byProtos$1(...protos), options);
-const bySource = (contents, options) => find$1(bySource$1(...contents), options);
+const query = (query, options) => find$2(query$1(query), options);
+const byEntries = (...filters) => find$2(join(...filters.map((filter) => byEntry(filter))));
+const byName = (name, options) => find$2(byName$1(name), options);
+const byKeys = (keys, options) => find$2(byKeys$1(...keys), options);
+const byProtos = (protos, options) => find$2(byProtos$1(...protos), options);
+const bySource = (contents, options) => find$2(bySource$1(...contents), options);
 const all = {
     find: (filter, { resolve = true, entries = false } = {}) => BdApi.Webpack.getModule(filter, {
         first: false,
@@ -193,7 +195,7 @@ const all = {
 const resolveKey = (target, filter) => [target, Object.entries(target ?? {}).find(([, value]) => filter(value))?.[0]];
 const demangle = (mapping, required, proxy = false) => {
     const req = required ?? Object.keys(mapping);
-    const found = find$1((target) => (checkObjectValues(target)
+    const found = find$2((target) => (checkObjectValues(target)
         && req.every((req) => Object.values(target).some((value) => mapping[req](value)))));
     return proxy ? mappedProxy(found, Object.fromEntries(Object.entries(mapping).map(([key, filter]) => [
         key,
@@ -224,7 +226,7 @@ const DiumFinder = {
     byProtos,
     bySource,
     demangle,
-    find: find$1,
+    find: find$2,
     query,
     resolveKey,
     waitFor
@@ -234,6 +236,7 @@ const COLOR = "#3a71c1";
 const print = (output, ...data) => output(`%c[${getMeta().name}] %c${getMeta().version ? `(v${getMeta().version})` : ""}`, `color: ${COLOR}; font-weight: 700;`, "color: #666; font-size: .8em;", ...data);
 const log = (...data) => print(console.log, ...data);
 const warn = (...data) => print(console.warn, ...data);
+const error = (...data) => print(console.error, ...data);
 
 const patch = (type, object, method, callback, options) => {
     const original = object?.[method];
@@ -317,6 +320,8 @@ const UserUtils = {
     getPresenceState: () => PresenceStore$1.getState()
 };
 
+const Dispatcher$1 = /* @__PURE__ */ byKeys(["dispatch", "subscribe"]);
+
 const { default: Legacy, Dispatcher, Store, BatchedStoreListener, useStateFromStores } = /* @__PURE__ */ demangle({
     default: byKeys$1("Store", "connectStores"),
     Dispatcher: byProtos$1("dispatch"),
@@ -328,7 +333,8 @@ const { default: Legacy, Dispatcher, Store, BatchedStoreListener, useStateFromSt
 const MediaEngineStore = /* @__PURE__ */ byName("MediaEngineStore");
 
 const { React } = BdApi;
-const classNames = /* @__PURE__ */ find$1((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
+const classNames = /* @__PURE__ */ find$2((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
+const EventEmitter = /* @__PURE__ */ find$2((exports) => exports.prototype instanceof Object && Object.prototype.hasOwnProperty.call(exports.prototype, "prependOnceListener"));
 
 const ChannelMemberStore = byName('ChannelMemberStore');
 
@@ -544,10 +550,50 @@ const Utils = {
     get currentGuildMembers() { return currentGuildMembers(); },
 };
 
+const DISPATCH_ACTIONS = Dispatcher$1._subscriptions;
+function find$1(action) {
+    Object.keys(DISPATCH_ACTIONS).find(key => key.includes(action));
+}
+const ActionsEmitter = new class ActionsEmitter extends EventEmitter {
+    constructor() {
+        super(...arguments);
+        this._events = new Map();
+    }
+    on(eventName, listener) {
+        this._events.set(eventName, [...(this._events.get(eventName) ?? []), listener]);
+        Dispatcher$1.subscribe(eventName, listener);
+        return super.on(eventName, listener);
+    }
+    once(eventName, listener) {
+        this._events.set(eventName, [...(this._events.get(eventName) ?? []), listener]);
+        Dispatcher$1.subscribe(eventName, (...args) => {
+            listener(...args);
+            Dispatcher$1.unsubscribe(eventName, listener);
+            this._events.set(eventName, this._events.get(eventName).filter(l => l !== listener));
+        });
+        return super.once(eventName, listener);
+    }
+    off(eventName, listener) {
+        Dispatcher$1.unsubscribe(eventName, listener);
+        this._events.set(eventName, this._events.get(eventName).filter(l => l !== listener));
+        return super.off(eventName, listener);
+    }
+    removeAllListeners(event) {
+        this._events.forEach((listeners, event) => {
+            listeners.forEach(listener => Dispatcher$1.unsubscribe(event, listener));
+        });
+        this._events.clear();
+        return super.removeAllListeners(event);
+    }
+};
+
 const Actions = {
     __proto__: null,
+    ActionsEmitter,
+    DISPATCH_ACTIONS,
     GuildActions,
-    UserNoteActions
+    UserNoteActions,
+    find: find$1
 };
 
 const Common = /* @__PURE__ */ byKeys(["Button", "Switch", "Select"]);
@@ -779,16 +825,20 @@ class ElementSelector {
         this.result = this.result.substring(0, this.result.length - 1);
         return this;
     }
-    mutationManagerId(id, tagName) {
-        this.result += `${tagName ?? ''}[data-mutation-manager-id="${id}"] `;
-        return this;
-    }
     data(prop, value) {
         this.result += `[data-${prop}${value ? `="${value}"` : ''}] `;
         return this;
     }
+    dataIncludes(prop, value) {
+        this.result += `[data-${prop}*="${value}"] `;
+        return this;
+    }
     role(role, tagName) {
         this.result += `${tagName ?? ''}[role="${role}"] `;
+        return this;
+    }
+    type(type, tagName) {
+        this.result += `${tagName ?? ''}[type="${type}"] `;
         return this;
     }
     nth(index) {
@@ -953,7 +1003,7 @@ class DQuery {
             }
             return undefined;
         };
-        return getElement(this.element) ? new DQuery(getElement(this.element)) : undefined;
+        return getElement(this.element) ? $(getElement(this.element)) : undefined;
     }
     get firstChild() {
         return this.children()[0];
@@ -1177,7 +1227,7 @@ class DQuery {
         BdApi.ReactDOM.render(component, wrapper);
         return this;
     }
-    replaceComponent(component) {
+    replaceWithComponent(component) {
         BdApi.ReactDOM.render(component, this.element);
         return this;
     }
@@ -1197,8 +1247,8 @@ class DQuery {
         BdApi.ReactDOM.render(component, wrapper);
         return this;
     }
-    on(event, listener) {
-        this.element.addEventListener(event, listener.bind(this));
+    on(event, listener, options) {
+        this.element.addEventListener(event, listener.bind(this), options);
         return this;
     }
     off(event, listener) {
@@ -1211,6 +1261,10 @@ class DQuery {
 }
 function createElement(html, props = {}, target) {
     if (html === "<></>" || html.toLowerCase() === "fragment") {
+        if ('className' in props)
+            props.class = `bdd-wrapper ${props.className}`;
+        else
+            props.class = 'bdd-wrapper';
         html = `<div ${Object.entries(props).reduce((result, [key, value]) => {
             return result + `${key}="${value}" `;
         }, "")}></div>`;
@@ -1218,7 +1272,6 @@ function createElement(html, props = {}, target) {
     const element = (() => {
         if (html.startsWith('<')) {
             const element = new DOMParser().parseFromString(html, "text/html").body.firstElementChild;
-            element.classList.add("bdd-wrapper");
             return element;
         }
         return Object.assign(document.createElement(html), props);
@@ -1255,6 +1308,25 @@ function removeAllInjections() {
     injections = [];
 }
 
+function observeAppMountFor(callback, timeout, rejectMessage) {
+    return new Promise((resolve, reject) => {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (!mutation.addedNodes.length)
+                    return;
+                const result = callback();
+                if (result) {
+                    observer.disconnect();
+                    resolve(result);
+                }
+            });
+        });
+        observer.observe(document.querySelector('#app-mount'), { childList: true, subtree: true });
+        if (timeout)
+            setTimeout(() => reject(rejectMessage ?? 'Timeout'), timeout);
+    });
+}
+
 const DOM = {
     __proto__: null,
     $,
@@ -1263,6 +1335,7 @@ const DOM = {
     addEventListener,
     createElement,
     injectElement,
+    observeAppMountFor,
     removeAllEventListeners,
     removeAllInjections
 };
@@ -1410,15 +1483,34 @@ const BDFDB_Finder = {
     BDFDB_findByStrings
 };
 
-const findBySourceStrings = (...keywords) => BdApi.Webpack.getModule(m => m
-    && m != window
-    && Object.keys(m).length
-    && (
-    Object.keys(m).some(k => typeof m[k] === 'function' && keywords.every(keyword => m[k].toString().includes(keyword))
-        || Object.keys(m).some(k => typeof m[k] === 'object' && m[k] && 'render' in m[k] && keywords.every(keyword => m[k].render.toString().includes(keyword))))), { defaultExport: false, searchExports: true });
+const debugLog = (...data) => getMeta().development ? log(...data) : undefined;
+
+const findBySourceStrings = (...keywords) => {
+    const searchOptions = keywords.find(k => typeof k === 'object');
+    if (searchOptions)
+        keywords.splice(keywords.indexOf(searchOptions), 1);
+    const backupIdKeyword = keywords.find(k => k.toString().startsWith('backupId='));
+    const backupId = backupIdKeyword ? backupIdKeyword.toString().split('=')[1] : null;
+    const backupIdKeywordIndex = keywords.indexOf(backupIdKeyword);
+    if (backupIdKeywordIndex > -1)
+        keywords.splice(backupIdKeywordIndex, 1);
+    if (backupId)
+        log(`[findBySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
+    return BdApi.Webpack.getModule((e, m, id) => {
+        const filter = (e
+            && e != window
+            && Object.keys(e).length ? (
+        Object.keys(e).some(k => typeof e[k] === 'function' && keywords.every(keyword => e[k].toString().includes(keyword))
+            || Object.keys(e).some(k => typeof e[k] === 'object' && e[k] && 'render' in e[k] && keywords.every(keyword => e[k].render.toString().includes(keyword))))) : (typeof e === 'function' && keywords.every(keyword => e.toString().includes(keyword))));
+        if (!filter && id === backupId)
+            log(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, e);
+        return filter;
+    }, searchOptions ?? { searchExports: true });
+};
 const findComponentBySourceStrings = async (...keywords) => {
     const jsxModule = Finder.byKeys(['jsx']);
     const ReactModule = Finder.byKeys(['createElement', 'cloneElement']);
+    keywords = keywords.map(keyword => keyword.replace(/\s+/g, ''));
     const component = await new Promise((resolve, reject) => {
         try {
             const cancelJsx = after(jsxModule, 'jsx', ({ args: [component] }) => {
@@ -1457,8 +1549,9 @@ const Finder = {
     findBySourceStrings,
     findComponentBySourceStrings
 };
+const Finder$1 = Finder;
 
-const Finder$1 = {
+const Finder$2 = {
     __proto__: null,
     BDFDB_findByStrings,
     Finder,
@@ -1469,9 +1562,9 @@ const Finder$1 = {
     byName,
     byProtos,
     bySource,
-    default: Finder,
+    default: Finder$1,
     demangle,
-    find: find$1,
+    find: find$2,
     findBySourceStrings,
     findComponentBySourceStrings,
     query,
@@ -1486,7 +1579,7 @@ const TextInput = byName("TextInput");
 const ScrollerLooks = byKeys(['thin', 'fade']);
 const ScrollerAuto = byKeys(['ScrollerAuto']).ScrollerAuto;
 
-const UserProfileBadgeList = Finder.BDFDB_findByStrings(['QUEST_CONTENT_VIEWED', '"PRESS_BADGE"', 'PROFILE_USER_BADGES'], { defaultExport: false }).exports;
+const UserProfileBadgeList = Finder$1.BDFDB_findByStrings(['QUEST_CONTENT_VIEWED', '"PRESS_BADGE"', 'PROFILE_USER_BADGES'], { defaultExport: false }).exports;
 const RenderedUserProfileBadgeList = UserProfileBadgeList;
 var BadgeTypes;
 (function (BadgeTypes) {
@@ -1634,7 +1727,7 @@ class DanhoLibrary {
         this.DOM = DOM;
         this.Stores = Stores;
         this.Actions = Actions;
-        this.Finder = Finder$1;
+        this.Finder = Finder$2;
         this.Filters = Filters;
         this.styles = styles$1;
     }
@@ -1660,6 +1753,8 @@ const Settings = createSettings({
     movePremiumBadge: true,
     useClientCustomBadges: true,
     pronounsPageLinks: true,
+    allowForumSortByAuthor: true,
+    expandBioAgain: true,
 });
 const titles = {
     prettyRoles: `Remove role circle, add more color to the roles`,
@@ -1669,8 +1764,10 @@ const titles = {
     movePremiumBadge: `Move the Nitro badge before the Server Boosting badge again`,
     useClientCustomBadges: `Use your own custom badges`,
     pronounsPageLinks: `Turn pronouns.page links into clickable links`,
+    allowForumSortByAuthor: `Allow sorting forum posts by author`,
+    expandBioAgain: `Expand the bio section again by default`,
 };
-const Badges = createSettings({
+const Badges$1 = createSettings({
     developer: {
         name: 'Plugin Developer',
         iconUrl: 'https://media.discordapp.net/attachments/1005212649212100720/1288452741307433060/PinguDev.png?ex=66f53c9f&is=66f3eb1f&hm=f89e366a09bf6e9a50374e204b680beaca65de941c9f0cc8177f8f4021ec87c7&=&format=webp&quality=lossless&width=18&height=18',
@@ -1679,9 +1776,11 @@ const Badges = createSettings({
             before: BadgeTypes.ACTIVE_DEVELOPER,
             default: 0
         },
-        size: '16px'
+        size: '14px'
     },
 });
+
+const renderChildren = (children, props = {}) => children.map(child => React.createElement(child.tagName, Array.from(child.attributes).reduce((acc, { name, value }) => ({ ...acc, [name]: value }), props), child.outerHTML.match(/</g).length > 2 ? renderChildren(Array.from(child.children)) : child.textContent));
 
 function CreateSettingsGroup(callback) {
     return function SettingsGroup(props) {
@@ -1734,9 +1833,11 @@ function SettingsPanel() {
     const settingProps = { settings, set, titles };
     return (React.createElement("div", { className: "danho-plugin-settings" },
         React.createElement(FormSection, { title: "Danho Library Features" },
-            React.createElement(FormLabel, null, "Features"),
             React.createElement(Setting, { setting: "prettyRoles", ...settingProps }),
-            React.createElement(Setting, { setting: "badges", ...settingProps })),
+            React.createElement(Setting, { setting: "badges", ...settingProps }),
+            React.createElement(Setting, { setting: "pronounsPageLinks", ...settingProps }),
+            React.createElement(Setting, { setting: "allowForumSortByAuthor", ...settingProps }),
+            React.createElement(Setting, { setting: "expandBioAgain", ...settingProps })),
         tabs.some(([_, value]) => value) && (React.createElement(TabBar, { tabs: tabs, prettyRoles: React.createElement(PrettyRolesSettings, { ...settingProps }), badges: React.createElement(BadgesSettings, { ...settingProps }) }))));
 }
 
@@ -1756,23 +1857,27 @@ const PrettyRolesManager = new class PrettyRolesManager {
     }
 };
 
+function modifyRoleContextMenu(result) {
+    if (!PrettyRolesManager.context)
+        return result;
+    const roleId = result.props.children.props.id.split('-').pop();
+    const role = PrettyRolesManager.getRole(roleId);
+    PrettyRolesManager.role = role;
+    if (!PrettyRolesManager.canRemoveRole())
+        return result;
+    result.props.children = [
+        React.createElement(MenuGroup, null,
+            React.createElement(MenuItem, { color: 'danger', id: "pretty-roles__remove-role", label: `Remove role`, action: () => {
+                    PrettyRolesManager.removeRole();
+                } })),
+        result.props.children,
+    ];
+    return result;
+}
+
 function afterRoleContextMenu() {
     contextMenu('dev-context', result => {
-        if (!PrettyRolesManager.context)
-            return result;
-        const roleId = result.props.children.props.id.split('-').pop();
-        const role = PrettyRolesManager.getRole(roleId);
-        PrettyRolesManager.role = role;
-        if (!PrettyRolesManager.canRemoveRole())
-            return result;
-        result.props.children = [
-            React.createElement(MenuGroup, null,
-                React.createElement(MenuItem, { color: 'danger', id: "pretty-roles__remove-role", label: `Remove role`, action: () => {
-                        PrettyRolesManager.removeRole();
-                    } })),
-            result.props.children,
-        ];
-        return result;
+        return modifyRoleContextMenu(result);
     });
 }
 
@@ -1780,36 +1885,48 @@ const RolesListModule = demangle({
     RolesList: bySource$1('onAddRole')
 }, null, true);
 
+const createPatcherCallback = (callback) => callback;
+const createPatcherAfterCallback = (callback) => callback;
+const createPatcherCallback$1 = createPatcherCallback;
+
+const setManagerContext = createPatcherCallback$1(({ args, original }) => {
+    const result = original(...args);
+    PrettyRolesManager.context = result.props.children.props;
+    return result;
+});
+
 function insteadRolesList() {
-    instead(RolesListModule, 'RolesList', ({ args, original }) => {
-        const result = original(...args);
-        PrettyRolesManager.context = result.props.children.props;
-        return result;
+    instead(RolesListModule, 'RolesList', (data) => {
+        return setManagerContext(data);
     });
 }
 
+const prettifyRoles = createPatcherAfterCallback(() => {
+    $(s => s.role('list', 'div').and.ariaLabelContains('Role'))?.children().forEach(el => {
+        const roleId = el.attr('data-list-item-id')?.split('_').pop();
+        if (!roleId)
+            return;
+        const role = PrettyRolesManager.getRole(roleId);
+        el.setStyleProperty('--role-color', hexToRgb(role.colorString
+            ?? rgbToHex(DEFAULT_DISCORD_ROLE_COLOR.split(',').map(Number))).join(','));
+        if (Settings.current.groupRoles) {
+            const isGroupRole = role.name.toLowerCase().includes('roles');
+            if (isGroupRole)
+                el.addClass('danho-library__pretty-roles__group-role');
+        }
+    });
+});
+
 function afterRolesList() {
-    after(RolesListModule, 'RolesList', () => {
-        $(s => s.role('list', 'div').and.ariaLabelContains('Role'))?.children().forEach(el => {
-            const roleId = el.attr('data-list-item-id')?.split('_').pop();
-            if (!roleId)
-                return;
-            const role = PrettyRolesManager.getRole(roleId);
-            el.setStyleProperty('--role-color', hexToRgb(role.colorString
-                ?? rgbToHex(DEFAULT_DISCORD_ROLE_COLOR.split(',').map(Number))).join(','));
-            if (Settings.current.groupRoles) {
-                const isGroupRole = role.name.toLowerCase().includes('roles');
-                if (isGroupRole)
-                    el.addClass('danho-library__pretty-roles__group-role');
-            }
-        });
+    after(RolesListModule, 'RolesList', (data) => {
+        prettifyRoles(data);
     });
 }
 
 const prettyRoles = "*[role=list][data-list-id*=roles] > div div:has([class*=roleRemoveButton][role=button]),\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveButton][role=button],\n*[role=list][data-list-id*=roles] > div [class*=roleFlowerStar],\n*[role=list][data-list-id*=roles] > div [class*=roleCircle] {\n  position: absolute;\n  inset: 0;\n  z-index: 1;\n}\n\n*[role=list][data-list-id*=roles] {\n  padding: 1rem;\n}\n*[role=list][data-list-id*=roles]:has(.danho-library__pretty-roles__group-role) div:has([class*=expandButton]) {\n  flex: 1 1 50%;\n}\n\n*[role=list][data-list-id*=roles] > div {\n  --role-color--default: rgb(86, 105, 118);\n  --role-color: var(--role-color--default);\n  --role-color-alpha: .125;\n  position: relative;\n  border: 1px solid rgb(var(--role-color, --role-color--default));\n  background-color: rgba(var(--role-color, --role-color--default), var(--role-color-alpha));\n  border-radius: 0.25rem;\n  height: 25px;\n  box-sizing: border-box;\n  justify-content: center;\n}\n*[role=list][data-list-id*=roles] > div [class*=roleCircle],\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveIcon] {\n  height: 100%;\n  width: 100%;\n}\n*[role=list][data-list-id*=roles] > div span[class*=roleCircle] {\n  background-color: unset !important;\n}\n*[role=list][data-list-id*=roles] > div svg[class*=roleRemoveIcon] {\n  display: none;\n}\n*[role=list][data-list-id*=roles] > div div:has(svg[class*=roleVerifiedIcon]) {\n  position: absolute;\n  top: -0.5rem;\n  left: -0.75rem;\n}\n*[role=list][data-list-id*=roles] > div:hover svg[class*=roleVerifiedIcon] {\n  display: inline-block !important;\n}\n\n.danho-library__pretty-roles__group-role {\n  flex: 1 1 100% !important;\n  margin-inline: -1rem;\n}";
 
 const isPrettyRolesEnabled = () => Settings.current.prettyRoles;
-function Feature$2() {
+function Feature$4() {
     if (!isPrettyRolesEnabled())
         return;
     insteadRolesList();
@@ -1817,8 +1934,17 @@ function Feature$2() {
     afterRoleContextMenu();
 }
 
+const PrettyRoles = {
+    __proto__: null,
+    default: Feature$4,
+    isPrettyRolesEnabled,
+    styles: prettyRoles
+};
+
 let CustomBadge = null;
 function patchBadgeComponent(result) {
+    if (!result.props.children[0])
+        return;
     const TooltipWrapper = result.props.children[0].type;
     const TooltipContent = result.props.children[0].props.children.type;
     CustomBadge = ({ name, iconUrl, style }) => {
@@ -1831,6 +1957,8 @@ function patchBadgeComponent(result) {
     };
 }
 function insertBadges(result, badgeData) {
+    if (!result)
+        return;
     if (result.props.children.some(badge => badge.type === CustomBadge))
         return;
     const badges = result.props.children;
@@ -1866,77 +1994,197 @@ function insertBadges(result, badgeData) {
     }
 }
 
+function movePremiumBeforeBoost(props) {
+    const nitroBadge = props.children.find(badge => badge.props.children.props.href?.includes(BadgeTypes.NITRO_ANY));
+    const boosterBadgePos = props.children.findIndex(badge => badge.props.text.toLowerCase().includes('boost'));
+    if (!nitroBadge || boosterBadgePos === -1)
+        return props;
+    props.children.splice(props.children.indexOf(nitroBadge), 1);
+    props.children.splice(boosterBadgePos - 1, 0, nitroBadge);
+    return props;
+}
+
+const modifyBadges = createPatcherAfterCallback(({ result }) => {
+    if (!CustomBadge)
+        return patchBadgeComponent(result);
+    if (Settings.current.movePremiumBadge)
+        movePremiumBeforeBoost(result.props);
+    insertBadges(result, Object.values(Badges$1.current));
+});
+
 function afterBadgeList() {
-    const { badges: badgesEnabled } = Settings.current;
-    if (!badgesEnabled)
-        return;
-    after(RenderedUserProfileBadgeList, 'Z', ({ result }) => {
-        if (!CustomBadge)
-            return patchBadgeComponent(result);
-        insertBadges(result, Object.values(Badges.current));
+    after(RenderedUserProfileBadgeList, 'Z', data => {
+        modifyBadges(data);
     }, { name: 'BadgeList' });
 }
 
-function insteadBadgeList() {
-    const { badges: badgesEnabled, movePremiumBadge } = Settings.current;
-    if (!badgesEnabled || !movePremiumBadge)
-        return;
-    instead(UserProfileBadgeList, 'Z', ({ args: [props], original: BadgeList }) => {
-        if (movePremiumBadge)
-            movePremiumBeforeBoost();
-        return BadgeList(props);
-        function movePremiumBeforeBoost() {
-            const nitroBadge = props.badges.find(badge => badge.id.includes(BadgeTypes.NITRO_ANY));
-            const boosterBadgePos = props.badges.findIndex(badge => badge.id.includes('booster'));
-            if (!nitroBadge || boosterBadgePos === -1)
-                return BadgeList(props);
-            props.badges.splice(props.badges.indexOf(nitroBadge), 1);
-            props.badges.splice(boosterBadgePos - 1, 0, nitroBadge);
-        }
-    }, { name: 'BadgeList' });
-}
-
-function Feature$1() {
+function Feature$3() {
     if (!Settings.current.badges)
         return;
-    Badges.load();
-    insteadBadgeList();
+    Badges$1.load();
     afterBadgeList();
 }
 
-const TextModule = Finder.findBySourceStrings('lineClamp', 'tabularNumbers', 'scaleFontToUserSetting');
+const Badges = {
+    __proto__: null,
+    default: Feature$3
+};
+
+const TextModule = Finder$1.findBySourceStrings('lineClamp', 'tabularNumbers', 'scaleFontToUserSetting');
+
+const transformTextIntoLinks = createPatcherAfterCallback(({ args: [props], result }) => {
+    const { className, children: text } = props;
+    if (!className || !className.includes('pronounsText'))
+        return;
+    const regex = text.match(/pronouns\.page\/@(\w+)/);
+    if (!regex)
+        return;
+    const [matched, username] = regex;
+    result.props.children = (React.createElement("a", { href: `https://pronouns.page/@${username}`, target: "_blank", rel: "noreferrer noopener" }, matched));
+});
 
 function afterTextModule() {
-    after(TextModule, 'render', ({ args: [props], result }) => {
-        const { className, children: text } = props;
-        if (!className || !className.includes('pronounsText'))
-            return;
-        const regex = text.match(/pronouns\.page\/@(\w+)/);
-        if (!regex)
-            return;
-        const [matched, username] = regex;
-        result.props.children = (React.createElement("a", { href: `https://pronouns.page/@${username}`, target: "_blank", rel: "noreferrer noopener" }, matched));
+    after(TextModule, 'render', (data) => {
+        transformTextIntoLinks(data);
     }, { name: 'TextModule--Pronouns' });
 }
 
-function Feature() {
+function Feature$2() {
     if (!Settings.current.pronounsPageLinks)
         return;
     afterTextModule();
 }
 
-function Features() {
-    Feature$2();
-    Feature$1();
-    Feature();
+const PronounsPageLinks = {
+    __proto__: null,
+    default: Feature$2
+};
+
+const { focused } = byKeys(['focused', 'item', 'labelContainer']);
+const SortByAuthorOption = ({ sortOptionClone, orderPostsByAuthor }) => {
+    const [className, dispatch] = React.useReducer((state, action) => {
+        switch (action) {
+            case 'hover': return `${state} ${focused}`;
+            case 'default': return state.replace(focused, '').trim();
+            default: return state;
+        }
+    }, sortOptionClone.className);
+    return (React.createElement("div", { "data-custom-option": true, className: className, onMouseOver: () => dispatch('hover'), onMouseOut: () => dispatch('default'), style: { maxHeight: '1rem', }, onClick: orderPostsByAuthor }, Array.from(sortOptionClone.children).map(child => {
+        if (child.className.includes('label'))
+            child.textContent = 'Author';
+        return renderChildren([child], { style: { maxHeight: '1rem', } });
+    })));
+};
+
+async function addSortByAuthorOnDOM() {
+    const sortGroup = await observeAppMountFor(() => $('#sort-and-view')?.children(s => s.ariaLabel('Sort by').and.role('group'), true), 5000, 'Sort group not found or took too long');
+    if (typeof sortGroup === 'string')
+        return error(sortGroup);
+    if (sortGroup.children('.bdd-wrapper').length)
+        return;
+    sortGroup.children('li').forEach(el => el.on('click', () => $('[data-custom-option] circle').unmount()));
+    const sortOptionClone = sortGroup.lastChild.element.cloneNode(true);
+    sortOptionClone.querySelector('circle')?.remove();
+    sortGroup.appendHtml('<></>').lastChild.replaceWithComponent(React.createElement(SortByAuthorOption, { sortOptionClone, orderPostsByAuthor }));
+    log('Sort by author added to DOM');
 }
-const styles = [
-    prettyRoles,
-].join("\n\n");
+function orderPostsByAuthor() {
+    const postsContainer = $(s => s.role('list').and.dataIncludes('list-id', 'forum-channel-list'))?.children(undefined, true);
+    if (!postsContainer)
+        return error('Posts not found');
+    const posts = postsContainer.children('li').reduce((acc, post) => {
+        const author = post.children(s => s.className('author').className('username'), true);
+        if (!author.element)
+            return acc;
+        const authorName = author.value.toString();
+        if (!authorName) {
+            error('Author not found', post);
+            return acc;
+        }
+        return acc.set(authorName, [...(acc.get(authorName) ?? []), post]);
+    }, new Map());
+    if (!posts.size)
+        return error('No posts found');
+    const sortedAuthors = Array.from(posts.keys()).sort();
+    postsContainer.children('li').forEach(post => post.unmount());
+    sortedAuthors.forEach(author => postsContainer.appendElements(posts.get(author)));
+    $('#sort-and-view')
+        .children('.bdd-wrapper svg', true)
+        .appendElements([$('#sort-and-view').children('circle', true).element]);
+    $(s => s.id('sort-and-view').role('group').and.ariaLabel('Sort by'))
+        .children('circle')
+        .forEach((el) => {
+        if (el.ancestor('.bdd-wrapper'))
+            return;
+        el.unmount();
+    });
+}
+
+async function patchSortAndView() {
+    const addSortAndViewButtonClick = () => {
+        if (!testForumChannel())
+            return;
+        const sortAndViewButton = $(s => s.ariaLabel('Sort & view').and.type('button'));
+        sortAndViewButton?.on('click', addSortByAuthorOnDOM);
+        debugLog(sortAndViewButton ? 'Sort and view button found' : 'Sort and view button not found');
+    };
+    addSortAndViewButtonClick();
+    ActionsEmitter.on('CHANNEL_SELECT', async () => {
+        await sleep(1000);
+        addSortAndViewButtonClick();
+    });
+}
+function testForumChannel() {
+    const [_blank, _channelsString, _guildId, channelId] = window.location.pathname.split('/');
+    const channel = ChannelStore.getChannel(channelId);
+    if (!channel)
+        return false;
+    return channel.type === 15 ;
+}
+
+function Feature$1() {
+    if (!Settings.current.allowForumSortByAuthor)
+        return;
+    patchSortAndView();
+}
+
+const SortForumsByAuthor = {
+    __proto__: null,
+    default: Feature$1
+};
+
+const style = ".danho-expand-bio-again div[class*=descriptionClamp] {\n  display: block !important;\n  max-height: unset !important;\n}\n.danho-expand-bio-again button[class*=viewFullBio] {\n  display: none !important;\n}";
+
+function Feature() {
+    if (!Settings.current.expandBioAgain)
+        return;
+    $('#app-mount').addClass('danho-expand-bio-again');
+}
+
+const ExpandBioAgain = {
+    __proto__: null,
+    default: Feature,
+    styles: style
+};
+
+const features = [
+    PrettyRoles,
+    Badges,
+    PronounsPageLinks,
+    SortForumsByAuthor,
+    ExpandBioAgain,
+];
+const Features = () => features.forEach(feature => feature.default());
+const styles = features.map(feature => 'styles' in feature ? feature.styles
+    : 'style' in feature ? feature.style
+        : '').join("\n\n");
 
 const index = buildPlugin({
     start() {
         Features();
+    },
+    stop() {
+        ActionsEmitter.removeAllListeners();
     },
     styles,
     Settings,

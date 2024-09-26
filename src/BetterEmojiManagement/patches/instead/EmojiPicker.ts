@@ -8,6 +8,6 @@ export default function insteadEmojiPicker() {
   return WaitForEmojiPicker((emojiPicker, key) => {
     Patcher.instead(emojiPicker, key, data => {
       return addBannedTagToEmoji(data);
-    });
+    }, { name: 'EmojiPicker' });
   });
 }

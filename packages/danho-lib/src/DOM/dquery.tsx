@@ -451,6 +451,8 @@ export default $;
 
 export function createElement(html: string | '<></>' | 'fragment' | keyof HTMLElementTagNameMap, props: Record<string, any> = {}, target?: Selector): HTMLElement {
   if (html === "<></>" || html.toLowerCase() === "fragment") {
+    if ('className' in props) props.class = `bdd-wrapper ${props.className}`;
+    else props.class = 'bdd-wrapper';
     html = `<div ${Object.entries(props).reduce((result, [key, value]) => {
       return result + `${key}="${value}" `;
     }, "")}></div>`;
@@ -459,7 +461,7 @@ export function createElement(html: string | '<></>' | 'fragment' | keyof HTMLEl
   const element = (() => {
     if (html.startsWith('<')) {
       const element = new DOMParser().parseFromString(html, "text/html").body.firstElementChild as HTMLElement;
-      element.classList.add("bdd-wrapper");
+      // element.classList.add("bdd-wrapper");
       return element;
     }
     return Object.assign(document.createElement(html), props);

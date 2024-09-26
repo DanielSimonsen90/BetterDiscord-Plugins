@@ -1,5 +1,5 @@
 import { React } from "@dium/modules";
-import { FormDivider, FormLabel, FormSection } from "@dium/components";
+import { FormSection } from "@dium/components";
 import { Setting, TabBar } from "@components/index";
 
 import { Settings, titles } from "../Settings";
@@ -19,9 +19,11 @@ export default function SettingsPanel() {
   return (
     <div className="danho-plugin-settings">
       <FormSection title="Danho Library Features">
-        <FormLabel>Features</FormLabel>
         <Setting setting="prettyRoles" {...settingProps} />
         <Setting setting="badges" {...settingProps} />
+        <Setting setting="pronounsPageLinks" {...settingProps} />
+        <Setting setting="allowForumSortByAuthor" {...settingProps} />
+        <Setting setting="expandBioAgain" {...settingProps} />
       </FormSection>
       {tabs.some(([_, value]) => value) && (
         <TabBar tabs={tabs}

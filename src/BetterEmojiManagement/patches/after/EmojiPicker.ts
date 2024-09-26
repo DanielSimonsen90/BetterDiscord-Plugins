@@ -9,7 +9,7 @@ export default function afterEmojiPicker() {
   return WaitForEmojiPicker((emojiPicker, key) => {
     const cancel = Patcher.after(emojiPicker, key, data => {
       addBannedDataTagToEmojiElement(data);
-    });
+    }, { name: 'EmojiPicker' });
     
     return [cancel, insteadEmojiPickerContextMenu()];
   });

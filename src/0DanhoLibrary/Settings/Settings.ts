@@ -14,6 +14,8 @@ export const Settings = createSettings({
   useClientCustomBadges: true,
 
   pronounsPageLinks: true,
+  allowForumSortByAuthor: true,
+  expandBioAgain: true,
 });
 
 export const titles: Record<keyof typeof Settings.current, string> = {
@@ -26,6 +28,8 @@ export const titles: Record<keyof typeof Settings.current, string> = {
   useClientCustomBadges: `Use your own custom badges`,
 
   pronounsPageLinks: `Turn pronouns.page links into clickable links`,
+  allowForumSortByAuthor: `Allow sorting forum posts by author`,
+  expandBioAgain: `Expand the bio section again by default`,
 };
 
 export const Badges = createSettings({
@@ -37,6 +41,6 @@ export const Badges = createSettings({
       before: BadgeTypes.ACTIVE_DEVELOPER,
       default: 0
     },
-    size: '16px'
+    size: '14px'
   } as CustomBadgeData,
 });

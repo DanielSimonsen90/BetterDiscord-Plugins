@@ -6,7 +6,13 @@ General Discord changes and improvements including:
 * [PrettyRoles]: Make roles look better
 * [Badges]: Move Nitro badge back to after boost badge + add Plugin Developer badge
 * [Pronouns.page links]: Make pronouns.page links clickable
-* TODO: Order Forum posts by Author
+* [SortForumPostsByAuthor]: Sort forum posts by author
+* [ExpandBiosAgain]: Nobody liked the compressed bios, so I expanded them again
+
+#### Bugs
+* [OrderForumPostsByAuthor]
+  - Breaks longer post preview messages
+  - Possibly also breaks original "Sort by" options - *Not tested*
 
 **Removed**
 * ActivityTab: Replace Guild Members aside with Tabbar of members and activities - *Removed due to mass component updates, making patches glitchy*

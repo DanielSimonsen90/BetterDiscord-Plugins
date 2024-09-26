@@ -420,16 +420,20 @@ class ElementSelector {
         this.result = this.result.substring(0, this.result.length - 1);
         return this;
     }
-    mutationManagerId(id, tagName) {
-        this.result += `${tagName ?? ''}[data-mutation-manager-id="${id}"] `;
-        return this;
-    }
     data(prop, value) {
         this.result += `[data-${prop}${value ? `="${value}"` : ''}] `;
         return this;
     }
+    dataIncludes(prop, value) {
+        this.result += `[data-${prop}*="${value}"] `;
+        return this;
+    }
     role(role, tagName) {
         this.result += `${tagName ?? ''}[role="${role}"] `;
+        return this;
+    }
+    type(type, tagName) {
+        this.result += `${tagName ?? ''}[type="${type}"] `;
         return this;
     }
     nth(index) {
@@ -580,7 +584,7 @@ class DQuery {
             }
             return undefined;
         };
-        return getElement(this.element) ? new DQuery(getElement(this.element)) : undefined;
+        return getElement(this.element) ? $(getElement(this.element)) : undefined;
     }
     get firstChild() {
         return this.children()[0];
@@ -804,7 +808,7 @@ class DQuery {
         BdApi.ReactDOM.render(component, wrapper);
         return this;
     }
-    replaceComponent(component) {
+    replaceWithComponent(component) {
         BdApi.ReactDOM.render(component, this.element);
         return this;
     }
@@ -824,8 +828,8 @@ class DQuery {
         BdApi.ReactDOM.render(component, wrapper);
         return this;
     }
-    on(event, listener) {
-        this.element.addEventListener(event, listener.bind(this));
+    on(event, listener, options) {
+        this.element.addEventListener(event, listener.bind(this), options);
         return this;
     }
     off(event, listener) {
@@ -838,6 +842,10 @@ class DQuery {
 }
 function createElement(html, props = {}, target) {
     if (html === "<></>" || html.toLowerCase() === "fragment") {
+        if ('className' in props)
+            props.class = `bdd-wrapper ${props.className}`;
+        else
+            props.class = 'bdd-wrapper';
         html = `<div ${Object.entries(props).reduce((result, [key, value]) => {
             return result + `${key}="${value}" `;
         }, "")}></div>`;
@@ -845,7 +853,6 @@ function createElement(html, props = {}, target) {
     const element = (() => {
         if (html.startsWith('<')) {
             const element = new DOMParser().parseFromString(html, "text/html").body.firstElementChild;
-            element.classList.add("bdd-wrapper");
             return element;
         }
         return Object.assign(document.createElement(html), props);
