@@ -22,6 +22,7 @@ export type CustomBadgeData = CustomBadgeProps & {
 
 export let CustomBadge: JSX.BD.FC<CustomBadgeProps> & React.FC<CustomBadgeProps> = null;
 export function patchBadgeComponent(result: ReturnType<UserProfileBadgeList<true>>) {
+  if (!result.props.children[0]) return;
   const TooltipWrapper = result.props.children[0].type as React.FC<
     Partial<{
       delay: 300;
@@ -54,6 +55,7 @@ export function patchBadgeComponent(result: ReturnType<UserProfileBadgeList<true
   }
 }
 export function insertBadges(result: ReturnType<UserProfileBadgeList<true>>, badgeData: CustomBadgeData[]) {
+  if (!result) return;
   if (result.props.children.some(badge => badge.type === CustomBadge)) return;
   const badges = result.props.children as Array<typeof result.props.children[0]>
 

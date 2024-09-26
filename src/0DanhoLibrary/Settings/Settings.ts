@@ -1,7 +1,7 @@
 import { createSettings } from "@dium/settings";
 import { BadgeTypes } from "@discord/components";
 
-import { CustomBadgeData } from "../features/badges/components/CustomBadge";
+import { CustomBadgeData } from "../features/badges/CustomBadge";
 import { DEFAULT_DISCORD_ROLE_COLOR, USER_TAGS } from "../constants";
 
 export const Settings = createSettings({

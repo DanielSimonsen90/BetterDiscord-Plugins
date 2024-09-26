@@ -1,26 +1,42 @@
 import * as DiumFinder from '@dium/api/finder';
 import * as BDFDB_Finder from './bdfdb';
+import * as Logger from './logger';
 import { Patcher } from '@dium/api';
 
 export * from '@dium/api/finder';
 export * from './bdfdb';
 
-export const findBySourceStrings = <TResult = any>(...keywords: string[]) => BdApi.Webpack.getModule(m =>
-  m
-  && m != window
-  && Object.keys(m).length
-  && (
-    // Exported property is a function
-    Object.keys(m).some(k => typeof m[k] === 'function' && keywords.every(keyword => m[k].toString().includes(keyword))
-    // Exported property is an object with a render function
-    || Object.keys(m).some(k => typeof m[k] === 'object' && m[k] && 'render' in m[k] && keywords.every(keyword => m[k].render.toString().includes(keyword)))
-  )
-), { defaultExport: false, searchExports: true }
-) as TResult;
+export const findBySourceStrings = <TResult = any>(...keywords: (string | `backupId=${number}`)[]): TResult => {
+  const backupIdKeyword = keywords.find(k => k.startsWith('backupId='));
+  const backupId = backupIdKeyword ? backupIdKeyword.split('=')[1] : null;
+  const backupIdKeywordIndex = keywords.indexOf(backupIdKeyword);
+  if (backupIdKeywordIndex > -1) keywords.splice(backupIdKeywordIndex, 1);
+  if (backupId) Logger.log(`[findBySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
 
-export const findComponentBySourceStrings = async <TResult = any>(...keywords: string[]) => {
+  return BdApi.Webpack.getModule((e, m, id) => {
+    const filter = (
+      e
+      && e != window
+      && Object.keys(e).length ? (
+        // Exported property is a function
+        Object.keys(e).some(k => typeof e[k] === 'function' && keywords.every(keyword => e[k].toString().includes(keyword))
+          // Exported property is an object with a render function
+          || Object.keys(e).some(k => typeof e[k] === 'object' && e[k] && 'render' in e[k] && keywords.every(keyword => e[k].render.toString().includes(keyword)))
+        )
+      ) : (
+        typeof e === 'function' && keywords.every(keyword => e.toString().includes(keyword))
+      )
+    );
+
+    if (!filter && id === backupId) Logger.log(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, e);
+    return filter;
+  }, { defaultExport: true, searchExports: true });
+};
+
+export const findComponentBySourceStrings = async <TResult = JSX.BD.FC>(...keywords: string[]) => {
   const jsxModule = Finder.byKeys(['jsx']);
   const ReactModule = Finder.byKeys(['createElement', 'cloneElement']);
+  keywords = keywords.map(keyword => keyword.replace(/\s+/g, ''));
 
   const component = await new Promise<TResult>((resolve, reject) => {
     try {
@@ -40,7 +56,7 @@ export const findComponentBySourceStrings = async <TResult = any>(...keywords: s
           cancelCE();
           resolve(component);
         }
-      }, { name: `findComponentBySourceStrings([${keywords.join(',')}])`,  });
+      }, { name: `findComponentBySourceStrings([${keywords.join(',')}])`, });
     }
     catch (err) {
       reject(err);

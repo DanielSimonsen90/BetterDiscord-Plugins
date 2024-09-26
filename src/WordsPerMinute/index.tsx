@@ -13,7 +13,6 @@ import { Settings } from './settings';
 import styles from './styles/index.scss';
 import SettingsPanel from "./SettingsPanel";
 
-
 async function initChatForm(chatForm: HTMLElement) {
   if (!chatForm) return;
 
