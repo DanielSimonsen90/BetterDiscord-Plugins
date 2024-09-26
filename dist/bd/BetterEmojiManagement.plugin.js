@@ -372,12 +372,11 @@ const createPlugin = (plugin) => (meta) => {
     };
 };
 
-async function WaitForEmojiPicker(callback) {
-    return waitFor(bySource(...['showEmojiFavoriteTooltip']), { resolve: false }).then(module => {
-        const key = 'default' in module ? 'default' : Object.keys(module)[0];
-        return callback(module, key);
-    });
-}
+const getEmojiUrl = (emoji, size = 128) => (`https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? 'gif' : 'webp'}` +
+    `?size=${size}&qualiy=lossless`);
+const EmojiStore = byName("EmojiStore");
+
+const GuildStore = byName("GuildStore");
 
 const createPatcherCallback = (callback) => callback;
 const createPatcherAfterCallback = (callback) => callback;
@@ -908,13 +907,8 @@ const sortBannedEmojisToEnd = function (emojis) {
                 : 0);
     });
 };
-const sortBannedEmojisOnSearch = createPatcherCallback(({ args, original: __getStoreSearchResults }) => {
-    const emojis = __getStoreSearchResults(...args);
-    return sortBannedEmojisToEnd(emojis);
-});
-const addBannedTagToEmoji = createPatcherCallback(({ args: [props], original: emojiPicker }) => {
+const addBannedTagToEmoji = createPatcherAfterCallback(({ result }) => {
     const bannedEmojis = Settings.current.bannedEmojis.map(e => e.id);
-    const result = emojiPicker(props);
     result.props.children = result.props.children.map((row) => {
         if (!row.props.descriptor)
             return row;
@@ -928,14 +922,15 @@ const addBannedTagToEmoji = createPatcherCallback(({ args: [props], original: em
             }
         };
     });
-    return result;
 });
 const addBannedDataTagToEmojiElement = createPatcherAfterCallback(({ result }) => {
     result.props.children.forEach(row => {
         if (!('data-banned-emoji' in row.props))
             return;
         const emojiId = row.props.descriptor.emoji.id;
-        $(`[data-id="${emojiId}"]`).attr('data-banned-emoji', 'true');
+        if (!emojiId)
+            return;
+        $(`[data-id="${emojiId}"]`)?.attr('data-banned-emoji', 'true');
     });
 });
 const renderBanEmojiMenuItem = function (menu, props) {
@@ -977,22 +972,6 @@ const replaceEmojiStore_getDisambiguatedEmojiContext = createPatcherCallback(({ 
     };
 });
 
-function insteadEmojiPicker() {
-    if (!isBanFeatureEnabled())
-        return;
-    return WaitForEmojiPicker((emojiPicker, key) => {
-        instead(emojiPicker, key, data => {
-            return addBannedTagToEmoji(data);
-        }, { name: 'EmojiPicker' });
-    });
-}
-
-const getEmojiUrl = (emoji, size = 128) => (`https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? 'gif' : 'webp'}` +
-    `?size=${size}&qualiy=lossless`);
-const EmojiStore = byName("EmojiStore");
-
-const GuildStore = byName("GuildStore");
-
 function insteadEmojiStore_getDisambiguatedEmojiContext() {
     if (!isBanFeatureEnabled())
         return;
@@ -1014,33 +993,36 @@ function insteadEmojiPickerContextMenu() {
 }
 
 const isFavorFavoriteFeatureEnabled = () => Settings.current.enableFavorFavoriteEmojis;
-const favorFavoriteEmojis = createPatcherCallback(({ args, original: __getStoreSearchResults }) => {
-    const emojis = __getStoreSearchResults(...args);
-    const favorites = EmojiStore.getDisambiguatedEmojiContext().favoriteEmojisWithoutFetchingLatest;
-    return emojis.sort((a, b) => {
-        const aIsFavorite = favorites.some(e => e.id === a.id);
-        const bIsFavorite = favorites.some(e => e.id === b.id);
-        return (aIsFavorite && !bIsFavorite ? -1
-            : !aIsFavorite && bIsFavorite ? 1
-                : 0);
-    });
-});
 
 function insteadGetSearchResultsOrder() {
     if (!isBanFeatureEnabled() && !isFavorFavoriteFeatureEnabled())
         return;
-    return instead(EmojiStore, "getSearchResultsOrder", (data) => {
-        const callbacks = [
-            isFavorFavoriteFeatureEnabled() && favorFavoriteEmojis,
-            () => data.original(...data.args),
-            isBanFeatureEnabled() && sortBannedEmojisOnSearch
-        ].filter(Boolean);
-        let result = data.args[0];
-        for (const callback of callbacks) {
-            let args = [...data.args].slice(1);
-            result = callback({ ...data, args: [result, ...args] });
-        }
-        return result;
+    return instead(EmojiStore, "getSearchResultsOrder", ({ args, original }) => {
+        const sortedByFavorites = isFavorFavoriteFeatureEnabled()
+            ? EmojiStore.getDisambiguatedEmojiContext().favoriteEmojisWithoutFetchingLatest.map(e => e.id)
+            : [];
+        const sortedByBanned = isBanFeatureEnabled()
+            ? Settings.current.bannedEmojis.map(e => e.id)
+            : [];
+        const result = original(...args);
+        return result.sort((a, b) => {
+            if (sortedByFavorites.includes(a.id) && !sortedByFavorites.includes(b.id))
+                return -1;
+            if (!sortedByFavorites.includes(a.id) && sortedByFavorites.includes(b.id))
+                return 1;
+            if (sortedByBanned.includes(a.id) && !sortedByBanned.includes(b.id))
+                return 1;
+            if (!sortedByBanned.includes(a.id) && sortedByBanned.includes(b.id))
+                return -1;
+            return 0;
+        });
+    });
+}
+
+async function WaitForEmojiPicker(callback) {
+    return waitFor(bySource(...['showEmojiFavoriteTooltip']), { resolve: false }).then(module => {
+        const key = 'default' in module ? 'default' : Object.keys(module)[0];
+        return callback(module, key);
     });
 }
 
@@ -1048,15 +1030,14 @@ function afterEmojiPicker() {
     if (!isBanFeatureEnabled())
         return;
     return WaitForEmojiPicker((emojiPicker, key) => {
-        const cancel = after(emojiPicker, key, data => {
+        after(emojiPicker, key, data => {
+            addBannedTagToEmoji(data);
             addBannedDataTagToEmojiElement(data);
         }, { name: 'EmojiPicker' });
-        return [cancel, insteadEmojiPickerContextMenu()];
     });
 }
 
 function patch() {
-    insteadEmojiPicker();
     insteadEmojiStore_getDisambiguatedEmojiContext();
     insteadEmojiPickerContextMenu();
     insteadGetSearchResultsOrder();
@@ -1211,7 +1192,7 @@ function BannedEmojiSection() {
     return (React.createElement(FormSection, { className: 'banned-emojis' },
         React.createElement(FormLabel, null, "Banned emojis"),
         React.createElement(Collapsible, { title: disableCollapsible ? 'There are no banned emojis.' : 'View banned emojis', disabled: disableCollapsible },
-            React.createElement("ul", { className: "banned-emojis__guilds-list" }, guilds.map(({ guild, bannedEmojis }) => (React.createElement("li", { key: guild.id, className: "banned-emojis__guild-list-item" },
+            React.createElement("ul", { className: "banned-emojis__guilds-list" }, guilds.map(({ guild, bannedEmojis }) => (React.createElement("li", { key: guild.id, className: "banned-emojis__guilds-list-item" },
                 React.createElement(Collapsible, { title: React.createElement("div", { className: 'banned-emojis__guilds-list-item__header' },
                         React.createElement(GuildListItem, { guild: guild },
                             React.createElement("span", { className: "banned-emojis-count" },
@@ -1237,7 +1218,7 @@ function BannedEmojiSection() {
                         }) }))))))))))));
 }
 
-const styles = "[data-banned-emoji=true] {\n  filter: saturate(0.4);\n  border: 1px solid var(--button-danger-background);\n}\n\n.banned-emojis__guilds-list {\n  border: 1px solid var(--background-secondary);\n}\n.banned-emojis__guilds-list-item__header {\n  width: 100%;\n  display: flex;\n  justify-content: space-between;\n}\n.banned-emojis__emojis-list {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 0.5rem;\n}";
+const styles = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible__content.hidden {\n  display: none;\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n[data-banned-emoji=true] {\n  filter: saturate(0.4);\n  border: 1px solid var(--button-danger-background);\n}\n\n.banned-emojis {\n  margin-top: 0.5rem;\n}\n.banned-emojis__guilds-list {\n  border: 1px solid var(--background-secondary);\n}\n.banned-emojis__guilds-list-item__header {\n  width: 100%;\n  display: flex;\n  justify-content: space-between;\n}\n.banned-emojis__emojis-list {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 0.5rem;\n}";
 
 function updatePatches() {
     unpatchAll();

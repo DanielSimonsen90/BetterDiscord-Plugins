@@ -1070,12 +1070,13 @@ async function checkChatFormMod(forceClear) {
 const index = createPlugin({
     start() {
         checkChatFormMod(true);
-        setInterval(checkChatFormMod, 1000);
+        this.interval = setInterval(checkChatFormMod, 1000);
     },
     stop() {
         resetProperties();
         removeAllEventListeners();
         removeAllInjections();
+        clearInterval(this.interval);
     },
     Settings,
     styles,
