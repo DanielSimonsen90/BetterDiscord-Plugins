@@ -1856,7 +1856,8 @@ const PrettyRolesManager = new class PrettyRolesManager {
     canRemoveRole() {
         if (!this.role)
             return false;
-        return this.context.canManageRoles && this.context.highestRole.id !== this.role.id;
+        return this.context.guild.ownerId === this.context.currentUser.id
+            || (this.context.canManageRoles && this.context.highestRole.id !== this.role.id);
     }
 };
 
