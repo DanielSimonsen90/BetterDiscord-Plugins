@@ -1,6 +1,6 @@
 /**
  * @name 0Danholibrary
- * @version 1.5.0
+ * @version 1.6.0
  * @author danielsimonsen90
  * @authorLink https://github.com/danielsimonsen90
  * @description Library for Danho's plugins
@@ -54,7 +54,7 @@ let meta = {
   "name": "0danholibrary",
   "description": "Library for Danho's plugins",
   "author": "danielsimonsen90",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "development": true,
   "dependencies": {
     "dium": "*",
@@ -297,7 +297,6 @@ const SelectedChannelStore = /* @__PURE__ */ byName("SelectedChannelStore");
 const SelectedGuildStore = byKeys(["getLastSelectedGuildId"]);
 
 const UserStore = /* @__PURE__ */ byName("UserStore");
-const PresenceStore$1 = /* @__PURE__ */ byName("PresenceStore");
 const RelationshipStore = /* @__PURE__ */ byName("RelationshipStore");
 
 const UserActivityStore = byKeys(["getUser", "getCurrentUser"]);
@@ -308,18 +307,28 @@ const UserTypingStore = byKeys(["getTypingUsers", "isTyping"]);
 
 const UserMentionStore = byKeys(["getMentions", "everyoneFilter"]);
 
+const PresenceStore = /* @__PURE__ */ byName("PresenceStore");
+
 const UserNoteActions = byKeys(["updateNote"]);
 
 const UserUtils = {
     ...UserStore,
-    ...PresenceStore$1,
+    ...PresenceStore,
     ...RelationshipStore,
     ...UserActivityStore,
     ...UserNoteStore,
     ...UserTypingStore,
     ...UserMentionStore,
     ...UserNoteActions,
-    getPresenceState: () => PresenceStore$1.getState()
+    get me() {
+        const user = UserStore.getCurrentUser();
+        return Object.assign(user, {
+            get status() {
+                return PresenceStore.getStatus(user.id);
+            }
+        });
+    },
+    getPresenceState: () => PresenceStore.getState(),
 };
 
 const Dispatcher$1 = /* @__PURE__ */ byKeys(["dispatch", "subscribe"]);
@@ -353,8 +362,6 @@ const GuildIdentyStore = byKeys(["saveGuildIdentityChanges"]);
 const GuildStore = byName("GuildStore");
 
 const ContentInventoryStore = byName("ContentInventoryStore");
-
-const PresenceStore = /* @__PURE__ */ byName("PresenceStore");
 
 const ThemeStore = byKeys(["theme"]);
 
@@ -1758,6 +1765,8 @@ const Settings = createSettings({
     pronounsPageLinks: true,
     allowForumSortByAuthor: true,
     expandBioAgain: true,
+    wakeUp: true,
+    isHidingOnPurpose: false,
 });
 const titles = {
     prettyRoles: `Remove role circle, add more color to the roles`,
@@ -1769,6 +1778,8 @@ const titles = {
     pronounsPageLinks: `Turn pronouns.page links into clickable links`,
     allowForumSortByAuthor: `Allow sorting forum posts by author`,
     expandBioAgain: `Expand the bio section again by default`,
+    wakeUp: `Reminds you that you're hiding. Why are you hiding?`,
+    isHidingOnPurpose: `User confirmed that they're hiding on purpose`
 };
 const Badges$1 = createSettings({
     developer: {
@@ -1840,7 +1851,8 @@ function SettingsPanel() {
             React.createElement(Setting, { setting: "badges", ...settingProps }),
             React.createElement(Setting, { setting: "pronounsPageLinks", ...settingProps }),
             React.createElement(Setting, { setting: "allowForumSortByAuthor", ...settingProps }),
-            React.createElement(Setting, { setting: "expandBioAgain", ...settingProps })),
+            React.createElement(Setting, { setting: "expandBioAgain", ...settingProps }),
+            React.createElement(Setting, { setting: "wakeUp", ...settingProps })),
         tabs.some(([_, value]) => value) && (React.createElement(TabBar, { tabs: tabs, prettyRoles: React.createElement(PrettyRolesSettings, { ...settingProps }), badges: React.createElement(BadgesSettings, { ...settingProps }) }))));
 }
 
@@ -1932,7 +1944,7 @@ function afterRolesList() {
 const prettyRoles = "*[role=list][data-list-id*=roles] > div div:has([class*=roleRemoveButton][role=button]),\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveButton][role=button],\n*[role=list][data-list-id*=roles] > div [class*=roleFlowerStar],\n*[role=list][data-list-id*=roles] > div [class*=roleCircle] {\n  position: absolute;\n  inset: 0;\n  z-index: 1;\n}\n\n*[role=list][data-list-id*=roles] {\n  padding: 1rem;\n}\n*[role=list][data-list-id*=roles]:has(.danho-library__pretty-roles__group-role) div:has([class*=expandButton]) {\n  flex: 1 1 50%;\n}\n\n*[role=list][data-list-id*=roles] > div {\n  --role-color--default: rgb(86, 105, 118);\n  --role-color: var(--role-color--default);\n  --role-color-alpha: .125;\n  position: relative;\n  border: 1px solid rgb(var(--role-color, --role-color--default));\n  background-color: rgba(var(--role-color, --role-color--default), var(--role-color-alpha));\n  border-radius: 0.25rem;\n  height: 25px;\n  box-sizing: border-box;\n  justify-content: center;\n}\n*[role=list][data-list-id*=roles] > div [class*=roleCircle],\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveIcon] {\n  height: 100%;\n  width: 100%;\n}\n*[role=list][data-list-id*=roles] > div span[class*=roleCircle] {\n  background-color: unset !important;\n}\n*[role=list][data-list-id*=roles] > div svg[class*=roleRemoveIcon] {\n  display: none;\n}\n*[role=list][data-list-id*=roles] > div div:has(svg[class*=roleVerifiedIcon]) {\n  position: absolute;\n  top: -0.5rem;\n  left: -0.75rem;\n}\n*[role=list][data-list-id*=roles] > div:hover svg[class*=roleVerifiedIcon] {\n  display: inline-block !important;\n}\n\n.danho-library__pretty-roles__group-role {\n  flex: 1 1 100% !important;\n  margin-inline: -1rem;\n}";
 
 const isPrettyRolesEnabled = () => Settings.current.prettyRoles;
-function Feature$4() {
+function Feature$5() {
     if (!isPrettyRolesEnabled())
         return;
     insteadRolesList();
@@ -1942,7 +1954,7 @@ function Feature$4() {
 
 const PrettyRoles = {
     __proto__: null,
-    default: Feature$4,
+    default: Feature$5,
     isPrettyRolesEnabled,
     styles: prettyRoles
 };
@@ -2024,7 +2036,7 @@ function afterBadgeList() {
     }, { name: 'BadgeList' });
 }
 
-function Feature$3() {
+function Feature$4() {
     if (!Settings.current.badges)
         return;
     Badges$1.load();
@@ -2033,7 +2045,7 @@ function Feature$3() {
 
 const Badges = {
     __proto__: null,
-    default: Feature$3
+    default: Feature$4
 };
 
 const TextModule = Finder$1.findBySourceStrings('lineClamp', 'tabularNumbers', 'scaleFontToUserSetting');
@@ -2055,7 +2067,7 @@ function afterTextModule() {
     }, { name: 'TextModule--Pronouns' });
 }
 
-function Feature$2() {
+function Feature$3() {
     if (!Settings.current.pronounsPageLinks)
         return;
     afterTextModule();
@@ -2063,7 +2075,7 @@ function Feature$2() {
 
 const PronounsPageLinks = {
     __proto__: null,
-    default: Feature$2
+    default: Feature$3
 };
 
 const { focused } = byKeys(['focused', 'item', 'labelContainer']);
@@ -2148,7 +2160,7 @@ function testForumChannel() {
     return channel.type === 15 ;
 }
 
-function Feature$1() {
+function Feature$2() {
     if (!Settings.current.allowForumSortByAuthor)
         return;
     patchSortAndView();
@@ -2156,12 +2168,12 @@ function Feature$1() {
 
 const SortForumsByAuthor = {
     __proto__: null,
-    default: Feature$1
+    default: Feature$2
 };
 
 const style = ".danho-expand-bio-again div[class*=descriptionClamp] {\n  display: block !important;\n  max-height: unset !important;\n}\n.danho-expand-bio-again button[class*=viewFullBio] {\n  display: none !important;\n}";
 
-function Feature() {
+function Feature$1() {
     if (!Settings.current.expandBioAgain)
         return;
     $('#app-mount').addClass('danho-expand-bio-again');
@@ -2169,8 +2181,46 @@ function Feature() {
 
 const ExpandBioAgain = {
     __proto__: null,
-    default: Feature,
+    default: Feature$1,
     styles: style
+};
+
+function Feature() {
+    if (!Settings.current.wakeUp)
+        return;
+    const status = UserUtils.me.status;
+    const isHiding = status === "invisible" ;
+    const { isHidingOnPurpose } = Settings.current;
+    if (isHidingOnPurpose && !isHiding)
+        Settings.update({ isHidingOnPurpose: false });
+    else if (!isHidingOnPurpose && isHiding) {
+        const close = BdApi.UI.showNotice(`You appear to be hiding... Is this on purpose?`, {
+            buttons: [
+                {
+                    label: 'Yes, stay hidden',
+                    onClick: () => {
+                        Settings.update({ isHidingOnPurpose: true });
+                        close();
+                    }
+                },
+                {
+                    label: 'No, get me back online',
+                    onClick: () => {
+                        const dispatch = Finder$1.findBySourceStrings('getStatus()', 'updateAsync("status",');
+                        if (!dispatch)
+                            return BdApi.UI.showToast('Could not find dispatcher', { type: 'error' });
+                        dispatch('online', status, undefined, undefined);
+                        close();
+                    }
+                },
+            ]
+        });
+    }
+}
+
+const WakeUp = {
+    __proto__: null,
+    default: Feature
 };
 
 const features = [
@@ -2179,6 +2229,7 @@ const features = [
     PronounsPageLinks,
     SortForumsByAuthor,
     ExpandBioAgain,
+    WakeUp
 ];
 const Features = () => features.forEach(feature => feature.default());
 const styles = features.map(feature => 'styles' in feature ? feature.styles

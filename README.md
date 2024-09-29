@@ -8,6 +8,7 @@ General Discord changes and improvements including:
 * [Pronouns.page links]: Make pronouns.page links clickable
 * [SortForumPostsByAuthor]: Sort forum posts by author
 * [ExpandBiosAgain]: Nobody liked the compressed bios, so I expanded them again
+* [WakeUp]: Sometimes you forget that you're hiding, so here's a reminder
 
 #### Bugs
 * [OrderForumPostsByAuthor]

@@ -16,6 +16,9 @@ export const Settings = createSettings({
   pronounsPageLinks: true,
   allowForumSortByAuthor: true,
   expandBioAgain: true,
+  
+  wakeUp: true,
+  isHidingOnPurpose: false,
 });
 
 export const titles: Record<keyof typeof Settings.current, string> = {
@@ -30,6 +33,9 @@ export const titles: Record<keyof typeof Settings.current, string> = {
   pronounsPageLinks: `Turn pronouns.page links into clickable links`,
   allowForumSortByAuthor: `Allow sorting forum posts by author`,
   expandBioAgain: `Expand the bio section again by default`,
+  
+  wakeUp: `Reminds you that you're hiding. Why are you hiding?`,
+  isHidingOnPurpose: `User confirmed that they're hiding on purpose`
 };
 
 export const Badges = createSettings({

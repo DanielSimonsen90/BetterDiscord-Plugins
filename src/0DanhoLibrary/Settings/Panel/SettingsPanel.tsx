@@ -24,6 +24,7 @@ export default function SettingsPanel() {
         <Setting setting="pronounsPageLinks" {...settingProps} />
         <Setting setting="allowForumSortByAuthor" {...settingProps} />
         <Setting setting="expandBioAgain" {...settingProps} />
+        <Setting setting="wakeUp" {...settingProps} />
       </FormSection>
       {tabs.some(([_, value]) => value) && (
         <TabBar tabs={tabs}

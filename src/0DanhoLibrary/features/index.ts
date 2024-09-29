@@ -3,6 +3,7 @@ import * as Badges from "./badges";
 import * as PronounsPageLinks from "./pronouns-page-links";
 import * as SortForumsByAuthor from "./sort-forums-by-author";
 import * as ExpandBioAgain from './expand-bio-again';
+import * as WakeUp from './wake-up';
 
 const features = [
   PrettyRoles,
@@ -10,6 +11,7 @@ const features = [
   PronounsPageLinks,
   SortForumsByAuthor,
   ExpandBioAgain,
+  WakeUp
 ];
 
 export const Features = () => features.forEach(feature => feature.default());

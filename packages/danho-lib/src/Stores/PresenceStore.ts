@@ -39,3 +39,4 @@ export interface PresenceStore extends Store {
 }
 
 export const PresenceStore: PresenceStore = /* @__PURE__ */ Finder.byName("PresenceStore");
+export default PresenceStore;
