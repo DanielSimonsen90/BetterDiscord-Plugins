@@ -58,3 +58,5 @@ export type ActivityTypes = [
     url: string,
   }
 ];
+
+export type Activity = ActivityTypes[number];
