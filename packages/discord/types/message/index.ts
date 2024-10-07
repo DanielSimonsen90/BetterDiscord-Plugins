@@ -9,7 +9,8 @@ export type Message = {
   author: User;
   content: string;
 
-  timestamp: import("moment").Moment;
+  // timestamp: import("moment").Moment;
+  timestamp: string;
   editedTimestamp?: any;
   state: MessageState;
 

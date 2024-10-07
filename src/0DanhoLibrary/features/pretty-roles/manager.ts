@@ -3,7 +3,7 @@ import { Snowflake } from '@discord/types/base';
 import { Role } from '@discord/types/guild/role';
 
 export const PrettyRolesManager = new class PrettyRolesManager {
-  context: ReturnType<RolesListModule['RolesList']>['props']['children']['props'];
+  context: ReturnType<RolesListModule['RolesList']>['props'];
   role: Role;
 
   getRole(roleId: Snowflake) {

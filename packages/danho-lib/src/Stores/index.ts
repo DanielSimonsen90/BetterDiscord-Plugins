@@ -8,6 +8,7 @@ export {
 
 // Global
 export * from './ChannelMemberStore';
+export * from './MessagesStore';
 
 // Guild
 export * from './EmojiStore';

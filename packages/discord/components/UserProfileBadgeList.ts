@@ -1,5 +1,4 @@
 import Finder from "@danho-lib/dium/api/finder";
-import type { If } from "@danho-lib/Utils/types";
 
 export type UserProfileBadgeList<Rendered extends boolean> = Rendered extends true ?
   () => JSX.BD.Rendered<{

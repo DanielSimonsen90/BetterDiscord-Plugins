@@ -38,20 +38,26 @@ export function Setting<
     />
   );
   if (type === undefined ? typeof v === 'number' : type === 'number') return (
-    <TextInput key={setting.toString()} title={titles[setting]} value={v as string} onChange={inputValue => {
-      const value = beforeChange ? beforeChange(Number(inputValue) as Settings[SettingsKey]) : Number(inputValue);
-      set({ [setting]: value } as any);
-      onChange?.(value as any);
-      setV(value as any);
-    }} />
+    <div className="setting-group">
+      <TextInput key={setting.toString()} value={v as string} onChange={inputValue => {
+        const value = beforeChange ? beforeChange(Number(inputValue) as Settings[SettingsKey]) : Number(inputValue);
+        set({ [setting]: value } as any);
+        onChange?.(value as any);
+        setV(value as any);
+      }} />
+      <FormText className='note'>{titles[setting]}</FormText>
+    </div>
   );
   if (type === undefined ? typeof v === 'string' : type === 'text') return (
-    <TextInput key={setting.toString()} title={titles[setting]} value={v as string} onChange={inputValue => {
-      const value = beforeChange ? beforeChange(inputValue as Settings[SettingsKey]) : inputValue;
-      set({ [setting]: value } as any);
-      onChange?.(value as any);
-      setV(value as any);
-    }} />
+    <div className="setting-group">
+      <TextInput key={setting.toString()} value={v as string} onChange={inputValue => {
+        const value = beforeChange ? beforeChange(inputValue as Settings[SettingsKey]) : inputValue;
+        set({ [setting]: value } as any);
+        onChange?.(value as any);
+        setV(value as any);
+      }} />
+      <FormText className='note'>{titles[setting]}</FormText>
+    </div>
   );
   if (type) return (
     <div className="danho-form-switch" key={setting.toString()}>

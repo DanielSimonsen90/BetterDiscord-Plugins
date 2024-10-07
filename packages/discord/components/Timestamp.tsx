@@ -10,7 +10,11 @@ export const Timestamp = Finder.findBySourceStrings("timestampTooltip", { defaul
   node: ReturnType<typeof getNode>;
 }>;
 
-export default function TimestampComponent({ unix, format }: { unix: number, format: DiscordTimeFormat }) {
+type Props = {
+  unix: number;
+  format: DiscordTimeFormat;
+}
+export default function TimestampComponent({ unix, format }: Props) {
   const node = getNode(unix, format);
   return <Timestamp node={node} />;
 }

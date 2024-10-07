@@ -1,0 +1,25 @@
+.custom-message {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: .5ch;
+
+  &__avatar {
+    --size: 2.5rem;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  &__main {
+    display: flex;
+    flex-direction: column;
+    gap: .5ch;
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: .5ch;
+    }
+  }
+}

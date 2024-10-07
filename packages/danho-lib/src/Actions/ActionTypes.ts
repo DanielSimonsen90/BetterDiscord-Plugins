@@ -23,6 +23,13 @@ type ActionProps = {
       };
     };
   };
+  MESSAGE_CREATE: {
+    channelId: Snowflake;
+    guildId?: Snowflake;
+    isPushNotification: boolean;
+    message: Message;
+    optimistic: boolean;
+  };
   PRESENCE_UPDATES: {
     updates: Array<{
       activities: Array<Activity>;
@@ -33,8 +40,8 @@ type ActionProps = {
       guildId: Snowflake | undefined;
       status: UserStatus;
       user: User | { id: Snowflake; };
-    }>
-  }
+    }>;
+  };
 };
 
 export type Actions = {
