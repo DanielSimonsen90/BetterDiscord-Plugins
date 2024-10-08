@@ -3,8 +3,8 @@ import { User } from "@discord/types/user";
 import { ActivityTypes } from "@discord/types/user/activity";
 import { Snowflake } from "@dium/modules";
 import { Store } from "@dium/modules/flux";
-import { StatusTypes } from "./PresenceStore";
 import { Finder } from "@dium/api";
+import { UserStatus } from "@discord/types/user/status";
 
 export interface ChannelMemberStore extends Store {
   getProps(guildId: Snowflake, channelId: Snowflake): {
@@ -30,7 +30,7 @@ type ChannelMemberRow = GuildMember & {
   activities: ActivityTypes[number][];
   isMobileOnline: boolean;
   isOwner: boolean;
-  status: StatusTypes;
+  status: UserStatus;
   type: 'MEMBER';
   user: User;
   unusualDMActivityUntil: null;

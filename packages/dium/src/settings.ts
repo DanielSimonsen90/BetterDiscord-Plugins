@@ -5,7 +5,7 @@ export type Listener<T> = (current: T) => void;
 
 export type Update<T> = Partial<T> | ((current: T) => Partial<T>);
 
-export type Setter<T> = (update: Update<T>) => void;
+export type Setter<T> = (update: Update<T>, replace?: boolean) => void;
 
 export type SettingsType<S extends SettingsStore<any>> = S["defaults"];
 
@@ -67,9 +67,12 @@ export class SettingsStore<T extends Record<string, any>> implements Flux.StoreL
      * Settings.update((current) => ({settingA: current.settingB}))
      * ```
      */
-    update = (settings: Update<T>): void => {
+    update = (settings: Update<T>, replace = false): void => {
         // TODO: copy and use comparators?
-        Object.assign(this.current, typeof settings === "function" ? settings(this.current) : settings);
+        // Object.assign(this.current, typeof settings === "function" ? settings(this.current) : settings);
+        this.current = typeof settings === "function" 
+            ? ({...(replace ? {} : this.current), ...settings(this.current)}) as T 
+            : ({...(replace ? {} : this.current), ...settings}) as T;
         this._dispatch(true);
     };
 

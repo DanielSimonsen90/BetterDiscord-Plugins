@@ -3,10 +3,12 @@ import type { Emoji } from "../guild/emoji";
 type BaseActivityType<Type extends number> = {
   id: string,
   name: string,
-  state: string,
   type: Type;
+  created_at: string;
+  state?: string,
 };
-type Assets = Partial<Record<`${'small' | 'large'}_${'image' | 'text'}`, string>>;
+export type Assets = Partial<Record<`${'small' | 'large'}_${'image' | 'text'}`, string>>;
+export type TimestampString = `${number}`
 export enum ActivityIndexes {
   PLAYING = 0,
   STREAMING = 1,
@@ -20,7 +22,7 @@ export type ActivityTypes = [
     application_id: string,
     assets: Assets,
     details: string,
-    timestamps: { start: string; },
+    timestamps: { start: TimestampString; },
   },
   Streaming: BaseActivityType<1> & {
     assets: Assets,
@@ -32,24 +34,21 @@ export type ActivityTypes = [
     assets: Assets,
     details: string,
     flags: number,
-    metadata: {
+    metadata?: {
       album_id: string,
       artist_ids: Array<string>,
       context_url: string,
     },
     party: { id: string; },
+    session_id: string,
     sync_id: string,
-    timestamps: { start: number, end: number; },
+    timestamps: { start: TimestampString, end: TimestampString; },
   },
-  Watching: Omit<BaseActivityType<3>, 'state'> & {
-    created_at: string;
-  },
-  /** Custom */
+  Watching: Omit<BaseActivityType<3>, 'state'> & {},
   Custom: BaseActivityType<4> & {
     emoji?: Emoji,
     id: "custom",
   },
-  /** Competing */
   Competing: BaseActivityType<5> & {
     application_id: string,
     assets: Assets,
@@ -60,3 +59,9 @@ export type ActivityTypes = [
 ];
 
 export type Activity = ActivityTypes[number];
+export type PlayingActivity = ActivityTypes[ActivityIndexes.PLAYING];
+export type StreamingActivity = ActivityTypes[ActivityIndexes.STREAMING];
+export type ListeningActivity = ActivityTypes[ActivityIndexes.LISTENING];
+export type WatchingActivity = ActivityTypes[ActivityIndexes.WATCHING];
+export type CustomActivity = ActivityTypes[ActivityIndexes.CUSTOM];
+export type CompetingActivity = ActivityTypes[ActivityIndexes.COMPETING];

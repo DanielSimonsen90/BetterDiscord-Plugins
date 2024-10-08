@@ -7,12 +7,13 @@ import UserActivityStore from '@stores/UserActivityStore';
 import UserNoteStore from '@stores/UserNoteStore';
 import UserTypingStore from '@stores/UserTypingStore';
 import UserMentionStore from '@stores/UserMentionStore';
-import PresenceStore, { StatusTypes } from '@stores/PresenceStore';
+import PresenceStore from '@stores/PresenceStore';
 
 import UserNoteActions from '@actions/UserNoteActions';
+import { UserStatus } from '@discord/types/user/status';
 
 type MyUser = User & {
-  get status(): StatusTypes;
+  get status(): UserStatus;
 }
 
 type CompiledUserUtils = BetterOmit<

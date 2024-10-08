@@ -7,7 +7,7 @@ type Props = {
   message: Message;
 };
 
-export default function Message({ message }: Props) {
+export function Message({ message }: Props) {
   const authorName = message.author.globalName ?? message.author.username;
 
   return (

@@ -30,7 +30,7 @@ type CompiledGuildUtils = BetterOmit<
   & typeof GuildActions
   , '__getLocalVars' | 'getState'> & {
     get current(): Guild | null;
-    get member(): GuildMember | null;
+    get me(): GuildMember | null;
 
     meFor(guildId: Snowflake): GuildMember;
     getSelectedGuildTimestamps(): ReturnType<SelectedGuildStore['getState']>["selectedGuildTimestampMillis"];
@@ -52,11 +52,11 @@ export const GuildUtils: CompiledGuildUtils = {
     return GuildStore.getGuild(SelectedGuildStore.getGuildId());
   },
   get me() {
-    return GuildMemberStore.getMember(SelectedGuildStore.getGuildId(), UserStore.getCurrentUser().id);
+    return GuildMemberStore.getMember(SelectedGuildStore.getGuildId(), UserStore.getCurrentUser().id) as any as GuildMember;
   },
 
   meFor(guildId: Snowflake) {
-    return GuildMemberStore.getMember(guildId, UserStore.getCurrentUser().id);
+    return GuildMemberStore.getMember(guildId, UserStore.getCurrentUser().id) as any as GuildMember;
   },
   getSelectedGuildTimestamps() {
     return SelectedGuildStore.getState().selectedGuildTimestampMillis;

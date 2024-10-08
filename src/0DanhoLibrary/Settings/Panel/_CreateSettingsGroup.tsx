@@ -17,12 +17,6 @@ export default function CreateSettingsGroup(callback: (
   formElements: typeof FormElements
 ) => JSX.Element) {
   return function SettingsGroup(props: SettingProps) {
-    const { FormDivider } = FormElements;
-    const children = callback(React, props, Setting, FormElements);
-
-    return (<>
-      <FormDivider />
-      {children}
-    </>)
+    return callback(React, props, Setting, FormElements);
   }
 }

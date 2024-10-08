@@ -1,4 +1,3 @@
-import { ScrollerAuto, ScrollerLooks } from "@discord/components/Scroller";
 import { React, classNames } from "@dium/modules";
 
 type Props<
@@ -13,18 +12,18 @@ type Props<
   beforeTabChange?: (tab: TTabKey) => void,
   onTabChange?: (tab: TTabKey) => void,
 } & {
-  [key in TTabKey]: React.ReactNode | React.FC;
-}
+    [key in TTabKey]: React.ReactNode | React.FC;
+  };
 
 export function TabBar<TTabKey extends string>({ tabs, ...props }: Props<TTabKey>) {
   const { noTabsBackground, noContentBackground } = props;
 
-  const [activeTab, _setActiveTab] = React.useState<TTabKey>(props.defaultTab ?? tabs.some(([key, value]) => 
+  const [activeTab, _setActiveTab] = React.useState<TTabKey>(props.defaultTab ?? tabs.some(([key, value]) =>
     typeof value === 'string' ? value === props.defaultTab : key === props.defaultTab
   ) ? props.defaultTab as TTabKey : tabs[0][0] as TTabKey);
 
   const TabContent: React.FC = typeof props[activeTab as string] === 'function'
-    ? props[activeTab as string] 
+    ? props[activeTab as string]
     : () => props[activeTab as string];
 
   const setActiveTab = React.useCallback((tab: TTabKey) => {
@@ -49,9 +48,7 @@ export function TabBar<TTabKey extends string>({ tabs, ...props }: Props<TTabKey
         {tabs.map(([tab, title]) => title && <button className={classNames("tab-bar__tab", activeTab === tab && 'tab-bar__tab--active')} key={tab} onClick={() => setActiveTab(tab)}>{title}</button>)}
       </div>
       <div className={classNames('tab-bar__content', noContentBackground && 'tab-bar__content--no-color')}>
-        <ScrollerAuto className={classNames(ScrollerLooks.auto, ScrollerLooks.thin, ScrollerLooks.fade)}>
-          <TabContent />
-        </ScrollerAuto>
+        <TabContent />
       </div>
     </div>
   );

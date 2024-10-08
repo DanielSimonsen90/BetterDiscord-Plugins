@@ -1,3 +1,4 @@
+import { VoiceState, VoiceStateUpdate } from "@danho-lib/Stores";
 import { Snowflake } from "@discord/types/base";
 import { GuildMember } from "@discord/types/guild/member";
 import { Message } from "@discord/types/message";
@@ -41,6 +42,9 @@ type ActionProps = {
       status: UserStatus;
       user: User | { id: Snowflake; };
     }>;
+  };
+  VOICE_STATE_UPDATES: {
+    voiceStates: Array<VoiceStateUpdate>;
   };
 };
 

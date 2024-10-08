@@ -1,16 +1,15 @@
 import Finder from "@danho-lib/dium/api/finder";
-import { StatusTypes } from "@danho-lib/Stores";
 import { UserUtils } from "@danho-lib/Utils";
+import { UserStatus } from "@discord/types/user/status";
 import { Settings } from "src/0DanhoLibrary/Settings";
 
-type StatusString = 'online' | 'idle' | 'dnd' | 'invisible';
-type StatusDispatcher = (to: StatusString, from: StatusString, n: undefined, u: undefined) => Promise<void>;
+type StatusDispatcher = (to: UserStatus, from: UserStatus, n: undefined, u: undefined) => Promise<void>;
 
 export default function Feature() {
   if (!Settings.current.wakeUp) return;
 
   const status = UserUtils.me.status;
-  const isHiding = status === StatusTypes.INVISIBLE;
+  const isHiding = status === ('invisible' as UserStatus);
   const { isHidingOnPurpose } = Settings.current;
   if (isHidingOnPurpose && !isHiding) Settings.update({ isHidingOnPurpose: false });
   else if (!isHidingOnPurpose && isHiding) {
@@ -35,5 +34,5 @@ export default function Feature() {
       ]
     })
   }
-  // isHidingOnPurpose && status === StatusTypes.INVISIBLE || !isHidingOnPurpose && status !== StatusTypes.INVISIBLE
+  // isHidingOnPurpose && status === 'invisible' || !isHidingOnPurpose && status !== 'invisible'
 }

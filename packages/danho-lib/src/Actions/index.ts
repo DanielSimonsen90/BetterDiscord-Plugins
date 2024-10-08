@@ -7,7 +7,7 @@ export * from './GuildActions';
 
 export const DISPATCH_ACTIONS = Dispatcher._subscriptions;
 export function find(action: string) {
-  Object.keys(DISPATCH_ACTIONS).find(key => key.includes(action));
+  return Object.keys(DISPATCH_ACTIONS).filter(key => key.toLowerCase().includes(action.toLowerCase()));
 }
 
 export const ActionsEmitter = new class ActionsEmitter extends EventEmitter<Actions> {
