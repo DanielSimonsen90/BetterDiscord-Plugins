@@ -1,4 +1,4 @@
-import type { Arrayable } from 'danholibraryjs';
+import type { Arrayable } from './types';
 
 type RenderedComponentResultDefaultProps = {
   children: Arrayable<RenderedComponentResult> | null,

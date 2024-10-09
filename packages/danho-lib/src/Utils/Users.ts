@@ -1,13 +1,12 @@
-import { BetterOmit } from 'danholibraryjs';
-import { FilterStore } from "./types";
+import { BetterOmit, FilterStore } from "./types";
 
 import { UserStore, RelationshipStore, User } from '@dium/modules/user';
 
-import UserActivityStore from '@stores/UserActivityStore';
-import UserNoteStore from '@stores/UserNoteStore';
-import UserTypingStore from '@stores/UserTypingStore';
-import UserMentionStore from '@stores/UserMentionStore';
-import PresenceStore from '@stores/PresenceStore';
+import UserActivityStore from '@danho-lib/Stores/UserStores/UserActivityStore';
+import UserNoteStore from '@danho-lib/Stores/UserStores/UserNoteStore';
+import UserTypingStore from '@danho-lib/Stores/UserStores/UserTypingStore';
+import UserMentionStore from '@danho-lib/Stores/UserStores/UserMentionStore';
+import PresenceStore from '@danho-lib/Stores/UserStores/PresenceStore';
 
 import UserNoteActions from '@actions/UserNoteActions';
 import { UserStatus } from '@discord/types/user/status';

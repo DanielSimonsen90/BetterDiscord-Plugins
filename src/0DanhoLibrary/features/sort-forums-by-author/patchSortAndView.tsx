@@ -1,6 +1,6 @@
-import { ActionsEmitter } from "@danho-lib/Actions";
+import { ActionsEmitter } from "@actions";
+import { ChannelStore } from "@stores";
 import { $ } from "@danho-lib/DOM";
-import { ChannelStore } from "@danho-lib/Stores";
 import * as Logger from '@danho-lib/dium/api/logger';
 
 import { ChannelTypes } from "@dium/modules/channel";

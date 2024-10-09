@@ -1,7 +1,6 @@
+import { React } from '@react';
 import { createPatcherAfterCallback } from "@danho-lib/Patcher/CreatePatcherCallback";
 import TextModule from "@danho-lib/Patcher/Text";
-
-import { React } from '@dium/modules';
 
 export default createPatcherAfterCallback<TextModule['render']>(({ args: [props], result }) => {
   const { className, children: text } = props as { className: string, children: string; };

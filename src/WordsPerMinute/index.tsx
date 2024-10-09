@@ -1,4 +1,4 @@
-import { createPlugin } from "@dium/index";
+import { createPlugin } from "@dium";
 import { 
   createElement, 
   addEventListener, removeAllEventListeners, 

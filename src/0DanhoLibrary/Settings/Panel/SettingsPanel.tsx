@@ -1,6 +1,5 @@
-import { React } from "@dium/modules";
+import { React, Setting, TabBar } from "@react";
 import { FormSection } from "@dium/components";
-import { Setting, TabBar } from "@components/index";
 
 import { Settings, titles } from "../Settings";
 

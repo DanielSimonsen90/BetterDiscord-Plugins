@@ -1,4 +1,4 @@
-import { Emoji, EmojiStore } from "@danho-lib/Stores";
+import { Emoji, EmojiStore } from "@stores";
 import createPatcherCallback from "@danho-lib/Patcher/CreatePatcherCallback";
 import { Settings } from "../Settings";
 

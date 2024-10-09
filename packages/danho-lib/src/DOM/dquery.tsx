@@ -1,4 +1,4 @@
-import { Arrayable } from 'danholibraryjs';
+import { Arrayable } from '../Utils/types';
 import { Logger, Utils } from '@dium/index';
 import ElementSelector from './ElementSelector';
 import { If, PromisedReturn } from '../Utils/types';

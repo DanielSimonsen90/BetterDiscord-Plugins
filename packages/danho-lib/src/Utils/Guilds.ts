@@ -1,5 +1,3 @@
-import { BetterOmit } from "danholibraryjs";
-
 import {
   GuildStore,
   GuildMemberStore,
@@ -15,7 +13,7 @@ import GuildActions from "@actions/GuildActions";
 import { Guild } from "@discord/types/guild";
 import { GuildMember } from "@discord/types/guild/member";
 
-import { FilterStore } from "./types";
+import { BetterOmit, FilterStore } from "./types";
 import { Snowflake } from "@discord/types/base";
 
 type CompiledGuildUtils = BetterOmit<

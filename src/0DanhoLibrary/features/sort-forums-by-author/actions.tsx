@@ -1,7 +1,7 @@
+import { React } from "@react";
 import { DQuery, $, observeAppMountFor } from "@danho-lib/DOM";
 import { Logger } from "@dium/api";
 import { SortByAuthorOption } from "./SortByAuthorOption";
-import { React } from "@dium/modules";
 
 export async function addSortByAuthorOnDOM() {
   const sortGroup = await observeAppMountFor(

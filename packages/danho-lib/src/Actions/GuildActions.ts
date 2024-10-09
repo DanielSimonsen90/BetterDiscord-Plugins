@@ -5,7 +5,7 @@ import type { Guild } from "@discord/types/guild";
 import type { Role } from "@discord/types/guild/role";
 
 import { Finder } from "@dium/api";
-import type { Arrayable } from "danholibraryjs";
+import type { Arrayable } from "../Utils/types";
 
 export interface GuildActions {
     addGuild(name: string, icon: string, channels: Array<Channel>, systemChannelId: Snowflake): Guild;

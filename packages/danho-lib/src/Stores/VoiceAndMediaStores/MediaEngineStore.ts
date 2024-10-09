@@ -1,9 +1,9 @@
 import type { Snowflake } from "@discord/types/base";
 import { Store } from '@dium/modules/flux';
 import { Finder } from "@dium/api";
-import { BetterOmit } from "danholibraryjs";
+import { BetterOmit } from "../../Utils/types";
 
-export interface VoiceInfo extends Store {
+export interface MediaEngineStore extends Store {
     getAecDump(): boolean;
     getAttenuateWhileSPeakingOthers(): boolean;
     getAttenuateWhileSpeakingSlef(): boolean;
@@ -89,8 +89,8 @@ export interface VoiceInfo extends Store {
     supportsGraphicsCapture(): boolean;
     supportsInApp(feature: SupportedFeatures): boolean;
 }
-export const VoiceInfo: VoiceInfo = Finder.byKeys(["isSelfMute", "isNoiseCancellationSupported"]);
-export default VoiceInfo;
+export const MediaEngineStore: MediaEngineStore = Finder.byKeys(["isSelfMute", "isNoiseCancellationSupported"]);
+export default MediaEngineStore;
 
 export type MediaEngine = {
     Camera: CameraComponent;
@@ -169,10 +169,10 @@ export type MediaEngine = {
     watchdogTick(): boolean | undefined;
     writeAudioDebugState(): Promise<undefined>;
 }
-export const MediaEngine = VoiceInfo.getMediaEngine();
+export const MediaEngine = MediaEngineStore.getMediaEngine();
 
 export type VideoComponent = React.FunctionComponent<{}>;
-export const VideoComponent = VoiceInfo.getVideoComponent();
+export const VideoComponent = MediaEngineStore.getVideoComponent();
 
 export type CameraComponent = React.FunctionComponent<{
     deviceId: string;
@@ -180,7 +180,7 @@ export type CameraComponent = React.FunctionComponent<{
     width?: number;
     height?: number;
 }>;
-export const CameraComponent = VoiceInfo.getCameraComponent();
+export const CameraComponent = MediaEngineStore.getCameraComponent();
 
 export enum MediaEngineContextTypes {
     DEFAULT = "default",

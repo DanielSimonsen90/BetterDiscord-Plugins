@@ -1,4 +1,4 @@
-import { EmojiStore } from "@danho-lib/Stores";
+import { EmojiStore } from "@stores";
 import { Patcher } from "@dium/api";
 import { isBanFeatureEnabled, replaceEmojiStore_getDisambiguatedEmojiContext } from '../../features/BanEmojis';
 

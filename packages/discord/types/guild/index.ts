@@ -1,4 +1,13 @@
 // import { Guild } from "@dium/modules";
+
+export * from './emoji';
+export * from './features';
+export * from './folder';
+export * from './member';
+export * from './permissionOverwrite';
+export * from './permissions';
+export * from './role';
+
 import { Features } from "./features";
 import type { Snowflake } from "../base";
 import { Role } from "./role";

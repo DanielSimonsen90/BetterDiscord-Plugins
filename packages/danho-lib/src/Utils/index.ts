@@ -1,8 +1,8 @@
-import type { Arrayable } from "danholibraryjs";
 import { Finder } from "@dium/api";
 import { GuildStore, GuildMemberStore } from '@dium/modules/guild';
 import { SelectedChannelStore, ChannelStore } from '@dium/modules/channel';
-import { SelectedGuildStore } from '@stores/SelectedGuildStore';
+import { SelectedGuildStore } from '@danho-lib/Stores/GuildStores/SelectedGuildStore';
+import { Arrayable } from "./types";
 
 export * from './Functions';
 

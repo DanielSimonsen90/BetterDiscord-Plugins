@@ -1,5 +1,5 @@
 import { Patcher } from "@dium/api";
-import { EmojiStore } from "@danho-lib/Stores";
+import { EmojiStore } from "@stores";
 import { isBanFeatureEnabled } from "../../features/BanEmojis";
 import { isFavorFavoriteFeatureEnabled } from "../../features/FavorFavoriteEmojis";
 import { Settings } from "src/BetterEmojiManagement/Settings";

@@ -1,5 +1,5 @@
+import { React } from "@react";
 import { MenuGroup, MenuItem } from '@dium/components/menu';
-import { React } from "@dium/modules";
 import { PrettyRolesManager } from "../manager";
 
 export default function modifyRoleContextMenu(result: JSX.Element) {

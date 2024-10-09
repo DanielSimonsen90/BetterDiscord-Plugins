@@ -1,4 +1,4 @@
-import { renderChildren, React } from "@danho-lib/React";
+import { renderChildren, React, useReducer } from "@react";
 import { Finder } from "@dium/api";
 
 const { focused } = Finder.byKeys(['focused', 'item', 'labelContainer']) as Record<string, string>;
@@ -9,7 +9,7 @@ type Props = {
 }
 
 export const SortByAuthorOption = ({ sortOptionClone, orderPostsByAuthor }: Props) => {
-  const [className, dispatch] = React.useReducer((state: string, action: 'hover' | 'default') => {
+  const [className, dispatch] = useReducer((state: string, action: 'hover' | 'default') => {
     switch (action) {
       case 'hover': return `${state} ${focused}`;
       case 'default': return state.replace(focused, '').trim();

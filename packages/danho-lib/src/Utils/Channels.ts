@@ -3,7 +3,7 @@ import {
   GuildChannelStore,
   SelectedChannelStore
 } from '@stores/index';
-import { BetterOmit } from 'danholibraryjs';
+import { BetterOmit } from './types';
 import { FilterStore } from './types';
 import { Channel } from '@dium/modules/channel';
 import { Snowflake } from '@discord/types/base';

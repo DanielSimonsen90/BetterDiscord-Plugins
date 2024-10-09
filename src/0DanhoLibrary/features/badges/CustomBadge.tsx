@@ -1,7 +1,7 @@
+import { React } from "@react";
 import { $ } from "@danho-lib/DOM";
 import { BadgeTypes, UserProfileBadgeList } from "@discord/components/UserProfileBadgeList";
 import { Snowflake } from "@discord/types/base";
-import { React } from "@dium/modules";
 
 export type CustomBadgeProps = {
   name: string;

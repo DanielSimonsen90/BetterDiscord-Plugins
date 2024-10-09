@@ -3,7 +3,7 @@ import { Settings } from './Settings/Settings';
 import SettingsPanel from './Settings/Panel';
 
 import { Features, styles } from './features';
-import { ActionsEmitter } from '@danho-lib/Actions';
+import { ActionsEmitter } from '@actions';
 
 export default DanhoLibrary({
   start() {

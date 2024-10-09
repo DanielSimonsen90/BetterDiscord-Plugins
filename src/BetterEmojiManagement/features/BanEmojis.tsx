@@ -1,7 +1,7 @@
 import { MenuItem, MenuSeparator } from "@dium/components";
 import { React } from "@dium/modules";
 
-import { CustomEmoji, Emoji, EmojiStore } from "@danho-lib/Stores";
+import { CustomEmoji, Emoji, EmojiStore } from "@stores";
 import createPatcherCallback, { createPatcherAfterCallback } from "@danho-lib/Patcher/CreatePatcherCallback";
 import { ExpressionPickerContextMenuFiber, ExpressionPickerContextMenuTargetProps } from "@danho-lib/ContextMenus/ExpressionPickerItemOptions";
 import { ExpressionPickerMenu } from "@danho-lib/Modals/ExpressionPicker";

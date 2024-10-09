@@ -1,0 +1,1 @@
+export { ChannelStore } from '@dium/modules/channel'

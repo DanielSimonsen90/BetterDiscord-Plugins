@@ -1,10 +1,9 @@
-import { React } from '@dium/modules';
+import { React, useEffect, useMemo } from '@react';
 import { FormDivider, FormLabel, FormSection } from '@dium/components/form';
-
 import { SecondaryButton } from '@discord/components';
 
-import { Collapsible, Setting, GuildListItem } from '@components/index';
-import { EmojiStore, getEmojiUrl, GuildStore } from '@stores/index';
+import { Collapsible, Setting, GuildListItem } from '@components';
+import { EmojiStore, getEmojiUrl, GuildStore } from '@stores';
 
 import { Settings, titles } from './Settings';
 import BannedEmojiTag from './BannedEmojiTag';
@@ -16,7 +15,7 @@ type Props = {
 export default function SettingsPanel({ updatePatches }: Props) {
   const [current, set] = Settings.useState();
 
-  React.useEffect(() => {
+  useEffect(() => {
     updatePatches();
   }, [current.enableBannedEmojis, current.enableFavorFavoriteEmojis])
 
@@ -39,7 +38,7 @@ function BannedEmojiSection() {
   const [current, set] = Settings.useState();
   const emojiStoreContext = EmojiStore.getDisambiguatedEmojiContext();
   const bannedEmojis = current.bannedEmojis.map(({ id }) => emojiStoreContext.getById(id));
-  const guilds = React.useMemo(() => bannedEmojis.map(({ guildId }) => ({
+  const guilds = useMemo(() => bannedEmojis.map(({ guildId }) => ({
     id: guildId,
     guild: GuildStore.getGuild(guildId),
     bannedEmojis: bannedEmojis.filter(({ guildId: id }) => id === guildId)

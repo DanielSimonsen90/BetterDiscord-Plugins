@@ -1,9 +1,8 @@
+import { React, useMemo } from '@react';
 import { Settings, Highscores } from './settings';
 import { getMeta } from '@dium/meta';
-import { React } from '@dium/modules';
 
 const PluginName = getMeta().name;
-const { useMemo } = React;
 
 const ResetButton: React.FC<{
   onClick: () => void;

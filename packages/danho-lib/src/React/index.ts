@@ -49,7 +49,6 @@ export const {
 } = ReactDOM;
 
 // Export types
-import { Arrayable } from 'danholibraryjs';
 export {
   ComponentClass,
   FunctionComponent,
@@ -59,8 +58,6 @@ export {
   SetStateAction
 } from 'react';
 
-export type Children = Arrayable<React.ReactNode | JSX.Element>;
-export type Component<Props = {}, State = any> = React.Component<Props, State> | React.FunctionComponent<Props> | React.ComponentClass<Props, State>;
 export * from '@dium/utils/react';
 
 export const renderChildren = (children: Element[], props = {}): Array<JSX.Element> => children.map(child => React.createElement(
