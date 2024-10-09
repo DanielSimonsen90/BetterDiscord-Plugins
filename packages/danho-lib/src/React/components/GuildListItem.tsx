@@ -1,7 +1,6 @@
-import { React } from "@dium/modules";  
-import { GuildStore } from "@danho-lib/Stores";
-import { Snowflake } from "@discord/types/base";
-import { Guild } from "@discord/types/guild";
+import { React } from '../React';
+import { GuildStore } from "@stores";
+import { Snowflake, Guild } from "@discord/types";
 
 type GuildListItemProps = ({
   guildId: Snowflake;

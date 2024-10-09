@@ -1,8 +1,5 @@
 // import { Channel, Guild, Snowflake } from "../Discord";
-import type { Channel } from '@discord/types/channel';
-import type { Guild } from '@discord/types/guild';
-import { Snowflake } from '@discord/types/base';
-
+import type { Channel, Guild, Snowflake } from '@discord/types';
 import { Finder } from "@dium/api";
 import { Store } from "@dium/modules/flux";
 

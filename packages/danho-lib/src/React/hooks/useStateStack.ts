@@ -1,8 +1,5 @@
-import type { Dispatch, SetStateAction } from 'react';
-import { React } from '@dium/modules';
+import { useState, useCallback, Dispatch, SetStateAction } from '../React';
 import useDebounce from './useDebounce';
-
-const { useState, useCallback } = React;
 
 export function useStateStack<State>(initialState: State): [State, {
   push: Dispatch<SetStateAction<State>>;

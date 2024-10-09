@@ -1,15 +1,16 @@
-import { BetterOmit, FilterStore } from "./types";
+import type { BetterOmit, FilterStore } from "./types";
+import type { User, UserStatus } from '@discord/types/user';
 
-import { UserStore, RelationshipStore, User } from '@dium/modules/user';
-
-import UserActivityStore from '@danho-lib/Stores/UserStores/UserActivityStore';
-import UserNoteStore from '@danho-lib/Stores/UserStores/UserNoteStore';
-import UserTypingStore from '@danho-lib/Stores/UserStores/UserTypingStore';
-import UserMentionStore from '@danho-lib/Stores/UserStores/UserMentionStore';
-import PresenceStore from '@danho-lib/Stores/UserStores/PresenceStore';
+import {
+  UserActivityStore,
+  UserNoteStore,
+  UserTypingStore,
+  UserMentionStore,
+  PresenceStore,
+  UserStore, RelationshipStore
+} from '@stores';
 
 import UserNoteActions from '@actions/UserNoteActions';
-import { UserStatus } from '@discord/types/user/status';
 
 type MyUser = User & {
   get status(): UserStatus;
@@ -48,7 +49,7 @@ export const UserUtils: CompiledUserUtils = {
       get status() {
         return PresenceStore.getStatus(user.id);
       }
-    });
+    }) as MyUser;
   },
 
   getPresenceState: () => PresenceStore.getState(),

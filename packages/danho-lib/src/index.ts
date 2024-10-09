@@ -1,15 +1,12 @@
 import { Utils, UserUtils, GuildUtils } from '@danho-lib/Utils/index';
-import * as Stores from '@danho-lib/Stores';
-import * as Actions from '@danho-lib/Actions';
+import * as Stores from '@stores';
+import * as Actions from '@actions';
 import * as DOM from '@danho-lib/DOM';
 
 import { createPlugin, Plugin, Filters } from '@dium/index';
 import * as Finder from '@danho-lib/dium/api/finder';
 
 import styles from './styles/index.scss';
-
-export * as Components from './React/components';
-export * as Patcher from './Patcher';
 
 class DanhoLibrary implements Plugin<{}> {
   public Utils = Utils;

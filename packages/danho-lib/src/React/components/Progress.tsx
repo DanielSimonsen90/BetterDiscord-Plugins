@@ -1,4 +1,4 @@
-import { React } from "@dium/modules";
+import { React } from '../React';
 
 type Props = {
   value: number;

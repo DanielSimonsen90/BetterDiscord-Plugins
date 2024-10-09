@@ -1,6 +1,4 @@
-import { Snowflake } from "@discord/types/base";
-import { Activity, ActivityTypes, TimestampString } from "@discord/types/user/activity";
-import { UserStatus } from "@discord/types/user/status";
+import { Snowflake, Activity, ActivityTypes, TimestampString, UserStatus } from "@discord/types";
 import { Finder } from "@dium/api";
 import { Store } from "@dium/modules/flux";
 

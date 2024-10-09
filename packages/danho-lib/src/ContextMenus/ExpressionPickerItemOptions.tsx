@@ -1,5 +1,3 @@
-import { Patcher } from "@dium/api";
-
 type MenuItemFiber = {
   props: {
     action: (() => void) | ((e: any) => void),

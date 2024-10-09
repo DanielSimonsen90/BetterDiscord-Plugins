@@ -1,6 +1,6 @@
 import { Filters, Finder } from "@dium/api";
-import { CustomEmoji } from "@danho-lib/Stores";
-import { BetterOmit } from "../Utils/types";
+import type { CustomEmoji } from "@stores";
+import type { BetterOmit } from "../Utils/types";
 
 export type ExpressionPickerMenu = {
   [key: string]: (props: {

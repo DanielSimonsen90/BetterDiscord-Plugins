@@ -1,8 +1,5 @@
-import type { PresenceStoreState } from "@danho-lib/Stores";
-import type { Snowflake } from "@discord/types/base";
-import type { Channel } from "@discord/types/channel";
-import type { Guild } from "@discord/types/guild";
-import type { Role } from "@discord/types/guild/role";
+import type { PresenceStoreState } from "@stores";
+import type { Snowflake, Channel, Guild, Role } from "@discord/types";
 
 import { Finder } from "@dium/api";
 import type { Arrayable } from "../Utils/types";

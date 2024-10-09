@@ -1,7 +1,4 @@
-import { Role } from '@discord/types/guild/role';
-import { User } from '@discord/types/user';
-import { Guild } from '@discord/types/guild';
-import { GuildMember } from '@discord/types/guild/member';
+import { Role, User, Guild, GuildMember } from '@discord/types';
 import { Filters, Finder } from '@dium/api';
 
 export type RolesListModule = {

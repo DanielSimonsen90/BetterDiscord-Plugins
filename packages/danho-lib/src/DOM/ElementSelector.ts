@@ -1,4 +1,4 @@
-import { AriaRole } from "react";
+import type { AriaRole } from "react";
 import { If } from "../Utils/types";
 
 export class ElementSelector {

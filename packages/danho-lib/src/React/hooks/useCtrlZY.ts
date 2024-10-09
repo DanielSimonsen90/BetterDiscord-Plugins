@@ -1,5 +1,4 @@
-import { React } from '@dium/modules';
-const { useEffect } = React;
+import { useEffect } from '../React';
 
 type Props = {
   onCtrlZ: () => void;

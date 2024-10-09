@@ -1,9 +1,6 @@
 import { React, Flux } from "@dium/modules";
 import * as Data from "@dium/api/data";
-import {
-  Listener, Update, Setter
-
-} from '@dium/settings'
+import { Listener, Update, Setter } from '@dium/settings'
 
 export type StoreType<S extends DiumStore<any>> = S["defaults"];
 

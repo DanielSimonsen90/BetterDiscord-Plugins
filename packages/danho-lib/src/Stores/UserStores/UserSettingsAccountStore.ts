@@ -1,5 +1,4 @@
-import type { Snowflake } from "@discord/types/base";
-import type { User } from "@discord/types/user";
+import type { Snowflake, User } from "@discord/types";
 
 import { Finder } from "@dium/api";
 import { Store }from '@dium/modules/flux';

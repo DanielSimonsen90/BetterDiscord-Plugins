@@ -1,6 +1,4 @@
-import { Snowflake } from "@discord/types/base";
-import { User } from "@discord/types/user";
-import DisplayProfile from "@discord/types/user/displayProfile";
+import type { Snowflake, User, DisplayProfile } from "@discord/types";
 import { Finder } from "@dium/api";
 import type { TextVairants } from '@danho-lib/Patcher/Text'
 

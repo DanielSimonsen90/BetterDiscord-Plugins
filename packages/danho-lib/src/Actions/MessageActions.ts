@@ -1,8 +1,4 @@
-import { Snowflake } from "@discord/types/base";
-import { Channel } from "@discord/types/channel";
-import { Message } from "@discord/types/message";
-import { Attachment } from "@discord/types/message/attachment";
-import { User } from "@discord/types/user";
+import { Snowflake, Channel, Message, Attachment, User } from "@discord/types";
 import { Finder } from "@dium/api";
 
 type MessageActions = {

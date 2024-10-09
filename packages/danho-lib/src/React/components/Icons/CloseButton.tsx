@@ -1,4 +1,4 @@
-import { React } from '@dium/modules';
+import { React } from '../../React';
 
 export default function CloseButton() {
   return (

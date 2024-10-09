@@ -1,4 +1,5 @@
-import { React, classNames } from "@dium/modules";
+import { React, useCallback, useEffect, useState } from "../React";
+import { classNames } from "@dium/modules";
 
 type Props<
   TTabKey extends string,
@@ -18,7 +19,7 @@ type Props<
 export function TabBar<TTabKey extends string>({ tabs, ...props }: Props<TTabKey>) {
   const { noTabsBackground, noContentBackground } = props;
 
-  const [activeTab, _setActiveTab] = React.useState<TTabKey>(props.defaultTab ?? tabs.some(([key, value]) =>
+  const [activeTab, _setActiveTab] = useState<TTabKey>(props.defaultTab ?? tabs.some(([key, value]) =>
     typeof value === 'string' ? value === props.defaultTab : key === props.defaultTab
   ) ? props.defaultTab as TTabKey : tabs[0][0] as TTabKey);
 
@@ -26,16 +27,16 @@ export function TabBar<TTabKey extends string>({ tabs, ...props }: Props<TTabKey
     ? props[activeTab as string]
     : () => props[activeTab as string];
 
-  const setActiveTab = React.useCallback((tab: TTabKey) => {
+  const setActiveTab = useCallback((tab: TTabKey) => {
     if (props.beforeTabChange) props.beforeTabChange(tab);
     _setActiveTab(tab);
   }, [props.beforeTabChange, props.onTabChange, tabs]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (props.onTabChange) props.onTabChange(activeTab);
   }, [activeTab, props.onTabChange]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // if active tab key is not in tabs or the value is falsy, set it to the first tab
     if (!tabs.find(([key]) => key === activeTab)?.[1]) {
       _setActiveTab(tabs[0][0] as TTabKey);

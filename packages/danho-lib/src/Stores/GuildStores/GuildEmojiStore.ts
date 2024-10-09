@@ -1,5 +1,4 @@
-import type { Snowflake } from "@discord/types/base";
-import type { Emoji } from "@discord/types/guild/emoji";
+import type { Snowflake, Emoji } from "@discord/types";
 import { Finder } from "@dium/api";
 import { Store } from "@dium/modules/flux";
 

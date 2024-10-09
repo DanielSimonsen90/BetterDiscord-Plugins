@@ -1,7 +1,4 @@
-import { React } from '@dium/index';
-import type { DependencyList } from 'react';
-const { useState, useEffect } = React;
-
+import { useState, useEffect, DependencyList } from '../React';
 import * as Patcher from '@dium/api/patcher';
 
 type PatcherConfig = {

@@ -4,14 +4,14 @@ import { Store } from "@dium/modules/flux";
 export type Theme = 'dark' | 'light';
 
 export interface ThemeStore extends Store {
-    get theme(): Theme;
+  get theme(): Theme;
 
-    getState(): Record<'theme', Theme>;
-    __getLocalVars(): LocalVars;
+  getState(): Record<'theme', Theme>;
+  __getLocalVars(): LocalVars;
 }
 
 type LocalVars = Record<`${'default' | 'lastComputed'}Theme` | 'systemPrefersColorScheme' | 'theme', Theme> & {
-    useForcedColors: boolean;
-}
+  useForcedColors: boolean;
+};
 export const ThemeStore: ThemeStore = Finder.byKeys(["theme"]);
 export default ThemeStore;

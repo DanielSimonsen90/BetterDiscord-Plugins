@@ -1,3 +1,12 @@
+export * from './components';
+
+export * from './attachment';
+export * from './embed';
+export * from './flags';
+export * from './reaction';
+export * from './state';
+export * from './type';
+
 import type { Snowflake } from "../base";
 import type { User } from "../user";
 import type { MessageFlags } from "./flags";

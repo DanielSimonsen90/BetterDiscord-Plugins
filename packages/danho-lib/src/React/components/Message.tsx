@@ -1,7 +1,7 @@
-import { React, SimpleMarkdown } from "@dium/modules";
+import { React } from '../React';
+import { SimpleMarkdown } from "@dium/modules";
+import { Timestamp, Text } from "@discord/components";
 import { Message } from "@discord/types/message";
-import Timestamp from "@discord/components/Timestamp";
-import { Text } from "@dium/components";
 
 type Props = {
   message: Message;

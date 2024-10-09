@@ -1,10 +1,5 @@
-import { VoiceState, VoiceStateUpdate } from "@danho-lib/Stores";
-import { Snowflake } from "@discord/types/base";
-import { GuildMember } from "@discord/types/guild/member";
-import { Message } from "@discord/types/message";
-import { User } from "@discord/types/user";
-import { Activity } from "@discord/types/user/activity";
-import { UserStatus } from "@discord/types/user/status";
+import { VoiceStateUpdate } from "@stores";
+import { Snowflake, GuildMember, Message, User, Activity, UserStatus } from "@discord/types";
 
 type ActionProps = {
   CHANNEL_SELECT: {

@@ -1,8 +1,6 @@
-import { React } from '@dium/modules';
+import { React, useState } from '../React';
 import { Update } from '@dium/settings';
 import { FormSwitch, FormText, TextInput } from '@discord/components';
-
-const { useState } = React;
 
 type SettingProps<Settings extends Record<string, any>, SettingsKey extends keyof Settings> = {
   setting: SettingsKey,

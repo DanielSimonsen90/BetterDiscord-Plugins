@@ -1,10 +1,6 @@
-import { GuildMember } from "@discord/types/guild/member";
-import { User } from "@discord/types/user";
-import { ActivityTypes } from "@discord/types/user/activity";
-import { Snowflake } from "@dium/modules";
-import { Store } from "@dium/modules/flux";
+import { GuildMember, User, ActivityTypes, Snowflake, UserStatus } from "@discord/types";
 import { Finder } from "@dium/api";
-import { UserStatus } from "@discord/types/user/status";
+import { Store } from "@dium/modules/flux";
 
 export interface ChannelMemberStore extends Store {
   getProps(guildId: Snowflake, channelId: Snowflake): {

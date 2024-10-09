@@ -1,6 +1,5 @@
-import { React, classNames } from "@dium/modules";
-
-const { useState } = React;
+import { React, useState } from "../React";
+import { classNames } from "@dium/modules";
 
 type CollapsibleProps = {
   children: React.ReactNode;
