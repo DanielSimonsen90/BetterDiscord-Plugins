@@ -20,7 +20,7 @@ export function Progress({ value, ...props }: Props) {
   const barStyle = barColor ? { backgroundColor: barColor } : {};
   const fillStyle = fillColor ? { backgroundColor: fillColor, width: `${percentage}%` } : { width: percentage };
 
-  return hideOnMin || hideOnMax ? null : (
+  return (hideOnMin && percentage === 0) || (hideOnMax && percentage === 100) ? null : (
     <div className="progress-bar" style={barStyle}>
       <div className="progress-bar__fill" style={fillStyle} />
     </div>

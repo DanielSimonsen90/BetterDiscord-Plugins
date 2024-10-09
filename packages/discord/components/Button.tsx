@@ -62,7 +62,8 @@ export const Button: ButtonComponent = Finder.byKeys(["Button"]).Button;
 export default Button;
 
 export const SuccessButton = (props: ButtonProps) => <Button {...props} color={Button.Colors.GREEN} look={Button.Looks.FILLED} data-type="success" />;
-export const CancelButton = (props: ButtonProps) => <Button {...props} color={Button.Colors.RED} look={Button.Looks.OUTLINED} data-type="cancel" />;
+export const SecondaryDanger = (props: ButtonProps) => <Button {...props} color={Button.Colors.RED} look={Button.Looks.OUTLINED} data-type="cancel" />;
 
 export const PrimaryButton = (props: ButtonProps) => <Button {...props} color={Button.Colors.BRAND} look={Button.Looks.FILLED} data-type="primary" />;
 export const SecondaryButton = (props: ButtonProps) => <Button {...props} color={Button.Colors.PRIMARY} look={Button.Looks.OUTLINED} data-type="secondary" />;
+export const LinkButton = (props: ButtonProps) => <Button {...props} color={Button.Colors.LINK} look={Button.Looks.LINK} data-type="link" />;

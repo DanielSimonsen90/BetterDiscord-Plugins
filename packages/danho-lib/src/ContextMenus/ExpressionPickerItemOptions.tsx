@@ -57,8 +57,8 @@ export type ExpressionPickerContextMenuTargetProps = {
 
 type Callback = (menu: ExpressionPickerContextMenuFiber, targetProps: ExpressionPickerContextMenuTargetProps) => void;
 
-export function WaitForEmojiPickerContextMenu(callback: Callback) {
+export function PatchExpressionPicker(callback: Callback) {
   return BdApi.ContextMenu.patch('expression-picker', callback);
 }
 
-export default WaitForEmojiPickerContextMenu;
+export default PatchExpressionPicker;

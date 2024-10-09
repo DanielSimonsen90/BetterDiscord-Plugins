@@ -2,8 +2,11 @@ import { Dispatcher, EventEmitter } from '@dium/modules';
 import { Actions } from './ActionTypes';
 import { Logger } from '@danho-lib/dium/api/logger';
 
-export * from './UserNoteActions';
+export * from './AppActions';
+export * from './ChannelActions';
 export * from './GuildActions';
+export * from './MessageActions';
+export * from './UserNoteActions';
 
 export const DISPATCH_ACTIONS = Dispatcher._subscriptions;
 export function find(action: string) {
@@ -31,11 +34,11 @@ export const ActionsEmitter = new class ActionsEmitter extends EventEmitter<Acti
     this._events.set(
       eventName as string,
       [...existing, [listener as any, callback as any]]
-    )
+    );
 
     Dispatcher.subscribe(eventName as string, callback as any);
     Logger.log(`[ActionsEmitter] Subscribed to ${eventName}`);
-    
+
     return super.on(eventName, callback as any);
   };
   once<K>(eventName: keyof Actions | K, listener: K extends keyof Actions ? Actions[K] extends unknown[] ? (...args: Actions[K]) => void : never : never): this {
@@ -45,12 +48,12 @@ export const ActionsEmitter = new class ActionsEmitter extends EventEmitter<Acti
       } catch (error) {
         console.error(error, { eventName, args });
       }
-    }
+    };
     const existing = this._events.get(eventName as string) ?? [];
     this._events.set(
       eventName as string,
       [...existing, [listener as any, callback as any]]
-    )
+    );
 
     Dispatcher.subscribe(eventName as string, (...args) => {
       callback(...args as any);
