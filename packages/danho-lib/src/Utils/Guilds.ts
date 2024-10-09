@@ -4,10 +4,9 @@ import {
   GuildChannelStore,
   GuildEmojiStore,
   SelectedGuildStore,
-  VoiceInfo,
   VoiceStore,
   UserStore
-} from '@stores/index';
+} from '@stores';
 
 import GuildActions from "@actions/GuildActions";
 import { Guild } from "@discord/types/guild";
@@ -22,7 +21,6 @@ type CompiledGuildUtils = BetterOmit<
   & FilterStore<GuildChannelStore>
   & FilterStore<GuildEmojiStore>
   & FilterStore<SelectedGuildStore>
-  & FilterStore<VoiceInfo>
   & FilterStore<VoiceStore>
 
   & typeof GuildActions
@@ -41,7 +39,6 @@ export const GuildUtils: CompiledGuildUtils = {
   ...GuildChannelStore,
   ...GuildEmojiStore,
   ...SelectedGuildStore,
-  ...VoiceInfo,
   ...VoiceStore,
 
   ...GuildActions,
