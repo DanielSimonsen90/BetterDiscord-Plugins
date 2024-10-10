@@ -12,7 +12,7 @@ export declare class DanhoBDLib {
 
   log(prefix: string, ...data: any[]): void;
 
-  createPlugin<TPlugin extends BasePlugin>(name: string, builder: (BasePlugin: typeof BasePlugin) => TPlugin): TPlugin;
+  createPlugin<TPlugin extends BasePlugin>(name: string, builder: (basePlugin: typeof BasePlugin) => TPlugin): TPlugin;
 }
 
 export declare class BasePlugin<
@@ -41,12 +41,12 @@ export declare class BasePlugin<
   lib: DanhoBDLib;
 
   // DOM Modifiers
-  events: Array<PluginEventItem>;
+  events: Array<PluginEventItem<any>>;
   addEventListener<TEventKey extends keyof HTMLElementEventMap>(element: HTMLElement, type: TEventKey, listener: (this: HTMLElement, event: HTMLElementEventMap[TEventKey]) => void, options?: AddEventListenerOptions): void;
   removeAllEventListeners(): void;
 
   injections: Array<HTMLElement>;
-  injectElement(parentResolve: HTMLElement | string, element: HTMLElement, position: InsertPosition = 'beforeend'): void;
+  injectElement(parentResolve: HTMLElement | string, element: HTMLElement, position?: InsertPosition): void;
   removeAllInjections(): void;
 }
 
@@ -59,7 +59,7 @@ type PluginOptions<
   settings?: TSettings
 };
 
-type PluginEventItem<TEventKey> = {
+type PluginEventItem<TEventKey extends keyof EventSourceEventMap> = {
   element: HTMLElement;
   type: TEventKey;
   listener: (this: EventSource, event: EventSourceEventMap[TEventKey]) => void;
