@@ -1,5 +1,5 @@
 import { Finder } from "@dium/api";
-import { SelectedGuildStore, SelectedChannelStore, ChannelStore, GuildStore, GuildMemberStore } from '@stores';
+import { SelectedGuildStore, SelectedChannelStore, ChannelStore, GuildStore, GuildMemberStore, UserStore } from '@stores';
 import { Arrayable } from "./types";
 
 export * from './Functions';
@@ -18,23 +18,9 @@ export function findModule(args: Arrayable<string>, returnDisplayNamesOnly = fal
       module.default?.displayName || module.displayName
     : module;
 }
-export function findStore(storeName: string, allowMultiple = false) {
-  const result = Object.values<{
-    name: string,
-    band: number,
-    actionHandler: Record<string, any>,
-    storeDidChange: (e: any) => void;
-  }>(
-    Finder.byName("UserSettingsAccountStore")
-      ._dispatcher._actionHandlers._dependencyGraph.nodes
-  ).sort((a, b) => a.name.localeCompare(b.name))
-    .filter(s => s.name.toLowerCase().includes(storeName.toLowerCase()));
-
-  return allowMultiple
-    ? result.map(store => [store.name, Finder.byName(store.name) ?? new class InvalidStore { node = store; }])
-    : result.map(store => Finder.byName(store.name) ?? new class InvalidStore { node = store; })[0];
+export function currentUser() {
+  return UserStore.getCurrentUser()
 }
-
 export function currentGuild() {
   const guildId = SelectedGuildStore.getGuildId();
   return guildId ? GuildStore.getGuild(guildId) : null;
@@ -51,12 +37,11 @@ export function currentGuildMembers() {
 export const Utils = {
   findNodeByIncludingClassName,
   findModule,
-  findStore,
 
-  // get currentUser() { return currentUser() },
   get currentGuild() { return currentGuild(); },
   get currentChannel() { return currentChannel(); },
   get currentGuildMembers() { return currentGuildMembers(); },
+  get currentUser() { return currentUser(); }
 };
 
 export * from './Users';

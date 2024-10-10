@@ -32,6 +32,7 @@ type CompiledGuildUtils = BetterOmit<
     meFor(guildId: Snowflake): GuildMember;
     getSelectedGuildTimestamps(): ReturnType<SelectedGuildStore['getState']>["selectedGuildTimestampMillis"];
     getIconUrl(guild: Guild): string;
+    getGuildByName(name: string): Guild | null;
   };
 
 export const GuildUtils: CompiledGuildUtils = {
@@ -64,4 +65,7 @@ export const GuildUtils: CompiledGuildUtils = {
   getMembers(guild) {
     return GuildMemberStore.getMembers(guild);
   },
+  getGuildByName(name) {
+    return Object.values(GuildStore.getGuilds()).find(guild => guild.name === name) || null;
+  }
 };

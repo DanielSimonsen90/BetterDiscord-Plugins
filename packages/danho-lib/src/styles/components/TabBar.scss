@@ -10,6 +10,8 @@
 .tab-bar__tabs {
   display: grid;
   grid-auto-flow: column;
+  max-width: 100%;
+  overflow-x: auto;
 
   &--no-color .tab-bar__tab {
     background-color: transparent;

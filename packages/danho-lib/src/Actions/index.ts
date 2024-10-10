@@ -79,6 +79,6 @@ export const ActionsEmitter = new class ActionsEmitter extends EventEmitter<Acti
     this._events.clear();
 
     Logger.log(`[ActionsEmitter] Unsubscribed from all events`);
-    return super.removeAllListeners(event as string);
+    return super.removeAllListeners(event);
   }
 };

@@ -1,4 +1,4 @@
-import { useEffect } from '../React';
+import { useKeybind } from './useKeybind';
 
 type Props = {
   onCtrlZ: () => void;
@@ -6,16 +6,6 @@ type Props = {
 };
 
 export function useCtrlZY({ onCtrlY, onCtrlZ }: Props) {
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key === 'z') {
-        onCtrlZ();
-      } else if (e.ctrlKey && e.key === 'y') {
-        onCtrlY();
-      }
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onCtrlZ, onCtrlY]);
+  useKeybind(['Control', 'z'], onCtrlZ);
+  useKeybind(['Control', 'y'], onCtrlY);
 }
