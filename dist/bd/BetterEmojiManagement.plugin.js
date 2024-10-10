@@ -223,6 +223,8 @@ const margins = /* @__PURE__ */ byKeys(["marginBottom40", "marginTop4"]);
 
 const { Menu, Group: MenuGroup, Item: MenuItem, Separator: MenuSeparator, CheckboxItem: MenuCheckboxItem, RadioItem: MenuRadioItem, ControlItem: MenuControlItem } = BdApi.ContextMenu;
 
+const { TextInput, InputError } = Common;
+
 const queryFiber = (fiber, predicate, direction = "up" , depth = 30) => {
     if (depth < 0) {
         return null;
@@ -280,8 +282,10 @@ const SettingsContainer = ({ name, children, onReset }) => (React.createElement(
 class SettingsStore {
     constructor(defaults, onLoad) {
         this.listeners = new Set();
-        this.update = (settings) => {
-            Object.assign(this.current, typeof settings === "function" ? settings(this.current) : settings);
+        this.update = (settings, replace = false) => {
+            this.current = typeof settings === "function"
+                ? ({ ...(replace ? {} : this.current), ...settings(this.current) })
+                : ({ ...(replace ? {} : this.current), ...settings });
             this._dispatch(true);
         };
         this.addReactChangeListener = this.addListener;
@@ -372,11 +376,11 @@ const createPlugin = (plugin) => (meta) => {
     };
 };
 
+const GuildStore = byName("GuildStore");
+
 const getEmojiUrl = (emoji, size = 128) => (`https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? 'gif' : 'webp'}` +
     `?size=${size}&qualiy=lossless`);
 const EmojiStore = byName("EmojiStore");
-
-const GuildStore = byName("GuildStore");
 
 const createPatcherCallback = (callback) => callback;
 const createPatcherAfterCallback = (callback) => callback;
@@ -810,7 +814,7 @@ class DQuery {
         this.element.style.display = '';
     }
     appendHtml(html) {
-        this.element.appendChild(createElement(html));
+        this.element.appendChild(createElement$1(html));
         return this;
     }
     appendElements(elements) {
@@ -820,7 +824,7 @@ class DQuery {
         return this;
     }
     appendComponent(component, wrapperProps) {
-        this.element.appendChild(createElement("<></>", wrapperProps));
+        this.element.appendChild(createElement$1("<></>", wrapperProps));
         const wrapper = this.element.lastChild;
         BdApi.ReactDOM.render(component, wrapper);
         return this;
@@ -830,7 +834,7 @@ class DQuery {
         return this;
     }
     insertComponent(position, component) {
-        this.element.insertAdjacentElement(position, createElement("<></>"));
+        this.element.insertAdjacentElement(position, createElement$1("<></>"));
         const wrapper = this.parent.children(".bdd-wrapper", true).element;
         BdApi.ReactDOM.render(component, wrapper);
         return this;
@@ -840,7 +844,7 @@ class DQuery {
         return this;
     }
     prependComponent(component) {
-        this.element.insertAdjacentElement('afterbegin', createElement("<></>"));
+        this.element.insertAdjacentElement('afterbegin', createElement$1("<></>"));
         const wrapper = this.element.firstChild;
         BdApi.ReactDOM.render(component, wrapper);
         return this;
@@ -857,7 +861,7 @@ class DQuery {
         return forceFullRerender(this.fiber);
     }
 }
-function createElement(html, props = {}, target) {
+function createElement$1(html, props = {}, target) {
     if (html === "<></>" || html.toLowerCase() === "fragment") {
         if ('className' in props)
             props.class = `bdd-wrapper ${props.className}`;
@@ -876,6 +880,8 @@ function createElement(html, props = {}, target) {
     })();
     return element;
 }
+
+const { useCallback, useContext, useDebugValue, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useReducer, useRef, useState, useId, useDeferredValue, useInsertionEffect, useSyncExternalStore, useTransition, createRef, createContext, createElement, createFactory, forwardRef, cloneElement, lazy, memo, isValidElement, Component, PureComponent, Fragment, Suspense, } = React;
 
 function BinIcon() {
     return (React.createElement("svg", { "aria-hidden": false, width: "16", height: "16", viewBox: "0 0 24 24" },
@@ -980,14 +986,14 @@ function insteadEmojiStore_getDisambiguatedEmojiContext() {
     });
 }
 
-function WaitForEmojiPickerContextMenu(callback) {
+function PatchExpressionPicker(callback) {
     return BdApi.ContextMenu.patch('expression-picker', callback);
 }
 
 function insteadEmojiPickerContextMenu() {
     if (!isBanFeatureEnabled())
         return;
-    return WaitForEmojiPickerContextMenu((menu, targetProps) => {
+    return PatchExpressionPicker((menu, targetProps) => {
         renderBanEmojiMenuItem(menu, targetProps);
     });
 }
@@ -1044,6 +1050,39 @@ function patch() {
     afterEmojiPicker();
 }
 
+function Collapsible({ children, ...props }) {
+    const [isOpen, setIsOpen] = useState(props.defaultOpen ?? false);
+    const disabled = props.disabled ?? false;
+    const toggle = () => {
+        if (disabled)
+            return;
+        setIsOpen(!isOpen);
+        props.onToggle?.(!isOpen);
+        if (isOpen)
+            props.onClose?.();
+        else
+            props.onOpen?.();
+    };
+    const Title = typeof props.title === 'string' ? React.createElement("h3", null, props.title) : props.title;
+    const TitleOpen = typeof props.titleOpen === 'string' ? React.createElement("h3", null, props.titleOpen) : props.titleOpen;
+    return (React.createElement("div", { className: `collapsible ${props.className ?? ''}`, "data-open": isOpen, "data-disabled": disabled },
+        React.createElement("div", { className: "collapsible__header", onClick: toggle },
+            isOpen ? TitleOpen ?? Title : Title,
+            React.createElement("span", { style: { display: 'flex' } })),
+        React.createElement("div", { className: classNames('collapsible__content', isOpen ? 'visible' : 'hidden') }, children)));
+}
+
+function GuildListItem(props) {
+    const guildId = React.useMemo(() => 'guildId' in props ? props.guildId : props.guild.id, [props]);
+    const guild = React.useMemo(() => 'guild' in props ? props.guild : GuildStore.getGuild(guildId), [guildId]);
+    const { children } = props;
+    return (React.createElement("div", { className: "guild-list-item" },
+        React.createElement("img", { className: "guild-list-item__icon", src: window.DL.Guilds.getIconUrl(guild), alt: guild.name }),
+        React.createElement("div", { className: "guild-list-item__content-container" },
+            React.createElement("span", { className: "guild-list-item__name" }, guild.name),
+            React.createElement("span", { className: "guild-list-item__content" }, children))));
+}
+
 var ButtonLooks;
 (function (ButtonLooks) {
     ButtonLooks[ButtonLooks["BLANK"] = 0] = "BLANK";
@@ -1080,43 +1119,6 @@ var Colors;
 const Button = byKeys(["Button"]).Button;
 const SecondaryButton = (props) => React.createElement(Button, { ...props, color: Button.Colors.PRIMARY, look: Button.Looks.OUTLINED, "data-type": "secondary" });
 
-const TextInput = byName("TextInput");
-
-const { useState: useState$1 } = React;
-function Collapsible({ children, ...props }) {
-    const [isOpen, setIsOpen] = useState$1(props.defaultOpen ?? false);
-    const disabled = props.disabled ?? false;
-    const toggle = () => {
-        if (disabled)
-            return;
-        setIsOpen(!isOpen);
-        props.onToggle?.(!isOpen);
-        if (isOpen)
-            props.onClose?.();
-        else
-            props.onOpen?.();
-    };
-    const Title = typeof props.title === 'string' ? React.createElement("h3", null, props.title) : props.title;
-    const TitleOpen = typeof props.titleOpen === 'string' ? React.createElement("h3", null, props.titleOpen) : props.titleOpen;
-    return (React.createElement("div", { className: `collapsible ${props.className ?? ''}`, "data-open": isOpen, "data-disabled": disabled },
-        React.createElement("div", { className: "collapsible__header", onClick: toggle },
-            isOpen ? TitleOpen ?? Title : Title,
-            React.createElement("span", { style: { display: 'flex' } })),
-        React.createElement("div", { className: classNames('collapsible__content', isOpen ? 'visible' : 'hidden') }, children)));
-}
-
-function GuildListItem(props) {
-    const guildId = React.useMemo(() => 'guildId' in props ? props.guildId : props.guild.id, [props]);
-    const guild = React.useMemo(() => 'guild' in props ? props.guild : GuildStore.getGuild(guildId), [guildId]);
-    const { children } = props;
-    return (React.createElement("div", { className: "guild-list-item" },
-        React.createElement("img", { className: "guild-list-item__icon", src: window.DL.Guilds.getIconUrl(guild), alt: guild.name }),
-        React.createElement("div", { className: "guild-list-item__content-container" },
-            React.createElement("span", { className: "guild-list-item__name" }, guild.name),
-            React.createElement("span", { className: "guild-list-item__content" }, children))));
-}
-
-const { useState } = React;
 function Setting({ setting, settings, set, titles, ...props }) {
     const { beforeChange, onChange, formatValue, type } = props;
     const [v, _setV] = useState(formatValue ? formatValue(settings[setting]) : settings[setting]);
@@ -1129,19 +1131,23 @@ function Setting({ setting, settings, set, titles, ...props }) {
                 setV(checked);
             } }));
     if (type === undefined ? typeof v === 'number' : type === 'number')
-        return (React.createElement(TextInput, { key: setting.toString(), title: titles[setting], value: v, onChange: inputValue => {
-                const value = beforeChange ? beforeChange(Number(inputValue)) : Number(inputValue);
-                set({ [setting]: value });
-                onChange?.(value);
-                setV(value);
-            } }));
+        return (React.createElement("div", { className: "setting-group" },
+            React.createElement(TextInput, { key: setting.toString(), value: v, onChange: inputValue => {
+                    const value = beforeChange ? beforeChange(Number(inputValue)) : Number(inputValue);
+                    set({ [setting]: value });
+                    onChange?.(value);
+                    setV(value);
+                } }),
+            React.createElement(FormText, { className: 'note' }, titles[setting])));
     if (type === undefined ? typeof v === 'string' : type === 'text')
-        return (React.createElement(TextInput, { key: setting.toString(), title: titles[setting], value: v, onChange: inputValue => {
-                const value = beforeChange ? beforeChange(inputValue) : inputValue;
-                set({ [setting]: value });
-                onChange?.(value);
-                setV(value);
-            } }));
+        return (React.createElement("div", { className: "setting-group" },
+            React.createElement(TextInput, { key: setting.toString(), value: v, onChange: inputValue => {
+                    const value = beforeChange ? beforeChange(inputValue) : inputValue;
+                    set({ [setting]: value });
+                    onChange?.(value);
+                    setV(value);
+                } }),
+            React.createElement(FormText, { className: 'note' }, titles[setting])));
     if (type)
         return (React.createElement("div", { className: "danho-form-switch", key: setting.toString() },
             React.createElement("input", { type: type, key: setting.toString(), value: v, onChange: e => {
@@ -1167,7 +1173,7 @@ function BannedEmojiTag({ emojiId, onClick }) {
 
 function SettingsPanel({ updatePatches }) {
     const [current, set] = Settings.useState();
-    React.useEffect(() => {
+    useEffect(() => {
         updatePatches();
     }, [current.enableBannedEmojis, current.enableFavorFavoriteEmojis]);
     return (React.createElement("div", { className: 'danho-plugin-settings' },
@@ -1183,7 +1189,7 @@ function BannedEmojiSection() {
     const [current, set] = Settings.useState();
     const emojiStoreContext = EmojiStore.getDisambiguatedEmojiContext();
     const bannedEmojis = current.bannedEmojis.map(({ id }) => emojiStoreContext.getById(id));
-    const guilds = React.useMemo(() => bannedEmojis.map(({ guildId }) => ({
+    const guilds = useMemo(() => bannedEmojis.map(({ guildId }) => ({
         id: guildId,
         guild: GuildStore.getGuild(guildId),
         bannedEmojis: bannedEmojis.filter(({ guildId: id }) => id === guildId)

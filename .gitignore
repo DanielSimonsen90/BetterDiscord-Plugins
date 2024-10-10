@@ -1,2 +1,3 @@
 node_modules/
 src/Logger
+dist/bd/Logger.plugin.js

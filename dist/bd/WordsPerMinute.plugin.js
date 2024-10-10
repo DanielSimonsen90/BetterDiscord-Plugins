@@ -1,6 +1,6 @@
 /**
  * @name WordsPerMinute
- * @version 1.0.2
+ * @version 1.0.3
  * @author danielsimonsen90
  * @authorLink https://github.com/danielsimonsen90
  * @description View your words per minute while typing your message
@@ -52,7 +52,7 @@ WScript.Quit();
 
 let meta = {
   "name": "words-per-minute",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "View your words per minute while typing your message",
   "author": "danielsimonsen90",
   "dependencies": {
@@ -272,8 +272,10 @@ const SettingsContainer = ({ name, children, onReset }) => (React.createElement(
 class SettingsStore {
     constructor(defaults, onLoad) {
         this.listeners = new Set();
-        this.update = (settings) => {
-            Object.assign(this.current, typeof settings === "function" ? settings(this.current) : settings);
+        this.update = (settings, replace = false) => {
+            this.current = typeof settings === "function"
+                ? ({ ...(replace ? {} : this.current), ...settings(this.current) })
+                : ({ ...(replace ? {} : this.current), ...settings });
             this._dispatch(true);
         };
         this.addReactChangeListener = this.addListener;
@@ -793,7 +795,7 @@ class DQuery {
         this.element.style.display = '';
     }
     appendHtml(html) {
-        this.element.appendChild(createElement(html));
+        this.element.appendChild(createElement$1(html));
         return this;
     }
     appendElements(elements) {
@@ -803,7 +805,7 @@ class DQuery {
         return this;
     }
     appendComponent(component, wrapperProps) {
-        this.element.appendChild(createElement("<></>", wrapperProps));
+        this.element.appendChild(createElement$1("<></>", wrapperProps));
         const wrapper = this.element.lastChild;
         BdApi.ReactDOM.render(component, wrapper);
         return this;
@@ -813,7 +815,7 @@ class DQuery {
         return this;
     }
     insertComponent(position, component) {
-        this.element.insertAdjacentElement(position, createElement("<></>"));
+        this.element.insertAdjacentElement(position, createElement$1("<></>"));
         const wrapper = this.parent.children(".bdd-wrapper", true).element;
         BdApi.ReactDOM.render(component, wrapper);
         return this;
@@ -823,7 +825,7 @@ class DQuery {
         return this;
     }
     prependComponent(component) {
-        this.element.insertAdjacentElement('afterbegin', createElement("<></>"));
+        this.element.insertAdjacentElement('afterbegin', createElement$1("<></>"));
         const wrapper = this.element.firstChild;
         BdApi.ReactDOM.render(component, wrapper);
         return this;
@@ -840,7 +842,7 @@ class DQuery {
         return forceFullRerender(this.fiber);
     }
 }
-function createElement(html, props = {}, target) {
+function createElement$1(html, props = {}, target) {
     if (html === "<></>" || html.toLowerCase() === "fragment") {
         if ('className' in props)
             props.class = `bdd-wrapper ${props.className}`;
@@ -882,8 +884,87 @@ function removeAllInjections() {
     injections = [];
 }
 
-const ChatFormSelector = "[class*=chatContent] form";
+const ChatFormSelector = "[class*=chatContent] form div:has(> [class*=textAreaSlate])";
 const WPMCountId = 'wpm-count';
+
+const debugLog = (...data) => getMeta().development ? log(...data) : undefined;
+
+class DiumStore {
+    constructor(defaults, dataKey, onLoad) {
+        this.defaults = defaults;
+        this.dataKey = dataKey;
+        this.onLoad = onLoad;
+        this.listeners = new Set();
+        this.update = (item, replace = false) => {
+            const current = replace ? {} : this.current;
+            this.current = typeof item === "function"
+                ? ({ ...current, ...item(this.current) })
+                : ({ ...current, ...item });
+            this._dispatch(true);
+        };
+        this.addReactChangeListener = this.addListener;
+        this.removeReactChangeListener = this.removeListener;
+    }
+    load() {
+        this.current = { ...this.defaults, ...load(this.dataKey) };
+        this.onLoad?.();
+        this._dispatch(false);
+    }
+    _dispatch(save$1) {
+        for (const listener of this.listeners) {
+            listener(this.current);
+        }
+        if (save$1) {
+            save(this.dataKey, this.current);
+        }
+    }
+    reset() {
+        this.current = { ...this.defaults };
+        this._dispatch(true);
+    }
+    delete(...keys) {
+        for (const key of keys) {
+            delete this.current[key];
+        }
+        this._dispatch(true);
+    }
+    useCurrent() {
+        return useStateFromStores([this], () => this.current, undefined, () => false);
+    }
+    useSelector(selector, deps, compare) {
+        return useStateFromStores([this], () => selector(this.current), deps, compare);
+    }
+    useState() {
+        return useStateFromStores([this], () => [
+            this.current,
+            this.update
+        ]);
+    }
+    useStateWithDefaults() {
+        return useStateFromStores([this], () => [
+            this.current,
+            this.defaults,
+            this.update
+        ]);
+    }
+    useListener(listener, deps) {
+        React.useEffect(() => {
+            this.addListener(listener);
+            return () => this.removeListener(listener);
+        }, deps ?? [listener]);
+    }
+    addListener(listener) {
+        this.listeners.add(listener);
+        return listener;
+    }
+    removeListener(listener) {
+        this.listeners.delete(listener);
+    }
+    removeAllListeners() {
+        this.listeners.clear();
+    }
+}
+const createDiumStore = (defaults, dataKey, onLoad) => new DiumStore(defaults, dataKey, onLoad);
 
 function createProperty(options) {
     const optionsCompiled = typeof options === 'object' ? options : { defaultValue: options };
@@ -927,20 +1008,17 @@ function resetProperties() {
     wpm.reset();
 }
 
-const debugLog = (...data) => getMeta().development ? log(...data) : undefined;
-
 const Settings = createSettings({
-    autoResetTime: 1000,
-    leftAlign: '1.5rem'
+    leftAlign: '1ch'
 }, function onLoad() {
     Highscores.load();
 });
-const Highscores = createSettings({
+const Highscores = createDiumStore({
     best: 0,
     bestDate: new Date().toLocaleDateString(),
     today: 0,
     todayDate: new Date().toLocaleDateString()
-});
+}, 'highscores');
 
 function calculateWPM(messageContent) {
     if (typingStartTime.hasNoValue() || typingEndTime.hasNoValue() || !messageContent)
@@ -950,7 +1028,10 @@ function calculateWPM(messageContent) {
     const wordCount = messageContent.trim().split(/\s+/).length;
     if (wordCount <= 1 || messageContent.trim() === '')
         return;
-    wpm.set(wordCount / timeDiffMin);
+    const value = wordCount / timeDiffMin;
+    if (value > 300)
+        return;
+    wpm.set(value);
 }
 function updateHighscores() {
     const { best, bestDate, today: storedTodayScore, todayDate } = Highscores.current;
@@ -995,17 +1076,13 @@ function onKeyUp(event) {
 function onSubmit() {
     typingStartTime.reset();
     updateHighscores();
-    setTimeout(() => {
-        debugLog('Auto Reset');
-        typingEndTime.reset();
-        wpm.reset();
-    }, Settings.current.autoResetTime);
 }
 
 const styles = "@charset \"UTF-8\";\n.words-per-minute-settings {\n  display: flex;\n  flex-direction: column;\n  gap: 1rem;\n}\n.words-per-minute-settings h3 {\n  font-size: 1.25rem;\n  font-weight: bold;\n  color: var(--header-primary);\n  margin-bottom: 0.5rem;\n}\n.words-per-minute-settings input {\n  box-sizing: border-box;\n  width: 100%;\n  padding: 0.25rem;\n  border: 1px solid var(--interactive-normal);\n  border-radius: 0.5rem;\n  font-size: 1rem;\n  background-color: var(--background-modifier-accent);\n  color: var(--text-normal);\n}\n.words-per-minute-settings .words-per-minute-highscores {\n  margin-top: 1rem;\n}\n.words-per-minute-settings .words-per-minute-highscores section {\n  display: grid;\n  grid-template-columns: repeat(2, 1fr);\n  gap: 1rem;\n  place-items: center;\n}\n.words-per-minute-settings .words-per-minute-highscores h3 {\n  font-size: 1.25rem;\n  font-weight: bold;\n  color: var(--header-primary);\n  margin-bottom: 0.5rem;\n  text-align: center;\n}\n.words-per-minute-settings .words-per-minute-highscores h3::after {\n  content: \"\";\n  display: block;\n  width: 100%;\n  height: 1px;\n  background-color: var(--background-modifier-accent);\n  margin-top: 0.5rem;\n}\n.words-per-minute-settings .words-per-minute-highscores h4 {\n  font-size: 1.2rem;\n  font-weight: bold;\n  color: var(--header-secondary);\n  margin-bottom: 0.5rem;\n}\n.words-per-minute-settings .words-per-minute-highscores p {\n  color: var(--text-normal);\n  font-size: 1rem;\n}\n.words-per-minute-settings .words-per-minute-highscores span:first-child {\n  font-weight: bold;\n}\n.words-per-minute-settings .words-per-minute-highscores span:last-child::before {\n  content: \" • \";\n}\n.words-per-minute-settings .words-per-minute-highscores button {\n  padding: 0.5rem;\n  font-size: 0.8rem;\n  border-radius: 0.5rem;\n  margin-inline: auto;\n  color: var(--button-danger-background) !important;\n}\n.words-per-minute-settings .words-per-minute-highscores button:hover {\n  color: var(--white-500) !important;\n}\n\n#wpm-count {\n  display: none;\n  transition: top 0.25s ease-in-out 1s;\n}\n\nform:not(:has(span[class*=emptyText])) #wpm-count {\n  --leftAlign: $defaultLeftAlign;\n  display: block;\n  color: var(--text-message-preview-low-sat);\n  font-size: 12px;\n  font-weight: bold;\n  position: absolute;\n  margin: 0;\n  top: 0.3rem;\n  left: var(--leftAlign, \"1.5rem\");\n}\n\nform:has(#wpm-count) {\n  position: relative;\n}\n\ndiv[class*=inner]:has([class*=textArea] [data-slate-string]:not(:empty)) {\n  padding-top: 1rem;\n}";
 
+const { useCallback, useContext, useDebugValue, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useReducer, useRef, useState, useId, useDeferredValue, useInsertionEffect, useSyncExternalStore, useTransition, createRef, createContext, createElement, createFactory, forwardRef, cloneElement, lazy, memo, isValidElement, Component, PureComponent, Fragment, Suspense, } = React;
+
 const PluginName = getMeta().name;
-const { useMemo } = React;
 const ResetButton = ({ children = 'Reset', onClick, danger }) => (React.createElement("button", { className: `bd-button bd-button-outlined ${danger ? 'bd-button-color-red' : 'bd-button-color-primary'}`, onClick: onClick }, children));
 const SettingsGroup = ({ settingsKey, title, readonly }) => {
     const [current, defaults, set] = Settings.useStateWithDefaults();
@@ -1040,7 +1117,6 @@ function SettingsPanel() {
         Highscores.update({ today: 0, todayDate: new Date().toLocaleDateString() });
     }
     return (React.createElement("div", { className: `${PluginName}-settings`, style: { width: '100%' } },
-        React.createElement(SettingsGroup, { settingsKey: "autoResetTime", title: "Auto Reset Time (ms)" }),
         React.createElement(SettingsGroup, { settingsKey: "leftAlign", title: "Left Align" }),
         React.createElement("div", { className: `${PluginName}-highscores` },
             React.createElement("h3", null, "Highscores"),
@@ -1055,7 +1131,7 @@ async function initChatForm(chatForm) {
         return;
     addEventListener(chatForm, 'keydown', onKeyDown);
     addEventListener(chatForm, 'keyup', onKeyUp);
-    injectElement(chatForm, createElement(`<p id="${WPMCountId}" style="--leftAlign: ${Settings.current.leftAlign}">${wpm.get()} wpm</p>`));
+    injectElement(chatForm, createElement$1(`<p id="${WPMCountId}" style="--leftAlign: ${Settings.current.leftAlign}">${wpm.get()} wpm</p>`));
 }
 async function checkChatFormMod(forceClear) {
     const wpmCount = document.getElementById(WPMCountId);

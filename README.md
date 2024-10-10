@@ -1,7 +1,7 @@
 # BetterDiscord Plugins
 ## Forked from [Zerthox/BetterDiscord-Plugins](https://github.com/Zerthox/BetterDiscord-Plugins)
 
-### [0DanhoLibrary](/dist/bd/0DanhoLibrary.plugin.js) <sub><sup>`v.1.0.0` *(Updated: 20/05/2022)*</sup></sub>
+### [0DanhoLibrary](/dist/bd/0DanhoLibrary.plugin.js) <sub><sup>`v.1.6.0` *(Updated: 20/05/2022)*</sup></sub>
 General Discord changes and improvements including:
 * [PrettyRoles]: Make roles look better
 * [Badges]: Move Nitro badge back to after boost badge + add Plugin Developer badge
@@ -18,10 +18,10 @@ General Discord changes and improvements including:
 **Removed**
 * ActivityTab: Replace Guild Members aside with Tabbar of members and activities - *Removed due to mass component updates, making patches glitchy*
 
-### [WordsPerMinute](/dist/bd/WordsPerMinute.plugin.js) <sub><sup>`v.1.0.0` *(Updated: 06/09/2024)*</sup></sub>
+### [WordsPerMinute](/dist/bd/WordsPerMinute.plugin.js) <sub><sup>`v.1.0.3` *(Updated: 06/09/2024)*</sup></sub>
 While typing, it shows the words per minute you are typing. Saves the highest WPM that can be viewed in settings.
 
-### [BetterEmojiManagement - BETA](/dist/bd/BetterEmojiManagement.plugin.js) <sub><sup>`v.1.0.0` *(Updated: 10/09/2024)*</sup></sub>
+### [BetterEmojiManagement - BETA](/dist/bd/BetterEmojiManagement.plugin.js) <sub><sup>`v.1.0.1` *(Updated: 10/09/2024)*</sup></sub>
 Have better emoji management control.
 
 * [FavorFavoriteEmojis]: Push your favorite emojis to the top of search results

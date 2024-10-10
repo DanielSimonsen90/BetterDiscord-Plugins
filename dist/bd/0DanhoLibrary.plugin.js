@@ -239,6 +239,20 @@ const print = (output, ...data) => output(`%c[${getMeta().name}] %c${getMeta().v
 const log = (...data) => print(console.log, ...data);
 const warn = (...data) => print(console.warn, ...data);
 const error = (...data) => print(console.error, ...data);
+const group = (label, ...data) => print(console.group, label, ...data);
+const groupCollapsed = (label, ...data) => print(console.groupCollapsed, label, ...data);
+const groupEnd = () => console.groupEnd();
+
+const diumLogger = {
+    __proto__: null,
+    error,
+    group,
+    groupCollapsed,
+    groupEnd,
+    log,
+    print,
+    warn
+};
 
 const patch = (type, object, method, callback, options) => {
     const original = object?.[method];
@@ -288,72 +302,252 @@ const inject = (styles) => {
 };
 const clear = () => BdApi.DOM.removeStyle(getMeta().name);
 
-const GuildStore$1 = /* @__PURE__ */ byName("GuildStore");
-const GuildMemberStore = /* @__PURE__ */ byName("GuildMemberStore");
+class GlobalReq {
+    static get instance() {
+        if (!GlobalReq._instance) {
+            const id = "WebModules_" + Math.floor(Math.random() * 1000000000000);
+            let req;
+            window.webpackChunkdiscord_app.push([[id], {}, r => { if (r.c)
+                    req = r; }]);
+            delete req.m[id];
+            delete req.c[id];
+            GlobalReq._instance = req;
+        }
+        return GlobalReq._instance;
+    }
+    constructor() { }
+}
+const Cache = {
+    modules: {}
+};
+function BDFDB_findByStrings(strings, config = {}) {
+    strings = strings.flat(10);
+    return findModule$1("string", JSON.stringify(strings), m => checkModuleStrings(m, strings) && m, config);
+}
+function checkModuleStrings(module, strings, config = {}) {
+    const check = (s1, s2) => {
+        s1 = config.ignoreCase ? s1.toString().toLowerCase() : s1.toString();
+        return config.hasNot ? s1.indexOf(s2) == -1 : s1.indexOf(s2) > -1;
+    };
+    return [strings].flat(10).filter(n => typeof n == "string").map(config.ignoreCase ? (n => n.toLowerCase()) : (n => n)).every(string => module && ((typeof module == "function" || typeof module == "string") && (check(module, string) || typeof module.__originalFunction == "function" && check(module.__originalFunction, string)) || typeof module.type == "function" && check(module.type, string) || (typeof module == "function" || typeof module == "object") && module.prototype && Object.keys(module.prototype).filter(n => n.indexOf("render") == 0).some(n => check(module.prototype[n], string))));
+}
+function findModule$1(type, cacheString, filter, config = {}) {
+    if (!isObject(Cache.modules[type]))
+        Cache.modules[type] = { module: {}, export: {} };
+    let defaultExport = typeof config.defaultExport != "boolean" ? true : config.defaultExport;
+    if (!config.all && defaultExport && Cache.modules[type].export[cacheString])
+        return Cache.modules[type].export[cacheString];
+    else if (!config.all && !defaultExport && Cache.modules[type].module[cacheString])
+        return Cache.modules[type].module[cacheString];
+    else {
+        let m = find$1(filter, config);
+        if (m) {
+            if (!config.all) {
+                if (defaultExport)
+                    Cache.modules[type].export[cacheString] = m;
+                else
+                    Cache.modules[type].module[cacheString] = m;
+            }
+            return m;
+        }
+        else if (!config.noWarnings)
+            warn(`${cacheString} [${type}] not found in WebModules`);
+    }
+}
+function find$1(filter, config = {}) {
+    let defaultExport = typeof config.defaultExport != "boolean" ? true : config.defaultExport;
+    let onlySearchUnloaded = typeof config.onlySearchUnloaded != "boolean" ? false : config.onlySearchUnloaded;
+    let all = typeof config.all != "boolean" ? false : config.all;
+    const req = GlobalReq.instance;
+    const found = [];
+    if (!onlySearchUnloaded)
+        for (let i in req.c)
+            if (req.c.hasOwnProperty(i) && req.c[i].exports != window) {
+                let m = req.c[i].exports, r = null;
+                if (m && (typeof m == "object" || typeof m == "function")) {
+                    if (!!(r = filter(m))) {
+                        if (all)
+                            found.push(defaultExport ? r : req.c[i]);
+                        else
+                            return defaultExport ? r : req.c[i];
+                    }
+                    else if (Object.keys(m).length < 400)
+                        for (let key of Object.keys(m))
+                            try {
+                                if (m[key] && !!(r = filter(m[key]))) {
+                                    if (all)
+                                        found.push(defaultExport ? r : req.c[i]);
+                                    else
+                                        return defaultExport ? r : req.c[i];
+                                }
+                            }
+                            catch (err) { }
+                }
+                if (config.moduleName && m && m[config.moduleName] && (typeof m[config.moduleName] == "object" || typeof m[config.moduleName] == "function")) {
+                    if (!!(r = filter(m[config.moduleName]))) {
+                        if (all)
+                            found.push(defaultExport ? r : req.c[i]);
+                        else
+                            return defaultExport ? r : req.c[i];
+                    }
+                    else if (m[config.moduleName].type && (typeof m[config.moduleName].type == "object" || typeof m[config.moduleName].type == "function") && !!(r = filter(m[config.moduleName].type))) {
+                        if (all)
+                            found.push(defaultExport ? r : req.c[i]);
+                        else
+                            return defaultExport ? r : req.c[i];
+                    }
+                }
+                if (m && m.__esModule && m.default && (typeof m.default == "object" || typeof m.default == "function")) {
+                    if (!!(r = filter(m.default))) {
+                        if (all)
+                            found.push(defaultExport ? r : req.c[i]);
+                        else
+                            return defaultExport ? r : req.c[i];
+                    }
+                    else if (m.default.type && (typeof m.default.type == "object" || typeof m.default.type == "function") && !!(r = filter(m.default.type))) {
+                        if (all)
+                            found.push(defaultExport ? r : req.c[i]);
+                        else
+                            return defaultExport ? r : req.c[i];
+                    }
+                }
+            }
+    for (let i in req.m)
+        if (req.m.hasOwnProperty(i)) {
+            let m = req.m[i];
+            if (m && typeof m == "function") {
+                if (req.c[i] && !onlySearchUnloaded && filter(m)) {
+                    if (all)
+                        found.push(defaultExport ? req.c[i].exports : req.c[i]);
+                    else
+                        return defaultExport ? req.c[i].exports : req.c[i];
+                }
+                if (!req.c[i] && onlySearchUnloaded && filter(m)) {
+                    const resolved = {}, resolved2 = {};
+                    m(resolved, resolved2, req);
+                    const trueResolved = resolved2 && Object.getOwnPropertyNames(resolved2).length == 0 ? resolved : resolved2;
+                    if (all)
+                        found.push(defaultExport ? trueResolved.exports : trueResolved);
+                    else
+                        return defaultExport ? trueResolved.exports : trueResolved;
+                }
+            }
+        }
+    if (all)
+        return found;
+}
+function isObject(obj) {
+    return obj && typeof obj === "object" && obj.constructor === Object;
+}
+
+const BDFDB_Finder = {
+    __proto__: null,
+    BDFDB_findByStrings
+};
+
+const debugLog = (...data) => getMeta().development ? log(...data) : undefined;
+const Logger = {
+    ...diumLogger,
+    debugLog,
+};
+
+const findBySourceStrings = (...keywords) => {
+    const searchOptions = keywords.find(k => typeof k === 'object');
+    if (searchOptions)
+        keywords.splice(keywords.indexOf(searchOptions), 1);
+    const backupIdKeyword = keywords.find(k => k.toString().startsWith('backupId='));
+    const backupId = backupIdKeyword ? backupIdKeyword.toString().split('=')[1] : null;
+    const backupIdKeywordIndex = keywords.indexOf(backupIdKeyword);
+    if (backupIdKeywordIndex > -1)
+        keywords.splice(backupIdKeywordIndex, 1);
+    if (backupId)
+        log(`[findBySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
+    return BdApi.Webpack.getModule((e, m, id) => {
+        const filter = (e
+            && e != window
+            && Object.keys(e).length ? (
+        Object.keys(e).some(k => typeof e[k] === 'function' && keywords.every(keyword => e[k].toString().includes(keyword))
+            || Object.keys(e).some(k => typeof e[k] === 'object' && e[k] && 'render' in e[k] && keywords.every(keyword => e[k].render.toString().includes(keyword))))) : (typeof e === 'function' && keywords.every(keyword => e.toString().includes(keyword))));
+        if (!filter && id === backupId)
+            log(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, e);
+        return filter;
+    }, searchOptions ?? { searchExports: true });
+};
+const findComponentBySourceStrings = async (...keywords) => {
+    const jsxModule = Finder.byKeys(['jsx']);
+    const ReactModule = Finder.byKeys(['createElement', 'cloneElement']);
+    keywords = keywords.map(keyword => keyword.replace(/\s+/g, ''));
+    const component = await new Promise((resolve, reject) => {
+        try {
+            const cancelJsx = after(jsxModule, 'jsx', ({ args: [component] }) => {
+                if (typeof component === 'function' && keywords.every(keyword => component.toString().includes(keyword))) {
+                    cancelJsx();
+                    cancelCE();
+                    resolve(component);
+                }
+            }, { silent: true });
+            const cancelCE = after(ReactModule, 'createElement', ({ args: [component] }) => {
+                if (typeof component === 'function' && keywords.every(keyword => component.toString().includes(keyword))) {
+                    cancelJsx();
+                    cancelCE();
+                    resolve(component);
+                }
+            }, { name: `findComponentBySourceStrings([${keywords.join(',')}])`, });
+        }
+        catch (err) {
+            reject(err);
+        }
+    });
+    if (typeof component !== 'object')
+        return component;
+    if ('prototype' in component
+        && typeof component.prototype === 'object'
+        && 'render' in component.prototype
+        && typeof component.prototype.render === 'function') {
+        component.prototype.render = component.prototype.render.bind(component);
+        return component;
+    }
+    return component;
+};
+const Finder = {
+    ...DiumFinder,
+    ...BDFDB_Finder,
+    findBySourceStrings,
+    findComponentBySourceStrings
+};
+
+const Finder$1 = {
+    __proto__: null,
+    BDFDB_findByStrings,
+    Finder,
+    abort,
+    all,
+    byEntries,
+    byKeys,
+    byName,
+    byProtos,
+    bySource,
+    default: Finder,
+    demangle,
+    find: find$2,
+    findBySourceStrings,
+    findComponentBySourceStrings,
+    findWithKey,
+    query,
+    resolveKey,
+    waitFor
+};
+
+const ChannelMemberStore = byName('ChannelMemberStore');
 
 const ChannelStore = /* @__PURE__ */ byName("ChannelStore");
 const SelectedChannelStore = /* @__PURE__ */ byName("SelectedChannelStore");
 
-const SelectedGuildStore = byKeys(["getLastSelectedGuildId"]);
-
-const UserStore = /* @__PURE__ */ byName("UserStore");
-const RelationshipStore = /* @__PURE__ */ byName("RelationshipStore");
-
-const UserActivityStore = byKeys(["getUser", "getCurrentUser"]);
-
-const UserNoteStore = byKeys(["getNote", "_dispatcher"]);
-
-const UserTypingStore = byKeys(["getTypingUsers", "isTyping"]);
-
-const UserMentionStore = byKeys(["getMentions", "everyoneFilter"]);
-
-const PresenceStore = /* @__PURE__ */ byName("PresenceStore");
-
-const UserNoteActions = byKeys(["updateNote"]);
-
-const UserUtils = {
-    ...UserStore,
-    ...PresenceStore,
-    ...RelationshipStore,
-    ...UserActivityStore,
-    ...UserNoteStore,
-    ...UserTypingStore,
-    ...UserMentionStore,
-    ...UserNoteActions,
-    get me() {
-        const user = UserStore.getCurrentUser();
-        return Object.assign(user, {
-            get status() {
-                return PresenceStore.getStatus(user.id);
-            }
-        });
-    },
-    getPresenceState: () => PresenceStore.getState(),
-};
-
-const Dispatcher$1 = /* @__PURE__ */ byKeys(["dispatch", "subscribe"]);
-
-const { default: Legacy, Dispatcher, Store, BatchedStoreListener, useStateFromStores } = /* @__PURE__ */ demangle({
-    default: byKeys$1("Store", "connectStores"),
-    Dispatcher: byProtos$1("dispatch"),
-    Store: byProtos$1("emitChange"),
-    BatchedStoreListener: byProtos$1("attach", "detach"),
-    useStateFromStores: bySource$1("useStateFromStores")
-}, ["Store", "Dispatcher", "useStateFromStores"]);
-
-const MediaEngineStore = /* @__PURE__ */ byName("MediaEngineStore");
-
-const { React } = BdApi;
-const classNames = /* @__PURE__ */ find$2((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
-const EventEmitter = /* @__PURE__ */ find$2((exports) => exports.prototype instanceof Object && Object.prototype.hasOwnProperty.call(exports.prototype, "prependOnceListener"));
-
-const ChannelMemberStore = byName('ChannelMemberStore');
-
-const getEmojiUrl = (emoji, size = 128) => (`https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? 'gif' : 'webp'}` +
-    `?size=${size}&qualiy=lossless`);
-const EmojiStore = byName("EmojiStore");
-
 const GuildChannelStore = byKeys(["getTextChannelNameDisambiguations"]);
+
+const GuildMemberStore = /* @__PURE__ */ byName("GuildMemberStore");
+const SortedGuildStore = /* @__PURE__ */ byName("SortedGuildStore");
+const ExpandedGuildFolderStore = /* @__PURE__ */ byName("ExpandedGuildFolderStore");
 
 const GuildEmojiStore = byKeys(["getEmojis"]);
 
@@ -361,9 +555,17 @@ const GuildIdentyStore = byKeys(["saveGuildIdentityChanges"]);
 
 const GuildStore = byName("GuildStore");
 
-const ContentInventoryStore = byName("ContentInventoryStore");
+const SelectedGuildStore = byKeys(["getLastSelectedGuildId"]);
 
-const ThemeStore = byKeys(["theme"]);
+const PresenceStore = /* @__PURE__ */ byName("PresenceStore");
+
+const RelationshipStore = /* @__PURE__ */ byName("RelationshipStore");
+
+const UserActivityStore = byKeys(["getUser", "getCurrentUser"]);
+
+const UserMentionStore = byKeys(["getMentions", "everyoneFilter"]);
+
+const UserNoteStore = byKeys(["getNote", "_dispatcher"]);
 
 const UserSettingsAccountStore = byName("UserSettingsAccountStore");
 const UserProfileSettingsStore = byKeys(["saveProfileChanges", "setPendingBio"]);
@@ -378,10 +580,20 @@ var FormStates;
     FormStates["CLOSED"] = "CLOSED";
 })(FormStates || (FormStates = {}));
 
-const VoiceInfo = byKeys(["isSelfMute", "isNoiseCancellationSupported"]);
-const MediaEngine = VoiceInfo.getMediaEngine();
-const VideoComponent = VoiceInfo.getVideoComponent();
-const CameraComponent = VoiceInfo.getCameraComponent();
+const UserStore = Finder.byName("UserStore");
+
+const UserTypingStore = byKeys(["getTypingUsers", "isTyping"]);
+
+const ContentInventoryStore = byName("ContentInventoryStore");
+
+const getEmojiUrl = (emoji, size = 128) => (`https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? 'gif' : 'webp'}` +
+    `?size=${size}&qualiy=lossless`);
+const EmojiStore = byName("EmojiStore");
+
+const MediaEngineStore = byKeys(["isSelfMute", "isNoiseCancellationSupported"]);
+const MediaEngine = MediaEngineStore.getMediaEngine();
+const VideoComponent = MediaEngineStore.getVideoComponent();
+const CameraComponent = MediaEngineStore.getCameraComponent();
 var MediaEngineContextTypes;
 (function (MediaEngineContextTypes) {
     MediaEngineContextTypes["DEFAULT"] = "default";
@@ -442,15 +654,134 @@ var SupportedFeatures;
 
 const VoiceStore = byKeys(["getVoiceStateForUser"]);
 
+const ApplicationStore = Finder.byName("ApplicationStore");
+
+const Dispatcher$1 = /* @__PURE__ */ byKeys(["dispatch", "subscribe"]);
+
+const { default: Legacy, Dispatcher, Store, BatchedStoreListener, useStateFromStores } = /* @__PURE__ */ demangle({
+    default: byKeys$1("Store", "connectStores"),
+    Dispatcher: byProtos$1("dispatch"),
+    Store: byProtos$1("emitChange"),
+    BatchedStoreListener: byProtos$1("attach", "detach"),
+    useStateFromStores: bySource$1("useStateFromStores")
+}, ["Store", "Dispatcher", "useStateFromStores"]);
+
+const { React } = BdApi;
+const classNames = /* @__PURE__ */ find$2((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
+const EventEmitter = /* @__PURE__ */ find$2((exports) => exports.prototype instanceof Object && Object.prototype.hasOwnProperty.call(exports.prototype, "prependOnceListener"));
+
+class DiumStore {
+    constructor(defaults, dataKey, onLoad) {
+        this.defaults = defaults;
+        this.dataKey = dataKey;
+        this.onLoad = onLoad;
+        this.listeners = new Set();
+        this.update = (item, replace = false) => {
+            const current = replace ? {} : this.current;
+            this.current = typeof item === "function"
+                ? ({ ...current, ...item(this.current) })
+                : ({ ...current, ...item });
+            this._dispatch(true);
+        };
+        this.addReactChangeListener = this.addListener;
+        this.removeReactChangeListener = this.removeListener;
+    }
+    load() {
+        this.current = { ...this.defaults, ...load(this.dataKey) };
+        this.onLoad?.();
+        this._dispatch(false);
+    }
+    _dispatch(save$1) {
+        for (const listener of this.listeners) {
+            listener(this.current);
+        }
+        if (save$1) {
+            save(this.dataKey, this.current);
+        }
+    }
+    reset() {
+        this.current = { ...this.defaults };
+        this._dispatch(true);
+    }
+    delete(...keys) {
+        for (const key of keys) {
+            delete this.current[key];
+        }
+        this._dispatch(true);
+    }
+    useCurrent() {
+        return useStateFromStores([this], () => this.current, undefined, () => false);
+    }
+    useSelector(selector, deps, compare) {
+        return useStateFromStores([this], () => selector(this.current), deps, compare);
+    }
+    useState() {
+        return useStateFromStores([this], () => [
+            this.current,
+            this.update
+        ]);
+    }
+    useStateWithDefaults() {
+        return useStateFromStores([this], () => [
+            this.current,
+            this.defaults,
+            this.update
+        ]);
+    }
+    useListener(listener, deps) {
+        React.useEffect(() => {
+            this.addListener(listener);
+            return () => this.removeListener(listener);
+        }, deps ?? [listener]);
+    }
+    addListener(listener) {
+        this.listeners.add(listener);
+        return listener;
+    }
+    removeListener(listener) {
+        this.listeners.delete(listener);
+    }
+    removeAllListeners() {
+        this.listeners.clear();
+    }
+}
+const createDiumStore = (defaults, dataKey, onLoad) => new DiumStore(defaults, dataKey, onLoad);
+
+const MessageStore = byName("MessageStore");
+
+const ThemeStore = byKeys(["theme"]);
+
+function findStore(storeName, allowMultiple = false) {
+    const result = Object.values(Finder.byName("UserSettingsAccountStore")
+        ._dispatcher._actionHandlers._dependencyGraph.nodes).sort((a, b) => a.name.localeCompare(b.name))
+        .filter(s => s.name.toLowerCase().includes(storeName.toLowerCase()));
+    return allowMultiple
+        ? result.map(store => [store.name, Finder.byName(store.name) ?? new class InvalidStore {
+                constructor() {
+                    this.node = store;
+                }
+            }])
+        : result.map(store => Finder.byName(store.name)
+            ?? new class InvalidStore {
+                constructor() {
+                    this.node = store;
+                }
+                getName() { return store.name; }
+            }).find(store => store.getName() === storeName);
+}
+
 const Stores = {
     __proto__: null,
+    ApplicationStore,
     get AudioSubSystems () { return AudioSubSystems; },
     BetterProfileSettings,
     CameraComponent,
     ChannelMemberStore,
     ChannelStore,
     ContentInventoryStore,
+    DiumStore,
     EmojiStore,
+    ExpandedGuildFolderStore,
     GuildChannelStore,
     GuildEmojiStore,
     GuildIdentyStore,
@@ -460,9 +791,12 @@ const Stores = {
     get MediaEngineContextTypes () { return MediaEngineContextTypes; },
     get MediaEngineEvent () { return MediaEngineEvent; },
     MediaEngineStore,
+    MessageStore,
     PresenceStore,
+    RelationshipStore,
     SelectedChannelStore,
     SelectedGuildStore,
+    SortedGuildStore,
     get SupportedFeatures () { return SupportedFeatures; },
     ThemeStore,
     UserActivityStore,
@@ -473,9 +807,32 @@ const Stores = {
     UserStore,
     UserTypingStore,
     VideoComponent,
-    VoiceInfo,
     VoiceStore,
+    createDiumStore,
+    findStore,
     getEmojiUrl
+};
+
+const UserNoteActions = byKeys(["updateNote"]);
+
+const UserUtils = {
+    ...UserStore,
+    ...PresenceStore,
+    ...RelationshipStore,
+    ...UserActivityStore,
+    ...UserNoteStore,
+    ...UserTypingStore,
+    ...UserMentionStore,
+    ...UserNoteActions,
+    get me() {
+        const user = UserStore.getCurrentUser();
+        return Object.assign(user, {
+            get status() {
+                return PresenceStore.getStatus(user.id);
+            }
+        });
+    },
+    getPresenceState: () => PresenceStore.getState(),
 };
 
 const GuildActions = byKeys(["requestMembers"]);
@@ -486,7 +843,6 @@ const GuildUtils = {
     ...GuildChannelStore,
     ...GuildEmojiStore,
     ...SelectedGuildStore,
-    ...VoiceInfo,
     ...VoiceStore,
     ...GuildActions,
     get current() {
@@ -507,12 +863,15 @@ const GuildUtils = {
     getMembers(guild) {
         return GuildMemberStore.getMembers(guild);
     },
+    getGuildByName(name) {
+        return Object.values(GuildStore.getGuilds()).find(guild => guild.name === name) || null;
+    }
 };
 
 function findNodeByIncludingClassName(className, node = document.body) {
     return node.querySelector(`[class*="${className}"]`);
 }
-function findModule$1(args, returnDisplayNamesOnly = false) {
+function findModule(args, returnDisplayNamesOnly = false) {
     const module = typeof args === 'string' ? query({ name: args }) : query({ keys: args });
     if (!module)
         return module;
@@ -522,25 +881,12 @@ function findModule$1(args, returnDisplayNamesOnly = false) {
             module.default?.displayName || module.displayName
         : module;
 }
-function findStore(storeName, allowMultiple = false) {
-    const result = Object.values(byName("UserSettingsAccountStore")
-        ._dispatcher._actionHandlers._dependencyGraph.nodes).sort((a, b) => a.name.localeCompare(b.name))
-        .filter(s => s.name.toLowerCase().includes(storeName.toLowerCase()));
-    return allowMultiple
-        ? result.map(store => [store.name, byName(store.name) ?? new class InvalidStore {
-                constructor() {
-                    this.node = store;
-                }
-            }])
-        : result.map(store => byName(store.name) ?? new class InvalidStore {
-            constructor() {
-                this.node = store;
-            }
-        })[0];
+function currentUser() {
+    return UserStore.getCurrentUser();
 }
 function currentGuild() {
     const guildId = SelectedGuildStore.getGuildId();
-    return guildId ? GuildStore$1.getGuild(guildId) : null;
+    return guildId ? GuildStore.getGuild(guildId) : null;
 }
 function currentChannel() {
     const channelId = SelectedChannelStore.getChannelId();
@@ -552,16 +898,27 @@ function currentGuildMembers() {
 }
 const Utils = {
     findNodeByIncludingClassName,
-    findModule: findModule$1,
-    findStore,
+    findModule,
     get currentGuild() { return currentGuild(); },
     get currentChannel() { return currentChannel(); },
     get currentGuildMembers() { return currentGuildMembers(); },
+    get currentUser() { return currentUser(); }
 };
 
+const navigate = Finder.findBySourceStrings("transitionTo -", { defaultExport: false, searchExports: true });
+const navigateToGuild = Finder.findBySourceStrings("transitionToGuild -", { defaultExport: false, searchExports: true });
+const AppActions = {
+    navigate,
+    navigateToGuild,
+};
+
+const ChannelActions = byKeys(["selectChannel"]);
+
+const MessageActions = byKeys(["sendMessage"]);
+
 const DISPATCH_ACTIONS = Dispatcher$1._subscriptions;
-function find$1(action) {
-    Object.keys(DISPATCH_ACTIONS).find(key => key.includes(action));
+function find(action) {
+    return Object.keys(DISPATCH_ACTIONS).filter(key => key.toLowerCase().includes(action.toLowerCase()));
 }
 const ActionsEmitter = new class ActionsEmitter extends EventEmitter {
     constructor() {
@@ -569,29 +926,52 @@ const ActionsEmitter = new class ActionsEmitter extends EventEmitter {
         this._events = new Map();
     }
     on(eventName, listener) {
-        this._events.set(eventName, [...(this._events.get(eventName) ?? []), listener]);
-        Dispatcher$1.subscribe(eventName, listener);
-        return super.on(eventName, listener);
+        const callback = (...args) => {
+            try {
+                listener(...args);
+            }
+            catch (error) {
+                console.error(error, { eventName, args });
+            }
+        };
+        const existing = this._events.get(eventName) ?? [];
+        this._events.set(eventName, [...existing, [listener, callback]]);
+        Dispatcher$1.subscribe(eventName, callback);
+        Logger.log(`[ActionsEmitter] Subscribed to ${eventName}`);
+        return super.on(eventName, callback);
     }
+    ;
     once(eventName, listener) {
-        this._events.set(eventName, [...(this._events.get(eventName) ?? []), listener]);
+        const callback = (...args) => {
+            try {
+                listener(...args);
+            }
+            catch (error) {
+                console.error(error, { eventName, args });
+            }
+        };
+        const existing = this._events.get(eventName) ?? [];
+        this._events.set(eventName, [...existing, [listener, callback]]);
         Dispatcher$1.subscribe(eventName, (...args) => {
-            listener(...args);
-            Dispatcher$1.unsubscribe(eventName, listener);
-            this._events.set(eventName, this._events.get(eventName).filter(l => l !== listener));
+            callback(...args);
+            Dispatcher$1.unsubscribe(eventName, callback);
+            this._events.set(eventName, this._events.get(eventName).filter(([l]) => l !== listener));
         });
-        return super.once(eventName, listener);
+        Logger.log(`[ActionsEmitter] Subscribed to ${eventName}`);
+        return super.once(eventName, callback);
     }
     off(eventName, listener) {
         Dispatcher$1.unsubscribe(eventName, listener);
-        this._events.set(eventName, this._events.get(eventName).filter(l => l !== listener));
+        this._events.set(eventName, this._events.get(eventName).filter(([l]) => l !== listener));
+        Logger.log(`[ActionsEmitter] Unsubscribed from ${eventName}`);
         return super.off(eventName, listener);
     }
     removeAllListeners(event) {
         this._events.forEach((listeners, event) => {
-            listeners.forEach(listener => Dispatcher$1.unsubscribe(event, listener));
+            listeners.forEach(([listener, wrapped]) => Dispatcher$1.unsubscribe(event, wrapped));
         });
         this._events.clear();
+        Logger.log(`[ActionsEmitter] Unsubscribed from all events`);
         return super.removeAllListeners(event);
     }
 };
@@ -599,10 +979,13 @@ const ActionsEmitter = new class ActionsEmitter extends EventEmitter {
 const Actions = {
     __proto__: null,
     ActionsEmitter,
+    AppActions,
+    ChannelActions,
     DISPATCH_ACTIONS,
     GuildActions,
+    MessageActions,
     UserNoteActions,
-    find: find$1
+    find
 };
 
 const Common = /* @__PURE__ */ byKeys(["Button", "Switch", "Select"]);
@@ -628,6 +1011,8 @@ const FormElements = {
 const margins = /* @__PURE__ */ byKeys(["marginBottom40", "marginTop4"]);
 
 const { Menu, Group: MenuGroup, Item: MenuItem, Separator: MenuSeparator, CheckboxItem: MenuCheckboxItem, RadioItem: MenuRadioItem, ControlItem: MenuControlItem } = BdApi.ContextMenu;
+
+const { TextInput, InputError } = Common;
 
 const queryFiber = (fiber, predicate, direction = "up" , depth = 30) => {
     if (depth < 0) {
@@ -686,8 +1071,10 @@ const SettingsContainer = ({ name, children, onReset }) => (React.createElement(
 class SettingsStore {
     constructor(defaults, onLoad) {
         this.listeners = new Set();
-        this.update = (settings) => {
-            Object.assign(this.current, typeof settings === "function" ? settings(this.current) : settings);
+        this.update = (settings, replace = false) => {
+            this.current = typeof settings === "function"
+                ? ({ ...(replace ? {} : this.current), ...settings(this.current) })
+                : ({ ...(replace ? {} : this.current), ...settings });
             this._dispatch(true);
         };
         this.addReactChangeListener = this.addListener;
@@ -1221,7 +1608,7 @@ class DQuery {
         this.element.style.display = '';
     }
     appendHtml(html) {
-        this.element.appendChild(createElement(html));
+        this.element.appendChild(createElement$1(html));
         return this;
     }
     appendElements(elements) {
@@ -1231,7 +1618,7 @@ class DQuery {
         return this;
     }
     appendComponent(component, wrapperProps) {
-        this.element.appendChild(createElement("<></>", wrapperProps));
+        this.element.appendChild(createElement$1("<></>", wrapperProps));
         const wrapper = this.element.lastChild;
         BdApi.ReactDOM.render(component, wrapper);
         return this;
@@ -1241,7 +1628,7 @@ class DQuery {
         return this;
     }
     insertComponent(position, component) {
-        this.element.insertAdjacentElement(position, createElement("<></>"));
+        this.element.insertAdjacentElement(position, createElement$1("<></>"));
         const wrapper = this.parent.children(".bdd-wrapper", true).element;
         BdApi.ReactDOM.render(component, wrapper);
         return this;
@@ -1251,7 +1638,7 @@ class DQuery {
         return this;
     }
     prependComponent(component) {
-        this.element.insertAdjacentElement('afterbegin', createElement("<></>"));
+        this.element.insertAdjacentElement('afterbegin', createElement$1("<></>"));
         const wrapper = this.element.firstChild;
         BdApi.ReactDOM.render(component, wrapper);
         return this;
@@ -1268,7 +1655,7 @@ class DQuery {
         return forceFullRerender(this.fiber);
     }
 }
-function createElement(html, props = {}, target) {
+function createElement$1(html, props = {}, target) {
     if (html === "<></>" || html.toLowerCase() === "fragment") {
         if ('className' in props)
             props.class = `bdd-wrapper ${props.className}`;
@@ -1342,254 +1729,39 @@ const DOM = {
     $p,
     DQuery,
     addEventListener,
-    createElement,
+    createElement: createElement$1,
     injectElement,
     observeAppMountFor,
     removeAllEventListeners,
     removeAllInjections
 };
 
-class GlobalReq {
-    static get instance() {
-        if (!GlobalReq._instance) {
-            const id = "WebModules_" + Math.floor(Math.random() * 1000000000000);
-            let req;
-            window.webpackChunkdiscord_app.push([[id], {}, r => { if (r.c)
-                    req = r; }]);
-            delete req.m[id];
-            delete req.c[id];
-            GlobalReq._instance = req;
-        }
-        return GlobalReq._instance;
-    }
-    constructor() { }
-}
-const Cache = {
-    modules: {}
-};
-function BDFDB_findByStrings(strings, config = {}) {
-    strings = strings.flat(10);
-    return findModule("string", JSON.stringify(strings), m => checkModuleStrings(m, strings) && m, config);
-}
-function checkModuleStrings(module, strings, config = {}) {
-    const check = (s1, s2) => {
-        s1 = config.ignoreCase ? s1.toString().toLowerCase() : s1.toString();
-        return config.hasNot ? s1.indexOf(s2) == -1 : s1.indexOf(s2) > -1;
-    };
-    return [strings].flat(10).filter(n => typeof n == "string").map(config.ignoreCase ? (n => n.toLowerCase()) : (n => n)).every(string => module && ((typeof module == "function" || typeof module == "string") && (check(module, string) || typeof module.__originalFunction == "function" && check(module.__originalFunction, string)) || typeof module.type == "function" && check(module.type, string) || (typeof module == "function" || typeof module == "object") && module.prototype && Object.keys(module.prototype).filter(n => n.indexOf("render") == 0).some(n => check(module.prototype[n], string))));
-}
-function findModule(type, cacheString, filter, config = {}) {
-    if (!isObject(Cache.modules[type]))
-        Cache.modules[type] = { module: {}, export: {} };
-    let defaultExport = typeof config.defaultExport != "boolean" ? true : config.defaultExport;
-    if (!config.all && defaultExport && Cache.modules[type].export[cacheString])
-        return Cache.modules[type].export[cacheString];
-    else if (!config.all && !defaultExport && Cache.modules[type].module[cacheString])
-        return Cache.modules[type].module[cacheString];
-    else {
-        let m = find(filter, config);
-        if (m) {
-            if (!config.all) {
-                if (defaultExport)
-                    Cache.modules[type].export[cacheString] = m;
-                else
-                    Cache.modules[type].module[cacheString] = m;
-            }
-            return m;
-        }
-        else if (!config.noWarnings)
-            warn(`${cacheString} [${type}] not found in WebModules`);
+const styles$1 = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible__content.hidden {\n  display: none;\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.custom-message {\n  display: grid;\n  grid-template-columns: auto 1fr;\n  gap: 0.5ch;\n}\n.custom-message__avatar {\n  --size: 2.5rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  object-fit: cover;\n}\n.custom-message__main {\n  display: flex;\n  flex-direction: column;\n  gap: 0.5ch;\n}\n.custom-message__main header {\n  display: flex;\n  align-items: center;\n  gap: 0.5ch;\n}\n\n.progress-bar {\n  width: 100%;\n  height: 0.5rem;\n  border-radius: 0.5rem;\n  overflow: hidden;\n}\n.progress-bar__fill {\n  height: 100%;\n  background-color: var(--primary-600);\n  transition: width 0.3s;\n}\n\n.tab-bar {\n  width: 100%;\n}\n.tab-bar * {\n  color: var(--text-primary);\n  box-sizing: border-box;\n}\n\n.tab-bar__tabs {\n  display: grid;\n  grid-auto-flow: column;\n  max-width: 100%;\n  overflow-x: auto;\n}\n.tab-bar__tabs--no-color .tab-bar__tab {\n  background-color: transparent;\n  border: none;\n}\n\n.tab-bar__tab {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  border: none;\n  background-color: var(--primary-630);\n  color: var(--text-muted);\n  border: 1px solid var(--border-faint);\n  padding: 0.3rem 1rem;\n}\n.tab-bar__tab:hover {\n  background-color: var(--primary-600);\n  color: var(--text-primary);\n}\n.tab-bar__tab--active {\n  border: 1px solid var(--border-faint);\n  border-bottom: 1px solid var(--text-primary) !important;\n  color: var(--text-primary);\n}\n\n.tab-bar__content {\n  padding: 1em;\n  background-color: var(--primary-630);\n  border: 1px solid var(--border-faint);\n}\n.tab-bar__content--no-color {\n  background-color: transparent;\n  border: none;\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
+
+class DanhoLibrary {
+    constructor() {
+        this.Utils = Utils;
+        this.Users = UserUtils;
+        this.Guilds = GuildUtils;
+        this.DOM = DOM;
+        this.Stores = Stores;
+        this.Actions = Actions;
+        this.Finder = Finder$1;
+        this.Filters = Filters;
+        this.styles = styles$1;
     }
 }
-function find(filter, config = {}) {
-    let defaultExport = typeof config.defaultExport != "boolean" ? true : config.defaultExport;
-    let onlySearchUnloaded = typeof config.onlySearchUnloaded != "boolean" ? false : config.onlySearchUnloaded;
-    let all = typeof config.all != "boolean" ? false : config.all;
-    const req = GlobalReq.instance;
-    const found = [];
-    if (!onlySearchUnloaded)
-        for (let i in req.c)
-            if (req.c.hasOwnProperty(i) && req.c[i].exports != window) {
-                let m = req.c[i].exports, r = null;
-                if (m && (typeof m == "object" || typeof m == "function")) {
-                    if (!!(r = filter(m))) {
-                        if (all)
-                            found.push(defaultExport ? r : req.c[i]);
-                        else
-                            return defaultExport ? r : req.c[i];
-                    }
-                    else if (Object.keys(m).length < 400)
-                        for (let key of Object.keys(m))
-                            try {
-                                if (m[key] && !!(r = filter(m[key]))) {
-                                    if (all)
-                                        found.push(defaultExport ? r : req.c[i]);
-                                    else
-                                        return defaultExport ? r : req.c[i];
-                                }
-                            }
-                            catch (err) { }
-                }
-                if (config.moduleName && m && m[config.moduleName] && (typeof m[config.moduleName] == "object" || typeof m[config.moduleName] == "function")) {
-                    if (!!(r = filter(m[config.moduleName]))) {
-                        if (all)
-                            found.push(defaultExport ? r : req.c[i]);
-                        else
-                            return defaultExport ? r : req.c[i];
-                    }
-                    else if (m[config.moduleName].type && (typeof m[config.moduleName].type == "object" || typeof m[config.moduleName].type == "function") && !!(r = filter(m[config.moduleName].type))) {
-                        if (all)
-                            found.push(defaultExport ? r : req.c[i]);
-                        else
-                            return defaultExport ? r : req.c[i];
-                    }
-                }
-                if (m && m.__esModule && m.default && (typeof m.default == "object" || typeof m.default == "function")) {
-                    if (!!(r = filter(m.default))) {
-                        if (all)
-                            found.push(defaultExport ? r : req.c[i]);
-                        else
-                            return defaultExport ? r : req.c[i];
-                    }
-                    else if (m.default.type && (typeof m.default.type == "object" || typeof m.default.type == "function") && !!(r = filter(m.default.type))) {
-                        if (all)
-                            found.push(defaultExport ? r : req.c[i]);
-                        else
-                            return defaultExport ? r : req.c[i];
-                    }
-                }
-            }
-    for (let i in req.m)
-        if (req.m.hasOwnProperty(i)) {
-            let m = req.m[i];
-            if (m && typeof m == "function") {
-                if (req.c[i] && !onlySearchUnloaded && filter(m)) {
-                    if (all)
-                        found.push(defaultExport ? req.c[i].exports : req.c[i]);
-                    else
-                        return defaultExport ? req.c[i].exports : req.c[i];
-                }
-                if (!req.c[i] && onlySearchUnloaded && filter(m)) {
-                    const resolved = {}, resolved2 = {};
-                    m(resolved, resolved2, req);
-                    const trueResolved = resolved2 && Object.getOwnPropertyNames(resolved2).length == 0 ? resolved : resolved2;
-                    if (all)
-                        found.push(defaultExport ? trueResolved.exports : trueResolved);
-                    else
-                        return defaultExport ? trueResolved.exports : trueResolved;
-                }
-            }
-        }
-    if (all)
-        return found;
-}
-function isObject(obj) {
-    return obj && typeof obj === "object" && obj.constructor === Object;
+const LibraryPlugin = new DanhoLibrary();
+window.DL = LibraryPlugin;
+function buildPlugin(plugin) {
+    const built = Object.assign({}, LibraryPlugin, plugin);
+    built.styles = [LibraryPlugin.styles, plugin.styles].join('\n\n');
+    return createPlugin(built);
 }
 
-const BDFDB_Finder = {
-    __proto__: null,
-    BDFDB_findByStrings
-};
+const { useCallback, useContext, useDebugValue, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useReducer, useRef, useState, useId, useDeferredValue, useInsertionEffect, useSyncExternalStore, useTransition, createRef, createContext, createElement, createFactory, forwardRef, cloneElement, lazy, memo, isValidElement, Component, PureComponent, Fragment, Suspense, } = React;
 
-const debugLog = (...data) => getMeta().development ? log(...data) : undefined;
-
-const findBySourceStrings = (...keywords) => {
-    const searchOptions = keywords.find(k => typeof k === 'object');
-    if (searchOptions)
-        keywords.splice(keywords.indexOf(searchOptions), 1);
-    const backupIdKeyword = keywords.find(k => k.toString().startsWith('backupId='));
-    const backupId = backupIdKeyword ? backupIdKeyword.toString().split('=')[1] : null;
-    const backupIdKeywordIndex = keywords.indexOf(backupIdKeyword);
-    if (backupIdKeywordIndex > -1)
-        keywords.splice(backupIdKeywordIndex, 1);
-    if (backupId)
-        log(`[findBySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
-    return BdApi.Webpack.getModule((e, m, id) => {
-        const filter = (e
-            && e != window
-            && Object.keys(e).length ? (
-        Object.keys(e).some(k => typeof e[k] === 'function' && keywords.every(keyword => e[k].toString().includes(keyword))
-            || Object.keys(e).some(k => typeof e[k] === 'object' && e[k] && 'render' in e[k] && keywords.every(keyword => e[k].render.toString().includes(keyword))))) : (typeof e === 'function' && keywords.every(keyword => e.toString().includes(keyword))));
-        if (!filter && id === backupId)
-            log(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, e);
-        return filter;
-    }, searchOptions ?? { searchExports: true });
-};
-const findComponentBySourceStrings = async (...keywords) => {
-    const jsxModule = Finder.byKeys(['jsx']);
-    const ReactModule = Finder.byKeys(['createElement', 'cloneElement']);
-    keywords = keywords.map(keyword => keyword.replace(/\s+/g, ''));
-    const component = await new Promise((resolve, reject) => {
-        try {
-            const cancelJsx = after(jsxModule, 'jsx', ({ args: [component] }) => {
-                if (typeof component === 'function' && keywords.every(keyword => component.toString().includes(keyword))) {
-                    cancelJsx();
-                    cancelCE();
-                    resolve(component);
-                }
-            }, { silent: true });
-            const cancelCE = after(ReactModule, 'createElement', ({ args: [component] }) => {
-                if (typeof component === 'function' && keywords.every(keyword => component.toString().includes(keyword))) {
-                    cancelJsx();
-                    cancelCE();
-                    resolve(component);
-                }
-            }, { name: `findComponentBySourceStrings([${keywords.join(',')}])`, });
-        }
-        catch (err) {
-            reject(err);
-        }
-    });
-    if (typeof component !== 'object')
-        return component;
-    if ('prototype' in component
-        && typeof component.prototype === 'object'
-        && 'render' in component.prototype
-        && typeof component.prototype.render === 'function') {
-        component.prototype.render = component.prototype.render.bind(component);
-        return component;
-    }
-    return component;
-};
-const Finder = {
-    ...DiumFinder,
-    ...BDFDB_Finder,
-    findBySourceStrings,
-    findComponentBySourceStrings
-};
-const Finder$1 = Finder;
-
-const Finder$2 = {
-    __proto__: null,
-    BDFDB_findByStrings,
-    Finder,
-    abort,
-    all,
-    byEntries,
-    byKeys,
-    byName,
-    byProtos,
-    bySource,
-    default: Finder$1,
-    demangle,
-    find: find$2,
-    findBySourceStrings,
-    findComponentBySourceStrings,
-    findWithKey,
-    query,
-    resolveKey,
-    waitFor
-};
-
-const styles$1 = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible__content.hidden {\n  display: none;\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
-
-const TextInput = byName("TextInput");
-
-const ScrollerLooks = byKeys(['thin', 'fade']);
-const ScrollerAuto = byKeys(['ScrollerAuto']).ScrollerAuto;
-
-const UserProfileBadgeList = Finder$1.BDFDB_findByStrings(['QUEST_CONTENT_VIEWED', '"PRESS_BADGE"', 'PROFILE_USER_BADGES'], { defaultExport: false }).exports;
+const UserProfileBadgeList = Finder.BDFDB_findByStrings(['QUEST_CONTENT_VIEWED', '"PRESS_BADGE"', 'PROFILE_USER_BADGES'], { defaultExport: false }).exports;
 const RenderedUserProfileBadgeList = UserProfileBadgeList;
 var BadgeTypes;
 (function (BadgeTypes) {
@@ -1659,97 +1831,6 @@ var BadgeIconIds;
     BadgeIconIds["verified_developer"] = "6df5892e0f35b051f8b61eace34f4967";
 })(BadgeIconIds || (BadgeIconIds = {}));
 
-const { useState } = React;
-function Setting({ setting, settings, set, titles, ...props }) {
-    const { beforeChange, onChange, formatValue, type } = props;
-    const [v, _setV] = useState(formatValue ? formatValue(settings[setting]) : settings[setting]);
-    const setV = (value) => _setV(formatValue ? formatValue(value) : value);
-    if (type === undefined ? typeof v === 'boolean' : type === 'switch')
-        return (React.createElement(FormSwitch, { className: 'danho-form-switch', key: setting.toString(), note: titles[setting.toString()], value: Boolean(v), hideBorder: true, onChange: inputValue => {
-                const checked = beforeChange ? beforeChange(inputValue) : inputValue;
-                set({ [setting]: checked });
-                onChange?.(checked);
-                setV(checked);
-            } }));
-    if (type === undefined ? typeof v === 'number' : type === 'number')
-        return (React.createElement(TextInput, { key: setting.toString(), title: titles[setting], value: v, onChange: inputValue => {
-                const value = beforeChange ? beforeChange(Number(inputValue)) : Number(inputValue);
-                set({ [setting]: value });
-                onChange?.(value);
-                setV(value);
-            } }));
-    if (type === undefined ? typeof v === 'string' : type === 'text')
-        return (React.createElement(TextInput, { key: setting.toString(), title: titles[setting], value: v, onChange: inputValue => {
-                const value = beforeChange ? beforeChange(inputValue) : inputValue;
-                set({ [setting]: value });
-                onChange?.(value);
-                setV(value);
-            } }));
-    if (type)
-        return (React.createElement("div", { className: "danho-form-switch", key: setting.toString() },
-            React.createElement("input", { type: type, key: setting.toString(), value: v, onChange: e => {
-                    const value = beforeChange ? beforeChange(e.target.value) : e.target.value;
-                    set({ [setting]: value });
-                    onChange?.(value);
-                    setV(value);
-                } }),
-            React.createElement(FormText, { className: 'note' }, titles[setting])));
-    return (React.createElement("div", { className: 'settings-error' },
-        React.createElement("h1", null, "Unknown value type"),
-        React.createElement("h3", null,
-            "Recieved ",
-            typeof v),
-        React.createElement("h5", null, JSON.stringify(v))));
-}
-
-function TabBar({ tabs, ...props }) {
-    const { noTabsBackground, noContentBackground } = props;
-    const [activeTab, _setActiveTab] = React.useState((props.defaultTab ?? tabs.some(([key, value]) => typeof value === 'string' ? value === props.defaultTab : key === props.defaultTab)) ? props.defaultTab : tabs[0][0]);
-    const TabContent = typeof props[activeTab] === 'function'
-        ? props[activeTab]
-        : () => props[activeTab];
-    const setActiveTab = React.useCallback((tab) => {
-        if (props.beforeTabChange)
-            props.beforeTabChange(tab);
-        _setActiveTab(tab);
-    }, [props.beforeTabChange, props.onTabChange, tabs]);
-    React.useEffect(() => {
-        if (props.onTabChange)
-            props.onTabChange(activeTab);
-    }, [activeTab, props.onTabChange]);
-    React.useEffect(() => {
-        if (!tabs.find(([key]) => key === activeTab)?.[1]) {
-            _setActiveTab(tabs[0][0]);
-        }
-    }, [tabs]);
-    return (React.createElement("div", { className: "tab-bar" },
-        React.createElement("div", { className: classNames('tab-bar__tabs', noTabsBackground && 'tab-bar__tabs--no-color') }, tabs.map(([tab, title]) => title && React.createElement("button", { className: classNames("tab-bar__tab", activeTab === tab && 'tab-bar__tab--active'), key: tab, onClick: () => setActiveTab(tab) }, title))),
-        React.createElement("div", { className: classNames('tab-bar__content', noContentBackground && 'tab-bar__content--no-color') },
-            React.createElement(ScrollerAuto, { className: classNames(ScrollerLooks.auto, ScrollerLooks.thin, ScrollerLooks.fade) },
-                React.createElement(TabContent, null)))));
-}
-
-class DanhoLibrary {
-    constructor() {
-        this.Utils = Utils;
-        this.Users = UserUtils;
-        this.Guilds = GuildUtils;
-        this.DOM = DOM;
-        this.Stores = Stores;
-        this.Actions = Actions;
-        this.Finder = Finder$2;
-        this.Filters = Filters;
-        this.styles = styles$1;
-    }
-}
-const LibraryPlugin = new DanhoLibrary();
-window.DL = LibraryPlugin;
-function buildPlugin(plugin) {
-    const built = Object.assign({}, LibraryPlugin, plugin);
-    built.styles = [LibraryPlugin.styles, plugin.styles].join('\n\n');
-    return createPlugin(built);
-}
-
 const USER_TAGS = {
     DANHO: 'danhosaur'
 };
@@ -1794,15 +1875,83 @@ const Badges$1 = createSettings({
     },
 });
 
+function Setting({ setting, settings, set, titles, ...props }) {
+    const { beforeChange, onChange, formatValue, type } = props;
+    const [v, _setV] = useState(formatValue ? formatValue(settings[setting]) : settings[setting]);
+    const setV = (value) => _setV(formatValue ? formatValue(value) : value);
+    if (type === undefined ? typeof v === 'boolean' : type === 'switch')
+        return (React.createElement(FormSwitch, { className: 'danho-form-switch', key: setting.toString(), note: titles[setting.toString()], value: Boolean(v), hideBorder: true, onChange: inputValue => {
+                const checked = beforeChange ? beforeChange(inputValue) : inputValue;
+                set({ [setting]: checked });
+                onChange?.(checked);
+                setV(checked);
+            } }));
+    if (type === undefined ? typeof v === 'number' : type === 'number')
+        return (React.createElement("div", { className: "setting-group" },
+            React.createElement(TextInput, { key: setting.toString(), value: v, onChange: inputValue => {
+                    const value = beforeChange ? beforeChange(Number(inputValue)) : Number(inputValue);
+                    set({ [setting]: value });
+                    onChange?.(value);
+                    setV(value);
+                } }),
+            React.createElement(FormText, { className: 'note' }, titles[setting])));
+    if (type === undefined ? typeof v === 'string' : type === 'text')
+        return (React.createElement("div", { className: "setting-group" },
+            React.createElement(TextInput, { key: setting.toString(), value: v, onChange: inputValue => {
+                    const value = beforeChange ? beforeChange(inputValue) : inputValue;
+                    set({ [setting]: value });
+                    onChange?.(value);
+                    setV(value);
+                } }),
+            React.createElement(FormText, { className: 'note' }, titles[setting])));
+    if (type)
+        return (React.createElement("div", { className: "danho-form-switch", key: setting.toString() },
+            React.createElement("input", { type: type, key: setting.toString(), value: v, onChange: e => {
+                    const value = beforeChange ? beforeChange(e.target.value) : e.target.value;
+                    set({ [setting]: value });
+                    onChange?.(value);
+                    setV(value);
+                } }),
+            React.createElement(FormText, { className: 'note' }, titles[setting])));
+    return (React.createElement("div", { className: 'settings-error' },
+        React.createElement("h1", null, "Unknown value type"),
+        React.createElement("h3", null,
+            "Recieved ",
+            typeof v),
+        React.createElement("h5", null, JSON.stringify(v))));
+}
+
+function TabBar({ tabs, ...props }) {
+    const { noTabsBackground, noContentBackground } = props;
+    const [activeTab, _setActiveTab] = useState((props.defaultTab ?? tabs.some(([key, value]) => typeof value === 'string' ? value === props.defaultTab : key === props.defaultTab)) ? props.defaultTab : tabs[0][0]);
+    const TabContent = typeof props[activeTab] === 'function'
+        ? props[activeTab]
+        : () => props[activeTab];
+    const setActiveTab = useCallback((tab) => {
+        if (props.beforeTabChange)
+            props.beforeTabChange(tab);
+        _setActiveTab(tab);
+    }, [props.beforeTabChange, props.onTabChange, tabs]);
+    useEffect(() => {
+        if (props.onTabChange)
+            props.onTabChange(activeTab);
+    }, [activeTab, props.onTabChange]);
+    useEffect(() => {
+        if (!tabs.find(([key]) => key === activeTab)?.[1]) {
+            _setActiveTab(tabs[0][0]);
+        }
+    }, [tabs]);
+    return (React.createElement("div", { className: "tab-bar" },
+        React.createElement("div", { className: classNames('tab-bar__tabs', noTabsBackground && 'tab-bar__tabs--no-color') }, tabs.map(([tab, title]) => title && React.createElement("button", { className: classNames("tab-bar__tab", activeTab === tab && 'tab-bar__tab--active'), key: tab, onClick: () => setActiveTab(tab) }, title))),
+        React.createElement("div", { className: classNames('tab-bar__content', noContentBackground && 'tab-bar__content--no-color') },
+            React.createElement(TabContent, null))));
+}
+
 const renderChildren = (children, props = {}) => children.map(child => React.createElement(child.tagName, Array.from(child.attributes).reduce((acc, { name, value }) => ({ ...acc, [name]: value }), props), child.outerHTML.match(/</g).length > 2 ? renderChildren(Array.from(child.children)) : child.textContent));
 
 function CreateSettingsGroup(callback) {
     return function SettingsGroup(props) {
-        const { FormDivider } = FormElements;
-        const children = callback(React, props, Setting, FormElements);
-        return (React.createElement(React.Fragment, null,
-            React.createElement(FormDivider, null),
-            children));
+        return callback(React, props, Setting, FormElements);
     };
 }
 
@@ -1907,7 +2056,7 @@ const createPatcherCallback$1 = createPatcherCallback;
 
 const setManagerContext = createPatcherCallback$1(({ args, original }) => {
     const result = original(...args);
-    PrettyRolesManager.context = result.props.children.props;
+    PrettyRolesManager.context = result.props;
     return result;
 });
 
@@ -2048,7 +2197,7 @@ const Badges = {
     default: Feature$4
 };
 
-const TextModule = Finder$1.findBySourceStrings('lineClamp', 'tabularNumbers', 'scaleFontToUserSetting');
+const TextModule = Finder.findBySourceStrings('lineClamp', 'tabularNumbers', 'scaleFontToUserSetting');
 
 const transformTextIntoLinks = createPatcherAfterCallback(({ args: [props], result }) => {
     const { className, children: text } = props;
@@ -2080,7 +2229,7 @@ const PronounsPageLinks = {
 
 const { focused } = byKeys(['focused', 'item', 'labelContainer']);
 const SortByAuthorOption = ({ sortOptionClone, orderPostsByAuthor }) => {
-    const [className, dispatch] = React.useReducer((state, action) => {
+    const [className, dispatch] = useReducer((state, action) => {
         switch (action) {
             case 'hover': return `${state} ${focused}`;
             case 'default': return state.replace(focused, '').trim();
@@ -2189,7 +2338,7 @@ function Feature() {
     if (!Settings.current.wakeUp)
         return;
     const status = UserUtils.me.status;
-    const isHiding = status === "invisible" ;
+    const isHiding = status === 'invisible';
     const { isHidingOnPurpose } = Settings.current;
     if (isHidingOnPurpose && !isHiding)
         Settings.update({ isHidingOnPurpose: false });
@@ -2206,7 +2355,7 @@ function Feature() {
                 {
                     label: 'No, get me back online',
                     onClick: () => {
-                        const dispatch = Finder$1.findBySourceStrings('getStatus()', 'updateAsync("status",');
+                        const dispatch = Finder.findBySourceStrings('getStatus()', 'updateAsync("status",');
                         if (!dispatch)
                             return BdApi.UI.showToast('Could not find dispatcher', { type: 'error' });
                         dispatch('online', status, undefined, undefined);
