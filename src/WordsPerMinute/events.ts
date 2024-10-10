@@ -2,7 +2,6 @@ import { debugLog } from '@danho-lib/dium/api/logger';
 
 import { typingStartTime, typingEndTime, wpm } from './properties';
 import { calculateWPM, updateHighscores } from './methods';
-import { Settings } from './settings';
 
 export function onKeyDown(event: KeyboardEvent) {
   // Ignore non-character keys
@@ -42,10 +41,4 @@ export function onSubmit() {
   // Reset the typing start time
   typingStartTime.reset();
   updateHighscores();
-
-  setTimeout(() => {
-    debugLog('Auto Reset');
-    typingEndTime.reset();
-    wpm.reset();
-  }, Settings.current.autoResetTime);
 }

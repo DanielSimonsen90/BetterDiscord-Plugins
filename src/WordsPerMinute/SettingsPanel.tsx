@@ -71,7 +71,6 @@ export default function SettingsPanel() {
 
   return (
     <div className={`${PluginName}-settings`} style={{ width: '100%' }}>
-      <SettingsGroup settingsKey="autoResetTime" title="Auto Reset Time (ms)" />
       <SettingsGroup settingsKey="leftAlign" title="Left Align" />
 
       <div className={`${PluginName}-highscores`}>

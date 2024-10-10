@@ -14,7 +14,9 @@ export function calculateWPM(messageContent: string) {
   // For some reason, the !messageContent check is being ignored
   if (wordCount <= 1 || messageContent.trim() === '') return;
 
-  wpm.set(wordCount / timeDiffMin);
+  const value = wordCount / timeDiffMin;
+  if (value > 300) return; // This is a reasonable limit for typing speed
+  wpm.set(value);
 }
 
 export function updateHighscores() {
