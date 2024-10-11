@@ -3,6 +3,7 @@ import { Actions } from './ActionTypes';
 import { Logger } from '@danho-lib/dium/api/logger';
 
 export * from './AppActions';
+export * from './ApplicationActions';
 export * from './ChannelActions';
 export * from './GuildActions';
 export * from './MessageActions';

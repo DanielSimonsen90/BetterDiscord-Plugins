@@ -20,22 +20,64 @@ export const findBySourceStrings = <TResult = any>(...keywords: FindBySourceStri
   if (backupIdKeywordIndex > -1) keywords.splice(backupIdKeywordIndex, 1);
   if (backupId) Logger.log(`[findBySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
 
-  return BdApi.Webpack.getModule((e, m, id) => {
-    const filter = (
-      e
-      && e != window
-      && Object.keys(e).length ? (
-        // Exported property is a function
-        Object.keys(e).some(k => typeof e[k] === 'function' && keywords.every(keyword => e[k].toString().includes(keyword))
-          // Exported property is an object with a render function
-          || Object.keys(e).some(k => typeof e[k] === 'object' && e[k] && 'render' in e[k] && keywords.every(keyword => e[k].render.toString().includes(keyword)))
+  return BdApi.Webpack.getModule((exports, _, id) => {
+    if (!exports || exports === window) return false;
+
+    const eIsFunctionAndHasKeywords = typeof exports === 'function'
+      && keywords.every(keyword => exports.toString().includes(keyword));
+    if (eIsFunctionAndHasKeywords) return true;
+
+    const eIsObject = Object.keys(exports).length > 0;
+    const moduleIsMethodOrFunctionComponent = Object.keys(exports).some(k =>
+      typeof exports[k] === 'function'
+      && keywords.every(keyword => exports[k].toString().includes(keyword))
+    );
+    const eIsObjectAsE = keywords.every(keyword => Object.keys(exports).reduce((acc, k) => acc += exports[k]?.toString?.(), '').includes(keyword));
+    const moduleIsObjectFromE = Object.keys(exports).some(k =>
+      exports[k] && typeof exports[k] === 'object'
+      && keywords.every(keyword =>
+        Object.keys(exports[k])
+          .reduce((acc, key) => acc += exports[k][key]?.toString?.(), '')
+          .includes(keyword)
+      )
+    );
+    const moduleIsClassComponent = Object.keys(exports).some(k =>
+      typeof exports[k] === 'function'
+      && exports[k].prototype
+      && 'render' in exports[k].prototype
+      && keywords.every(keyword => exports[k].prototype.render.toString().includes(keyword))
+    );
+    const moduleIsObjectOfObjects = Object.keys(exports).some(k =>
+      exports[k] && typeof exports[k] === 'object'
+      && Object.keys(exports[k]).some(k2 =>
+        exports[k][k2] && typeof exports[k][k2] === 'object'
+        && keywords.every(keyword =>
+          Object.keys(exports[k][k2])
+            .reduce((acc, k3) => exports[k][k2] === window ? acc : acc += exports[k][k2][k3]?.toString?.(), '')
+            .includes(keyword)
         )
-      ) : (
-        typeof e === 'function' && keywords.every(keyword => e.toString().includes(keyword))
       )
     );
 
-    if (!filter && id === backupId) Logger.log(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, e);
+    const filter = eIsObject ? (
+      moduleIsMethodOrFunctionComponent
+      || eIsObjectAsE
+      || moduleIsClassComponent
+      || moduleIsObjectFromE
+      || moduleIsObjectOfObjects
+    ) : eIsFunctionAndHasKeywords;
+
+    if (!filter && id === backupId) Logger.log(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`,
+      exports,
+      { 
+        eIsFunctionAndHasKeywords,
+        moduleIsMethodOrFunctionComponent,
+        moduleIsObjectAsE: eIsObjectAsE,
+        moduleIsClassComponent,
+        moduleIsObjectFromE,
+        moduleIsObjectOfObjects,
+      }
+    );
     return filter;
   }, searchOptions ?? { searchExports: true });
 };

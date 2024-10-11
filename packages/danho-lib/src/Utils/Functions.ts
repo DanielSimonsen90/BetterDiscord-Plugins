@@ -1,4 +1,4 @@
-export const delay = <T>(callback: (...args: any[]) => any, time: number) => new Promise<T>((resolve, reject) => {
+export const wait = <T>(callback: (...args: any[]) => any, time: number) => new Promise<T>((resolve, reject) => {
   try { setTimeout(() => resolve(callback()), time); }
   catch (err) { reject(err); }
 });

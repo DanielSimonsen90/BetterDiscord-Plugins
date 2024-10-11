@@ -1,7 +1,8 @@
 import Finder from "@danho-lib/dium/api/finder";
 import { Guild, Snowflake, User } from "@discord/types";
+import { Store } from "@dium/modules/flux";
 
-type ApplicationStore = {
+type ApplicationStore = Store & {
   didFetchingApplicationFail(e: any): boolean;
   getAppIdForBotUserid(id: Snowflake): string | null;
   getApplication(id: string): Application | null;
@@ -19,7 +20,7 @@ type ApplicationStore = {
 
 export const ApplicationStore: ApplicationStore = Finder.byName("ApplicationStore");
 
-type Application = {
+export type Application = {
   aliases: string[];
   bot: User;
   coverImage: null | string;
