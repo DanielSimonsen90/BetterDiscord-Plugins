@@ -1,17 +1,20 @@
 import { React } from '../React';
-import { SimpleMarkdown } from "@dium/modules";
+import { SimpleMarkdown, classNames } from "@dium/modules";
 import { Timestamp, Text } from "@discord/components";
 import { Message } from "@discord/types/message";
 
 type Props = {
   message: Message;
+
+  className?: string;
+  onClick?: () => void;
 };
 
-export function Message({ message }: Props) {
+export function Message({ message, ...props }: Props) {
   const authorName = message.author.globalName ?? message.author.username;
 
   return (
-    <div className="custom-message">
+    <div {...props} className={classNames("custom-message", props.className)}>
       <aside className="custom-message__aside">
         <img className="custom-message__avatar" src={message.author.getAvatarURL()} alt={authorName} />
       </aside>

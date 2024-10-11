@@ -40,7 +40,8 @@ export {
   MouseEventHandler,
   DependencyList,
   Dispatch,
-  SetStateAction
+  SetStateAction,
+  ReactNode
 } from 'react';
 
 export { React };

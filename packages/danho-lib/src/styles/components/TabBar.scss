@@ -1,5 +1,6 @@
 .tab-bar {
-  width: 100%;
+  max-width: 100%;
+
 
   * {
     color: var(--text-primary);
@@ -49,5 +50,12 @@
   &--no-color {
     background-color: transparent;
     border: none;
+  }
+
+  &-page:not(&-page--active) {
+    opacity: 0;
+    z-index: -1;
+    pointer-events: none;
+    height: 0;
   }
 }
