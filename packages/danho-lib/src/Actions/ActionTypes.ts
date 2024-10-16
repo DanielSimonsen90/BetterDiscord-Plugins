@@ -5,10 +5,10 @@ type ActionProps = {
   CHANNEL_SELECT: {
     channelId: Snowflake;
     guildId: Snowflake;
-    jumpType: undefined;
-    messageId: Snowflake | null;
+    jumpType?: undefined;
+    messageId?: Snowflake | null;
     preserveDrawerState: undefined;
-    source: undefined;
+    source?: undefined;
   };
   LOAD_FORUM_POSTS: {
     guildId: Snowflake;
@@ -33,10 +33,23 @@ type ActionProps = {
         desktop?: UserStatus;
         mobile?: UserStatus;
       };
-      guildId: Snowflake | undefined;
+      guildId?: Snowflake | undefined;
       status: UserStatus;
       user: User | { id: Snowflake; };
     }>;
+  };
+  USER_PROFILE_MODAL_OPEN: {
+    analyticsLocation?: undefined;
+    channelId: Snowflake;
+    friendToken?: undefined;
+    guildId?: Snowflake | undefined;
+    messageId: Snowflake;
+    roleId?: Snowflake | undefined;
+    sessionId: string;
+    showGuildProfile: boolean;
+    sourceAnalyticsLocations: Array<string>;
+    subsection?: undefined;
+    userId: Snowflake;
   };
   VOICE_STATE_UPDATES: {
     voiceStates: Array<VoiceStateUpdate>;

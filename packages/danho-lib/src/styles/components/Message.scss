@@ -22,4 +22,16 @@
       gap: .5ch;
     }
   }
+
+  .user-mention, .role-mention {
+    color: var(--mention-foreground);
+    background-color: var(--mention-background);
+
+    &::before {
+      content: '@';
+    }
+  }
+  .channel-mention::before {
+    content: '#';
+  }
 }

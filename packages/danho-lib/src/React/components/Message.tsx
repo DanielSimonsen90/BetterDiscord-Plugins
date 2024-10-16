@@ -2,6 +2,7 @@ import { React } from '../React';
 import { SimpleMarkdown, classNames } from "@dium/modules";
 import { Timestamp, Text } from "@discord/components";
 import { Message } from "@discord/types/message";
+import DiscordMarkdown from './DiscordMarkdown';
 
 type Props = {
   message: Message;
@@ -29,7 +30,7 @@ export function Message({ message, ...props }: Props) {
         </header>
         <section className="custom-message__content">
           <Text variant="text-md/normal" className="custom-message__content-text">
-            <SimpleMarkdown.ReactMarkdown source={message.content} />
+            <DiscordMarkdown content={message.content} />
           </Text>
         </section>
       </section>

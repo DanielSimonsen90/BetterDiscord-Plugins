@@ -82,4 +82,9 @@ export const ActionsEmitter = new class ActionsEmitter extends EventEmitter<Acti
     Logger.log(`[ActionsEmitter] Unsubscribed from all events`);
     return super.removeAllListeners(event);
   }
+
+  emit<K>(eventName: keyof Actions | K, ...args: K extends keyof Actions ? Actions[K] extends unknown[] ? Actions[K] : never : never): boolean {
+    Logger.log(`[ActionsEmitter] Emitting ${eventName}`, { args });
+    return super.emit(eventName, ...args as any);
+  }
 };

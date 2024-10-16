@@ -58,6 +58,7 @@ export const findBySourceStrings = <TResult = any>(...keywords: FindBySourceStri
         )
       )
     );
+    const eIsClassAsE = 'constructor' in exports && keywords.every(keyword => exports.constructor.toString().includes(keyword));
 
     const filter = eIsObject ? (
       moduleIsMethodOrFunctionComponent
@@ -65,18 +66,26 @@ export const findBySourceStrings = <TResult = any>(...keywords: FindBySourceStri
       || moduleIsClassComponent
       || moduleIsObjectFromE
       || moduleIsObjectOfObjects
+      || eIsClassAsE
     ) : eIsFunctionAndHasKeywords;
 
-    if (!filter && id === backupId) Logger.log(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`,
+    if ((filter && id !== backupId) || !filter && id === backupId) Logger.log(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`,
+    {
       exports,
-      { 
+      internal: {
         eIsFunctionAndHasKeywords,
         moduleIsMethodOrFunctionComponent,
-        moduleIsObjectAsE: eIsObjectAsE,
+        eIsObjectAsE,
         moduleIsClassComponent,
         moduleIsObjectFromE,
         moduleIsObjectOfObjects,
+        eIsClassAsE,
+      },
+      strings: {
+        exports: JSON.stringify(exports),
+        keys: Object.keys(exports).map(k => `${k}: ${JSON.stringify(exports[k])}`),
       }
+    }
     );
     return filter;
   }, searchOptions ?? { searchExports: true });

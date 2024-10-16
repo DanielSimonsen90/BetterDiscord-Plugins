@@ -10,7 +10,7 @@ import {
 } from '@stores';
 
 import GuildActions from "@actions/GuildActions";
-import { Guild } from "@discord/types/guild";
+import { Guild, Role } from "@discord/types/guild";
 import { GuildMember } from "@discord/types/guild/member";
 
 import { BetterOmit, FilterStore } from "./types";
@@ -33,6 +33,8 @@ type CompiledGuildUtils = BetterOmit<
     getSelectedGuildTimestamps(): ReturnType<SelectedGuildStore['getState']>["selectedGuildTimestampMillis"];
     getIconUrl(guild: Guild): string;
     getGuildByName(name: string): Guild | null;
+    getGuildRoleWithoutGuildId(roleId: Snowflake): Role | null;
+    getEmojiIcon(emojiId: Snowflake, size?: number): string;
   };
 
 export const GuildUtils: CompiledGuildUtils = {
@@ -61,11 +63,23 @@ export const GuildUtils: CompiledGuildUtils = {
   getIconUrl(guild) {
     return guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp` : 'https://cdn.discordapp.com/embed/avatars/0.png';
   },
+  getEmojiIcon(emojiId, size = 128) {
+    return `https://cdn.discordapp.com/emojis/${emojiId}.webp?size=${size}&quality=lossless`;
+  },
 
   getMembers(guild) {
     return GuildMemberStore.getMembers(guild);
   },
   getGuildByName(name) {
     return Object.values(GuildStore.getGuilds()).find(guild => guild.name === name) || null;
-  }
+  },
+  getGuildRoleWithoutGuildId(roleId) {
+    const allGuildsRoles = GuildStore.getAllGuildsRoles();
+    for (const guildId in allGuildsRoles) {
+      if (allGuildsRoles[guildId][roleId]) {
+        return allGuildsRoles[guildId][roleId];
+      }
+    }
+    return null;
+  },
 };

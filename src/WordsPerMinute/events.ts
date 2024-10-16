@@ -24,8 +24,8 @@ export function onKeyUp(event: KeyboardEvent) {
   // Log the event data
   debugLog(`[${new Date(typingStartTime.get()).toLocaleTimeString()} - ${new Date(typingEndTime.get()).toLocaleTimeString()}] ${wpm}: ${messageContent}`);
 
-  // When enter-type key is pressed, submit the message
-  if (event.key === 'Enter' || event.key === 'NumpadEnter') {
+  // When enter-type key is pressed (without holding shift for new line), submit the message
+  if ((event.key === 'Enter' || event.key === 'NumpadEnter') && !event.shiftKey) {
     onSubmit();
   }
 
