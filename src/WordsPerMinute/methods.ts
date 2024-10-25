@@ -37,7 +37,7 @@ export function updateHighscores() {
 
   Highscores.update({
     best: Math.max(best, current),
-    bestDate: best > current ? new Date().toLocaleDateString() : new Date(bestDate).toLocaleDateString(),
+    bestDate: current > best ? new Date().toLocaleDateString() : new Date(bestDate).toLocaleDateString(),
     today: Math.max(today, current),
     todayDate: new Date().toLocaleDateString()
   });

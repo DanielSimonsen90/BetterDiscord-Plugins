@@ -462,14 +462,54 @@ const findBySourceStrings = (...keywords) => {
         keywords.splice(backupIdKeywordIndex, 1);
     if (backupId)
         log(`[findBySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
-    return BdApi.Webpack.getModule((e, m, id) => {
-        const filter = (e
-            && e != window
-            && Object.keys(e).length ? (
-        Object.keys(e).some(k => typeof e[k] === 'function' && keywords.every(keyword => e[k].toString().includes(keyword))
-            || Object.keys(e).some(k => typeof e[k] === 'object' && e[k] && 'render' in e[k] && keywords.every(keyword => e[k].render.toString().includes(keyword))))) : (typeof e === 'function' && keywords.every(keyword => e.toString().includes(keyword))));
-        if (!filter && id === backupId)
-            log(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, e);
+    return BdApi.Webpack.getModule((exports, _, id) => {
+        if (!exports || exports === window)
+            return false;
+        const eIsFunctionAndHasKeywords = typeof exports === 'function'
+            && keywords.every(keyword => exports.toString().includes(keyword));
+        if (eIsFunctionAndHasKeywords)
+            return true;
+        const eIsObject = Object.keys(exports).length > 0;
+        const moduleIsMethodOrFunctionComponent = Object.keys(exports).some(k => typeof exports[k] === 'function'
+            && keywords.every(keyword => exports[k].toString().includes(keyword)));
+        const eIsObjectAsE = keywords.every(keyword => Object.keys(exports).reduce((acc, k) => acc += exports[k]?.toString?.(), '').includes(keyword));
+        const moduleIsObjectFromE = Object.keys(exports).some(k => exports[k] && typeof exports[k] === 'object'
+            && keywords.every(keyword => Object.keys(exports[k])
+                .reduce((acc, key) => acc += exports[k][key]?.toString?.(), '')
+                .includes(keyword)));
+        const moduleIsClassComponent = Object.keys(exports).some(k => typeof exports[k] === 'function'
+            && exports[k].prototype
+            && 'render' in exports[k].prototype
+            && keywords.every(keyword => exports[k].prototype.render.toString().includes(keyword)));
+        const moduleIsObjectOfObjects = Object.keys(exports).some(k => exports[k] && typeof exports[k] === 'object'
+            && Object.keys(exports[k]).some(k2 => exports[k][k2] && typeof exports[k][k2] === 'object'
+                && keywords.every(keyword => Object.keys(exports[k][k2])
+                    .reduce((acc, k3) => exports[k][k2] === window ? acc : acc += exports[k][k2][k3]?.toString?.(), '')
+                    .includes(keyword))));
+        const eIsClassAsE = 'constructor' in exports && keywords.every(keyword => exports.constructor.toString().includes(keyword));
+        const filter = eIsObject ? (moduleIsMethodOrFunctionComponent
+            || eIsObjectAsE
+            || moduleIsClassComponent
+            || moduleIsObjectFromE
+            || moduleIsObjectOfObjects
+            || eIsClassAsE) : eIsFunctionAndHasKeywords;
+        if ((filter && id !== backupId) || !filter && id === backupId)
+            log(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, {
+                exports,
+                internal: {
+                    eIsFunctionAndHasKeywords,
+                    moduleIsMethodOrFunctionComponent,
+                    eIsObjectAsE,
+                    moduleIsClassComponent,
+                    moduleIsObjectFromE,
+                    moduleIsObjectOfObjects,
+                    eIsClassAsE,
+                },
+                strings: {
+                    exports: JSON.stringify(exports),
+                    keys: Object.keys(exports).map(k => `${k}: ${JSON.stringify(exports[k])}`),
+                }
+            });
         return filter;
     }, searchOptions ?? { searchExports: true });
 };
@@ -860,12 +900,24 @@ const GuildUtils = {
     getIconUrl(guild) {
         return guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp` : 'https://cdn.discordapp.com/embed/avatars/0.png';
     },
+    getEmojiIcon(emojiId, size = 128) {
+        return `https://cdn.discordapp.com/emojis/${emojiId}.webp?size=${size}&quality=lossless`;
+    },
     getMembers(guild) {
         return GuildMemberStore.getMembers(guild);
     },
     getGuildByName(name) {
         return Object.values(GuildStore.getGuilds()).find(guild => guild.name === name) || null;
-    }
+    },
+    getGuildRoleWithoutGuildId(roleId) {
+        const allGuildsRoles = GuildStore.getAllGuildsRoles();
+        for (const guildId in allGuildsRoles) {
+            if (allGuildsRoles[guildId][roleId]) {
+                return allGuildsRoles[guildId][roleId];
+            }
+        }
+        return null;
+    },
 };
 
 function findNodeByIncludingClassName(className, node = document.body) {
@@ -911,6 +963,8 @@ const AppActions = {
     navigate,
     navigateToGuild,
 };
+
+const ApplicationActions = Finder.findBySourceStrings("fetchApplications", "createApplication");
 
 const ChannelActions = byKeys(["selectChannel"]);
 
@@ -974,12 +1028,17 @@ const ActionsEmitter = new class ActionsEmitter extends EventEmitter {
         Logger.log(`[ActionsEmitter] Unsubscribed from all events`);
         return super.removeAllListeners(event);
     }
+    emit(eventName, ...args) {
+        Logger.log(`[ActionsEmitter] Emitting ${eventName}`, { args });
+        return super.emit(eventName, ...args);
+    }
 };
 
 const Actions = {
     __proto__: null,
     ActionsEmitter,
     AppActions,
+    ApplicationActions,
     ChannelActions,
     DISPATCH_ACTIONS,
     GuildActions,
@@ -1736,7 +1795,7 @@ const DOM = {
     removeAllInjections
 };
 
-const styles$1 = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible__content.hidden {\n  display: none;\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.custom-message {\n  display: grid;\n  grid-template-columns: auto 1fr;\n  gap: 0.5ch;\n}\n.custom-message__avatar {\n  --size: 2.5rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  object-fit: cover;\n}\n.custom-message__main {\n  display: flex;\n  flex-direction: column;\n  gap: 0.5ch;\n}\n.custom-message__main header {\n  display: flex;\n  align-items: center;\n  gap: 0.5ch;\n}\n\n.progress-bar {\n  width: 100%;\n  height: 0.5rem;\n  border-radius: 0.5rem;\n  overflow: hidden;\n}\n.progress-bar__fill {\n  height: 100%;\n  background-color: var(--primary-600);\n  transition: width 0.3s;\n}\n\n.tab-bar {\n  width: 100%;\n}\n.tab-bar * {\n  color: var(--text-primary);\n  box-sizing: border-box;\n}\n\n.tab-bar__tabs {\n  display: grid;\n  grid-auto-flow: column;\n  max-width: 100%;\n  overflow-x: auto;\n}\n.tab-bar__tabs--no-color .tab-bar__tab {\n  background-color: transparent;\n  border: none;\n}\n\n.tab-bar__tab {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  border: none;\n  background-color: var(--primary-630);\n  color: var(--text-muted);\n  border: 1px solid var(--border-faint);\n  padding: 0.3rem 1rem;\n}\n.tab-bar__tab:hover {\n  background-color: var(--primary-600);\n  color: var(--text-primary);\n}\n.tab-bar__tab--active {\n  border: 1px solid var(--border-faint);\n  border-bottom: 1px solid var(--text-primary) !important;\n  color: var(--text-primary);\n}\n\n.tab-bar__content {\n  padding: 1em;\n  background-color: var(--primary-630);\n  border: 1px solid var(--border-faint);\n}\n.tab-bar__content--no-color {\n  background-color: transparent;\n  border: none;\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
+const styles$1 = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible__content.hidden {\n  display: none;\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.custom-message {\n  display: grid;\n  grid-template-columns: auto 1fr;\n  gap: 0.5ch;\n}\n.custom-message__avatar {\n  --size: 2.5rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  object-fit: cover;\n}\n.custom-message__main {\n  display: flex;\n  flex-direction: column;\n  gap: 0.5ch;\n}\n.custom-message__main header {\n  display: flex;\n  align-items: center;\n  gap: 0.5ch;\n}\n.custom-message .user-mention, .custom-message .role-mention {\n  color: var(--mention-foreground);\n  background-color: var(--mention-background);\n}\n.custom-message .user-mention::before, .custom-message .role-mention::before {\n  content: \"@\";\n}\n.custom-message .channel-mention::before {\n  content: \"#\";\n}\n\n.progress-bar {\n  width: 100%;\n  height: 0.5rem;\n  border-radius: 0.5rem;\n  overflow: hidden;\n}\n.progress-bar__fill {\n  height: 100%;\n  background-color: var(--primary-600);\n  transition: width 0.3s;\n}\n\n.tab-bar {\n  max-width: 100%;\n}\n.tab-bar * {\n  color: var(--text-primary);\n  box-sizing: border-box;\n}\n\n.tab-bar__tabs {\n  display: grid;\n  grid-auto-flow: column;\n  max-width: 100%;\n  overflow-x: auto;\n}\n.tab-bar__tabs--no-color .tab-bar__tab {\n  background-color: transparent;\n  border: none;\n}\n\n.tab-bar__tab {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  border: none;\n  background-color: var(--primary-630);\n  color: var(--text-muted);\n  border: 1px solid var(--border-faint);\n  padding: 0.3rem 1rem;\n}\n.tab-bar__tab:hover {\n  background-color: var(--primary-600);\n  color: var(--text-primary);\n}\n.tab-bar__tab--active {\n  border: 1px solid var(--border-faint);\n  border-bottom: 1px solid var(--text-primary) !important;\n  color: var(--text-primary);\n}\n\n.tab-bar__content {\n  padding: 1em;\n  background-color: var(--primary-630);\n  border: 1px solid var(--border-faint);\n}\n.tab-bar__content--no-color {\n  background-color: transparent;\n  border: none;\n}\n.tab-bar__content-page:not(.tab-bar__content-page--active) {\n  opacity: 0;\n  z-index: -1;\n  pointer-events: none;\n  height: 0;\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
 
 class DanhoLibrary {
     constructor() {
@@ -1922,28 +1981,48 @@ function Setting({ setting, settings, set, titles, ...props }) {
 }
 
 function TabBar({ tabs, ...props }) {
-    const { noTabsBackground, noContentBackground } = props;
-    const [activeTab, _setActiveTab] = useState((props.defaultTab ?? tabs.some(([key, value]) => typeof value === 'string' ? value === props.defaultTab : key === props.defaultTab)) ? props.defaultTab : tabs[0][0]);
-    const TabContent = typeof props[activeTab] === 'function'
-        ? props[activeTab]
-        : () => props[activeTab];
+    const [activeTab, _setActiveTab] = useState(props.defaultTab
+        ?? tabs.filter(([_, value]) => value)[0][0]);
+    const internalTabs = useMemo(() => {
+        const set = tabs
+            .filter(([_, value]) => value !== undefined)
+            .reduce((acc, [key, value]) => acc.set(key, value), new Map());
+        return [...set.entries()];
+    }, [tabs, props.id]);
+    const getKeyName = useCallback((key) => props.id ? `#${props.id}-${key}` : key, [props.id]);
+    const TabContent = useCallback(function TabContent() {
+        const contentChildren = internalTabs.map(([tab]) => [tab, typeof props[tab] === 'function'
+                ? props[tab]
+                : () => props[tab]]);
+        return (React.createElement(React.Fragment, null, contentChildren.map(([tab, Content], key) => (React.createElement("div", { key: getKeyName(`content-${key}`), className: classNames("tab-bar__content-page", tab === (props.tab ?? activeTab) && 'tab-bar__content-page--active') },
+            React.createElement(Content, null))))));
+    }, [tabs, activeTab, props.tab]);
     const setActiveTab = useCallback((tab) => {
+        if (!tab)
+            return;
         if (props.beforeTabChange)
             props.beforeTabChange(tab);
-        _setActiveTab(tab);
-    }, [props.beforeTabChange, props.onTabChange, tabs]);
-    useEffect(() => {
+        (props.setTab ?? _setActiveTab)(tab);
+    }, [props.beforeTabChange, props.setTab]);
+    useEffect(function onTabChanged() {
         if (props.onTabChange)
-            props.onTabChange(activeTab);
-    }, [activeTab, props.onTabChange]);
-    useEffect(() => {
-        if (!tabs.find(([key]) => key === activeTab)?.[1]) {
-            _setActiveTab(tabs[0][0]);
+            props.onTabChange(props.tab ?? activeTab);
+    }, [activeTab, props.tab, props.onTabChange]);
+    useEffect(function onTabsOptionsChanged() {
+        if (!tabs.find(([key]) => key === (props.tab ?? activeTab))?.[1]) {
+            setActiveTab(tabs[0][0]);
         }
     }, [tabs]);
-    return (React.createElement("div", { className: "tab-bar" },
-        React.createElement("div", { className: classNames('tab-bar__tabs', noTabsBackground && 'tab-bar__tabs--no-color') }, tabs.map(([tab, title]) => title && React.createElement("button", { className: classNames("tab-bar__tab", activeTab === tab && 'tab-bar__tab--active'), key: tab, onClick: () => setActiveTab(tab) }, title))),
-        React.createElement("div", { className: classNames('tab-bar__content', noContentBackground && 'tab-bar__content--no-color') },
+    useEffect(function onControlledTabChanged() {
+        if (props.tab)
+            setActiveTab(props.tab);
+    }, [props.tab]);
+    return (React.createElement("div", { id: props.id, className: classNames("tab-bar", props.className) },
+        React.createElement("header", { className: classNames('tab-bar__tabs') },
+            internalTabs.map(([tab, title]) => title &&
+                React.createElement("button", { key: getKeyName(tab), className: classNames("tab-bar__tab", activeTab === tab && 'tab-bar__tab--active'), onClick: () => setActiveTab(tab) }, title)),
+            props.children),
+        React.createElement("section", { className: classNames('tab-bar__content') },
             React.createElement(TabContent, null))));
 }
 

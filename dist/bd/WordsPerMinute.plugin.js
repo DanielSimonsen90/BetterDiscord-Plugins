@@ -1,6 +1,6 @@
 /**
  * @name WordsPerMinute
- * @version 1.0.3
+ * @version 1.0.4
  * @author danielsimonsen90
  * @authorLink https://github.com/danielsimonsen90
  * @description View your words per minute while typing your message
@@ -52,7 +52,7 @@ WScript.Quit();
 
 let meta = {
   "name": "words-per-minute",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "View your words per minute while typing your message",
   "author": "danielsimonsen90",
   "dependencies": {
@@ -1044,7 +1044,7 @@ function updateHighscores() {
         return;
     Highscores.update({
         best: Math.max(best, current),
-        bestDate: best > current ? new Date().toLocaleDateString() : new Date(bestDate).toLocaleDateString(),
+        bestDate: current > best ? new Date().toLocaleDateString() : new Date(bestDate).toLocaleDateString(),
         today: Math.max(today, current),
         todayDate: new Date().toLocaleDateString()
     });
@@ -1064,7 +1064,7 @@ function onKeyUp(event) {
     const messageContent = event.target.textContent;
     calculateWPM(messageContent);
     debugLog(`[${new Date(typingStartTime.get()).toLocaleTimeString()} - ${new Date(typingEndTime.get()).toLocaleTimeString()}] ${wpm}: ${messageContent}`);
-    if (event.key === 'Enter' || event.key === 'NumpadEnter') {
+    if ((event.key === 'Enter' || event.key === 'NumpadEnter') && !event.shiftKey) {
         onSubmit();
     }
     if (event.key === 'Backspace' && !messageContent.trim()) {
