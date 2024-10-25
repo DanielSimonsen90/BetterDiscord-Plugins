@@ -2,11 +2,13 @@ import { React } from "@react";
 import { $ } from "@danho-lib/DOM";
 import { BadgeTypes, UserProfileBadgeList } from "@discord/components/UserProfileBadgeList";
 import { Snowflake } from "@discord/types/base";
+import { Logger } from "@dium";
 
 export type CustomBadgeProps = {
   name: string;
   iconUrl: string;
   style?: React.CSSProperties;
+  href?: string;
 };
 
 export type CustomBadgeData = CustomBadgeProps & {
@@ -35,20 +37,24 @@ export function patchBadgeComponent(result: ReturnType<UserProfileBadgeList<true
     }
   >;
   const TooltipContent = result.props.children[0].props.children.type as React.FC<{
-    children: [
-      JSX.IntrinsicElements['img'],
-      boolean // ???
-    ],
+    children: JSX.IntrinsicElements['img' | 'a'],
   }>;
 
-  CustomBadge = ({ name, iconUrl, style }: CustomBadgeProps) => {
+  CustomBadge = ({ name, iconUrl, style, href }: CustomBadgeProps) => {
     if (!name || !iconUrl) return null;
+
+    const InnerBadge = ({ href }: { href?: string }) => href ? (
+      <a href={href} target="_blank" rel="noreferrer noopener">
+        <InnerBadge />
+      </a>
+    ) : (
+      <img src={iconUrl} alt={name} className={result.props.children[0].props.children.props.children[0].props.className} style={style} />
+    )
 
     return (
       <TooltipWrapper text={name}>
         <TooltipContent>
-          <img src={iconUrl} alt={name} className={result.props.children[0].props.children.props.children[0].props.className} style={style} />
-          {false}
+          <InnerBadge href={href} />
         </TooltipContent>
       </TooltipWrapper>
     ) as any;
@@ -82,13 +88,13 @@ export function insertBadges(result: ReturnType<UserProfileBadgeList<true>>, bad
     if (typeof position === 'number') return position;
 
     const [startIndex, endIndex] = [position.before, position.after].map((badgeType, i) => badgeType
-      ? badges.findIndex(badge => badge.props.text.toLowerCase().includes(badgeType.toLowerCase())) + i
+      ? badges.findIndex(badge => badge.key.includes(badgeType.toLowerCase())) + i
       : -1
     );
 
-    return startIndex === -1 && endIndex === -1 && position.default === undefined ? badges.length // Indexes failed; default to end
-    : startIndex === -1 && position.default === undefined ? endIndex  // Start index not provided; use end index
-    : endIndex === -1 && position.default === undefined ? startIndex  // End index not provided; use start index
+    return startIndex === -1 && endIndex === -1 ? badges.length // Indexes failed; default to end
+    : startIndex === -1 ? endIndex  // Start index not provided; use end index
+    : endIndex === -1 ? startIndex  // End index not provided; use start index
     : position.default === undefined ? Math.max(startIndex, endIndex) - Math.min(startIndex, endIndex) // Both indexes provided; use the difference
     : position.default ?? badges.length; // Use default index if provided, otherwise use end
   }

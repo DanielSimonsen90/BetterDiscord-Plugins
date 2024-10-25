@@ -41,7 +41,7 @@ export const titles: Record<keyof typeof Settings.current, string> = {
 export const Badges = createSettings({
   developer: {
     name: 'Plugin Developer',
-    iconUrl: 'https://media.discordapp.net/attachments/1005212649212100720/1288452741307433060/PinguDev.png?ex=66f53c9f&is=66f3eb1f&hm=f89e366a09bf6e9a50374e204b680beaca65de941c9f0cc8177f8f4021ec87c7&=&format=webp&quality=lossless&width=18&height=18',
+    iconUrl: 'https://i.imgur.com/f5MDiAd.png',
     userTags: [USER_TAGS.DANHO],
     position: {
       before: BadgeTypes.ACTIVE_DEVELOPER,
