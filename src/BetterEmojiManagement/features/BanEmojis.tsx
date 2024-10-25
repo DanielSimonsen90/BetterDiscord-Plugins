@@ -111,5 +111,6 @@ export const replaceEmojiStore_getDisambiguatedEmojiContext = createPatcherCallb
     getEscapedCustomEmoticonNames: function () { return result.getEscapedCustomEmoticonNames(); },
     getCustomEmoticonRegex: function () { return result.getCustomEmoticonRegex(); },
     getEmojiInPriorityOrderWithoutFetchingLatest: function () { return sortBannedEmojisToEnd(result.getEmojiInPriorityOrderWithoutFetchingLatest()); },
+    getByName(name: string) { return result.getByName(name); },
   } as any;
 });

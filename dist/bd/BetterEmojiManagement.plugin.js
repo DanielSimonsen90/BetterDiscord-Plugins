@@ -1,6 +1,6 @@
 /**
  * @name BetterEmojiManagement
- * @version 1.0.1
+ * @version 1.0.2
  * @author DanielSimonsen90
  * @authorLink https://github.com/DanielSimonsen90
  * @description Handle emojis better like favoring favorite emojis on search, removing your bad emojis, and more.
@@ -52,7 +52,7 @@ WScript.Quit();
 
 let meta = {
   "name": "better-emoji-management",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Handle emojis better like favoring favorite emojis on search, removing your bad emojis, and more.",
   "author": "DanielSimonsen90"
 };
@@ -975,6 +975,7 @@ const replaceEmojiStore_getDisambiguatedEmojiContext = createPatcherCallback(({ 
         getEscapedCustomEmoticonNames: function () { return result.getEscapedCustomEmoticonNames(); },
         getCustomEmoticonRegex: function () { return result.getCustomEmoticonRegex(); },
         getEmojiInPriorityOrderWithoutFetchingLatest: function () { return sortBannedEmojisToEnd(result.getEmojiInPriorityOrderWithoutFetchingLatest()); },
+        getByName(name) { return result.getByName(name); },
     };
 });
 
