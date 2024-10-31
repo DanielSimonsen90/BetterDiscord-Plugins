@@ -7,7 +7,7 @@ import { SearchOptions } from 'betterdiscord';
 export * from '@dium/api/finder';
 export * from './bdfdb';
 
-type AdditionalFindArgs = `backupId={number}` | SearchOptions<boolean>;
+type AdditionalFindArgs = `backupId={number}` | 'showMultiple=true' | SearchOptions<boolean>;
 type FindBySourceStringsArgs = [...string[]] | [...string[], AdditionalFindArgs];
 
 export const findBySourceStrings = <TResult = any>(...keywords: FindBySourceStringsArgs): TResult => {
@@ -20,7 +20,12 @@ export const findBySourceStrings = <TResult = any>(...keywords: FindBySourceStri
   if (backupIdKeywordIndex > -1) keywords.splice(backupIdKeywordIndex, 1);
   if (backupId) Logger.log(`[findBySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
 
-  return BdApi.Webpack.getModule((exports, _, id) => {
+  const showMultiple = keywords.find(k => k === 'showMultiple=true');
+  const showMultipleIndex = keywords.indexOf(showMultiple as 'showMultiple=true');
+  if (showMultipleIndex > -1) keywords.splice(showMultipleIndex, 1);
+  if (showMultiple) Logger.log(`[findBySourceStrings] Showing multiple results - [${keywords.join(',')}]`, keywords);
+
+  const moduleCallback = (exports, _, id) => {
     if (!exports || exports === window) return false;
 
     const eIsFunctionAndHasKeywords = typeof exports === 'function'
@@ -59,6 +64,7 @@ export const findBySourceStrings = <TResult = any>(...keywords: FindBySourceStri
       )
     );
     const eIsClassAsE = 'constructor' in exports && keywords.every(keyword => exports.constructor.toString().includes(keyword));
+    const eIsObjectWithKeywords = keywords.every(keyword => Object.keys(exports).reduce((acc, k) => acc += k + exports[k]?.toString?.(), '').includes(keyword));
 
     const filter = eIsObject ? (
       moduleIsMethodOrFunctionComponent
@@ -67,28 +73,36 @@ export const findBySourceStrings = <TResult = any>(...keywords: FindBySourceStri
       || moduleIsObjectFromE
       || moduleIsObjectOfObjects
       || eIsClassAsE
+      || eIsObjectWithKeywords
     ) : eIsFunctionAndHasKeywords;
 
     if ((filter && id !== backupId) || !filter && id === backupId) Logger.log(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`,
-    {
-      exports,
-      internal: {
-        eIsFunctionAndHasKeywords,
-        moduleIsMethodOrFunctionComponent,
-        eIsObjectAsE,
-        moduleIsClassComponent,
-        moduleIsObjectFromE,
-        moduleIsObjectOfObjects,
-        eIsClassAsE,
-      },
-      strings: {
-        exports: JSON.stringify(exports),
-        keys: Object.keys(exports).map(k => `${k}: ${JSON.stringify(exports[k])}`),
+      {
+        exports,
+        internal: {
+          eIsFunctionAndHasKeywords,
+          moduleIsMethodOrFunctionComponent,
+          eIsObjectAsE,
+          moduleIsClassComponent,
+          moduleIsObjectFromE,
+          moduleIsObjectOfObjects,
+          eIsClassAsE,
+        },
+        strings: {
+          exports: JSON.stringify(exports),
+          keys: Object.keys(exports).map(k => `${k}: ${JSON.stringify(exports[k])}`),
+        }
       }
-    }
     );
+
+    if (backupId && backupId === id) Logger.log('Found by id', { exports, id });
     return filter;
-  }, searchOptions ?? { searchExports: true });
+  };
+
+  const moduleSearchOptions = searchOptions ?? { searchExports: true };
+  return showMultiple 
+    ? BdApi.Webpack.getModules(moduleCallback, moduleSearchOptions) 
+    : BdApi.Webpack.getModule(moduleCallback, moduleSearchOptions);
 };
 
 export const findComponentBySourceStrings = async <TResult = JSX.BD.FC>(...keywords: string[]) => {

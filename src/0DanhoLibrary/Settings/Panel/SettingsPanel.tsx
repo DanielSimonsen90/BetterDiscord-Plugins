@@ -6,12 +6,14 @@ import { Settings, titles } from "../Settings";
 import { SettingProps } from "./_CreateSettingsGroup";
 import PrettyRolesSettings from "./PrettyRolesSettings";
 import BadgesSettings from "./BadgesSettings";
+import AutoCancelFriendRequestSettings from "./AutoCancelFriendRequestSettings";
 
 export default function SettingsPanel() {
   const [settings, set] = Settings.useState();
-  const tabs = Settings.useSelector(({ prettyRoles, badges }) => [
+  const tabs = Settings.useSelector(({ prettyRoles, badges, autoCancelFriendRequests }) => [
     ['prettyRoles', prettyRoles ? 'Pretty Roles' : null],
-    ['badges', badges ? 'Badges' : null]
+    ['badges', badges ? 'Badges' : null],
+    ['autoCancelFriendRequests', autoCancelFriendRequests ? 'Auto Cancel Friend Requests' : null],
   ] as Array<[string, string]>);
   const settingProps: SettingProps = { settings, set, titles };
 
@@ -24,11 +26,14 @@ export default function SettingsPanel() {
         <Setting setting="allowForumSortByAuthor" {...settingProps} />
         <Setting setting="expandBioAgain" {...settingProps} />
         <Setting setting="wakeUp" {...settingProps} />
+        <Setting setting="autoCancelFriendRequests" {...settingProps} />
+        <Setting setting="showGuildMembersInHeader" {...settingProps} />
       </FormSection>
       {tabs.some(([_, value]) => value) && (
         <TabBar tabs={tabs}
           prettyRoles={<PrettyRolesSettings {...settingProps} />}
           badges={<BadgesSettings {...settingProps} />}
+          autoCancelFriendRequests={<AutoCancelFriendRequestSettings {...settingProps} />}
         />
       )}
     </div>

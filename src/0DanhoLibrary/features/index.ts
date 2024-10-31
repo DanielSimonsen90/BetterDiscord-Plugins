@@ -4,6 +4,8 @@ import * as PronounsPageLinks from "./pronouns-page-links";
 import * as SortForumsByAuthor from "./sort-forums-by-author";
 import * as ExpandBioAgain from './expand-bio-again';
 import * as WakeUp from './wake-up';
+import * as BlockFriendRequests from './auto-cancel-friend-requests';
+import * as ShowGuildMembersInHeader from './show-guild-members-in-header';
 
 const features = [
   PrettyRoles,
@@ -11,7 +13,9 @@ const features = [
   PronounsPageLinks,
   SortForumsByAuthor,
   ExpandBioAgain,
-  WakeUp
+  WakeUp,
+  BlockFriendRequests,
+  ShowGuildMembersInHeader
 ];
 
 export const Features = () => features.forEach(feature => feature.default());

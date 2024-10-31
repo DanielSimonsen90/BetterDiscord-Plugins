@@ -402,9 +402,7 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     return this;
   }
   public appendComponent(component: JSX.Element, wrapperProps?: any): DQuery<El> {
-    this.element.appendChild(createElement("<></>", wrapperProps));
-    const wrapper = this.element.lastChild as HTMLElement;
-
+    const wrapper = this.element.appendChild(createElement("<></>", wrapperProps)) as HTMLElement;
     BdApi.ReactDOM.render(component, wrapper);
     return this;
   }
@@ -454,6 +452,7 @@ export function createElement(html: string | '<></>' | 'fragment' | keyof HTMLEl
     if ('className' in props) props.class = `bdd-wrapper ${props.className}`;
     else props.class = 'bdd-wrapper';
     html = `<div ${Object.entries(props).reduce((result, [key, value]) => {
+      if (key === 'className') return result;
       return result + `${key}="${value}" `;
     }, "")}></div>`;
   }

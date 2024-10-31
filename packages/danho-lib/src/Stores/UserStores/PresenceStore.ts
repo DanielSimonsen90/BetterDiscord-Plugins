@@ -33,7 +33,7 @@ export interface PresenceStoreState {
   activities: Record<Snowflake, Activity[]>;
   activityMetadata: Record<any, any>;
 
-  presenceForguilds: {
+  presencesForGuilds: {
     [userId: Snowflake]: {
       [guildId: Snowflake]: Presence;
     };

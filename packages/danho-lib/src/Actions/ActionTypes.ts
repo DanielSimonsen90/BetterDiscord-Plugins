@@ -38,6 +38,17 @@ type ActionProps = {
       user: User | { id: Snowflake; };
     }>;
   };
+  RELATIONSHIP_ADD: {
+    relationship: {
+      id: Snowflake;
+      type: number;
+      nickname: null | string;
+      since: string;
+      isSpamRequest: boolean;
+      user: User;
+    },
+    shouldNotify: boolean;
+  }
   USER_PROFILE_MODAL_OPEN: {
     analyticsLocation?: undefined;
     channelId: Snowflake;

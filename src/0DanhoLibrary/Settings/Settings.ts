@@ -19,6 +19,11 @@ export const Settings = createSettings({
   
   wakeUp: true,
   isHidingOnPurpose: false,
+
+  autoCancelFriendRequests: true,
+  folderNames: new Array<string>(),
+
+  showGuildMembersInHeader: true,
 });
 
 export const titles: Record<keyof typeof Settings.current, string> = {
@@ -35,7 +40,12 @@ export const titles: Record<keyof typeof Settings.current, string> = {
   expandBioAgain: `Expand the bio section again by default`,
   
   wakeUp: `Reminds you that you're hiding. Why are you hiding?`,
-  isHidingOnPurpose: `User confirmed that they're hiding on purpose`
+  isHidingOnPurpose: `User confirmed that they're hiding on purpose`,
+  
+  autoCancelFriendRequests: `Auto cancel friend requests on bigger servers`,
+  folderNames: `Folder names that should block all incoming friend requests`,
+
+  showGuildMembersInHeader: `Show guild members in the header`
 };
 
 export const Badges = createSettings({

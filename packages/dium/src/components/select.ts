@@ -24,7 +24,7 @@ export interface SelectProps<T, O extends SelectOption<T>> {
     optionClassName?: string;
     closeOnSelect?: any;
     select?: (value: T) => void;
-    isSelected?: (value: T) => boolean;
+    isSelected: (value: T) => boolean;
     clear?: () => void;
     serialize?: (value: T) => string;
     hideIcon?: boolean;

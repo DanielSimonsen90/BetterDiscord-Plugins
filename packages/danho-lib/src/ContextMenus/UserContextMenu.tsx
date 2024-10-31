@@ -1,4 +1,5 @@
 import { User } from "@discord/types/user";
+import { RenderedMenuItem } from "./Builder.types";
 
 type UserContextMenuFiber = {
   props: {
@@ -9,11 +10,11 @@ type UserContextMenuFiber = {
           JSX.BD.Rendered<{ children: null; }>,
           JSX.BD.Rendered<{
             children: [
-              MenuItem<"user-profile", "Profile">,
-              MenuItem<"message-user", "Message">,
-              MenuItem<"call", "Call">,
-              MenuItem<"note", "Edit Note">,
-              MenuItem<"add-friend-nickname", "Add Friend Nickname">,
+              RenderedMenuItem<"user-profile", "Profile">,
+              RenderedMenuItem<"message-user", "Message">,
+              RenderedMenuItem<"call", "Call">,
+              RenderedMenuItem<"note", "Edit Note">,
+              RenderedMenuItem<"add-friend-nickname", "Add Friend Nickname">,
               null
             ];
           }>,
@@ -25,16 +26,16 @@ type UserContextMenuFiber = {
               JSX.BD.Rendered<{
                 id: 'invite-to-server',
                 label: 'Invite to Server',
-                children: Array<JSX.BD.Rendered<MenuItem<"<guildId>", "<guildName>">>>;
+                children: Array<JSX.BD.Rendered<RenderedMenuItem<"<guildId>", "<guildName>">>>;
               }>,
-              MenuItem<"remove-friend", "Remove Friend">,
-              MenuItem<"block", "Block">,
+              RenderedMenuItem<"remove-friend", "Remove Friend">,
+              RenderedMenuItem<"block", "Block">,
             ]
           }>
         ];
       }>,
       JSX.BD.Rendered<{
-        children: JSX.BD.Rendered<MenuItem<"devmode-copy-id-<userId>", "Copy User ID"> & {
+        children: JSX.BD.Rendered<RenderedMenuItem<"devmode-copy-id-<userId>", "Copy User ID"> & {
           focusedClassName?: string;
           icon: (e: any) => any;
           iconLeft: undefined;
@@ -46,12 +47,6 @@ type UserContextMenuFiber = {
     onSelect: undefined;
   };
 };
-
-type MenuItem<id, label, action = (() => void)> = JSX.BD.Rendered<{
-  action: action,
-  id: id,
-  label: label,
-}>
 
 type UserContextMenuTargetProps = {
   config: { context: 'APP', onClose: () => void },

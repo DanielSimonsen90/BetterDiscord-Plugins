@@ -2,7 +2,7 @@ import { ContextMenuItemProps as BaseContextMenuItemProps } from "betterdiscord"
 import type React from "react";
 
 export type ContextMenuItemProps = BaseContextMenuItemProps & {
-  color?: string | 'default';
+  color?: string | 'default' | 'danger' | 'brand' | 'primary' | 'secondary' | 'success' | 'warning';
   label: string;
   icon?: React.FC<{ color?: string | 'currentColor' }>
   iconLeft?: boolean;
@@ -29,3 +29,9 @@ export type ContextMenuItemProps = BaseContextMenuItemProps & {
   /** @default true */
   extended?: boolean;
 }
+
+export type RenderedMenuItem<id, label, action = (() => void)> = JSX.BD.Rendered<{
+  action: action,
+  id: id,
+  label: label,
+}>;
