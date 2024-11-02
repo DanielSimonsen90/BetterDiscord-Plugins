@@ -10,7 +10,7 @@ export type UserProfileStore = Store & {
     user: User;
   }>;
   getMutualFriendsCount(userId: Snowflake): number;
-  getMutualGuilds(userId: Snowflake): Array<{
+  getMutualGuilds(userId: Snowflake): undefined | Array<{
     nick: string | null;
     guild: Guild;
   }>;
