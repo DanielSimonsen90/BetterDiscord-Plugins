@@ -1,16 +1,17 @@
 import RolesListModule from '@danho-lib/Patcher/RolesList';
+import { GuildUtils } from '@danho-lib/Utils';
 import type { Snowflake, Role } from '@discord/types';
 
 export const PrettyRolesManager = new class PrettyRolesManager {
-  context: ReturnType<RolesListModule['RolesList']>['props'];
+  context: ReturnType<RolesListModule['RolesList']>['props'] | undefined;
   role: Role;
 
   getRole(roleId: Snowflake) {
-    return this.context.roles.find(r => r.id === roleId);
+    return this.context?.roles.find(r => r.id === roleId) ?? GuildUtils.getGuildRoleWithoutGuildId(roleId);
   }
   removeRole() {
     if (!this.role) return;
-    this.context.onRemoveRole(this.role);
+    this.context?.onRemoveRole(this.role);
   }
   canRemoveRole() {
     if (!this.role) return false;

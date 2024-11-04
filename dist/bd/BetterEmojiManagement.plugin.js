@@ -223,6 +223,8 @@ const margins = /* @__PURE__ */ byKeys(["marginBottom40", "marginTop4"]);
 
 const { Menu, Group: MenuGroup, Item: MenuItem, Separator: MenuSeparator, CheckboxItem: MenuCheckboxItem, RadioItem: MenuRadioItem, ControlItem: MenuControlItem } = BdApi.ContextMenu;
 
+const { Select, SingleSelect } = Common;
+
 const { TextInput, InputError } = Common;
 
 const queryFiber = (fiber, predicate, direction = "up" , depth = 30) => {
@@ -824,8 +826,7 @@ class DQuery {
         return this;
     }
     appendComponent(component, wrapperProps) {
-        this.element.appendChild(createElement$1("<></>", wrapperProps));
-        const wrapper = this.element.lastChild;
+        const wrapper = this.element.appendChild(createElement$1("<></>", wrapperProps));
         BdApi.ReactDOM.render(component, wrapper);
         return this;
     }
@@ -868,6 +869,8 @@ function createElement$1(html, props = {}, target) {
         else
             props.class = 'bdd-wrapper';
         html = `<div ${Object.entries(props).reduce((result, [key, value]) => {
+            if (key === 'className')
+                return result;
             return result + `${key}="${value}" `;
         }, "")}></div>`;
     }
@@ -1149,13 +1152,25 @@ function Setting({ setting, settings, set, titles, ...props }) {
                     setV(value);
                 } }),
             React.createElement(FormText, { className: 'note' }, titles[setting])));
-    if (type)
+    if (type && type !== 'select')
         return (React.createElement("div", { className: "danho-form-switch", key: setting.toString() },
             React.createElement("input", { type: type, key: setting.toString(), value: v, onChange: e => {
                     const value = beforeChange ? beforeChange(e.target.value) : e.target.value;
                     set({ [setting]: value });
                     onChange?.(value);
                     setV(value);
+                } }),
+            React.createElement(FormText, { className: 'note' }, titles[setting])));
+    if (type === 'select' && Array.isArray(settings[setting]))
+        return (React.createElement("div", { className: "danho-form-select", key: setting.toString() },
+            React.createElement(Select, { options: props.selectValues.map(value => ({ label: value, value })), isSelected: value => Array.isArray(settings[setting]) ? v.includes(value) : false, serialize: value => JSON.stringify(value), select: (value) => {
+                    const selected = [...settings[setting]];
+                    if (selected.includes(value))
+                        selected.splice(selected.indexOf(value), 1);
+                    else
+                        selected.push(value);
+                    set({ [setting]: selected });
+                    setV(selected);
                 } }),
             React.createElement(FormText, { className: 'note' }, titles[setting])));
     return (React.createElement("div", { className: 'settings-error' },

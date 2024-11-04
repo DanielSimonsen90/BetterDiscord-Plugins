@@ -1,6 +1,6 @@
 /**
  * @name 0Danholibrary
- * @version 1.6.0
+ * @version 1.6.1
  * @author danielsimonsen90
  * @authorLink https://github.com/danielsimonsen90
  * @description Library for Danho's plugins
@@ -54,7 +54,7 @@ let meta = {
   "name": "0danholibrary",
   "description": "Library for Danho's plugins",
   "author": "danielsimonsen90",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "development": true,
   "dependencies": {
     "dium": "*",
@@ -462,7 +462,13 @@ const findBySourceStrings = (...keywords) => {
         keywords.splice(backupIdKeywordIndex, 1);
     if (backupId)
         log(`[findBySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
-    return BdApi.Webpack.getModule((exports, _, id) => {
+    const showMultiple = keywords.find(k => k === 'showMultiple=true');
+    const showMultipleIndex = keywords.indexOf(showMultiple);
+    if (showMultipleIndex > -1)
+        keywords.splice(showMultipleIndex, 1);
+    if (showMultiple)
+        log(`[findBySourceStrings] Showing multiple results - [${keywords.join(',')}]`, keywords);
+    const moduleCallback = (exports, _, id) => {
         if (!exports || exports === window)
             return false;
         const eIsFunctionAndHasKeywords = typeof exports === 'function'
@@ -487,12 +493,14 @@ const findBySourceStrings = (...keywords) => {
                     .reduce((acc, k3) => exports[k][k2] === window ? acc : acc += exports[k][k2][k3]?.toString?.(), '')
                     .includes(keyword))));
         const eIsClassAsE = 'constructor' in exports && keywords.every(keyword => exports.constructor.toString().includes(keyword));
+        const eIsObjectWithKeywords = keywords.every(keyword => Object.keys(exports).reduce((acc, k) => acc += k + exports[k]?.toString?.(), '').includes(keyword));
         const filter = eIsObject ? (moduleIsMethodOrFunctionComponent
             || eIsObjectAsE
             || moduleIsClassComponent
             || moduleIsObjectFromE
             || moduleIsObjectOfObjects
-            || eIsClassAsE) : eIsFunctionAndHasKeywords;
+            || eIsClassAsE
+            || eIsObjectWithKeywords) : eIsFunctionAndHasKeywords;
         if ((filter && id !== backupId) || !filter && id === backupId)
             log(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, {
                 exports,
@@ -510,8 +518,14 @@ const findBySourceStrings = (...keywords) => {
                     keys: Object.keys(exports).map(k => `${k}: ${JSON.stringify(exports[k])}`),
                 }
             });
+        if (backupId && backupId === id)
+            log('Found by id', { exports, id });
         return filter;
-    }, searchOptions ?? { searchExports: true });
+    };
+    const moduleSearchOptions = searchOptions ?? { searchExports: true };
+    return showMultiple
+        ? BdApi.Webpack.getModules(moduleCallback, moduleSearchOptions)
+        : BdApi.Webpack.getModule(moduleCallback, moduleSearchOptions);
 };
 const findComponentBySourceStrings = async (...keywords) => {
     const jsxModule = Finder.byKeys(['jsx']);
@@ -607,6 +621,203 @@ const UserMentionStore = byKeys(["getMentions", "everyoneFilter"]);
 
 const UserNoteStore = byKeys(["getNote", "_dispatcher"]);
 
+const Dispatcher$1 = /* @__PURE__ */ byKeys(["dispatch", "subscribe"]);
+
+const { default: Legacy, Dispatcher, Store, BatchedStoreListener, useStateFromStores } = /* @__PURE__ */ demangle({
+    default: byKeys$1("Store", "connectStores"),
+    Dispatcher: byProtos$1("dispatch"),
+    Store: byProtos$1("emitChange"),
+    BatchedStoreListener: byProtos$1("attach", "detach"),
+    useStateFromStores: bySource$1("useStateFromStores")
+}, ["Store", "Dispatcher", "useStateFromStores"]);
+
+const { React } = BdApi;
+const classNames = /* @__PURE__ */ find$2((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
+const EventEmitter = /* @__PURE__ */ find$2((exports) => exports.prototype instanceof Object && Object.prototype.hasOwnProperty.call(exports.prototype, "prependOnceListener"));
+
+const Common = /* @__PURE__ */ byKeys(["Button", "Switch", "Select"]);
+
+const Button = Common.Button;
+
+const Flex = /* @__PURE__ */ byKeys(["Child", "Justify"], { entries: true });
+
+const { FormSection, FormItem, FormTitle, FormText, FormLabel, FormDivider, FormSwitch, FormNotice } = Common;
+
+const FormElements = {
+    __proto__: null,
+    FormDivider,
+    FormItem,
+    FormLabel,
+    FormNotice,
+    FormSection,
+    FormSwitch,
+    FormText,
+    FormTitle
+};
+
+const margins = /* @__PURE__ */ byKeys(["marginBottom40", "marginTop4"]);
+
+const { Menu, Group: MenuGroup, Item: MenuItem, Separator: MenuSeparator, CheckboxItem: MenuCheckboxItem, RadioItem: MenuRadioItem, ControlItem: MenuControlItem } = BdApi.ContextMenu;
+
+const { Select, SingleSelect } = Common;
+
+const { TextInput, InputError } = Common;
+
+const Text = Common.Text;
+
+const queryFiber = (fiber, predicate, direction = "up" , depth = 30) => {
+    if (depth < 0) {
+        return null;
+    }
+    if (predicate(fiber)) {
+        return fiber;
+    }
+    if (direction === "up"  || direction === "both" ) {
+        let count = 0;
+        let parent = fiber.return;
+        while (parent && count < depth) {
+            if (predicate(parent)) {
+                return parent;
+            }
+            count++;
+            parent = parent.return;
+        }
+    }
+    if (direction === "down"  || direction === "both" ) {
+        let child = fiber.child;
+        while (child) {
+            const result = queryFiber(child, predicate, "down" , depth - 1);
+            if (result) {
+                return result;
+            }
+            child = child.sibling;
+        }
+    }
+    return null;
+};
+const findOwner = (fiber, depth = 50) => {
+    return queryFiber(fiber, (node) => node?.stateNode instanceof React.Component, "up" , depth);
+};
+const forceFullRerender = (fiber) => new Promise((resolve) => {
+    const owner = findOwner(fiber);
+    if (owner) {
+        const { stateNode } = owner;
+        instead(stateNode, "render", () => null, { once: true, silent: true });
+        stateNode.forceUpdate(() => stateNode.forceUpdate(() => resolve(true)));
+    }
+    else {
+        resolve(false);
+    }
+});
+
+const SettingsContainer = ({ name, children, onReset }) => (React.createElement(FormSection, null,
+    children,
+    onReset ? (React.createElement(React.Fragment, null,
+        React.createElement(FormDivider, { className: classNames(margins.marginTop20, margins.marginBottom20) }),
+        React.createElement(Flex, { justify: Flex.Justify.END },
+            React.createElement(Button, { size: Button.Sizes.SMALL, onClick: () => confirm(name, "Reset all settings?", {
+                    onConfirm: () => onReset()
+                }) }, "Reset")))) : null));
+
+class SettingsStore {
+    constructor(defaults, onLoad) {
+        this.listeners = new Set();
+        this.update = (settings, replace = false) => {
+            this.current = typeof settings === "function"
+                ? ({ ...(replace ? {} : this.current), ...settings(this.current) })
+                : ({ ...(replace ? {} : this.current), ...settings });
+            this._dispatch(true);
+        };
+        this.addReactChangeListener = this.addListener;
+        this.removeReactChangeListener = this.removeListener;
+        this.defaults = defaults;
+        this.onLoad = onLoad;
+    }
+    load() {
+        this.current = { ...this.defaults, ...load("settings") };
+        this.onLoad?.();
+        this._dispatch(false);
+    }
+    _dispatch(save$1) {
+        for (const listener of this.listeners) {
+            listener(this.current);
+        }
+        if (save$1) {
+            save("settings", this.current);
+        }
+    }
+    reset() {
+        this.current = { ...this.defaults };
+        this._dispatch(true);
+    }
+    delete(...keys) {
+        for (const key of keys) {
+            delete this.current[key];
+        }
+        this._dispatch(true);
+    }
+    useCurrent() {
+        return useStateFromStores([this], () => this.current, undefined, () => false);
+    }
+    useSelector(selector, deps, compare) {
+        return useStateFromStores([this], () => selector(this.current), deps, compare);
+    }
+    useState() {
+        return useStateFromStores([this], () => [
+            this.current,
+            this.update
+        ]);
+    }
+    useStateWithDefaults() {
+        return useStateFromStores([this], () => [
+            this.current,
+            this.defaults,
+            this.update
+        ]);
+    }
+    useListener(listener, deps) {
+        React.useEffect(() => {
+            this.addListener(listener);
+            return () => this.removeListener(listener);
+        }, deps ?? [listener]);
+    }
+    addListener(listener) {
+        this.listeners.add(listener);
+        return listener;
+    }
+    removeListener(listener) {
+        this.listeners.delete(listener);
+    }
+    removeAllListeners() {
+        this.listeners.clear();
+    }
+}
+const createSettings = (defaults, onLoad) => new SettingsStore(defaults, onLoad);
+
+const createPlugin = (plugin) => (meta) => {
+    setMeta(meta);
+    const { start, stop, styles, Settings, SettingsPanel } = (plugin instanceof Function ? plugin(meta) : plugin);
+    Settings?.load();
+    return {
+        start() {
+            log("Enabled");
+            inject(styles);
+            start?.();
+        },
+        stop() {
+            abort();
+            unpatchAll();
+            clear();
+            stop?.();
+            log("Disabled");
+        },
+        getSettingsPanel: SettingsPanel ? () => (React.createElement(SettingsContainer, { name: meta.name, onReset: Settings ? () => Settings.reset() : null },
+            React.createElement(SettingsPanel, null))) : null
+    };
+};
+
+const UserProfileStore = byName("UserProfileStore");
+
 const UserSettingsAccountStore = byName("UserSettingsAccountStore");
 const UserProfileSettingsStore = byKeys(["saveProfileChanges", "setPendingBio"]);
 const BetterProfileSettings = {
@@ -695,20 +906,6 @@ var SupportedFeatures;
 const VoiceStore = byKeys(["getVoiceStateForUser"]);
 
 const ApplicationStore = Finder.byName("ApplicationStore");
-
-const Dispatcher$1 = /* @__PURE__ */ byKeys(["dispatch", "subscribe"]);
-
-const { default: Legacy, Dispatcher, Store, BatchedStoreListener, useStateFromStores } = /* @__PURE__ */ demangle({
-    default: byKeys$1("Store", "connectStores"),
-    Dispatcher: byProtos$1("dispatch"),
-    Store: byProtos$1("emitChange"),
-    BatchedStoreListener: byProtos$1("attach", "detach"),
-    useStateFromStores: bySource$1("useStateFromStores")
-}, ["Store", "Dispatcher", "useStateFromStores"]);
-
-const { React } = BdApi;
-const classNames = /* @__PURE__ */ find$2((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
-const EventEmitter = /* @__PURE__ */ find$2((exports) => exports.prototype instanceof Object && Object.prototype.hasOwnProperty.call(exports.prototype, "prependOnceListener"));
 
 class DiumStore {
     constructor(defaults, dataKey, onLoad) {
@@ -843,6 +1040,7 @@ const Stores = {
     UserMentionStore,
     UserNoteStore,
     UserProfileSettingsStore,
+    UserProfileStore,
     UserSettingsAccountStore,
     UserStore,
     UserTypingStore,
@@ -1045,183 +1243,6 @@ const Actions = {
     MessageActions,
     UserNoteActions,
     find
-};
-
-const Common = /* @__PURE__ */ byKeys(["Button", "Switch", "Select"]);
-
-const Button = Common.Button;
-
-const Flex = /* @__PURE__ */ byKeys(["Child", "Justify"], { entries: true });
-
-const { FormSection, FormItem, FormTitle, FormText, FormLabel, FormDivider, FormSwitch, FormNotice } = Common;
-
-const FormElements = {
-    __proto__: null,
-    FormDivider,
-    FormItem,
-    FormLabel,
-    FormNotice,
-    FormSection,
-    FormSwitch,
-    FormText,
-    FormTitle
-};
-
-const margins = /* @__PURE__ */ byKeys(["marginBottom40", "marginTop4"]);
-
-const { Menu, Group: MenuGroup, Item: MenuItem, Separator: MenuSeparator, CheckboxItem: MenuCheckboxItem, RadioItem: MenuRadioItem, ControlItem: MenuControlItem } = BdApi.ContextMenu;
-
-const { TextInput, InputError } = Common;
-
-const queryFiber = (fiber, predicate, direction = "up" , depth = 30) => {
-    if (depth < 0) {
-        return null;
-    }
-    if (predicate(fiber)) {
-        return fiber;
-    }
-    if (direction === "up"  || direction === "both" ) {
-        let count = 0;
-        let parent = fiber.return;
-        while (parent && count < depth) {
-            if (predicate(parent)) {
-                return parent;
-            }
-            count++;
-            parent = parent.return;
-        }
-    }
-    if (direction === "down"  || direction === "both" ) {
-        let child = fiber.child;
-        while (child) {
-            const result = queryFiber(child, predicate, "down" , depth - 1);
-            if (result) {
-                return result;
-            }
-            child = child.sibling;
-        }
-    }
-    return null;
-};
-const findOwner = (fiber, depth = 50) => {
-    return queryFiber(fiber, (node) => node?.stateNode instanceof React.Component, "up" , depth);
-};
-const forceFullRerender = (fiber) => new Promise((resolve) => {
-    const owner = findOwner(fiber);
-    if (owner) {
-        const { stateNode } = owner;
-        instead(stateNode, "render", () => null, { once: true, silent: true });
-        stateNode.forceUpdate(() => stateNode.forceUpdate(() => resolve(true)));
-    }
-    else {
-        resolve(false);
-    }
-});
-
-const SettingsContainer = ({ name, children, onReset }) => (React.createElement(FormSection, null,
-    children,
-    onReset ? (React.createElement(React.Fragment, null,
-        React.createElement(FormDivider, { className: classNames(margins.marginTop20, margins.marginBottom20) }),
-        React.createElement(Flex, { justify: Flex.Justify.END },
-            React.createElement(Button, { size: Button.Sizes.SMALL, onClick: () => confirm(name, "Reset all settings?", {
-                    onConfirm: () => onReset()
-                }) }, "Reset")))) : null));
-
-class SettingsStore {
-    constructor(defaults, onLoad) {
-        this.listeners = new Set();
-        this.update = (settings, replace = false) => {
-            this.current = typeof settings === "function"
-                ? ({ ...(replace ? {} : this.current), ...settings(this.current) })
-                : ({ ...(replace ? {} : this.current), ...settings });
-            this._dispatch(true);
-        };
-        this.addReactChangeListener = this.addListener;
-        this.removeReactChangeListener = this.removeListener;
-        this.defaults = defaults;
-        this.onLoad = onLoad;
-    }
-    load() {
-        this.current = { ...this.defaults, ...load("settings") };
-        this.onLoad?.();
-        this._dispatch(false);
-    }
-    _dispatch(save$1) {
-        for (const listener of this.listeners) {
-            listener(this.current);
-        }
-        if (save$1) {
-            save("settings", this.current);
-        }
-    }
-    reset() {
-        this.current = { ...this.defaults };
-        this._dispatch(true);
-    }
-    delete(...keys) {
-        for (const key of keys) {
-            delete this.current[key];
-        }
-        this._dispatch(true);
-    }
-    useCurrent() {
-        return useStateFromStores([this], () => this.current, undefined, () => false);
-    }
-    useSelector(selector, deps, compare) {
-        return useStateFromStores([this], () => selector(this.current), deps, compare);
-    }
-    useState() {
-        return useStateFromStores([this], () => [
-            this.current,
-            this.update
-        ]);
-    }
-    useStateWithDefaults() {
-        return useStateFromStores([this], () => [
-            this.current,
-            this.defaults,
-            this.update
-        ]);
-    }
-    useListener(listener, deps) {
-        React.useEffect(() => {
-            this.addListener(listener);
-            return () => this.removeListener(listener);
-        }, deps ?? [listener]);
-    }
-    addListener(listener) {
-        this.listeners.add(listener);
-        return listener;
-    }
-    removeListener(listener) {
-        this.listeners.delete(listener);
-    }
-    removeAllListeners() {
-        this.listeners.clear();
-    }
-}
-const createSettings = (defaults, onLoad) => new SettingsStore(defaults, onLoad);
-
-const createPlugin = (plugin) => (meta) => {
-    setMeta(meta);
-    const { start, stop, styles, Settings, SettingsPanel } = (plugin instanceof Function ? plugin(meta) : plugin);
-    Settings?.load();
-    return {
-        start() {
-            log("Enabled");
-            inject(styles);
-            start?.();
-        },
-        stop() {
-            abort();
-            unpatchAll();
-            clear();
-            stop?.();
-            log("Disabled");
-        },
-        getSettingsPanel: SettingsPanel ? () => (React.createElement(SettingsContainer, { name: meta.name, onReset: Settings ? () => Settings.reset() : null },
-            React.createElement(SettingsPanel, null))) : null
-    };
 };
 
 class ElementSelector {
@@ -1677,8 +1698,7 @@ class DQuery {
         return this;
     }
     appendComponent(component, wrapperProps) {
-        this.element.appendChild(createElement$1("<></>", wrapperProps));
-        const wrapper = this.element.lastChild;
+        const wrapper = this.element.appendChild(createElement$1("<></>", wrapperProps));
         BdApi.ReactDOM.render(component, wrapper);
         return this;
     }
@@ -1721,6 +1741,8 @@ function createElement$1(html, props = {}, target) {
         else
             props.class = 'bdd-wrapper';
         html = `<div ${Object.entries(props).reduce((result, [key, value]) => {
+            if (key === 'className')
+                return result;
             return result + `${key}="${value}" `;
         }, "")}></div>`;
     }
@@ -1907,6 +1929,9 @@ const Settings = createSettings({
     expandBioAgain: true,
     wakeUp: true,
     isHidingOnPurpose: false,
+    autoCancelFriendRequests: true,
+    folderNames: new Array(),
+    showGuildMembersInHeader: true,
 });
 const titles = {
     prettyRoles: `Remove role circle, add more color to the roles`,
@@ -1919,12 +1944,15 @@ const titles = {
     allowForumSortByAuthor: `Allow sorting forum posts by author`,
     expandBioAgain: `Expand the bio section again by default`,
     wakeUp: `Reminds you that you're hiding. Why are you hiding?`,
-    isHidingOnPurpose: `User confirmed that they're hiding on purpose`
+    isHidingOnPurpose: `User confirmed that they're hiding on purpose`,
+    autoCancelFriendRequests: `Auto cancel friend requests on bigger servers`,
+    folderNames: `Folder names that should block all incoming friend requests`,
+    showGuildMembersInHeader: `Show guild members in the header`
 };
 const Badges$1 = createSettings({
     developer: {
         name: 'Plugin Developer',
-        iconUrl: 'https://media.discordapp.net/attachments/1005212649212100720/1288452741307433060/PinguDev.png?ex=66f53c9f&is=66f3eb1f&hm=f89e366a09bf6e9a50374e204b680beaca65de941c9f0cc8177f8f4021ec87c7&=&format=webp&quality=lossless&width=18&height=18',
+        iconUrl: 'https://i.imgur.com/f5MDiAd.png',
         userTags: [USER_TAGS.DANHO],
         position: {
             before: BadgeTypes.ACTIVE_DEVELOPER,
@@ -1963,13 +1991,25 @@ function Setting({ setting, settings, set, titles, ...props }) {
                     setV(value);
                 } }),
             React.createElement(FormText, { className: 'note' }, titles[setting])));
-    if (type)
+    if (type && type !== 'select')
         return (React.createElement("div", { className: "danho-form-switch", key: setting.toString() },
             React.createElement("input", { type: type, key: setting.toString(), value: v, onChange: e => {
                     const value = beforeChange ? beforeChange(e.target.value) : e.target.value;
                     set({ [setting]: value });
                     onChange?.(value);
                     setV(value);
+                } }),
+            React.createElement(FormText, { className: 'note' }, titles[setting])));
+    if (type === 'select' && Array.isArray(settings[setting]))
+        return (React.createElement("div", { className: "danho-form-select", key: setting.toString() },
+            React.createElement(Select, { options: props.selectValues.map(value => ({ label: value, value })), isSelected: value => Array.isArray(settings[setting]) ? v.includes(value) : false, serialize: value => JSON.stringify(value), select: (value) => {
+                    const selected = [...settings[setting]];
+                    if (selected.includes(value))
+                        selected.splice(selected.indexOf(value), 1);
+                    else
+                        selected.push(value);
+                    set({ [setting]: selected });
+                    setV(selected);
                 } }),
             React.createElement(FormText, { className: 'note' }, titles[setting])));
     return (React.createElement("div", { className: 'settings-error' },
@@ -2066,11 +2106,18 @@ const BadgesSettings = CreateSettingsGroup((React, props, Setting, { FormSection
         React.createElement(Setting, { setting: "movePremiumBadge", ...props })));
 });
 
+const AutoCancelFriendRequestSettings = CreateSettingsGroup((React, props, Setting, { FormSection }) => {
+    const folderNames = SortedGuildStore.getGuildFolders().map(folder => folder.folderName);
+    return (React.createElement(FormSection, { title: "Auto Cancel Friend Request Settings" },
+        React.createElement(Setting, { setting: "folderNames", type: 'select', selectValues: folderNames, ...props })));
+});
+
 function SettingsPanel() {
     const [settings, set] = Settings.useState();
-    const tabs = Settings.useSelector(({ prettyRoles, badges }) => [
+    const tabs = Settings.useSelector(({ prettyRoles, badges, autoCancelFriendRequests }) => [
         ['prettyRoles', prettyRoles ? 'Pretty Roles' : null],
-        ['badges', badges ? 'Badges' : null]
+        ['badges', badges ? 'Badges' : null],
+        ['autoCancelFriendRequests', autoCancelFriendRequests ? 'Auto Cancel Friend Requests' : null],
     ]);
     const settingProps = { settings, set, titles };
     return (React.createElement("div", { className: "danho-plugin-settings" },
@@ -2080,18 +2127,20 @@ function SettingsPanel() {
             React.createElement(Setting, { setting: "pronounsPageLinks", ...settingProps }),
             React.createElement(Setting, { setting: "allowForumSortByAuthor", ...settingProps }),
             React.createElement(Setting, { setting: "expandBioAgain", ...settingProps }),
-            React.createElement(Setting, { setting: "wakeUp", ...settingProps })),
-        tabs.some(([_, value]) => value) && (React.createElement(TabBar, { tabs: tabs, prettyRoles: React.createElement(PrettyRolesSettings, { ...settingProps }), badges: React.createElement(BadgesSettings, { ...settingProps }) }))));
+            React.createElement(Setting, { setting: "wakeUp", ...settingProps }),
+            React.createElement(Setting, { setting: "autoCancelFriendRequests", ...settingProps }),
+            React.createElement(Setting, { setting: "showGuildMembersInHeader", ...settingProps })),
+        tabs.some(([_, value]) => value) && (React.createElement(TabBar, { tabs: tabs, prettyRoles: React.createElement(PrettyRolesSettings, { ...settingProps }), badges: React.createElement(BadgesSettings, { ...settingProps }), autoCancelFriendRequests: React.createElement(AutoCancelFriendRequestSettings, { ...settingProps }) }))));
 }
 
 const PrettyRolesManager = new class PrettyRolesManager {
     getRole(roleId) {
-        return this.context.roles.find(r => r.id === roleId);
+        return this.context?.roles.find(r => r.id === roleId) ?? GuildUtils.getGuildRoleWithoutGuildId(roleId);
     }
     removeRole() {
         if (!this.role)
             return;
-        this.context.onRemoveRole(this.role);
+        this.context?.onRemoveRole(this.role);
     }
     canRemoveRole() {
         if (!this.role)
@@ -2145,7 +2194,7 @@ function insteadRolesList() {
     });
 }
 
-const prettifyRoles = createPatcherAfterCallback(() => {
+function prettyRoles$1() {
     $(s => s.role('list', 'div').and.ariaLabelContains('Role'))?.children().forEach(el => {
         const roleId = el.attr('data-list-item-id')?.split('_').pop();
         if (!roleId)
@@ -2161,28 +2210,36 @@ const prettifyRoles = createPatcherAfterCallback(() => {
                 el.addClass('danho-library__pretty-roles__group-role');
         }
     });
-});
+}
 
 function afterRolesList() {
-    after(RolesListModule, 'RolesList', (data) => {
-        prettifyRoles(data);
+    after(RolesListModule, 'RolesList', () => {
+        prettyRoles$1();
     });
+}
+
+function afterUserProfileModalAboutMe() {
+    const UserProfileModalAboutMe = Finder.findBySourceStrings('look:"profile_modal"', { defaultExport: false });
+    after(UserProfileModalAboutMe, 'Z', () => {
+        prettyRoles$1();
+    }, { name: 'UserProfileModalAboutMe' });
 }
 
 const prettyRoles = "*[role=list][data-list-id*=roles] > div div:has([class*=roleRemoveButton][role=button]),\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveButton][role=button],\n*[role=list][data-list-id*=roles] > div [class*=roleFlowerStar],\n*[role=list][data-list-id*=roles] > div [class*=roleCircle] {\n  position: absolute;\n  inset: 0;\n  z-index: 1;\n}\n\n*[role=list][data-list-id*=roles] {\n  padding: 1rem;\n}\n*[role=list][data-list-id*=roles]:has(.danho-library__pretty-roles__group-role) div:has([class*=expandButton]) {\n  flex: 1 1 50%;\n}\n\n*[role=list][data-list-id*=roles] > div {\n  --role-color--default: rgb(86, 105, 118);\n  --role-color: var(--role-color--default);\n  --role-color-alpha: .125;\n  position: relative;\n  border: 1px solid rgb(var(--role-color, --role-color--default));\n  background-color: rgba(var(--role-color, --role-color--default), var(--role-color-alpha));\n  border-radius: 0.25rem;\n  height: 25px;\n  box-sizing: border-box;\n  justify-content: center;\n}\n*[role=list][data-list-id*=roles] > div [class*=roleCircle],\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveIcon] {\n  height: 100%;\n  width: 100%;\n}\n*[role=list][data-list-id*=roles] > div span[class*=roleCircle] {\n  background-color: unset !important;\n}\n*[role=list][data-list-id*=roles] > div svg[class*=roleRemoveIcon] {\n  display: none;\n}\n*[role=list][data-list-id*=roles] > div div:has(svg[class*=roleVerifiedIcon]) {\n  position: absolute;\n  top: -0.5rem;\n  left: -0.75rem;\n}\n*[role=list][data-list-id*=roles] > div:hover svg[class*=roleVerifiedIcon] {\n  display: inline-block !important;\n}\n\n.danho-library__pretty-roles__group-role {\n  flex: 1 1 100% !important;\n  margin-inline: -1rem;\n}";
 
 const isPrettyRolesEnabled = () => Settings.current.prettyRoles;
-function Feature$5() {
+function Feature$7() {
     if (!isPrettyRolesEnabled())
         return;
     insteadRolesList();
     afterRolesList();
+    afterUserProfileModalAboutMe();
     afterRoleContextMenu();
 }
 
 const PrettyRoles = {
     __proto__: null,
-    default: Feature$5,
+    default: Feature$7,
     isPrettyRolesEnabled,
     styles: prettyRoles
 };
@@ -2193,13 +2250,14 @@ function patchBadgeComponent(result) {
         return;
     const TooltipWrapper = result.props.children[0].type;
     const TooltipContent = result.props.children[0].props.children.type;
-    CustomBadge = ({ name, iconUrl, style }) => {
+    CustomBadge = ({ name, iconUrl, style, href }) => {
         if (!name || !iconUrl)
             return null;
+        const InnerBadge = ({ href }) => href ? (React.createElement("a", { href: href, target: "_blank", rel: "noreferrer noopener" },
+            React.createElement(InnerBadge, null))) : (React.createElement("img", { src: iconUrl, alt: name, className: result.props.children[0].props.children.props.children[0].props.className, style: style }));
         return (React.createElement(TooltipWrapper, { text: name },
             React.createElement(TooltipContent, null,
-                React.createElement("img", { src: iconUrl, alt: name, className: result.props.children[0].props.children.props.children[0].props.className, style: style }),
-                false)));
+                React.createElement(InnerBadge, { href: href }))));
     };
 }
 function insertBadges(result, badgeData) {
@@ -2230,11 +2288,11 @@ function insertBadges(result, badgeData) {
         if (typeof position === 'number')
             return position;
         const [startIndex, endIndex] = [position.before, position.after].map((badgeType, i) => badgeType
-            ? badges.findIndex(badge => badge.props.text.toLowerCase().includes(badgeType.toLowerCase())) + i
+            ? badges.findIndex(badge => badge.key.includes(badgeType.toLowerCase())) + i
             : -1);
-        return startIndex === -1 && endIndex === -1 && position.default === undefined ? badges.length
-            : startIndex === -1 && position.default === undefined ? endIndex
-                : endIndex === -1 && position.default === undefined ? startIndex
+        return startIndex === -1 && endIndex === -1 ? badges.length
+            : startIndex === -1 ? endIndex
+                : endIndex === -1 ? startIndex
                     : position.default === undefined ? Math.max(startIndex, endIndex) - Math.min(startIndex, endIndex)
                         : position.default ?? badges.length;
     }
@@ -2264,7 +2322,7 @@ function afterBadgeList() {
     }, { name: 'BadgeList' });
 }
 
-function Feature$4() {
+function Feature$6() {
     if (!Settings.current.badges)
         return;
     Badges$1.load();
@@ -2273,7 +2331,7 @@ function Feature$4() {
 
 const Badges = {
     __proto__: null,
-    default: Feature$4
+    default: Feature$6
 };
 
 const TextModule = Finder.findBySourceStrings('lineClamp', 'tabularNumbers', 'scaleFontToUserSetting');
@@ -2295,7 +2353,7 @@ function afterTextModule() {
     }, { name: 'TextModule--Pronouns' });
 }
 
-function Feature$3() {
+function Feature$5() {
     if (!Settings.current.pronounsPageLinks)
         return;
     afterTextModule();
@@ -2303,7 +2361,7 @@ function Feature$3() {
 
 const PronounsPageLinks = {
     __proto__: null,
-    default: Feature$3
+    default: Feature$5
 };
 
 const { focused } = byKeys(['focused', 'item', 'labelContainer']);
@@ -2388,7 +2446,7 @@ function testForumChannel() {
     return channel.type === 15 ;
 }
 
-function Feature$2() {
+function Feature$4() {
     if (!Settings.current.allowForumSortByAuthor)
         return;
     patchSortAndView();
@@ -2396,12 +2454,12 @@ function Feature$2() {
 
 const SortForumsByAuthor = {
     __proto__: null,
-    default: Feature$2
+    default: Feature$4
 };
 
 const style = ".danho-expand-bio-again div[class*=descriptionClamp] {\n  display: block !important;\n  max-height: unset !important;\n}\n.danho-expand-bio-again button[class*=viewFullBio] {\n  display: none !important;\n}";
 
-function Feature$1() {
+function Feature$3() {
     if (!Settings.current.expandBioAgain)
         return;
     $('#app-mount').addClass('danho-expand-bio-again');
@@ -2409,11 +2467,11 @@ function Feature$1() {
 
 const ExpandBioAgain = {
     __proto__: null,
-    default: Feature$1,
+    default: Feature$3,
     styles: style
 };
 
-function Feature() {
+function Feature$2() {
     if (!Settings.current.wakeUp)
         return;
     const status = UserUtils.me.status;
@@ -2448,6 +2506,104 @@ function Feature() {
 
 const WakeUp = {
     __proto__: null,
+    default: Feature$2
+};
+
+const RelationshipActions = Finder.findBySourceStrings("cancelFriendRequest", "addRelationship", "removeRelationship");
+
+function PatchGuildContextMenu(callback) {
+    return BdApi.ContextMenu.patch('guild-context', callback);
+}
+
+function buildTextItem(id, label, action, props = {}) {
+    return {
+        type: 'text',
+        label,
+        action,
+        id,
+        onClose: props.onClose ?? (() => { }),
+        ...props
+    };
+}
+function buildTextItemElement(id, label, action, props = {}) {
+    return BdApi.ContextMenu.buildItem(buildTextItem(id, label, action, props));
+}
+
+function Feature$1() {
+    if (!Settings.current.autoCancelFriendRequests || Settings.current.folderNames.length === 0)
+        return;
+    ActionsEmitter.on('RELATIONSHIP_ADD', ({ relationship }) => {
+        const blockFolderNames = Settings.current.folderNames;
+        const blockFolders = SortedGuildStore.getGuildFolders().filter(folder => blockFolderNames.includes(folder.folderName));
+        if (blockFolders.length === 0)
+            return;
+        const cancelFriendRequest = () => {
+            RelationshipActions.cancelFriendRequest(relationship.user.id, 'friends');
+            const message = `Blocked friend request from ${relationship.user.username} (${relationship.user.id}) because they are in a blocked folder`;
+            log(message);
+            BdApi.UI.showToast(message, { type: 'success' });
+        };
+        const mutualGuildIds = UserProfileStore.getMutualGuilds(relationship.user.id)?.map(v => v.guild.id);
+        if (mutualGuildIds === undefined)
+            return cancelFriendRequest();
+        else if (mutualGuildIds.length === 0)
+            return;
+        const mutualGuildIdsInBlockFolders = mutualGuildIds.filter(guildId => blockFolders.some(folder => folder.guildIds.includes(guildId)));
+        if (mutualGuildIdsInBlockFolders.length === 0)
+            return;
+        else if (mutualGuildIdsInBlockFolders.length !== mutualGuildIds.length)
+            return;
+    });
+    PatchGuildContextMenu((menu, props) => {
+        if (!props.folderName)
+            return;
+        const isInBlockedFolder = Settings.current.folderNames.includes(props.folderName);
+        menu.props.children.push(buildTextItemElement('danho-block-friend-requests', isInBlockedFolder ? 'Unblock friend requests' : 'Block friend requests', () => {
+            Settings.update(cur => ({ ...cur, folderNames: isInBlockedFolder
+                    ? cur.folderNames.filter(v => v !== props.folderName)
+                    : [...cur.folderNames, props.folderName] }));
+        }, { color: 'danger' }));
+    });
+}
+
+const BlockFriendRequests = {
+    __proto__: null,
+    default: Feature$1
+};
+
+function Feature() {
+    const headerMemo = Finder.findBySourceStrings("hasCommunityInfoSubheader()", "ANIMATED_BANNER", "header");
+    if (!headerMemo)
+        return Logger.error("Failed to find header memo");
+    after(headerMemo, 'type', ({ args: [props] }) => {
+        let showGuildMembers = $('.danho-lib__header-members', false);
+        if (showGuildMembers.length >= 1)
+            return;
+        const guild = props.children.props.guild;
+        if (!guild)
+            return;
+        const members = GuildMemberStore.getMembers(guild.id);
+        const presenceState = PresenceStore.getState();
+        const nonOfflineMembers = members.filter(member => presenceState.statuses[member.userId] && presenceState.statuses[member.userId] !== 'offline');
+        const header = $(s => s.className('container', 'nav').and.ariaLabel(`${guild.name} (server)`).className('header', 'header'));
+        if (!header)
+            return;
+        header.appendComponent(React.createElement(Text, { variant: "heading-md/normal" },
+            nonOfflineMembers.length,
+            "/",
+            members.length), { className: 'danho-lib__header-members' });
+        setTimeout(() => {
+            showGuildMembers = $('danho-lib__header-members', false);
+            if (showGuildMembers.length > 1) {
+                showGuildMembers.pop();
+                showGuildMembers.forEach(e => e.unmount());
+            }
+        }, 100);
+    }, { name: 'GuildHeader' });
+}
+
+const ShowGuildMembersInHeader = {
+    __proto__: null,
     default: Feature
 };
 
@@ -2457,7 +2613,9 @@ const features = [
     PronounsPageLinks,
     SortForumsByAuthor,
     ExpandBioAgain,
-    WakeUp
+    WakeUp,
+    BlockFriendRequests,
+    ShowGuildMembersInHeader
 ];
 const Features = () => features.forEach(feature => feature.default());
 const styles = features.map(feature => 'styles' in feature ? feature.styles

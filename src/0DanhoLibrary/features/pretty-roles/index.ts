@@ -1,6 +1,7 @@
 import afterRoleContextMenu from '../../patches/after/roleContextMenu';
 import insteadRolesList from '../../patches/instead/RolesList';
 import afterRolesList from '../../patches/after/RolesList';
+import afterUserProfileModalAboutMe from '../../patches/after/UserProfileModalAboutMe';
 import { Settings } from '../../Settings/Settings';
 
 export { default as styles } from './pretty-roles.scss';
@@ -11,5 +12,6 @@ export default function Feature() {
 
   insteadRolesList();
   afterRolesList();
+  afterUserProfileModalAboutMe();
   afterRoleContextMenu();
 }

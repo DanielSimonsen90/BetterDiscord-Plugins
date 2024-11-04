@@ -805,8 +805,7 @@ class DQuery {
         return this;
     }
     appendComponent(component, wrapperProps) {
-        this.element.appendChild(createElement$1("<></>", wrapperProps));
-        const wrapper = this.element.lastChild;
+        const wrapper = this.element.appendChild(createElement$1("<></>", wrapperProps));
         BdApi.ReactDOM.render(component, wrapper);
         return this;
     }
@@ -849,6 +848,8 @@ function createElement$1(html, props = {}, target) {
         else
             props.class = 'bdd-wrapper';
         html = `<div ${Object.entries(props).reduce((result, [key, value]) => {
+            if (key === 'className')
+                return result;
             return result + `${key}="${value}" `;
         }, "")}></div>`;
     }
