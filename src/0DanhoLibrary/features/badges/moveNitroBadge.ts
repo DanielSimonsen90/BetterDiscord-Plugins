@@ -1,4 +1,4 @@
-import { BadgeTypes, UserProfileBadgeList } from "@discord/components";
+import { BadgeTypes, UserBadges } from "@discord/components";
 
 type Props = ReturnType<UserProfileBadgeList<true>>['props']
 

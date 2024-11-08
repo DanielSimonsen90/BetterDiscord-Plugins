@@ -43,7 +43,10 @@ const patch = <Module, Key extends keyof Module>(
 ) => {
     const original = object?.[method];
     if (!(original instanceof Function)) {
+        Logger.error(`Patch target ${original} is not a function`, object, method, options.name);
+        BdApi.UI.alert("Error", `Patch target ${original} is not a function`);
         throw TypeError(`patch target ${original} is not a function`);
+        return () => {};
     }
 
     const cancel = BdApi.Patcher[type](

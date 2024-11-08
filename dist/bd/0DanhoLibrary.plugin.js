@@ -257,6 +257,8 @@ const diumLogger = {
 const patch = (type, object, method, callback, options) => {
     const original = object?.[method];
     if (!(original instanceof Function)) {
+        error(`Patch target ${original} is not a function`, object, method, options.name);
+        BdApi.UI.alert("Error", `Patch target ${original} is not a function`);
         throw TypeError(`patch target ${original} is not a function`);
     }
     const cancel = BdApi.Patcher[type](getMeta().name, object, method, options.once ? (...args) => {
@@ -1842,8 +1844,8 @@ function buildPlugin(plugin) {
 
 const { useCallback, useContext, useDebugValue, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useReducer, useRef, useState, useId, useDeferredValue, useInsertionEffect, useSyncExternalStore, useTransition, createRef, createContext, createElement, createFactory, forwardRef, cloneElement, lazy, memo, isValidElement, Component, PureComponent, Fragment, Suspense, } = React;
 
-const UserProfileBadgeList = Finder.BDFDB_findByStrings(['QUEST_CONTENT_VIEWED', '"PRESS_BADGE"', 'PROFILE_USER_BADGES'], { defaultExport: false }).exports;
-const RenderedUserProfileBadgeList = UserProfileBadgeList;
+const UserBadges = Finder.BDFDB_findByStrings(['QUEST_CONTENT_VIEWED', '"PRESS_BADGE"', 'badgeClassName'], { defaultExport: false }).exports;
+const RenderedUserProfileBadgeList = UserBadges;
 var BadgeTypes;
 (function (BadgeTypes) {
     BadgeTypes["NITRO_ANY"] = "premium";
@@ -2220,6 +2222,8 @@ function afterRolesList() {
 
 function afterUserProfileModalAboutMe() {
     const UserProfileModalAboutMe = Finder.findBySourceStrings('look:"profile_modal"', { defaultExport: false });
+    if (!UserProfileModalAboutMe)
+        return console.error('UserProfileModalAboutMe not found');
     after(UserProfileModalAboutMe, 'Z', () => {
         prettyRoles$1();
     }, { name: 'UserProfileModalAboutMe' });

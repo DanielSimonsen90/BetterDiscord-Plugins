@@ -1,5 +1,5 @@
 import { createPatcherAfterCallback } from "@danho-lib/Patcher/CreatePatcherCallback";
-import { UserProfileBadgeList } from "@discord/components";
+import { UserBadges } from "@discord/components";
 
 import { Badges, Settings } from "src/0DanhoLibrary/Settings";
 import { CustomBadge, patchBadgeComponent, insertBadges } from "./CustomBadge";

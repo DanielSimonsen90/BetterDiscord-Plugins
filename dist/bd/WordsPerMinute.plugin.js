@@ -158,10 +158,13 @@ const abort = () => {
 const COLOR = "#3a71c1";
 const print = (output, ...data) => output(`%c[${getMeta().name}] %c${getMeta().version ? `(v${getMeta().version})` : ""}`, `color: ${COLOR}; font-weight: 700;`, "color: #666; font-size: .8em;", ...data);
 const log = (...data) => print(console.log, ...data);
+const error = (...data) => print(console.error, ...data);
 
 const patch = (type, object, method, callback, options) => {
     const original = object?.[method];
     if (!(original instanceof Function)) {
+        error(`Patch target ${original} is not a function`, object, method, options.name);
+        BdApi.UI.alert("Error", `Patch target ${original} is not a function`);
         throw TypeError(`patch target ${original} is not a function`);
     }
     const cancel = BdApi.Patcher[type](getMeta().name, object, method, options.once ? (...args) => {

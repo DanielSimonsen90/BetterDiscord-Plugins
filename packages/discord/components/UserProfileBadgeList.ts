@@ -1,6 +1,6 @@
 import Finder from "@danho-lib/dium/api/finder";
 
-export type UserProfileBadgeList<Rendered extends boolean> = Rendered extends true ?
+export type UserBadges<Rendered extends boolean> = Rendered extends true ?
   () => JSX.BD.Rendered<{
     'aria-label': 'User Badges';
     children: Array<JSX.BD.Rendered<{
@@ -34,12 +34,12 @@ export type UserProfileBadgeList<Rendered extends boolean> = Rendered extends tr
   }>;
 
 export type UserProfileBadgeListModule<Rendered extends boolean = false> = {
-  Z: UserProfileBadgeList<Rendered>;
+  Z: UserBadges<Rendered>;
 };
 
-export const UserProfileBadgeList: UserProfileBadgeListModule = Finder.BDFDB_findByStrings(['QUEST_CONTENT_VIEWED', '"PRESS_BADGE"', 'PROFILE_USER_BADGES'], { defaultExport: false }).exports;
-export const RenderedUserProfileBadgeList: UserProfileBadgeListModule<true> = UserProfileBadgeList as any as UserProfileBadgeListModule<true>;
-export default UserProfileBadgeList;
+export const UserBadges: UserProfileBadgeListModule = Finder.BDFDB_findByStrings(['QUEST_CONTENT_VIEWED', '"PRESS_BADGE"', 'badgeClassName'], { defaultExport: false }).exports;
+export const RenderedUserProfileBadgeList: UserProfileBadgeListModule<true> = UserBadges as any as UserProfileBadgeListModule<true>;
+export default UserBadges;
 
 type UserProfileBadge = {
   id: string;
