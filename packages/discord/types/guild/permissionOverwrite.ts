@@ -1,6 +1,6 @@
 export type PermissionOverwrite = {
-  allow: number;
-  deny: number;
+  allow: bigint;
+  deny: bigint;
   id: string;
   type: number;
 };

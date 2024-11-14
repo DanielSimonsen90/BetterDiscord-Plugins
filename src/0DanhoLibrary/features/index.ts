@@ -6,6 +6,7 @@ import * as ExpandBioAgain from './expand-bio-again';
 import * as WakeUp from './wake-up';
 import * as BlockFriendRequests from './auto-cancel-friend-requests';
 import * as ShowGuildMembersInHeader from './show-guild-members-in-header';
+import * as QuickAddMemberToDungeon from './quick-add-member-to-dungeon';
 
 const features = [
   PrettyRoles,
@@ -15,7 +16,8 @@ const features = [
   ExpandBioAgain,
   WakeUp,
   BlockFriendRequests,
-  ShowGuildMembersInHeader
+  ShowGuildMembersInHeader,
+  QuickAddMemberToDungeon,
 ];
 
 export const Features = () => features.forEach(feature => feature.default());

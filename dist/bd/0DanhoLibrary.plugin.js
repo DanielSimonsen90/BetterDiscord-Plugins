@@ -494,7 +494,7 @@ const findBySourceStrings = (...keywords) => {
                 && keywords.every(keyword => Object.keys(exports[k][k2])
                     .reduce((acc, k3) => exports[k][k2] === window ? acc : acc += exports[k][k2][k3]?.toString?.(), '')
                     .includes(keyword))));
-        const eIsClassAsE = 'constructor' in exports && keywords.every(keyword => exports.constructor.toString().includes(keyword));
+        const eIsClassAsE = typeof exports === 'object' && 'constructor' in exports && keywords.every(keyword => exports.constructor.toString().includes(keyword));
         const eIsObjectWithKeywords = keywords.every(keyword => Object.keys(exports).reduce((acc, k) => acc += k + exports[k]?.toString?.(), '').includes(keyword));
         const filter = eIsObject ? (moduleIsMethodOrFunctionComponent
             || eIsObjectAsE
@@ -1934,6 +1934,7 @@ const Settings = createSettings({
     autoCancelFriendRequests: true,
     folderNames: new Array(),
     showGuildMembersInHeader: true,
+    addToDungeon: true,
 });
 const titles = {
     prettyRoles: `Remove role circle, add more color to the roles`,
@@ -1949,7 +1950,8 @@ const titles = {
     isHidingOnPurpose: `User confirmed that they're hiding on purpose`,
     autoCancelFriendRequests: `Auto cancel friend requests on bigger servers`,
     folderNames: `Folder names that should block all incoming friend requests`,
-    showGuildMembersInHeader: `Show guild members in the header`
+    showGuildMembersInHeader: `Show guild members in the header`,
+    addToDungeon: `"Add to / Remove from Dungeon" context menu on users in the Deadly Ninja server`,
 };
 const Badges$1 = createSettings({
     developer: {
@@ -2232,7 +2234,7 @@ function afterUserProfileModalAboutMe() {
 const prettyRoles = "*[role=list][data-list-id*=roles] > div div:has([class*=roleRemoveButton][role=button]),\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveButton][role=button],\n*[role=list][data-list-id*=roles] > div [class*=roleFlowerStar],\n*[role=list][data-list-id*=roles] > div [class*=roleCircle] {\n  position: absolute;\n  inset: 0;\n  z-index: 1;\n}\n\n*[role=list][data-list-id*=roles] {\n  padding: 1rem;\n}\n*[role=list][data-list-id*=roles]:has(.danho-library__pretty-roles__group-role) div:has([class*=expandButton]) {\n  flex: 1 1 50%;\n}\n\n*[role=list][data-list-id*=roles] > div {\n  --role-color--default: rgb(86, 105, 118);\n  --role-color: var(--role-color--default);\n  --role-color-alpha: .125;\n  position: relative;\n  border: 1px solid rgb(var(--role-color, --role-color--default));\n  background-color: rgba(var(--role-color, --role-color--default), var(--role-color-alpha));\n  border-radius: 0.25rem;\n  height: 25px;\n  box-sizing: border-box;\n  justify-content: center;\n}\n*[role=list][data-list-id*=roles] > div [class*=roleCircle],\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveIcon] {\n  height: 100%;\n  width: 100%;\n}\n*[role=list][data-list-id*=roles] > div span[class*=roleCircle] {\n  background-color: unset !important;\n}\n*[role=list][data-list-id*=roles] > div svg[class*=roleRemoveIcon] {\n  display: none;\n}\n*[role=list][data-list-id*=roles] > div div:has(svg[class*=roleVerifiedIcon]) {\n  position: absolute;\n  top: -0.5rem;\n  left: -0.75rem;\n}\n*[role=list][data-list-id*=roles] > div:hover svg[class*=roleVerifiedIcon] {\n  display: inline-block !important;\n}\n\n.danho-library__pretty-roles__group-role {\n  flex: 1 1 100% !important;\n  margin-inline: -1rem;\n}";
 
 const isPrettyRolesEnabled = () => Settings.current.prettyRoles;
-function Feature$7() {
+function Feature$8() {
     if (!isPrettyRolesEnabled())
         return;
     insteadRolesList();
@@ -2243,7 +2245,7 @@ function Feature$7() {
 
 const PrettyRoles = {
     __proto__: null,
-    default: Feature$7,
+    default: Feature$8,
     isPrettyRolesEnabled,
     styles: prettyRoles
 };
@@ -2326,7 +2328,7 @@ function afterBadgeList() {
     }, { name: 'BadgeList' });
 }
 
-function Feature$6() {
+function Feature$7() {
     if (!Settings.current.badges)
         return;
     Badges$1.load();
@@ -2335,7 +2337,7 @@ function Feature$6() {
 
 const Badges = {
     __proto__: null,
-    default: Feature$6
+    default: Feature$7
 };
 
 const TextModule = Finder.findBySourceStrings('lineClamp', 'tabularNumbers', 'scaleFontToUserSetting');
@@ -2357,7 +2359,7 @@ function afterTextModule() {
     }, { name: 'TextModule--Pronouns' });
 }
 
-function Feature$5() {
+function Feature$6() {
     if (!Settings.current.pronounsPageLinks)
         return;
     afterTextModule();
@@ -2365,7 +2367,7 @@ function Feature$5() {
 
 const PronounsPageLinks = {
     __proto__: null,
-    default: Feature$5
+    default: Feature$6
 };
 
 const { focused } = byKeys(['focused', 'item', 'labelContainer']);
@@ -2450,7 +2452,7 @@ function testForumChannel() {
     return channel.type === 15 ;
 }
 
-function Feature$4() {
+function Feature$5() {
     if (!Settings.current.allowForumSortByAuthor)
         return;
     patchSortAndView();
@@ -2458,12 +2460,12 @@ function Feature$4() {
 
 const SortForumsByAuthor = {
     __proto__: null,
-    default: Feature$4
+    default: Feature$5
 };
 
 const style = ".danho-expand-bio-again div[class*=descriptionClamp] {\n  display: block !important;\n  max-height: unset !important;\n}\n.danho-expand-bio-again button[class*=viewFullBio] {\n  display: none !important;\n}";
 
-function Feature$3() {
+function Feature$4() {
     if (!Settings.current.expandBioAgain)
         return;
     $('#app-mount').addClass('danho-expand-bio-again');
@@ -2471,11 +2473,11 @@ function Feature$3() {
 
 const ExpandBioAgain = {
     __proto__: null,
-    default: Feature$3,
+    default: Feature$4,
     styles: style
 };
 
-function Feature$2() {
+function Feature$3() {
     if (!Settings.current.wakeUp)
         return;
     const status = UserUtils.me.status;
@@ -2510,7 +2512,7 @@ function Feature$2() {
 
 const WakeUp = {
     __proto__: null,
-    default: Feature$2
+    default: Feature$3
 };
 
 const RelationshipActions = Finder.findBySourceStrings("cancelFriendRequest", "addRelationship", "removeRelationship");
@@ -2533,7 +2535,7 @@ function buildTextItemElement(id, label, action, props = {}) {
     return BdApi.ContextMenu.buildItem(buildTextItem(id, label, action, props));
 }
 
-function Feature$1() {
+function Feature$2() {
     if (!Settings.current.autoCancelFriendRequests || Settings.current.folderNames.length === 0)
         return;
     ActionsEmitter.on('RELATIONSHIP_ADD', ({ relationship }) => {
@@ -2572,10 +2574,10 @@ function Feature$1() {
 
 const BlockFriendRequests = {
     __proto__: null,
-    default: Feature$1
+    default: Feature$2
 };
 
-function Feature() {
+function Feature$1() {
     const headerMemo = Finder.findBySourceStrings("hasCommunityInfoSubheader()", "ANIMATED_BANNER", "header");
     if (!headerMemo)
         return Logger.error("Failed to find header memo");
@@ -2608,6 +2610,65 @@ function Feature() {
 
 const ShowGuildMembersInHeader = {
     __proto__: null,
+    default: Feature$1
+};
+
+function PatchUserContextMenu(callback) {
+    return BdApi.ContextMenu.patch('user-context', callback);
+}
+
+const DEADLY_NINJA_ID = '405763731079823380';
+const DUNGEON_ID = '760145289956294716';
+function Feature() {
+    if (!Settings.current.addToDungeon)
+        return;
+    const permissionActions = Finder.findBySourceStrings("addRecipient", "clearPermissionOverwrite", "updatePermissionOverwrite", "backupId=493683");
+    const hasPermission = (channel, userId, accessPermissions) => {
+        if (!accessPermissions)
+            return false;
+        const userPermissions = channel.permissionOverwrites[userId]?.allow ?? 0n;
+        return BigInt(userPermissions & accessPermissions) === accessPermissions;
+    };
+    PatchUserContextMenu((menu, props) => {
+        const isGuildContextMenu = !!props.guildId;
+        if (!isGuildContextMenu)
+            return menu;
+        const guild = GuildStore.getGuild(props.guildId);
+        if (guild.id !== DEADLY_NINJA_ID)
+            return menu;
+        const memberIds = GuildMemberStore.getMemberIds(guild.id);
+        const dungeon = GuildChannelStore.getChannels(guild.id).VOCAL.find(stored => stored.channel.id === DUNGEON_ID)?.channel;
+        if (!dungeon)
+            return menu;
+        const accessPermission = dungeon.accessPermission ?? 1049600n;
+        if (typeof accessPermission !== "bigint") {
+            console.error("Invalid accessPermission value", accessPermission);
+            return menu;
+        }
+        const permittedUsers = memberIds
+            .map(UserStore.getUser)
+            .filter(Boolean)
+            .filter(user => hasPermission(dungeon, user.id, accessPermission));
+        if (!permittedUsers.length)
+            return menu;
+        const hasAccess = permittedUsers.some(user => user.id === props.user.id);
+        const allow = (userId) => ({
+            allow: accessPermission,
+            deny: 0n,
+            id: userId,
+            type: 1,
+        });
+        menu.props.children[0].props.children[5].props.children.push(buildTextItemElement(hasAccess ? "remove-from-dungeon" : "add-to-dungeon", hasAccess ? "Remove from Dungeon" : "Add to Dungeon", () => {
+            if (hasAccess)
+                permissionActions.clearPermissionOverwrite(DUNGEON_ID, props.user.id);
+            else
+                permissionActions.updatePermissionOverwrite(DUNGEON_ID, allow(props.user.id));
+        }));
+    });
+}
+
+const QuickAddMemberToDungeon = {
+    __proto__: null,
     default: Feature
 };
 
@@ -2619,7 +2680,8 @@ const features = [
     ExpandBioAgain,
     WakeUp,
     BlockFriendRequests,
-    ShowGuildMembersInHeader
+    ShowGuildMembersInHeader,
+    QuickAddMemberToDungeon,
 ];
 const Features = () => features.forEach(feature => feature.default());
 const styles = features.map(feature => 'styles' in feature ? feature.styles

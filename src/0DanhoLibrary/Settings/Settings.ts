@@ -24,6 +24,7 @@ export const Settings = createSettings({
   folderNames: new Array<string>(),
 
   showGuildMembersInHeader: true,
+  addToDungeon: true,
 });
 
 export const titles: Record<keyof typeof Settings.current, string> = {
@@ -45,7 +46,8 @@ export const titles: Record<keyof typeof Settings.current, string> = {
   autoCancelFriendRequests: `Auto cancel friend requests on bigger servers`,
   folderNames: `Folder names that should block all incoming friend requests`,
 
-  showGuildMembersInHeader: `Show guild members in the header`
+  showGuildMembersInHeader: `Show guild members in the header`,
+  addToDungeon: `"Add to / Remove from Dungeon" context menu on users in the Deadly Ninja server`,
 };
 
 export const Badges = createSettings({

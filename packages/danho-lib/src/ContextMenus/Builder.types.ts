@@ -35,3 +35,9 @@ export type RenderedMenuItem<id, label, action = (() => void)> = JSX.BD.Rendered
   id: id,
   label: label,
 }>;
+
+export type RenderedMenuItemChildren<id, label, children> = JSX.BD.Rendered<{
+  children: children,
+  id: id,
+  label: label,
+}>;

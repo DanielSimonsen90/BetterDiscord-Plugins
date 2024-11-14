@@ -63,7 +63,7 @@ export const findBySourceStrings = <TResult = any>(...keywords: FindBySourceStri
         )
       )
     );
-    const eIsClassAsE = 'constructor' in exports && keywords.every(keyword => exports.constructor.toString().includes(keyword));
+    const eIsClassAsE = typeof exports === 'object' && 'constructor' in exports && keywords.every(keyword => exports.constructor.toString().includes(keyword));
     const eIsObjectWithKeywords = keywords.every(keyword => Object.keys(exports).reduce((acc, k) => acc += k + exports[k]?.toString?.(), '').includes(keyword));
 
     const filter = eIsObject ? (

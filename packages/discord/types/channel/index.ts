@@ -1,4 +1,5 @@
 import { Snowflake } from "../base";
+import { PermissionOverwrite } from "../guild";
 import { ChannelTypes } from "./types";
 // import { Channel } from "@dium/modules";
 
@@ -25,12 +26,7 @@ export interface Channel {
   originChannelId?: Snowflake;
   ownerId?: Snowflake;
 
-  permissionOverwrites: Record<Snowflake, {
-    type: number;
-    id: Snowflake;
-    allow: Permissions;
-    deny: Permissions;
-  }>;
+  permissionOverwrites: Record<Snowflake, PermissionOverwrite>;
 
   position: number;
   lastMessageId: Snowflake;
