@@ -51,13 +51,13 @@
     display: none;
   }
 
-  div:has(svg[class*=roleVerifiedIcon]) {
+  div:has(svg[class*=linkIcon]) {
     position: absolute;
     top: -.5rem;
     left: -.75rem;
   }
 
-  &:hover svg[class*=roleVerifiedIcon] {
+  &:hover svg[class*=linkIcon] {
     display: inline-block !important;
   }
 }
