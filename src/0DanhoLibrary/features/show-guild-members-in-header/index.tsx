@@ -1,10 +1,13 @@
 import Finder from "@danho-lib/dium/api/finder";
 import { Logger } from "@danho-lib/dium/api/logger";
 import { $ } from "@danho-lib/DOM";
-import { Guild } from "@discord/types";
+
+import { Guild, GuildMember, Snowflake } from "@discord/types";
+
 import { Patcher } from "@dium";
 import { Text } from "@dium/components";
-import { GuildMemberStore, PresenceStore, UserStore } from "@stores";
+
+import { GuildMemberStore, GuildStore, PresenceStore } from "@stores";
 import { React } from '@react';
 
 type GuildHeader = {
@@ -26,17 +29,23 @@ export default function Feature() {
   const headerMemo = Finder.findBySourceStrings<GuildHeader>("hasCommunityInfoSubheader()", "ANIMATED_BANNER", "header");
   if (!headerMemo) return Logger.error("Failed to find header memo");
 
-  Patcher.after(headerMemo, 'type', ({ args: [props] }) => {
+  const MemberListItem = Finder.findBySourceStrings("ownerTooltipText", "onClickPremiumGuildIcon:", { defaultExport: false }) as Record<'Z', JSX.BD.FCF<{
+    guildId: Snowflake;
+  }>>;
+  if (!MemberListItem) return Logger.error("Failed to find MemberListItem");
+
+  Patcher.after(MemberListItem, 'Z', ({ args: [props] }) => {
     let showGuildMembers = $('.danho-lib__header-members', false);
     if (showGuildMembers.length >= 1) return;
 
-    const guild = props.children.props.guild;
+    const guild = GuildStore.getGuild(props.guildId);
     if (!guild) return;
     
     const members = GuildMemberStore.getMembers(guild.id);
     const presenceState = PresenceStore.getState();
     const nonOfflineMembers = members.filter(member => presenceState.statuses[member.userId] && presenceState.statuses[member.userId] !== 'offline');
-    const header = $(s => s.className('container', 'nav').and.ariaLabel(`${guild.name} (server)`).className('header', 'header'));
+    const header = $(s => s.className('container', 'nav').and.ariaLabel(`${guild.name} (server)`)
+      .className('header', 'header'));
     if (!header) return;
     
     header.appendComponent(
@@ -47,7 +56,7 @@ export default function Feature() {
     setTimeout(() => {
       showGuildMembers = $('danho-lib__header-members', false);
       if (showGuildMembers.length > 1) {
-        showGuildMembers.pop();
+        showGuildMembers.shift();
         showGuildMembers.forEach(e => e.unmount());
       }
     }, 100)
