@@ -1,5 +1,6 @@
 import { createProperty } from "@danho-lib/Utils";
 import { WPMCountId } from './Selectors';
+import { onSubmit } from "./events";
 
 export const typingStartTime = createProperty<number>(undefined);
 export const typingEndTime = createProperty<number>(undefined);
@@ -9,6 +10,18 @@ export const wpm = createProperty({
   afterSet: (value) => {
     const wpmCountElement = document.getElementById(WPMCountId);
     if (wpmCountElement) wpmCountElement.textContent = `${value} wpm`;
+  }
+});
+
+let observer = new MutationObserver(() => {
+  const placeholder = document.querySelector('[class*=textArea] > div > [class*=placeholder]');
+  if (placeholder) onSubmit();
+});
+export const activelyTyping = createProperty({
+  defaultValue: false,
+  afterSet: (value) => {
+    if (value) observer.disconnect();
+    else observer.observe(document.body, { childList: true, subtree: true });
   }
 });
 
