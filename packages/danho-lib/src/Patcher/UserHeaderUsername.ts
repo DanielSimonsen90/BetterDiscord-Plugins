@@ -33,7 +33,7 @@ type UserHeaderUsernameModule = {
   }>
 };
 
-export const UserHeaderUsernameModule: UserHeaderUsernameModule = Finder.bySource(["USER_PROFILE_PRONOUNS", ".pronouns", "FULL_SIZE", "discriminatorClass"], { resolve: false });
+export const UserHeaderUsernameModule: UserHeaderUsernameModule = Finder.bySource([".pronouns", "discriminatorClass"], { resolve: false })
 
 type UserHeaderUsernameProps = {
   nickanme: string;
