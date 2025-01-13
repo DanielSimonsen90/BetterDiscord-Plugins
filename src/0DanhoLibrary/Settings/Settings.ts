@@ -25,6 +25,11 @@ export const Settings = createSettings({
 
   showGuildMembersInHeader: true,
   addToDungeon: true,
+
+  lockChannels: true,
+  lockPassword: 'hello',
+  lockUnlockForMinutes: 5,
+  initialLockState: true,
 });
 
 export const titles: Record<keyof typeof Settings.current, string> = {
@@ -48,6 +53,11 @@ export const titles: Record<keyof typeof Settings.current, string> = {
 
   showGuildMembersInHeader: `Show guild members in the header`,
   addToDungeon: `"Add to / Remove from Dungeon" context menu on users in the Deadly Ninja server`,
+
+  lockChannels: `Lock channels with a password`,
+  lockPassword: `Password for locking channels`,
+  lockUnlockForMinutes: `Minutes to lock channels for`,
+  initialLockState: `Initial lock state for channels`,
 };
 
 export const Badges = createSettings({

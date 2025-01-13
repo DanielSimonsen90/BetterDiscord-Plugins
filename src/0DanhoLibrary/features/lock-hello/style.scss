@@ -1,0 +1,25 @@
+.bdd-wrapper:has(#secret-channel-login) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  position: absolute;
+  inset: 0;
+  background-color: var(--background-primary);
+  height: 100%;
+  width: 100%;
+  z-index: 9999;
+}
+
+#secret-channel-login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+div:has(> #secret-channel-login) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
