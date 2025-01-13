@@ -5,7 +5,7 @@ import { Badges, Settings } from "src/0DanhoLibrary/Settings";
 import { CustomBadge, patchBadgeComponent, insertBadges } from "./CustomBadge";
 import movePremiumBeforeBoost from "./moveNitroBadge";
 
-export default createPatcherAfterCallback<UserProfileBadgeList<true>>(({ result }) => {
+export default createPatcherAfterCallback<UserBadges<true>>(({ result }) => {
   if (!CustomBadge) return patchBadgeComponent(result);
   if (Settings.current.movePremiumBadge) movePremiumBeforeBoost(result.props);
 
