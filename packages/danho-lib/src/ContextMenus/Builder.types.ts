@@ -4,27 +4,37 @@ import type React from "react";
 export type ContextMenuItemProps = BaseContextMenuItemProps & {
   color?: string | 'default' | 'danger' | 'brand' | 'primary' | 'secondary' | 'success' | 'warning';
   label: string;
+
   icon?: React.FC<{ color?: string | 'currentColor' }>
   iconLeft?: boolean;
   /** @default md */
   iconLeftSize?: 'sm' | 'md' | 'lg';
+  
   hint?: string;
   subtext?: string;
   subtextLineClamp?: number;
+  
   hasSubmenu?: boolean;
+  checked?: boolean;
+
   disabled?: boolean;
   /** @default true */
   isFocused?: boolean;
+  
   menuItemProps?: React.HTMLProps<HTMLDivElement>;
+  iconProps?: Record<string, any>;
+  
   action: () => void;
   onClose: () => void;
   onFocus?: () => void;
+  
   className?: string;
   focusedClassName?: string;
   subMenuIconClassName?: string;
+  
   dontCloseOnActionIfHoldingShiftKey?: boolean;
   dontCloseOnAction?: boolean;
-  iconProps?: Record<string, any>;
+  
   sparkle?: boolean;
   /** @default true */
   extended?: boolean;

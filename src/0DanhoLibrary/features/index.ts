@@ -8,6 +8,7 @@ import * as BlockFriendRequests from './auto-cancel-friend-requests';
 import * as ShowGuildMembersInHeader from './show-guild-members-in-header';
 import * as QuickAddMemberToDungeon from './quick-add-member-to-dungeon';
 import * as LockHello from './lock-hello';
+import * as JoinVoiceWithCamera from './join-voice-with-camera';
 
 const features = [
   PrettyRoles,
@@ -20,6 +21,7 @@ const features = [
   ShowGuildMembersInHeader,
   QuickAddMemberToDungeon,
   LockHello,
+  JoinVoiceWithCamera
 ];
 
 export const Features = () => features.forEach(feature => feature.default());
