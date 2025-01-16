@@ -1,25 +1,13 @@
 import { buildTextItemElement } from "@danho-lib/ContextMenus/Builder";
 import PatchChannelContextMenu from "@danho-lib/ContextMenus/ChannelContextMenu";
 
+import joinWithCamera from "./joinWithCamera";
 import Finder from "@danho-lib/dium/api/finder";
+import { Logger, Patcher } from "@dium";
+import { Channel } from "@discord/types";
 import { $ } from "@danho-lib/DOM";
 
-import { Snowflake } from "@discord/types";
-import { Logger } from "@dium";
-import { MediaEngineStore } from "@stores";
-
 export default function Feature() {
-  const handleVoiceConnect = Finder.findBySourceStrings("handleVoiceConnect") as (
-    props: {
-      channelId?: Snowflake,
-      bypassChangeModal?: boolean,
-    }
-  ) => void;
-  const VoiceActions = Finder.findBySourceStrings("setVideoEnabled", "setVideoDevice") as {
-    setVideoEnabled: (enabled: boolean) => void;
-    setVideoDevice: (deviceId: string) => void;
-  };
-
   PatchChannelContextMenu((menu, props) => {
     const options = menu.props.children;
     const voiceOptions = options[3].props.children;
@@ -28,24 +16,30 @@ export default function Feature() {
       buildTextItemElement(
         "join-with-camera",
         "Join with Camera",
-        () => {
-          const preferredWebcamId = MediaEngineStore.getVideoDeviceId()
-          
-          handleVoiceConnect({ channelId: props.channel.id }); 
-
-          if (!preferredWebcamId) {
-            BdApi.UI.showToast("No preferred webcam set", { type: "error" });
-
-            // Turn on camera using UI button
-            $(s => s.className('button', 'button').ariaLabelContains("Turn On Camera"))?.element?.click();
-            return;
-          }
-          VoiceActions.setVideoDevice(preferredWebcamId);
-          VoiceActions.setVideoEnabled(true);
-        }
+        () => joinWithCamera(props.channel.id)
       ) as any
-    )
+    );
+  });
 
-    Logger.log('ChannelContextMenu', { menu, props });
+  PatchHomeVoiceChannel();
+}
+
+function PatchHomeVoiceChannel() {
+  const ChannelItem = Finder.findBySourceStrings("tutorialId", "visible", "shouldShow", { defaultExport: false }) as {
+    Z: JSX.BD.FC<any>;
+  }
+
+  const HOME_CHANNEL_ID = '1266581800428245094';
+
+  Patcher.after(ChannelItem, "Z", ({ args: [props] }) => {
+    const channel = props.children.props.children[1].props.channel as Channel;
+    if (!channel || channel.id !== HOME_CHANNEL_ID) return;
+
+    const { className, 'data-dnd-name': dndName } = props.children.props as Record<string, string>;
+    const node = $(s => s.className(className).and.data('dnd-name', dndName));
+    node?.on('dblclick', (e) => {
+      e.preventDefault();
+      joinWithCamera(HOME_CHANNEL_ID);
+    });
   });
 }
