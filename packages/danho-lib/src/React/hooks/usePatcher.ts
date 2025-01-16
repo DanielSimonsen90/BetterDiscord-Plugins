@@ -16,14 +16,17 @@ export function usePatcher<
     PatchType extends 'before' | 'instead' | 'after',
     Patch extends keyof Module, 
     Cb extends Callback<Module[Patch]>
->(module: Module, type: PatchType, patch: Patch, callback: Cb, config: PatcherConfig): UsePatcherReturn {
-    const { once } = config;
-    const repatchDeps = config.repatchDeps ?? [];
+>(module: Module, type: PatchType, patch: Patch, callback: Cb, config?: PatcherConfig): UsePatcherReturn {
+    const once = config?.once ?? false;
+    const repatchDeps = config?.repatchDeps ?? [];
 
     const [patched, setPatched] = useState(false);
     const [cancel, setCancel] = useState(() => () => {});
 
     useEffect(() => {
+        if (!module) return;
+        else if (!(patch in module)) return console.warn(`[usePatcher] Patch ${String(patch)} not found in module`, module);
+
         setCancel(Patcher[type as any](module, patch, callback, { once }));
         setPatched(true);
 

@@ -3,8 +3,9 @@ export * as Icons from 'danho-lib/src/React/components/Icons';
 
 export * from './Button';
 export * from './Form';
-export * from './SelectMenu';
+export * from './RoleMention';
 export * from './Scroller';
+export * from './SelectMenu';
 export * from './Tooltip';
 export * from './UserProfileBadgeList';
 export { default as Timestamp } from './Timestamp';

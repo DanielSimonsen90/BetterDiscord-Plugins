@@ -16,5 +16,12 @@ type Props = {
 }
 export default function TimestampComponent({ unix, format }: Props) {
   const node = getNode(unix, format);
-  return <Timestamp node={node} />;
+  try {
+    return <Timestamp node={node} />;
+  } catch (e) {
+    console.error(e);
+    return <p>{
+      new Date(unix * 1000).toLocaleString()
+    }</p>;
+  }
 }

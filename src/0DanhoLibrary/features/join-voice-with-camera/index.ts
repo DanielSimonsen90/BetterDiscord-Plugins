@@ -1,11 +1,13 @@
 import { buildTextItemElement } from "@danho-lib/ContextMenus/Builder";
 import PatchChannelContextMenu from "@danho-lib/ContextMenus/ChannelContextMenu";
+import Finder from "@danho-lib/dium/api/finder";
+import { $ } from "@danho-lib/DOM";
 
 import joinWithCamera from "./joinWithCamera";
-import Finder from "@danho-lib/dium/api/finder";
-import { Logger, Patcher } from "@dium";
+
+import { Patcher } from "@dium";
 import { Channel } from "@discord/types";
-import { $ } from "@danho-lib/DOM";
+
 
 export default function Feature() {
   PatchChannelContextMenu((menu, props) => {
@@ -32,6 +34,8 @@ function PatchHomeVoiceChannel() {
   const HOME_CHANNEL_ID = '1266581800428245094';
 
   Patcher.after(ChannelItem, "Z", ({ args: [props] }) => {
+    if (!props.children?.props?.children?.[1]?.props?.channel) return;
+    
     const channel = props.children.props.children[1].props.channel as Channel;
     if (!channel || channel.id !== HOME_CHANNEL_ID) return;
 

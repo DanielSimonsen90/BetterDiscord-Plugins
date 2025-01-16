@@ -27,7 +27,20 @@ export type Message = {
   nonce?: Snowflake;
 
   flags: MessageFlags;
-  attachments: any[];
+  attachments: Array<{
+    content_scan_version: number;
+    content_type: string;
+    filename: string;
+    height: number;
+    width: number;
+    id: Snowflake;
+    placeholder: string;
+    placeholder_version: number;
+    proxy_url: string;
+    size: number;
+    spoiler: boolean;
+    url: string;
+  }>;
   codedLinks: any[];
   components: any[];
   embeds: any[];
