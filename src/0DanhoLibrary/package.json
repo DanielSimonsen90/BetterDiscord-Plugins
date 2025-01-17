@@ -1,11 +1,11 @@
 {
-    "name": "0danholibrary",
-    "description": "Library for Danho's plugins",
-    "author": "danielsimonsen90",
-    "version": "1.7.0",
-    "development": true,
-    "dependencies": {
-        "dium": "*",
-        "danho-lib": "*"
-    }
+  "name": "0danholibrary",
+  "description": "Library for Danho's plugins",
+  "author": "danielsimonsen90",
+  "version": "1.7.0",
+  "development": true,
+  "dependencies": {
+    "dium": "*",
+    "danho-lib": "*"
+  }
 }

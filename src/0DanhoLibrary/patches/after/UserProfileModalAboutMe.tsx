@@ -1,6 +1,6 @@
 import Finder from "@danho-lib/dium/api/finder";
 import { Patcher } from "@dium";
-import prettifyRoles from "src/0DanhoLibrary/features/pretty-roles/patches/prettifyRoles";
+import prettifyRoles from "src/0DanhoLibrary/features/style-changes/pretty-roles/patches/prettifyRoles";
 
 
 

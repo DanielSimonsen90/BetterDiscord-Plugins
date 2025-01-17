@@ -3,7 +3,6 @@ export * as Icons from 'danho-lib/src/React/components/Icons';
 
 export * from './Button';
 export * from './Form';
-export * from './RoleMention';
 export * from './Scroller';
 export * from './SelectMenu';
 export * from './Tooltip';

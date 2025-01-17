@@ -1,6 +1,7 @@
 import { DiscordTimeFormat, Snowflake } from '@discord/types';
 import { React, useEffect, useState } from '../../React';
-import { Timestamp, RoleMention } from '@discord/components';
+import RoleMention from '../RoleMention';
+import { Timestamp } from '@discord/components';
 
 import ChannelMention from './ChannelMention';
 import EmojiMention from './EmojiMention';

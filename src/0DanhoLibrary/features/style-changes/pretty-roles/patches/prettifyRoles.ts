@@ -2,8 +2,8 @@ import { $ } from "@danho-lib/DOM";
 import { hexToRgb, RGB, rgbToHex } from "@danho-lib/Utils/Colors";
 
 import { DEFAULT_DISCORD_ROLE_COLOR } from "src/0DanhoLibrary/constants";
-import { PrettyRolesManager } from "src/0DanhoLibrary/features/pretty-roles/manager";
 import { Settings } from "src/0DanhoLibrary/Settings";
+import { PrettyRolesManager } from "../manager";
 
 export default function prettyRoles() {
   $(s => s.role('list', 'div').and.ariaLabelContains('Role'))?.children().forEach(el => {
