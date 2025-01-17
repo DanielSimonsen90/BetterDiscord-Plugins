@@ -1,24 +1,10 @@
-import * as Badges from "./badges";
-import * as SortForumsByAuthor from "./sort-forums-by-author";
-import * as WakeUp from './wake-up';
-import * as BlockFriendRequests from './auto-cancel-friend-requests';
-import * as ShowGuildMembersInHeader from './show-guild-members-in-header';
-import * as QuickAddMemberToDungeon from './quick-add-member-to-dungeon';
-import * as LockHello from './lock-hello';
-import * as JoinVoiceWithCamera from './join-voice-with-camera';
-
+import DiscordEnhancements from "./discord-enhancements";
+import DanhoEnhancements from "./danho-enhancements";
 import StyleChanges from './style-changes';
 
 const features = [
-  Badges,
-  SortForumsByAuthor,
-  WakeUp,
-  BlockFriendRequests,
-  ShowGuildMembersInHeader,
-  QuickAddMemberToDungeon,
-  LockHello,
-  JoinVoiceWithCamera,
-
+  ...DiscordEnhancements,
+  ...DanhoEnhancements,
   ...StyleChanges,
 ];
 

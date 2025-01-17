@@ -1,5 +1,5 @@
 /**
- * @name 0Danholibrary
+ * @name 0DanhoLibrary
  * @version 1.7.0
  * @author danielsimonsen90
  * @authorLink https://github.com/danielsimonsen90
@@ -51,7 +51,7 @@ WScript.Quit();
 @else @*/
 
 let meta = {
-  "name": "0danholibrary",
+  "name": "0danho-library",
   "description": "Library for Danho's plugins",
   "author": "danielsimonsen90",
   "version": "1.7.0",
@@ -1179,6 +1179,12 @@ const ChannelActions = byKeys(["selectChannel"]);
 
 const MessageActions = byKeys(["sendMessage"]);
 
+const InternalVoiceActions = Finder.findBySourceStrings("setVideoEnabled", "setVideoDevice");
+const handleVoiceConnect = Finder.findBySourceStrings("handleVoiceConnect");
+const VoiceActions = Object.assign({}, InternalVoiceActions, {
+    handleVoiceConnect
+});
+
 const DISPATCH_ACTIONS = Dispatcher$1._subscriptions;
 function find(action) {
     return Object.keys(DISPATCH_ACTIONS).filter(key => key.toLowerCase().includes(action.toLowerCase()));
@@ -1253,6 +1259,7 @@ const Actions = {
     GuildActions,
     MessageActions,
     UserNoteActions,
+    VoiceActions,
     find
 };
 
@@ -1853,6 +1860,164 @@ function buildPlugin(plugin) {
 
 const { useCallback, useContext, useDebugValue, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useReducer, useRef, useState, useId, useDeferredValue, useInsertionEffect, useSyncExternalStore, useTransition, createRef, createContext, createElement, createFactory, forwardRef, cloneElement, lazy, memo, isValidElement, Component, PureComponent, Fragment, Suspense, } = React;
 
+const UserBadges = Finder.BDFDB_findByStrings(['QUEST_CONTENT_VIEWED', '"PRESS_BADGE"', 'badgeClassName'], { defaultExport: false }).exports;
+const RenderedUserProfileBadgeList = UserBadges;
+var BadgeTypes;
+(function (BadgeTypes) {
+    BadgeTypes["NITRO_ANY"] = "premium";
+    BadgeTypes["NITRO_BRONZE"] = "premium_tenure_1_month";
+    BadgeTypes["NITRO_SILVER"] = "premium_tenure_3_month";
+    BadgeTypes["NITRO_GOLD"] = "premium_tenure_6_month";
+    BadgeTypes["NITRO_PLATINUM"] = "premium_tenure_12_month";
+    BadgeTypes["NITRO_DIAMOND"] = "premium_tenure_24_month";
+    BadgeTypes["NITRO_EMERALD"] = "premium_tenure_36_month";
+    BadgeTypes["NITRO_RUBY"] = "premium_tenure_60_month";
+    BadgeTypes["NITRO_FIRE"] = "premium_tenure_72_month";
+    BadgeTypes["GUILD_BOOST_ANY"] = "booster";
+    BadgeTypes["GUILD_BOOST_1"] = "guild_booster_lvl1";
+    BadgeTypes["GUILD_BOOST_2"] = "guild_booster_lvl2";
+    BadgeTypes["GUILD_BOOST_3"] = "guild_booster_lvl3";
+    BadgeTypes["GUILD_BOOST_4"] = "guild_booster_lvl4";
+    BadgeTypes["GUILD_BOOST_5"] = "guild_booster_lvl5";
+    BadgeTypes["GUILD_BOOST_6"] = "guild_booster_lvl6";
+    BadgeTypes["GUILD_BOOST_7"] = "guild_booster_lvl7";
+    BadgeTypes["GUILD_BOOST_8"] = "guild_booster_lvl8";
+    BadgeTypes["GUILD_BOOST_9"] = "guild_booster_lvl9";
+    BadgeTypes["EARLY_SUPPORTER"] = "early_supporter";
+    BadgeTypes["HYPESQUAD_EVENTS"] = "hypesquad";
+    BadgeTypes["HYPESQUAD_BRAVERY"] = "hypesquad_house_1";
+    BadgeTypes["HYPESQUAD_BRILLIANCE"] = "hypesquad_house_2";
+    BadgeTypes["HYPESQUAD_BALANCE"] = "hypesquad_house_3";
+    BadgeTypes["ACTIVE_DEVELOPER"] = "active_developer";
+    BadgeTypes["SLASH_COMMANDS"] = "bot_commands";
+    BadgeTypes["EARLY_VERIFIED_DEVELOPER"] = "verified_developer";
+    BadgeTypes["BUG_HUNTER_GREEN"] = "bug_hunter_level_1";
+    BadgeTypes["BUG_HUNTER_GOLD"] = "bug_hunter_level_2";
+    BadgeTypes["STAFF"] = "staff";
+    BadgeTypes["MODERATOR"] = "certified_moderator";
+    BadgeTypes["PARTNER"] = "partner";
+    BadgeTypes["AUTO_MOD"] = "automod";
+    BadgeTypes["QUEST"] = "quest_completed";
+    BadgeTypes["LEGACY_USERNAME"] = "legacy_username";
+})(BadgeTypes || (BadgeTypes = {}));
+var BadgeIconIds;
+(function (BadgeIconIds) {
+    BadgeIconIds["active_developer"] = "6bdc42827a38498929a4920da12695d9";
+    BadgeIconIds["automod"] = "f2459b691ac7453ed6039bbcfaccbfcd";
+    BadgeIconIds["bot_commands"] = "6f9e37f9029ff57aef81db857890005e";
+    BadgeIconIds["bug_hunter_lvl1"] = "2717692c7dca7289b35297368a940dd0";
+    BadgeIconIds["bug_hunter_lvl2"] = "848f79194d4be5ff5f81505cbd0ce1e6";
+    BadgeIconIds["certified_moderator"] = "fee1624003e2fee35cb398e125dc479b";
+    BadgeIconIds["guild_booster_lvl1"] = "51040c70d4f20a921ad6674ff86fc95c";
+    BadgeIconIds["guild_booster_lvl2"] = "0e4080d1d333bc7ad29ef6528b6f2fb7";
+    BadgeIconIds["guild_booster_lvl3"] = "72bed924410c304dbe3d00a6e593ff59";
+    BadgeIconIds["guild_booster_lvl4"] = "df199d2050d3ed4ebf84d64ae83989f8";
+    BadgeIconIds["guild_booster_lvl5"] = "996b3e870e8a22ce519b3a50e6bdd52f";
+    BadgeIconIds["guild_booster_lvl6"] = "991c9f39ee33d7537d9f408c3e53141e";
+    BadgeIconIds["guild_booster_lvl7"] = "cb3ae83c15e970e8f3d410bc62cb8b99";
+    BadgeIconIds["guild_booster_lvl8"] = "7142225d31238f6387d9f09efaa02759";
+    BadgeIconIds["guild_booster_lvl9"] = "ec92202290b48d0879b7413d2dde3bab";
+    BadgeIconIds["hypesquad"] = "bf01d1073931f921909045f3a39fd264";
+    BadgeIconIds["hypesquad_house_1"] = "8a88d63823d8a71cd5e390baa45efa02";
+    BadgeIconIds["hypesquad_house_2"] = "011940fd013da3f7fb926e4a1cd2e618";
+    BadgeIconIds["hypesquad_house_3"] = "3aa41de486fa12454c3761e8e223442e";
+    BadgeIconIds["legacy_username"] = "6de6d34650760ba5551a79732e98ed60";
+    BadgeIconIds["partner"] = "3f9748e53446a137a052f3454e2de41e";
+    BadgeIconIds["premium"] = "2ba85e8026a8614b640c2837bcdfe21b";
+    BadgeIconIds["premium_early_supporter"] = "7060786766c9c840eb3019e725d2b358";
+    BadgeIconIds["quest_completed"] = "7d9ae358c8c5e118768335dbe68b4fb8";
+    BadgeIconIds["staff"] = "5e74e9b61934fc1f67c65515d1f7e60d";
+    BadgeIconIds["verified_developer"] = "6df5892e0f35b051f8b61eace34f4967";
+})(BadgeIconIds || (BadgeIconIds = {}));
+
+const USER_TAGS = {
+    DANHO: 'danhosaur'
+};
+const DEFAULT_DISCORD_ROLE_COLOR = `153, 170, 181`;
+
+const StyleChanges$1 = {
+    styleChanges: true,
+    movePremiumBadge: true,
+    prettyRoles: true,
+    defaultRoleColor: DEFAULT_DISCORD_ROLE_COLOR,
+    groupRoles: true,
+    pronounsPageLinks: true,
+    expandBioAgain: true,
+    nonObnoxiousProfileEffects: true,
+};
+const DiscordEnhancements$1 = {
+    discordEnhancements: true,
+    autoCancelFriendRequests: true,
+    folderNames: new Array(),
+    joinVoiceWithCamera: true,
+    showGuildMembersInHeader: true,
+    allowForumSortByAuthor: true,
+};
+const DanhoEnhancements$1 = {
+    danhoEnhancements: true,
+    badges: true,
+    useClientCustomBadges: true,
+    wakeUp: true,
+    isHidingOnPurpose: false,
+    addToDungeon: true,
+    lockChannels: true,
+    lockPassword: 'hello',
+    lockUnlockForMinutes: 5,
+    initialLockState: true,
+};
+const Settings = createSettings({
+    ...StyleChanges$1,
+    ...DiscordEnhancements$1,
+    ...DanhoEnhancements$1,
+});
+const StyleChangesTitles = {
+    styleChanges: `Style changes`,
+    movePremiumBadge: `Move the Nitro badge before the Server Boosting badge again`,
+    prettyRoles: `Remove role circle, add more color to the roles`,
+    defaultRoleColor: `Default role color`,
+    groupRoles: `Widen roles that include "roles" in their name to make them stand out as a group`,
+    pronounsPageLinks: `Turn pronouns.page links into clickable links`,
+    expandBioAgain: `Expand the bio section again by default`,
+    nonObnoxiousProfileEffects: `Lower the opacity of profile effects (on hover) so they aren't as obnoxious`,
+};
+const DiscordEnhancementsTitles = {
+    discordEnhancements: `Discord enhancements`,
+    autoCancelFriendRequests: `Auto cancel friend requests on bigger servers`,
+    folderNames: `Folder names that should block all incoming friend requests`,
+    joinVoiceWithCamera: `Join voice channels with camera on`,
+    showGuildMembersInHeader: `Show guild members in the header`,
+    allowForumSortByAuthor: `Allow sorting forum posts by author`,
+};
+const DanhoEnhancementsTitles = {
+    danhoEnhancements: `Danho enhancements`,
+    badges: `User badge modifications`,
+    useClientCustomBadges: `Use your own custom badges`,
+    wakeUp: `Reminds you that you're hiding. Why are you hiding?`,
+    isHidingOnPurpose: `User confirmed that they're hiding on purpose`,
+    addToDungeon: `"Add to / Remove from Dungeon" context menu on users in the Deadly Ninja server`,
+    lockChannels: `Lock channels with a password`,
+    lockPassword: `Password for locking channels`,
+    lockUnlockForMinutes: `Minutes to lock channels for`,
+    initialLockState: `Initial lock state for channels`,
+};
+const titles = {
+    ...StyleChangesTitles,
+    ...DiscordEnhancementsTitles,
+    ...DanhoEnhancementsTitles,
+};
+const Badges$1 = createSettings({
+    developer: {
+        name: 'Plugin Developer',
+        iconUrl: 'https://i.imgur.com/f5MDiAd.png',
+        userTags: [USER_TAGS.DANHO],
+        position: {
+            before: BadgeTypes.ACTIVE_DEVELOPER,
+            default: 0
+        },
+        size: '14px'
+    },
+});
+
 function Setting({ setting, settings, set, titles, ...props }) {
     const { beforeChange, onChange, formatValue, type } = props;
     const [v, _setV] = useState(formatValue ? formatValue(settings[setting]) : settings[setting]);
@@ -1959,138 +2124,6 @@ function TabBar({ tabs, ...props }) {
 
 const renderChildren = (children, props = {}) => children.map(child => React.createElement(child.tagName, Array.from(child.attributes).reduce((acc, { name, value }) => ({ ...acc, [name]: value }), props), child.outerHTML.match(/</g).length > 2 ? renderChildren(Array.from(child.children)) : child.textContent));
 
-const UserBadges = Finder.BDFDB_findByStrings(['QUEST_CONTENT_VIEWED', '"PRESS_BADGE"', 'badgeClassName'], { defaultExport: false }).exports;
-const RenderedUserProfileBadgeList = UserBadges;
-var BadgeTypes;
-(function (BadgeTypes) {
-    BadgeTypes["NITRO_ANY"] = "premium";
-    BadgeTypes["NITRO_BRONZE"] = "premium_tenure_1_month";
-    BadgeTypes["NITRO_SILVER"] = "premium_tenure_3_month";
-    BadgeTypes["NITRO_GOLD"] = "premium_tenure_6_month";
-    BadgeTypes["NITRO_PLATINUM"] = "premium_tenure_12_month";
-    BadgeTypes["NITRO_DIAMOND"] = "premium_tenure_24_month";
-    BadgeTypes["NITRO_EMERALD"] = "premium_tenure_36_month";
-    BadgeTypes["NITRO_RUBY"] = "premium_tenure_60_month";
-    BadgeTypes["NITRO_FIRE"] = "premium_tenure_72_month";
-    BadgeTypes["GUILD_BOOST_ANY"] = "booster";
-    BadgeTypes["GUILD_BOOST_1"] = "guild_booster_lvl1";
-    BadgeTypes["GUILD_BOOST_2"] = "guild_booster_lvl2";
-    BadgeTypes["GUILD_BOOST_3"] = "guild_booster_lvl3";
-    BadgeTypes["GUILD_BOOST_4"] = "guild_booster_lvl4";
-    BadgeTypes["GUILD_BOOST_5"] = "guild_booster_lvl5";
-    BadgeTypes["GUILD_BOOST_6"] = "guild_booster_lvl6";
-    BadgeTypes["GUILD_BOOST_7"] = "guild_booster_lvl7";
-    BadgeTypes["GUILD_BOOST_8"] = "guild_booster_lvl8";
-    BadgeTypes["GUILD_BOOST_9"] = "guild_booster_lvl9";
-    BadgeTypes["EARLY_SUPPORTER"] = "early_supporter";
-    BadgeTypes["HYPESQUAD_EVENTS"] = "hypesquad";
-    BadgeTypes["HYPESQUAD_BRAVERY"] = "hypesquad_house_1";
-    BadgeTypes["HYPESQUAD_BRILLIANCE"] = "hypesquad_house_2";
-    BadgeTypes["HYPESQUAD_BALANCE"] = "hypesquad_house_3";
-    BadgeTypes["ACTIVE_DEVELOPER"] = "active_developer";
-    BadgeTypes["SLASH_COMMANDS"] = "bot_commands";
-    BadgeTypes["EARLY_VERIFIED_DEVELOPER"] = "verified_developer";
-    BadgeTypes["BUG_HUNTER_GREEN"] = "bug_hunter_level_1";
-    BadgeTypes["BUG_HUNTER_GOLD"] = "bug_hunter_level_2";
-    BadgeTypes["STAFF"] = "staff";
-    BadgeTypes["MODERATOR"] = "certified_moderator";
-    BadgeTypes["PARTNER"] = "partner";
-    BadgeTypes["AUTO_MOD"] = "automod";
-    BadgeTypes["QUEST"] = "quest_completed";
-    BadgeTypes["LEGACY_USERNAME"] = "legacy_username";
-})(BadgeTypes || (BadgeTypes = {}));
-var BadgeIconIds;
-(function (BadgeIconIds) {
-    BadgeIconIds["active_developer"] = "6bdc42827a38498929a4920da12695d9";
-    BadgeIconIds["automod"] = "f2459b691ac7453ed6039bbcfaccbfcd";
-    BadgeIconIds["bot_commands"] = "6f9e37f9029ff57aef81db857890005e";
-    BadgeIconIds["bug_hunter_lvl1"] = "2717692c7dca7289b35297368a940dd0";
-    BadgeIconIds["bug_hunter_lvl2"] = "848f79194d4be5ff5f81505cbd0ce1e6";
-    BadgeIconIds["certified_moderator"] = "fee1624003e2fee35cb398e125dc479b";
-    BadgeIconIds["guild_booster_lvl1"] = "51040c70d4f20a921ad6674ff86fc95c";
-    BadgeIconIds["guild_booster_lvl2"] = "0e4080d1d333bc7ad29ef6528b6f2fb7";
-    BadgeIconIds["guild_booster_lvl3"] = "72bed924410c304dbe3d00a6e593ff59";
-    BadgeIconIds["guild_booster_lvl4"] = "df199d2050d3ed4ebf84d64ae83989f8";
-    BadgeIconIds["guild_booster_lvl5"] = "996b3e870e8a22ce519b3a50e6bdd52f";
-    BadgeIconIds["guild_booster_lvl6"] = "991c9f39ee33d7537d9f408c3e53141e";
-    BadgeIconIds["guild_booster_lvl7"] = "cb3ae83c15e970e8f3d410bc62cb8b99";
-    BadgeIconIds["guild_booster_lvl8"] = "7142225d31238f6387d9f09efaa02759";
-    BadgeIconIds["guild_booster_lvl9"] = "ec92202290b48d0879b7413d2dde3bab";
-    BadgeIconIds["hypesquad"] = "bf01d1073931f921909045f3a39fd264";
-    BadgeIconIds["hypesquad_house_1"] = "8a88d63823d8a71cd5e390baa45efa02";
-    BadgeIconIds["hypesquad_house_2"] = "011940fd013da3f7fb926e4a1cd2e618";
-    BadgeIconIds["hypesquad_house_3"] = "3aa41de486fa12454c3761e8e223442e";
-    BadgeIconIds["legacy_username"] = "6de6d34650760ba5551a79732e98ed60";
-    BadgeIconIds["partner"] = "3f9748e53446a137a052f3454e2de41e";
-    BadgeIconIds["premium"] = "2ba85e8026a8614b640c2837bcdfe21b";
-    BadgeIconIds["premium_early_supporter"] = "7060786766c9c840eb3019e725d2b358";
-    BadgeIconIds["quest_completed"] = "7d9ae358c8c5e118768335dbe68b4fb8";
-    BadgeIconIds["staff"] = "5e74e9b61934fc1f67c65515d1f7e60d";
-    BadgeIconIds["verified_developer"] = "6df5892e0f35b051f8b61eace34f4967";
-})(BadgeIconIds || (BadgeIconIds = {}));
-
-const USER_TAGS = {
-    DANHO: 'danhosaur'
-};
-const DEFAULT_DISCORD_ROLE_COLOR = `153, 170, 181`;
-
-const Settings = createSettings({
-    prettyRoles: true,
-    defaultRoleColor: DEFAULT_DISCORD_ROLE_COLOR,
-    groupRoles: true,
-    badges: true,
-    movePremiumBadge: true,
-    useClientCustomBadges: true,
-    pronounsPageLinks: true,
-    allowForumSortByAuthor: true,
-    expandBioAgain: true,
-    wakeUp: true,
-    isHidingOnPurpose: false,
-    autoCancelFriendRequests: true,
-    folderNames: new Array(),
-    showGuildMembersInHeader: true,
-    addToDungeon: true,
-    lockChannels: true,
-    lockPassword: 'hello',
-    lockUnlockForMinutes: 5,
-    initialLockState: true,
-    nonObnoxiousProfileEffects: true,
-});
-const titles = {
-    prettyRoles: `Remove role circle, add more color to the roles`,
-    defaultRoleColor: `Default role color`,
-    groupRoles: `Widen roles that include "roles" in their name to make them stand out as a group`,
-    badges: `User badge modifications`,
-    movePremiumBadge: `Move the Nitro badge before the Server Boosting badge again`,
-    useClientCustomBadges: `Use your own custom badges`,
-    pronounsPageLinks: `Turn pronouns.page links into clickable links`,
-    allowForumSortByAuthor: `Allow sorting forum posts by author`,
-    expandBioAgain: `Expand the bio section again by default`,
-    wakeUp: `Reminds you that you're hiding. Why are you hiding?`,
-    isHidingOnPurpose: `User confirmed that they're hiding on purpose`,
-    autoCancelFriendRequests: `Auto cancel friend requests on bigger servers`,
-    folderNames: `Folder names that should block all incoming friend requests`,
-    showGuildMembersInHeader: `Show guild members in the header`,
-    addToDungeon: `"Add to / Remove from Dungeon" context menu on users in the Deadly Ninja server`,
-    lockChannels: `Lock channels with a password`,
-    lockPassword: `Password for locking channels`,
-    lockUnlockForMinutes: `Minutes to lock channels for`,
-    initialLockState: `Initial lock state for channels`,
-    nonObnoxiousProfileEffects: `Lower the opacity of profile effects (on hover) so they aren't as obnoxious`,
-};
-const Badges$1 = createSettings({
-    developer: {
-        name: 'Plugin Developer',
-        iconUrl: 'https://i.imgur.com/f5MDiAd.png',
-        userTags: [USER_TAGS.DANHO],
-        position: {
-            before: BadgeTypes.ACTIVE_DEVELOPER,
-            default: 0
-        },
-        size: '14px'
-    },
-});
-
 function CreateSettingsGroup(callback) {
     return function SettingsGroup(props) {
         return callback(React, props, Setting, FormElements);
@@ -2120,283 +2153,251 @@ function hexToRgb(hex) {
     return [r, g, b];
 }
 
-const PrettyRolesSettings = CreateSettingsGroup((React, props, Setting, { FormSection }) => (React.createElement(FormSection, { title: "PrettyRoles Settings" },
-    React.createElement(Setting, { setting: "defaultRoleColor", type: "color", ...props, formatValue: rgbString => "#" + rgbToHex(rgbString.split(',').map(Number)), beforeChange: hex => hexToRgb(hex).join(',') }),
-    React.createElement(Setting, { setting: "groupRoles", ...props }))));
-
-const BadgesSettings = CreateSettingsGroup((React, props, Setting, { FormSection }) => {
-    return (React.createElement(FormSection, { title: "Badges Settings" },
-        React.createElement(Setting, { setting: "movePremiumBadge", ...props }),
-        React.createElement(Setting, { setting: "useClientCustomBadges", ...props })));
+const StyleSettings = CreateSettingsGroup((React, props, Setting, { FormSection, FormDivider }) => {
+    const PrettyRoles = () => (React.createElement(FormSection, { title: "PrettyRoles Settings" },
+        React.createElement(Setting, { setting: "prettyRoles", ...props }),
+        React.createElement(Setting, { setting: "defaultRoleColor", type: "color", ...props, formatValue: rgbString => "#" + rgbToHex(rgbString.split(',').map(Number)), beforeChange: hex => hexToRgb(hex).join(',') }),
+        React.createElement(Setting, { setting: "groupRoles", ...props })));
+    const BadgeModification = () => (React.createElement(FormSection, { title: "Badge Modification" },
+        React.createElement(Setting, { setting: "movePremiumBadge", ...props })));
+    const PronounsPageLinks = () => (React.createElement(FormSection, { title: "Pronouns Page Links" },
+        React.createElement(Setting, { setting: "pronounsPageLinks", ...props })));
+    const ExpandBioAgain = () => (React.createElement(FormSection, { title: "Expand Bio Again" },
+        React.createElement(Setting, { setting: "expandBioAgain", ...props })));
+    const NonObnoxiousProfileEffects = () => (React.createElement(FormSection, { title: "Non-Obnoxious Profile Effects" },
+        React.createElement(Setting, { setting: "nonObnoxiousProfileEffects", ...props })));
+    return (React.createElement(React.Fragment, null,
+        React.createElement(BadgeModification, null),
+        React.createElement(FormDivider, null),
+        React.createElement(ExpandBioAgain, null),
+        React.createElement(FormDivider, null),
+        React.createElement(NonObnoxiousProfileEffects, null),
+        React.createElement(FormDivider, null),
+        React.createElement(PrettyRoles, null),
+        React.createElement(FormDivider, null),
+        React.createElement(PronounsPageLinks, null)));
 });
 
 const AutoCancelFriendRequestSettings = CreateSettingsGroup((React, props, Setting, { FormSection }) => {
     const folderNames = SortedGuildStore.getGuildFolders().map(folder => folder.folderName);
-    return (React.createElement(FormSection, { title: "Auto Cancel Friend Request Settings" },
-        React.createElement(Setting, { setting: "folderNames", type: 'select', selectValues: folderNames, ...props })));
+    return (React.createElement(Setting, { setting: "folderNames", type: 'select', selectValues: folderNames, ...props }));
+});
+
+const DiscordChangesSettings = CreateSettingsGroup((React, props, Setting, { FormSection, FormDivider }) => {
+    const AutoCancelFriendRequests = () => (React.createElement(FormSection, { title: "Auto Cancel Friend Requests" },
+        React.createElement(Setting, { setting: "autoCancelFriendRequests", ...props }),
+        props.settings.autoCancelFriendRequests ? React.createElement(AutoCancelFriendRequestSettings, { ...props }) : null));
+    const JoinVoiceWithCamera = () => (React.createElement(FormSection, { title: "Join Voice With Camera" },
+        React.createElement(Setting, { setting: "joinVoiceWithCamera", ...props })));
+    const ShowGuildMembersInHeader = () => (React.createElement(FormSection, { title: "Show Guild Members In Header" },
+        React.createElement(Setting, { setting: "showGuildMembersInHeader", ...props })));
+    const AllowForumSortByAuthor = () => (React.createElement(FormSection, { title: "Allow Forum Sort By Author" },
+        React.createElement(Setting, { setting: "allowForumSortByAuthor", ...props })));
+    return (React.createElement(React.Fragment, null,
+        React.createElement(AutoCancelFriendRequests, null),
+        React.createElement(FormDivider, null),
+        React.createElement(JoinVoiceWithCamera, null),
+        React.createElement(FormDivider, null),
+        React.createElement(ShowGuildMembersInHeader, null),
+        React.createElement(FormDivider, null),
+        React.createElement(AllowForumSortByAuthor, null)));
+});
+
+const BadgesSettings = CreateSettingsGroup((React, props, Setting, { FormSection }) => {
+    return (React.createElement(Setting, { setting: "useClientCustomBadges", ...props }));
 });
 
 const LockSettings = CreateSettingsGroup((React, props, Setting, { FormSection }) => {
-    return (React.createElement(FormSection, { title: "Lock Settings" },
+    return (React.createElement(React.Fragment, null,
         React.createElement(Setting, { setting: "lockPassword", ...props }),
         React.createElement(Setting, { setting: "lockUnlockForMinutes", ...props, type: "number" }),
         React.createElement(Setting, { setting: "initialLockState", ...props })));
 });
 
+const DanhoChangesSettings = CreateSettingsGroup((React, props, Setting, { FormSection, FormDivider }) => {
+    const Badges = () => (React.createElement(FormSection, { title: "Badges" },
+        React.createElement(Setting, { setting: "badges", ...props }),
+        props.settings.badges ? React.createElement(BadgesSettings, { ...props }) : null));
+    const LockChannels = () => (React.createElement(FormSection, { title: "Lock Channels" },
+        React.createElement(Setting, { setting: "lockChannels", ...props }),
+        props.settings.lockChannels ? React.createElement(LockSettings, { ...props }) : null));
+    const QuickAddMemberToDungeon = () => (React.createElement(FormSection, { title: "Add To Dungeon" },
+        React.createElement(Setting, { setting: "addToDungeon", ...props })));
+    const WakeUp = () => (React.createElement(FormSection, { title: "Wake Up" },
+        React.createElement(Setting, { setting: "wakeUp", ...props })));
+    return (React.createElement(React.Fragment, null,
+        React.createElement(Badges, null),
+        React.createElement(FormDivider, null),
+        React.createElement(LockChannels, null),
+        React.createElement(FormDivider, null),
+        React.createElement(QuickAddMemberToDungeon, null),
+        React.createElement(FormDivider, null),
+        React.createElement(WakeUp, null)));
+});
+
 function SettingsPanel() {
     const [settings, set] = Settings.useState();
-    const tabs = Settings.useSelector(({ prettyRoles, badges, autoCancelFriendRequests }) => [
-        ['prettyRoles', prettyRoles ? 'Pretty Roles' : null],
-        ['badges', badges ? 'Badges' : null],
-        ['autoCancelFriendRequests', autoCancelFriendRequests ? 'Auto Cancel Friend Requests' : null],
-        ['lockChannels', settings.lockChannels ? 'Lock Channels' : null],
+    const tabs = Settings.useSelector(({ styleChanges, discordEnhancements, danhoEnhancements }) => [
+        ['styleChanges', styleChanges ? 'Style Changes' : null],
+        ['discordEnhancements', discordEnhancements ? 'Discord Enhancements' : null],
+        ['danhoEnhancements', danhoEnhancements ? 'Danho Enhancements' : null],
     ]);
     const settingProps = { settings, set, titles };
     return (React.createElement("div", { className: "danho-plugin-settings" },
         React.createElement(FormSection, { title: "Danho Library Features" },
-            React.createElement(Setting, { setting: "prettyRoles", ...settingProps }),
-            React.createElement(Setting, { setting: "badges", ...settingProps }),
-            React.createElement(Setting, { setting: "pronounsPageLinks", ...settingProps }),
-            React.createElement(Setting, { setting: "allowForumSortByAuthor", ...settingProps }),
-            React.createElement(Setting, { setting: "expandBioAgain", ...settingProps }),
-            React.createElement(Setting, { setting: "wakeUp", ...settingProps }),
-            React.createElement(Setting, { setting: "autoCancelFriendRequests", ...settingProps }),
-            React.createElement(Setting, { setting: "showGuildMembersInHeader", ...settingProps }),
-            React.createElement(Setting, { setting: "addToDungeon", ...settingProps }),
-            React.createElement(Setting, { setting: "lockChannels", ...settingProps }),
-            React.createElement(Setting, { setting: "nonObnoxiousProfileEffects", ...settingProps })),
-        tabs.some(([_, value]) => value) && (React.createElement(TabBar, { tabs: tabs, prettyRoles: React.createElement(PrettyRolesSettings, { ...settingProps }), badges: React.createElement(BadgesSettings, { ...settingProps }), autoCancelFriendRequests: React.createElement(AutoCancelFriendRequestSettings, { ...settingProps }), lockChannels: React.createElement(LockSettings, { ...settingProps }) }))));
+            React.createElement(Setting, { setting: "styleChanges", ...settingProps }),
+            React.createElement(Setting, { setting: "discordEnhancements", ...settingProps }),
+            React.createElement(Setting, { setting: "danhoEnhancements", ...settingProps })),
+        tabs.some(([_, value]) => value) && (React.createElement(TabBar, { tabs: tabs, styleChanges: React.createElement(StyleSettings, { ...settingProps }), discordEnhancements: React.createElement(DiscordChangesSettings, { ...settingProps }), danhoEnhancements: React.createElement(DanhoChangesSettings, { ...settingProps }) }))));
 }
 
-const PrettyRolesManager = new class PrettyRolesManager {
-    getRole(roleId) {
-        return this.context?.roles.find(r => r.id === roleId) ?? GuildUtils.getGuildRoleWithoutGuildId(roleId);
-    }
-    removeRole() {
-        if (!this.role)
-            return;
-        this.context?.onRemoveRole(this.role);
-    }
-    canRemoveRole() {
-        if (!this.role)
-            return false;
-        return this.context.guild.ownerId === this.context.currentUser.id
-            || (this.context.canManageRoles && this.context.highestRole.id !== this.role.id);
-    }
-};
+const RelationshipActions = Finder.findBySourceStrings("cancelFriendRequest", "addRelationship", "removeRelationship");
 
-function modifyRoleContextMenu(result) {
-    if (!PrettyRolesManager.context)
-        return result;
-    const roleId = result.props.children.props.id.split('-').pop();
-    const role = PrettyRolesManager.getRole(roleId);
-    PrettyRolesManager.role = role;
-    if (!PrettyRolesManager.canRemoveRole())
-        return result;
-    result.props.children = [
-        React.createElement(MenuGroup, null,
-            React.createElement(MenuItem, { color: 'danger', id: "pretty-roles__remove-role", label: `Remove role`, action: () => {
-                    PrettyRolesManager.removeRole();
-                } })),
-        result.props.children,
-    ];
-    return result;
+function PatchGuildContextMenu(callback) {
+    return BdApi.ContextMenu.patch('guild-context', callback);
 }
 
-function afterRoleContextMenu() {
-    contextMenu('dev-context', result => {
-        return modifyRoleContextMenu(result);
-    });
-}
-
-const RolesListModule = demangle({
-    RolesList: bySource$1('onAddRole')
-}, null, true);
-
-const createPatcherCallback = (callback) => callback;
-const createPatcherAfterCallback = (callback) => callback;
-const createPatcherCallback$1 = createPatcherCallback;
-
-const setManagerContext = createPatcherCallback$1(({ args, original }) => {
-    const result = original(...args);
-    PrettyRolesManager.context = result.props;
-    return result;
-});
-
-function insteadRolesList() {
-    instead(RolesListModule, 'RolesList', (data) => {
-        return setManagerContext(data);
-    });
-}
-
-function prettyRoles$1() {
-    $(s => s.role('list', 'div').and.ariaLabelContains('Role'))?.children().forEach(el => {
-        const roleId = el.attr('data-list-item-id')?.split('_').pop();
-        if (!roleId)
-            return;
-        const role = PrettyRolesManager.getRole(roleId);
-        if (!role)
-            return;
-        el.setStyleProperty('--role-color', hexToRgb(role.colorString
-            ?? rgbToHex(DEFAULT_DISCORD_ROLE_COLOR.split(',').map(Number))).join(','));
-        if (Settings.current.groupRoles) {
-            const isGroupRole = role.name.toLowerCase().includes('roles');
-            if (isGroupRole)
-                el.addClass('danho-library__pretty-roles__group-role');
-        }
-    });
-}
-
-function afterRolesList() {
-    after(RolesListModule, 'RolesList', () => {
-        prettyRoles$1();
-    });
-}
-
-function afterUserProfileModalAboutMe() {
-    const UserProfileModalAboutMe = Finder.findBySourceStrings('look:"profile_modal"', { defaultExport: false });
-    if (!UserProfileModalAboutMe)
-        return console.error('UserProfileModalAboutMe not found');
-    after(UserProfileModalAboutMe, 'Z', () => {
-        prettyRoles$1();
-    }, { name: 'UserProfileModalAboutMe' });
-}
-
-const prettyRoles = "*[role=list][data-list-id*=roles] > div div:has([class*=roleRemoveButton][role=button]),\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveButton][role=button],\n*[role=list][data-list-id*=roles] > div [class*=roleFlowerStar],\n*[role=list][data-list-id*=roles] > div [class*=roleCircle] {\n  position: absolute;\n  inset: 0;\n  z-index: 1;\n}\n\n*[role=list][data-list-id*=roles] {\n  padding: 1rem;\n}\n*[role=list][data-list-id*=roles]:has(.danho-library__pretty-roles__group-role) div:has([class*=expandButton]) {\n  flex: 1 1 50%;\n}\n\n*[role=list][data-list-id*=roles] > div {\n  --role-color--default: rgb(86, 105, 118);\n  --role-color: var(--role-color--default);\n  --role-color-alpha: .125;\n  position: relative;\n  border: 1px solid rgb(var(--role-color, --role-color--default));\n  background-color: rgba(var(--role-color, --role-color--default), var(--role-color-alpha));\n  border-radius: 0.25rem;\n  height: 25px;\n  box-sizing: border-box;\n  justify-content: center;\n}\n*[role=list][data-list-id*=roles] > div [class*=roleCircle],\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveIcon] {\n  height: 100%;\n  width: 100%;\n}\n*[role=list][data-list-id*=roles] > div span[class*=roleCircle] {\n  background-color: unset !important;\n}\n*[role=list][data-list-id*=roles] > div svg[class*=roleRemoveIcon] {\n  display: none;\n}\n*[role=list][data-list-id*=roles] > div div:has(svg[class*=linkIcon]) {\n  position: absolute;\n  top: -0.5rem;\n  left: -0.75rem;\n}\n*[role=list][data-list-id*=roles] > div:hover svg[class*=linkIcon] {\n  display: inline-block !important;\n}\n\n.danho-library__pretty-roles__group-role {\n  flex: 1 1 100% !important;\n  margin-inline: -1rem;\n}";
-
-const isPrettyRolesEnabled = () => Settings.current.prettyRoles;
-function Feature$b() {
-    if (!isPrettyRolesEnabled())
-        return;
-    insteadRolesList();
-    afterRolesList();
-    afterUserProfileModalAboutMe();
-    afterRoleContextMenu();
-}
-
-const PrettyRoles = {
-    __proto__: null,
-    default: Feature$b,
-    isPrettyRolesEnabled,
-    styles: prettyRoles
-};
-
-let CustomBadge = null;
-function patchBadgeComponent(result) {
-    if (!result.props.children[0])
-        return;
-    const TooltipWrapper = result.props.children[0].type;
-    const TooltipContent = result.props.children[0].props.children.type;
-    CustomBadge = ({ name, iconUrl, style, href }) => {
-        if (!name || !iconUrl)
-            return null;
-        const InnerBadge = ({ href }) => href ? (React.createElement("a", { href: href, target: "_blank", rel: "noreferrer noopener" },
-            React.createElement(InnerBadge, null))) : (React.createElement("img", { src: iconUrl, alt: name, className: result.props.children[0].props.children.props.children[0].props.className, style: style }));
-        return (React.createElement(TooltipWrapper, { text: name },
-            React.createElement(TooltipContent, null,
-                React.createElement(InnerBadge, { href: href }))));
+function buildTextItem(id, label, action, props = {}) {
+    return {
+        type: 'text',
+        label,
+        action,
+        id,
+        onClose: props.onClose ?? (() => { }),
+        ...props
     };
 }
-function insertBadges(result, badgeData) {
-    if (!result)
+function buildTextItemElement(id, label, action, props = {}) {
+    return BdApi.ContextMenu.buildItem(buildTextItem(id, label, action, props));
+}
+
+function Feature$b() {
+    if (!Settings.current.autoCancelFriendRequests || Settings.current.folderNames.length === 0)
         return;
-    if (result.props.children.some(badge => badge.type === CustomBadge))
+    ActionsEmitter.on('RELATIONSHIP_ADD', ({ relationship }) => {
+        const blockFolderNames = Settings.current.folderNames;
+        const blockFolders = SortedGuildStore.getGuildFolders().filter(folder => blockFolderNames.includes(folder.folderName));
+        if (blockFolders.length === 0)
+            return;
+        const cancelFriendRequest = () => {
+            RelationshipActions.cancelFriendRequest(relationship.user.id, 'friends');
+            const message = `Blocked friend request from ${relationship.user.username} (${relationship.user.id}) because they are in a blocked folder`;
+            log(message);
+            BdApi.UI.showToast(message, { type: 'success' });
+        };
+        const mutualGuildIds = UserProfileStore.getMutualGuilds(relationship.user.id)?.map(v => v.guild.id);
+        if (mutualGuildIds === undefined)
+            return cancelFriendRequest();
+        else if (mutualGuildIds.length === 0)
+            return;
+        const mutualGuildIdsInBlockFolders = mutualGuildIds.filter(guildId => blockFolders.some(folder => folder.guildIds.includes(guildId)));
+        if (mutualGuildIdsInBlockFolders.length === 0)
+            return;
+        else if (mutualGuildIdsInBlockFolders.length !== mutualGuildIds.length)
+            return;
+    });
+    PatchGuildContextMenu((menu, props) => {
+        if (!props.folderName)
+            return;
+        const isInBlockedFolder = Settings.current.folderNames.includes(props.folderName);
+        menu.props.children.push(buildTextItemElement('danho-block-friend-requests', isInBlockedFolder ? 'Unblock friend requests' : 'Block friend requests', () => {
+            Settings.update(cur => ({ ...cur, folderNames: isInBlockedFolder
+                    ? cur.folderNames.filter(v => v !== props.folderName)
+                    : [...cur.folderNames, props.folderName] }));
+        }, { color: 'danger' }));
+    });
+}
+
+const AutoCancelFriendRequests = {
+    __proto__: null,
+    default: Feature$b
+};
+
+function PatchChannelContextMenu(callback) {
+    return BdApi.ContextMenu.patch('channel-context', callback);
+}
+
+function joinWithCamera(channelId) {
+    const preferredWebcamId = MediaEngineStore.getVideoDeviceId();
+    VoiceActions.handleVoiceConnect({ channelId });
+    if (!preferredWebcamId) {
+        BdApi.UI.showToast("No preferred webcam set", { type: "error" });
+        $(s => s.className('button', 'button').ariaLabelContains("Turn On Camera"))?.element?.click();
         return;
-    const badges = result.props.children;
-    const newBadges = badgeData
-        .filter(({ userTags }) => userTags ? checkUserId(userTags) : true)
-        .sort((a, b) => getPosition(a.position) - getPosition(b.position))
-        .map(({ size, position, ...props }) => [position, React.createElement(CustomBadge, { key: props.name, ...props, style: { width: size, height: size } })]);
-    for (const [position, badge] of newBadges) {
-        badges.splice(getPosition(position), 0, badge);
     }
-    function checkUserId(userTags) {
-        const userTag = $(s => s.role('dialog').className('userTag'))?.value.toString()
-            ?? $(s => s.className('userProfileOuter').className('userTag'))?.value.toString()
-            ?? $(s => s.className('accountProfileCard').className('usernameInnerRow'), false)
-                .map(dq => dq.children(undefined, true).value.toString())[1];
-        return userTags.includes(userTag);
-    }
-    function getPosition(position) {
-        if (position === undefined || position === 'end')
-            return badges.length;
-        if (position === 'start')
-            return 0;
-        if (typeof position === 'number')
-            return position;
-        const [startIndex, endIndex] = [position.before, position.after].map((badgeType, i) => badgeType
-            ? badges.findIndex(badge => badge.key.includes(badgeType.toLowerCase())) + i
-            : -1);
-        return startIndex === -1 && endIndex === -1 ? badges.length
-            : startIndex === -1 ? endIndex
-                : endIndex === -1 ? startIndex
-                    : position.default === undefined ? Math.max(startIndex, endIndex) - Math.min(startIndex, endIndex)
-                        : position.default ?? badges.length;
-    }
+    VoiceActions.setVideoDevice(preferredWebcamId);
+    VoiceActions.setVideoEnabled(true);
 }
 
-function movePremiumBeforeBoost(props) {
-    const nitroBadge = props.children.find(badge => badge.props.children.props.href?.includes(BadgeTypes.NITRO_ANY));
-    const boosterBadgePos = props.children.findIndex(badge => badge.props.text.toLowerCase().includes('boost'));
-    if (!nitroBadge || boosterBadgePos === -1)
-        return props;
-    props.children.splice(props.children.indexOf(nitroBadge), 1);
-    props.children.splice(boosterBadgePos - 1, 0, nitroBadge);
-    return props;
-}
-
-const modifyBadges = createPatcherAfterCallback(({ result }) => {
-    if (!CustomBadge)
-        return patchBadgeComponent(result);
-    if (Settings.current.movePremiumBadge)
-        movePremiumBeforeBoost(result.props);
-    insertBadges(result, Object.values(Badges$1.current));
-});
-
-function afterBadgeList() {
-    after(RenderedUserProfileBadgeList, 'Z', data => {
-        modifyBadges(data);
-    }, { name: 'BadgeList' });
-}
-
-function Feature$a() {
-    if (!Settings.current.badges)
+async function Feature$a() {
+    if (!Settings.current.joinVoiceWithCamera)
         return;
-    Badges$1.load();
-    afterBadgeList();
+    PatchChannelContextMenu((menu, props) => {
+        const options = menu.props.children;
+        const voiceOptions = options[3].props.children;
+        voiceOptions.unshift(buildTextItemElement("join-with-camera", "Join with Camera", () => joinWithCamera(props.channel.id)));
+    });
+    PatchHomeVoiceChannel();
+}
+function PatchHomeVoiceChannel() {
+    const ChannelItem = Finder.findBySourceStrings("tutorialId", "visible", "shouldShow", { defaultExport: false });
+    const HOME_CHANNEL_ID = '1266581800428245094';
+    after(ChannelItem, "Z", ({ args: [props] }) => {
+        if (!props.children?.props?.children?.[1]?.props?.channel)
+            return;
+        const channel = props.children.props.children[1].props.channel;
+        if (!channel || channel.id !== HOME_CHANNEL_ID)
+            return;
+        const { className, 'data-dnd-name': dndName } = props.children.props;
+        const node = $(s => s.className(className).and.data('dnd-name', dndName));
+        node?.on('dblclick', (e) => {
+            e.preventDefault();
+            joinWithCamera(HOME_CHANNEL_ID);
+        });
+    });
 }
 
-const Badges = {
+const JoinVoiceWithCamera = {
     __proto__: null,
     default: Feature$a
 };
 
-const TextModule = Finder.findBySourceStrings('lineClamp', 'tabularNumbers', 'scaleFontToUserSetting');
-
-const transformTextIntoLinks = createPatcherAfterCallback(({ args: [props], result }) => {
-    const { className, children: text } = props;
-    if (!className || !className.includes('pronounsText'))
-        return;
-    const regex = text.match(/\w{2}\.pronouns\.page\/@(\w+)/);
-    if (!regex)
-        return;
-    const [matched] = regex;
-    result.props.children = (React.createElement("a", { href: `https://${matched}`, target: "_blank", rel: "noreferrer noopener" }, matched));
-});
-
-function afterTextModule() {
-    after(TextModule, 'render', (data) => {
-        transformTextIntoLinks(data);
-    }, { name: 'TextModule--Pronouns' });
-}
-
 function Feature$9() {
-    if (!Settings.current.pronounsPageLinks)
-        return;
-    afterTextModule();
+    const headerMemo = Finder.findBySourceStrings("hasCommunityInfoSubheader()", "ANIMATED_BANNER", "header");
+    if (!headerMemo)
+        return Logger.error("Failed to find header memo");
+    const MemberListItem = Finder.findBySourceStrings("ownerTooltipText", "onClickPremiumGuildIcon:", { defaultExport: false });
+    if (!MemberListItem)
+        return Logger.error("Failed to find MemberListItem");
+    after(MemberListItem, 'Z', ({ args: [props] }) => {
+        let showGuildMembers = $('.danho-lib__header-members', false);
+        if (showGuildMembers.length >= 1)
+            return;
+        const guild = GuildStore.getGuild(props.guildId);
+        if (!guild)
+            return;
+        const members = GuildMemberStore.getMembers(guild.id);
+        const presenceState = PresenceStore.getState();
+        const nonOfflineMembers = members.filter(member => presenceState.statuses[member.userId] && presenceState.statuses[member.userId] !== 'offline');
+        const header = $(s => s.className('container', 'nav').and.ariaLabel(`${guild.name} (server)`)
+            .className('header', 'header'));
+        if (!header)
+            return;
+        header.appendComponent(React.createElement(Text, { variant: "heading-md/normal" },
+            nonOfflineMembers.length,
+            "/",
+            members.length), { className: 'danho-lib__header-members' });
+        setTimeout(() => {
+            showGuildMembers = $('danho-lib__header-members', false);
+            if (showGuildMembers.length > 1) {
+                showGuildMembers.shift();
+                showGuildMembers.forEach(e => e.unmount());
+            }
+        }, 100);
+    }, { name: 'GuildHeader' });
 }
 
-const PronounsPageLinks = {
+const ShowGuildMembersInHeader = {
     __proto__: null,
     default: Feature$9
 };
@@ -2494,158 +2495,185 @@ const SortForumsByAuthor = {
     default: Feature$8
 };
 
-const style$2 = ".danho-expand-bio-again div[class*=descriptionClamp] {\n  display: block !important;\n  max-height: unset !important;\n}\n.danho-expand-bio-again button[class*=viewFullBio] {\n  display: none !important;\n}";
+const DiscordEnhancements = [
+    AutoCancelFriendRequests,
+    JoinVoiceWithCamera,
+    ShowGuildMembersInHeader,
+    SortForumsByAuthor,
+];
 
-function Feature$7() {
-    if (!Settings.current.expandBioAgain)
+const createPatcherCallback = (callback) => callback;
+const createPatcherAfterCallback = (callback) => callback;
+const createPatcherCallback$1 = createPatcherCallback;
+
+let CustomBadge = null;
+function patchBadgeComponent(result) {
+    if (!result.props.children[0])
         return;
-    $('#app-mount').addClass('danho-expand-bio-again');
+    const TooltipWrapper = result.props.children[0].type;
+    const TooltipContent = result.props.children[0].props.children.type;
+    CustomBadge = ({ name, iconUrl, style, href }) => {
+        if (!name || !iconUrl)
+            return null;
+        const InnerBadge = ({ href }) => href ? (React.createElement("a", { href: href, target: "_blank", rel: "noreferrer noopener" },
+            React.createElement(InnerBadge, null))) : (React.createElement("img", { src: iconUrl, alt: name, className: result.props.children[0].props.children.props.children[0].props.className, style: style }));
+        return (React.createElement(TooltipWrapper, { text: name },
+            React.createElement(TooltipContent, null,
+                React.createElement(InnerBadge, { href: href }))));
+    };
 }
-
-const ExpandBioAgain = {
-    __proto__: null,
-    default: Feature$7,
-    styles: style$2
-};
-
-function Feature$6() {
-    if (!Settings.current.wakeUp)
+function insertBadges(result, badgeData) {
+    if (!result)
         return;
-    const status = UserUtils.me.status;
-    const isHiding = status === 'invisible';
-    const { isHidingOnPurpose } = Settings.current;
-    if (isHidingOnPurpose && !isHiding)
-        Settings.update({ isHidingOnPurpose: false });
-    else if (!isHidingOnPurpose && isHiding) {
-        const close = BdApi.UI.showNotice(`You appear to be hiding... Is this on purpose?`, {
-            buttons: [
-                {
-                    label: 'Yes, stay hidden',
-                    onClick: () => {
-                        Settings.update({ isHidingOnPurpose: true });
-                        close();
-                    }
-                },
-                {
-                    label: 'No, get me back online',
-                    onClick: () => {
-                        const dispatch = Finder.findBySourceStrings('getStatus()', 'updateAsync("status",');
-                        if (!dispatch)
-                            return BdApi.UI.showToast('Could not find dispatcher', { type: 'error' });
-                        dispatch('online', status, undefined, undefined);
-                        close();
-                    }
-                },
-            ]
-        });
+    if (result.props.children.some(badge => badge.type === CustomBadge))
+        return;
+    const badges = result.props.children;
+    const newBadges = badgeData
+        .filter(({ userTags }) => userTags ? checkUserId(userTags) : true)
+        .sort((a, b) => getPosition(a.position) - getPosition(b.position))
+        .map(({ size, position, ...props }) => [position, React.createElement(CustomBadge, { key: props.name, ...props, style: { width: size, height: size } })]);
+    for (const [position, badge] of newBadges) {
+        badges.splice(getPosition(position), 0, badge);
+    }
+    function checkUserId(userTags) {
+        const userTag = $(s => s.role('dialog').className('userTag'))?.value.toString()
+            ?? $(s => s.className('userProfileOuter').className('userTag'))?.value.toString()
+            ?? $(s => s.className('accountProfileCard').className('usernameInnerRow'), false)
+                .map(dq => dq.children(undefined, true).value.toString())[1];
+        return userTags.includes(userTag);
+    }
+    function getPosition(position) {
+        if (position === undefined || position === 'end')
+            return badges.length;
+        if (position === 'start')
+            return 0;
+        if (typeof position === 'number')
+            return position;
+        const [startIndex, endIndex] = [position.before, position.after].map((badgeType, i) => badgeType
+            ? badges.findIndex(badge => badge.key.includes(badgeType.toLowerCase())) + i
+            : -1);
+        return startIndex === -1 && endIndex === -1 ? badges.length
+            : startIndex === -1 ? endIndex
+                : endIndex === -1 ? startIndex
+                    : position.default === undefined ? Math.max(startIndex, endIndex) - Math.min(startIndex, endIndex)
+                        : position.default ?? badges.length;
     }
 }
 
-const WakeUp = {
-    __proto__: null,
-    default: Feature$6
-};
-
-const RelationshipActions = Finder.findBySourceStrings("cancelFriendRequest", "addRelationship", "removeRelationship");
-
-function PatchGuildContextMenu(callback) {
-    return BdApi.ContextMenu.patch('guild-context', callback);
+function movePremiumBeforeBoost(props) {
+    const nitroBadge = props.children.find(badge => badge.props.children.props.href?.includes(BadgeTypes.NITRO_ANY));
+    const boosterBadgePos = props.children.findIndex(badge => badge.props.text.toLowerCase().includes('boost'));
+    if (!nitroBadge || boosterBadgePos === -1)
+        return props;
+    props.children.splice(props.children.indexOf(nitroBadge), 1);
+    props.children.splice(boosterBadgePos - 1, 0, nitroBadge);
+    return props;
 }
 
-function buildTextItem(id, label, action, props = {}) {
-    return {
-        type: 'text',
-        label,
-        action,
-        id,
-        onClose: props.onClose ?? (() => { }),
-        ...props
-    };
-}
-function buildTextItemElement(id, label, action, props = {}) {
-    return BdApi.ContextMenu.buildItem(buildTextItem(id, label, action, props));
+const modifyBadges = createPatcherAfterCallback(({ result }) => {
+    if (!CustomBadge)
+        return patchBadgeComponent(result);
+    if (Settings.current.movePremiumBadge)
+        movePremiumBeforeBoost(result.props);
+    insertBadges(result, Object.values(Badges$1.current));
+});
+
+function afterBadgeList() {
+    after(RenderedUserProfileBadgeList, 'Z', data => {
+        modifyBadges(data);
+    }, { name: 'BadgeList' });
 }
 
-function Feature$5() {
-    if (!Settings.current.autoCancelFriendRequests || Settings.current.folderNames.length === 0)
+function Feature$7() {
+    if (!Settings.current.badges)
         return;
-    ActionsEmitter.on('RELATIONSHIP_ADD', ({ relationship }) => {
-        const blockFolderNames = Settings.current.folderNames;
-        const blockFolders = SortedGuildStore.getGuildFolders().filter(folder => blockFolderNames.includes(folder.folderName));
-        if (blockFolders.length === 0)
-            return;
-        const cancelFriendRequest = () => {
-            RelationshipActions.cancelFriendRequest(relationship.user.id, 'friends');
-            const message = `Blocked friend request from ${relationship.user.username} (${relationship.user.id}) because they are in a blocked folder`;
-            log(message);
-            BdApi.UI.showToast(message, { type: 'success' });
-        };
-        const mutualGuildIds = UserProfileStore.getMutualGuilds(relationship.user.id)?.map(v => v.guild.id);
-        if (mutualGuildIds === undefined)
-            return cancelFriendRequest();
-        else if (mutualGuildIds.length === 0)
-            return;
-        const mutualGuildIdsInBlockFolders = mutualGuildIds.filter(guildId => blockFolders.some(folder => folder.guildIds.includes(guildId)));
-        if (mutualGuildIdsInBlockFolders.length === 0)
-            return;
-        else if (mutualGuildIdsInBlockFolders.length !== mutualGuildIds.length)
-            return;
-    });
-    PatchGuildContextMenu((menu, props) => {
-        if (!props.folderName)
-            return;
-        const isInBlockedFolder = Settings.current.folderNames.includes(props.folderName);
-        menu.props.children.push(buildTextItemElement('danho-block-friend-requests', isInBlockedFolder ? 'Unblock friend requests' : 'Block friend requests', () => {
-            Settings.update(cur => ({ ...cur, folderNames: isInBlockedFolder
-                    ? cur.folderNames.filter(v => v !== props.folderName)
-                    : [...cur.folderNames, props.folderName] }));
-        }, { color: 'danger' }));
-    });
+    Badges$1.load();
+    afterBadgeList();
 }
 
-const BlockFriendRequests = {
+const Badges = {
     __proto__: null,
-    default: Feature$5
+    default: Feature$7
 };
 
-function Feature$4() {
-    const headerMemo = Finder.findBySourceStrings("hasCommunityInfoSubheader()", "ANIMATED_BANNER", "header");
-    if (!headerMemo)
-        return Logger.error("Failed to find header memo");
-    const MemberListItem = Finder.findBySourceStrings("ownerTooltipText", "onClickPremiumGuildIcon:", { defaultExport: false });
-    if (!MemberListItem)
-        return Logger.error("Failed to find MemberListItem");
-    after(MemberListItem, 'Z', ({ args: [props] }) => {
-        let showGuildMembers = $('.danho-lib__header-members', false);
-        if (showGuildMembers.length >= 1)
-            return;
-        const guild = GuildStore.getGuild(props.guildId);
-        if (!guild)
-            return;
-        const members = GuildMemberStore.getMembers(guild.id);
-        const presenceState = PresenceStore.getState();
-        const nonOfflineMembers = members.filter(member => presenceState.statuses[member.userId] && presenceState.statuses[member.userId] !== 'offline');
-        const header = $(s => s.className('container', 'nav').and.ariaLabel(`${guild.name} (server)`)
-            .className('header', 'header'));
-        if (!header)
-            return;
-        header.appendComponent(React.createElement(Text, { variant: "heading-md/normal" },
-            nonOfflineMembers.length,
-            "/",
-            members.length), { className: 'danho-lib__header-members' });
-        setTimeout(() => {
-            showGuildMembers = $('danho-lib__header-members', false);
-            if (showGuildMembers.length > 1) {
-                showGuildMembers.shift();
-                showGuildMembers.forEach(e => e.unmount());
-            }
-        }, 100);
-    }, { name: 'GuildHeader' });
+class ChannelLock {
+    constructor(stayUnlockedForMinutes, initialState) {
+        this._locked = initialState;
+        this._timeoutDuration = stayUnlockedForMinutes * 60 * 1000;
+    }
+    get isLocked() {
+        return this._locked;
+    }
+    lock() {
+        this._locked = true;
+    }
+    unlock() {
+        this._locked = false;
+        if (this._timeout)
+            clearTimeout(this._timeout);
+        this._timeout = setTimeout(() => {
+            if (!this._locked)
+                this._locked = true;
+        }, this._timeoutDuration);
+    }
 }
 
-const ShowGuildMembersInHeader = {
+const LOGIN_ID = 'secret-channel-login';
+function Login({ onSubmit }) {
+    function handleSubmit(e) {
+        e.preventDefault();
+        const password = e.currentTarget.password.value;
+        onSubmit(password);
+    }
+    return (React.createElement("form", { id: LOGIN_ID, onSubmit: handleSubmit },
+        React.createElement(Text, null, "This channel is locked. Please enter the password to access it."),
+        React.createElement("div", { className: 'form-group' },
+            React.createElement(FormItem, { title: 'Password' }),
+            React.createElement("input", { type: "password", name: "password" })),
+        React.createElement(Button, { type: "submit" }, "Login")));
+}
+
+const style$2 = ".bdd-wrapper:has(#secret-channel-login) {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  position: absolute;\n  inset: 0;\n  background-color: var(--background-primary);\n  height: 100%;\n  width: 100%;\n  z-index: 9999;\n}\n\n#secret-channel-login {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 1rem;\n}\n\ndiv:has(> #secret-channel-login) {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}";
+
+const DUNGEON_GUILD_ID = '460926327269359626';
+const HELLO_CHANNEL_ID = '1303419756572835930';
+let debouncedLoginRemover;
+function Feature$6() {
+    const Lock = new ChannelLock(Settings.current.lockUnlockForMinutes, Settings.current.initialLockState);
+    ActionsEmitter.on('CHANNEL_SELECT', async ({ channelId, guildId }) => {
+        if (!channelId
+            || !guildId
+            || guildId !== DUNGEON_GUILD_ID
+            || channelId !== HELLO_CHANNEL_ID) {
+            if (debouncedLoginRemover)
+                clearTimeout(debouncedLoginRemover);
+            if (document.getElementById(LOGIN_ID))
+                debouncedLoginRemover = setTimeout(() => document.getElementById(LOGIN_ID)?.parentElement.remove(), 100);
+            return;
+        }
+        await wait(() => { }, 1);
+        const contentContainer = $(`[class*='content']:has(> main[class*='chatContent'])`);
+        if (!contentContainer)
+            return Logger.log(`Could not find content container`, {
+                get contentContainer() {
+                    return $(`[class*='content']:has(> main[class*='chatContent'])`);
+                }
+            });
+        if (Lock.isLocked)
+            contentContainer.insertComponent('afterbegin', React.createElement(Login, { onSubmit: password => {
+                    const correct = password === Settings.current.lockPassword;
+                    if (!correct)
+                        return BdApi.UI.showToast('Incorrect password', { type: 'error' });
+                    $(`#${LOGIN_ID}`).parent.unmount();
+                    Lock.unlock();
+                } }));
+    });
+}
+
+const LockHello = {
     __proto__: null,
-    default: Feature$4
+    default: Feature$6,
+    style: style$2
 };
 
 function PatchUserContextMenu(callback) {
@@ -2654,7 +2682,7 @@ function PatchUserContextMenu(callback) {
 
 const DEADLY_NINJA_ID = '405763731079823380';
 const DUNGEON_ID = '760145289956294716';
-function Feature$3() {
+function Feature$5() {
     if (!Settings.current.addToDungeon)
         return;
     const permissionActions = Finder.findBySourceStrings("addRecipient", "clearPermissionOverwrite", "updatePermissionOverwrite", "backupId=493683");
@@ -2704,141 +2732,71 @@ function Feature$3() {
 
 const QuickAddMemberToDungeon = {
     __proto__: null,
-    default: Feature$3
+    default: Feature$5
 };
 
-class ChannelLock {
-    constructor(stayUnlockedForMinutes, initialState) {
-        this._locked = initialState;
-        this._timeoutDuration = stayUnlockedForMinutes * 60 * 1000;
-    }
-    get isLocked() {
-        return this._locked;
-    }
-    lock() {
-        this._locked = true;
-    }
-    unlock() {
-        this._locked = false;
-        if (this._timeout)
-            clearTimeout(this._timeout);
-        this._timeout = setTimeout(() => {
-            if (!this._locked)
-                this._locked = true;
-        }, this._timeoutDuration);
-    }
-}
-
-const LOGIN_ID = 'secret-channel-login';
-function Login({ onSubmit }) {
-    function handleSubmit(e) {
-        e.preventDefault();
-        const password = e.currentTarget.password.value;
-        onSubmit(password);
-    }
-    return (React.createElement("form", { id: LOGIN_ID, onSubmit: handleSubmit },
-        React.createElement(Text, null, "This channel is locked. Please enter the password to access it."),
-        React.createElement("div", { className: 'form-group' },
-            React.createElement(FormItem, { title: 'Password' }),
-            React.createElement("input", { type: "password", name: "password" })),
-        React.createElement(Button, { type: "submit" }, "Login")));
-}
-
-const style$1 = ".bdd-wrapper:has(#secret-channel-login) {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  position: absolute;\n  inset: 0;\n  background-color: var(--background-primary);\n  height: 100%;\n  width: 100%;\n  z-index: 9999;\n}\n\n#secret-channel-login {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 1rem;\n}\n\ndiv:has(> #secret-channel-login) {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}";
-
-const DUNGEON_GUILD_ID = '460926327269359626';
-const HELLO_CHANNEL_ID = '1303419756572835930';
-let debouncedLoginRemover;
-function Feature$2() {
-    const Lock = new ChannelLock(Settings.current.lockUnlockForMinutes, Settings.current.initialLockState);
-    ActionsEmitter.on('CHANNEL_SELECT', async ({ channelId, guildId }) => {
-        if (!channelId
-            || !guildId
-            || guildId !== DUNGEON_GUILD_ID
-            || channelId !== HELLO_CHANNEL_ID) {
-            if (debouncedLoginRemover)
-                clearTimeout(debouncedLoginRemover);
-            if (document.getElementById(LOGIN_ID))
-                debouncedLoginRemover = setTimeout(() => document.getElementById(LOGIN_ID)?.parentElement.remove(), 100);
-            return;
-        }
-        await wait(() => { }, 1);
-        const contentContainer = $(`[class*='content']:has(> main[class*='chatContent'])`);
-        if (!contentContainer)
-            return Logger.log(`Could not find content container`, {
-                get contentContainer() {
-                    return $(`[class*='content']:has(> main[class*='chatContent'])`);
-                }
-            });
-        if (Lock.isLocked)
-            contentContainer.insertComponent('afterbegin', React.createElement(Login, { onSubmit: password => {
-                    const correct = password === Settings.current.lockPassword;
-                    if (!correct)
-                        return BdApi.UI.showToast('Incorrect password', { type: 'error' });
-                    $(`#${LOGIN_ID}`).parent.unmount();
-                    Lock.unlock();
-                } }));
-    });
-}
-
-const LockHello = {
-    __proto__: null,
-    default: Feature$2,
-    style: style$1
-};
-
-function PatchChannelContextMenu(callback) {
-    return BdApi.ContextMenu.patch('channel-context', callback);
-}
-
-const handleVoiceConnect = Finder.findBySourceStrings("handleVoiceConnect");
-const VoiceActions = Finder.findBySourceStrings("setVideoEnabled", "setVideoDevice");
-function joinWithCamera(channelId) {
-    const preferredWebcamId = MediaEngineStore.getVideoDeviceId();
-    handleVoiceConnect({ channelId });
-    if (!preferredWebcamId) {
-        BdApi.UI.showToast("No preferred webcam set", { type: "error" });
-        $(s => s.className('button', 'button').ariaLabelContains("Turn On Camera"))?.element?.click();
+function Feature$4() {
+    if (!Settings.current.wakeUp)
         return;
-    }
-    VoiceActions.setVideoDevice(preferredWebcamId);
-    VoiceActions.setVideoEnabled(true);
-}
-
-function Feature$1() {
-    PatchChannelContextMenu((menu, props) => {
-        const options = menu.props.children;
-        const voiceOptions = options[3].props.children;
-        voiceOptions.unshift(buildTextItemElement("join-with-camera", "Join with Camera", () => joinWithCamera(props.channel.id)));
-    });
-    PatchHomeVoiceChannel();
-}
-function PatchHomeVoiceChannel() {
-    const ChannelItem = Finder.findBySourceStrings("tutorialId", "visible", "shouldShow", { defaultExport: false });
-    const HOME_CHANNEL_ID = '1266581800428245094';
-    after(ChannelItem, "Z", ({ args: [props] }) => {
-        if (!props.children?.props?.children?.[1]?.props?.channel)
-            return;
-        const channel = props.children.props.children[1].props.channel;
-        if (!channel || channel.id !== HOME_CHANNEL_ID)
-            return;
-        const { className, 'data-dnd-name': dndName } = props.children.props;
-        const node = $(s => s.className(className).and.data('dnd-name', dndName));
-        node?.on('dblclick', (e) => {
-            e.preventDefault();
-            joinWithCamera(HOME_CHANNEL_ID);
+    const status = UserUtils.me.status;
+    const isHiding = status === 'invisible';
+    const { isHidingOnPurpose } = Settings.current;
+    if (isHidingOnPurpose && !isHiding)
+        Settings.update({ isHidingOnPurpose: false });
+    else if (!isHidingOnPurpose && isHiding) {
+        const close = BdApi.UI.showNotice(`You appear to be hiding... Is this on purpose?`, {
+            buttons: [
+                {
+                    label: 'Yes, stay hidden',
+                    onClick: () => {
+                        Settings.update({ isHidingOnPurpose: true });
+                        close();
+                    }
+                },
+                {
+                    label: 'No, get me back online',
+                    onClick: () => {
+                        const dispatch = Finder.findBySourceStrings('getStatus()', 'updateAsync("status",');
+                        if (!dispatch)
+                            return BdApi.UI.showToast('Could not find dispatcher', { type: 'error' });
+                        dispatch('online', status, undefined, undefined);
+                        close();
+                    }
+                },
+            ]
         });
-    });
+    }
 }
 
-const JoinVoiceWithCamera = {
+const WakeUp = {
     __proto__: null,
-    default: Feature$1
+    default: Feature$4
+};
+
+const DanhoEnhancements = [
+    Badges,
+    LockHello,
+    QuickAddMemberToDungeon,
+    WakeUp,
+];
+
+const style$1 = ".danho-expand-bio-again div[class*=descriptionClamp] {\n  display: block !important;\n  max-height: unset !important;\n}\n.danho-expand-bio-again button[class*=viewFullBio] {\n  display: none !important;\n}";
+
+function Feature$3() {
+    if (!Settings.current.expandBioAgain)
+        return;
+    $('#app-mount').addClass('danho-expand-bio-again');
+}
+
+const ExpandBioAgain = {
+    __proto__: null,
+    default: Feature$3,
+    styles: style$1
 };
 
 const style = ".danho-non-obnoxious-profile-effects [class*=profileEffects]:hover {\n  opacity: 0.2;\n}";
 
-function Feature() {
+function Feature$2() {
     if (!Settings.current.nonObnoxiousProfileEffects)
         return;
     $('#app-mount').addClass('danho-non-obnoxious-profile-effects');
@@ -2846,23 +2804,160 @@ function Feature() {
 
 const NonObnoxiousProfileEffects = {
     __proto__: null,
-    default: Feature,
+    default: Feature$2,
     styles: style
 };
 
-const features = [
-    PrettyRoles,
-    Badges,
-    PronounsPageLinks,
-    SortForumsByAuthor,
+const PrettyRolesManager = new class PrettyRolesManager {
+    getRole(roleId) {
+        return this.context?.roles.find(r => r.id === roleId) ?? GuildUtils.getGuildRoleWithoutGuildId(roleId);
+    }
+    removeRole() {
+        if (!this.role)
+            return;
+        this.context?.onRemoveRole(this.role);
+    }
+    canRemoveRole() {
+        if (!this.role)
+            return false;
+        return this.context.guild.ownerId === this.context.currentUser.id
+            || (this.context.canManageRoles && this.context.highestRole.id !== this.role.id);
+    }
+};
+
+function modifyRoleContextMenu(result) {
+    if (!PrettyRolesManager.context)
+        return result;
+    const roleId = result.props.children.props.id.split('-').pop();
+    const role = PrettyRolesManager.getRole(roleId);
+    PrettyRolesManager.role = role;
+    if (!PrettyRolesManager.canRemoveRole())
+        return result;
+    result.props.children = [
+        React.createElement(MenuGroup, null,
+            React.createElement(MenuItem, { color: 'danger', id: "pretty-roles__remove-role", label: `Remove role`, action: () => {
+                    PrettyRolesManager.removeRole();
+                } })),
+        result.props.children,
+    ];
+    return result;
+}
+
+function afterRoleContextMenu() {
+    contextMenu('dev-context', result => {
+        return modifyRoleContextMenu(result);
+    });
+}
+
+const RolesListModule = demangle({
+    RolesList: bySource$1('onAddRole')
+}, null, true);
+
+const setManagerContext = createPatcherCallback$1(({ args, original }) => {
+    const result = original(...args);
+    PrettyRolesManager.context = result.props;
+    return result;
+});
+
+function insteadRolesList() {
+    instead(RolesListModule, 'RolesList', (data) => {
+        return setManagerContext(data);
+    });
+}
+
+function prettyRoles$1() {
+    $(s => s.role('list', 'div').and.ariaLabelContains('Role'))?.children().forEach(el => {
+        const roleId = el.attr('data-list-item-id')?.split('_').pop();
+        if (!roleId)
+            return;
+        const role = PrettyRolesManager.getRole(roleId);
+        if (!role)
+            return;
+        el.setStyleProperty('--role-color', hexToRgb(role.colorString
+            ?? rgbToHex(DEFAULT_DISCORD_ROLE_COLOR.split(',').map(Number))).join(','));
+        if (Settings.current.groupRoles) {
+            const isGroupRole = role.name.toLowerCase().includes('roles');
+            if (isGroupRole)
+                el.addClass('danho-library__pretty-roles__group-role');
+        }
+    });
+}
+
+function afterRolesList() {
+    after(RolesListModule, 'RolesList', () => {
+        prettyRoles$1();
+    });
+}
+
+function afterUserProfileModalAboutMe() {
+    const UserProfileModalAboutMe = Finder.findBySourceStrings('look:"profile_modal"', { defaultExport: false });
+    if (!UserProfileModalAboutMe)
+        return console.error('UserProfileModalAboutMe not found');
+    after(UserProfileModalAboutMe, 'Z', () => {
+        prettyRoles$1();
+    }, { name: 'UserProfileModalAboutMe' });
+}
+
+const prettyRoles = "*[role=list][data-list-id*=roles] > div div:has([class*=roleRemoveButton][role=button]),\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveButton][role=button],\n*[role=list][data-list-id*=roles] > div [class*=roleFlowerStar],\n*[role=list][data-list-id*=roles] > div [class*=roleCircle] {\n  position: absolute;\n  inset: 0;\n  z-index: 1;\n}\n\n*[role=list][data-list-id*=roles] {\n  padding: 1rem;\n}\n*[role=list][data-list-id*=roles]:has(.danho-library__pretty-roles__group-role) div:has([class*=expandButton]) {\n  flex: 1 1 50%;\n}\n\n*[role=list][data-list-id*=roles] > div {\n  --role-color--default: rgb(86, 105, 118);\n  --role-color: var(--role-color--default);\n  --role-color-alpha: .125;\n  position: relative;\n  border: 1px solid rgb(var(--role-color, --role-color--default));\n  background-color: rgba(var(--role-color, --role-color--default), var(--role-color-alpha));\n  border-radius: 0.25rem;\n  height: 25px;\n  box-sizing: border-box;\n  justify-content: center;\n}\n*[role=list][data-list-id*=roles] > div [class*=roleCircle],\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveIcon] {\n  height: 100%;\n  width: 100%;\n}\n*[role=list][data-list-id*=roles] > div span[class*=roleCircle] {\n  background-color: unset !important;\n}\n*[role=list][data-list-id*=roles] > div svg[class*=roleRemoveIcon] {\n  display: none;\n}\n*[role=list][data-list-id*=roles] > div div:has(svg[class*=linkIcon]) {\n  position: absolute;\n  top: -0.5rem;\n  left: -0.75rem;\n}\n*[role=list][data-list-id*=roles] > div:hover svg[class*=linkIcon] {\n  display: inline-block !important;\n}\n\n.danho-library__pretty-roles__group-role {\n  flex: 1 1 100% !important;\n  margin-inline: -1rem;\n}";
+
+const isPrettyRolesEnabled = () => Settings.current.prettyRoles;
+function Feature$1() {
+    if (!isPrettyRolesEnabled())
+        return;
+    insteadRolesList();
+    afterRolesList();
+    afterUserProfileModalAboutMe();
+    afterRoleContextMenu();
+}
+
+const PrettyRoles = {
+    __proto__: null,
+    default: Feature$1,
+    isPrettyRolesEnabled,
+    styles: prettyRoles
+};
+
+const TextModule = Finder.findBySourceStrings('lineClamp', 'tabularNumbers', 'scaleFontToUserSetting');
+
+const transformTextIntoLinks = createPatcherAfterCallback(({ args: [props], result }) => {
+    const { className, children: text } = props;
+    if (!className || !className.includes('pronounsText'))
+        return;
+    const regex = text.match(/\w{2}\.pronouns\.page\/@(\w+)/);
+    if (!regex)
+        return;
+    const [matched] = regex;
+    result.props.children = (React.createElement("a", { href: `https://${matched}`, target: "_blank", rel: "noreferrer noopener" }, matched));
+});
+
+function afterTextModule() {
+    after(TextModule, 'render', (data) => {
+        transformTextIntoLinks(data);
+    }, { name: 'TextModule--Pronouns' });
+}
+
+function Feature() {
+    if (!Settings.current.pronounsPageLinks)
+        return;
+    afterTextModule();
+}
+
+const PronounsPageLinks = {
+    __proto__: null,
+    default: Feature
+};
+
+const StyleChanges = [
     ExpandBioAgain,
-    WakeUp,
-    BlockFriendRequests,
-    ShowGuildMembersInHeader,
-    QuickAddMemberToDungeon,
-    LockHello,
-    JoinVoiceWithCamera,
-    NonObnoxiousProfileEffects
+    NonObnoxiousProfileEffects,
+    PrettyRoles,
+    PronounsPageLinks
+];
+
+const features = [
+    ...DiscordEnhancements,
+    ...DanhoEnhancements,
+    ...StyleChanges,
 ];
 const Features = () => features.forEach(feature => feature.default());
 const styles = features.map(feature => 'styles' in feature ? feature.styles

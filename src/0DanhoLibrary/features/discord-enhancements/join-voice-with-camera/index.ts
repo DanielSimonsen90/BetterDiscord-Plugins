@@ -7,9 +7,11 @@ import joinWithCamera from "./joinWithCamera";
 
 import { Patcher } from "@dium";
 import { Channel } from "@discord/types";
+import { Settings } from "src/0DanhoLibrary/Settings";
 
+export default async function Feature() {
+  if (!Settings.current.joinVoiceWithCamera) return;
 
-export default function Feature() {
   PatchChannelContextMenu((menu, props) => {
     const options = menu.props.children;
     const voiceOptions = options[3].props.children;

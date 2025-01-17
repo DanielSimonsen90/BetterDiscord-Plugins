@@ -1,22 +1,11 @@
 import { MediaEngineStore } from "@stores";
 import { Snowflake } from "@discord/types";
-import Finder from "@danho-lib/dium/api/finder";
 import $ from "@danho-lib/DOM/dquery";
+import { VoiceActions } from "@actions";
 
-const handleVoiceConnect = Finder.findBySourceStrings("handleVoiceConnect") as (
-  props: {
-    channelId?: Snowflake,
-    bypassChangeModal?: boolean,
-  }
-) => void;
-const VoiceActions = Finder.findBySourceStrings("setVideoEnabled", "setVideoDevice") as {
-  setVideoEnabled: (enabled: boolean) => void;
-  setVideoDevice: (deviceId: string) => void;
-};
 export default function joinWithCamera(channelId: Snowflake) {
   const preferredWebcamId = MediaEngineStore.getVideoDeviceId();
-
-  handleVoiceConnect({ channelId });
+  VoiceActions.handleVoiceConnect({ channelId });
 
   if (!preferredWebcamId) {
     BdApi.UI.showToast("No preferred webcam set", { type: "error" });

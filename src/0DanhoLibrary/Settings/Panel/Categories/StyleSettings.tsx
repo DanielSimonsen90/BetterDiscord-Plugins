@@ -1,4 +1,4 @@
-import CreateSettingsGroup from "./_CreateSettingsGroup";
+import CreateSettingsGroup from "../_CreateSettingsGroup";
 import { rgbToHex, hexToRgb } from "@danho-lib/Utils/Colors";
 
 export default CreateSettingsGroup((React, props, Setting, { FormSection, FormDivider }) => {

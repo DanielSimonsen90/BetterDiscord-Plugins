@@ -8,6 +8,7 @@ export * from './ChannelActions';
 export * from './GuildActions';
 export * from './MessageActions';
 export * from './UserNoteActions';
+export * from './VoiceActions';
 
 export const DISPATCH_ACTIONS = Dispatcher._subscriptions;
 export function find(action: string) {
