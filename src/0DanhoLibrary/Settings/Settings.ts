@@ -30,6 +30,8 @@ export const Settings = createSettings({
   lockPassword: 'hello',
   lockUnlockForMinutes: 5,
   initialLockState: true,
+
+  nonObnoxiousProfileEffects: true,
 });
 
 export const titles: Record<keyof typeof Settings.current, string> = {
@@ -58,6 +60,8 @@ export const titles: Record<keyof typeof Settings.current, string> = {
   lockPassword: `Password for locking channels`,
   lockUnlockForMinutes: `Minutes to lock channels for`,
   initialLockState: `Initial lock state for channels`,
+
+  nonObnoxiousProfileEffects: `Lower the opacity of profile effects (on hover) so they aren't as obnoxious`,
 };
 
 export const Badges = createSettings({

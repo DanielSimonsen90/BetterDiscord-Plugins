@@ -7,6 +7,7 @@ import { SettingProps } from "./_CreateSettingsGroup";
 import PrettyRolesSettings from "./PrettyRolesSettings";
 import BadgesSettings from "./BadgesSettings";
 import AutoCancelFriendRequestSettings from "./AutoCancelFriendRequestSettings";
+import LockSettings from "./LockSettings";
 
 export default function SettingsPanel() {
   const [settings, set] = Settings.useState();
@@ -14,6 +15,7 @@ export default function SettingsPanel() {
     ['prettyRoles', prettyRoles ? 'Pretty Roles' : null],
     ['badges', badges ? 'Badges' : null],
     ['autoCancelFriendRequests', autoCancelFriendRequests ? 'Auto Cancel Friend Requests' : null],
+    ['lockChannels', settings.lockChannels ? 'Lock Channels' : null],
   ] as Array<[string, string]>);
   const settingProps: SettingProps = { settings, set, titles };
 
@@ -28,12 +30,16 @@ export default function SettingsPanel() {
         <Setting setting="wakeUp" {...settingProps} />
         <Setting setting="autoCancelFriendRequests" {...settingProps} />
         <Setting setting="showGuildMembersInHeader" {...settingProps} />
+        <Setting setting="addToDungeon" {...settingProps} />
+        <Setting setting="lockChannels" {...settingProps} />
+        <Setting setting="nonObnoxiousProfileEffects" {...settingProps} />
       </FormSection>
       {tabs.some(([_, value]) => value) && (
         <TabBar tabs={tabs}
           prettyRoles={<PrettyRolesSettings {...settingProps} />}
           badges={<BadgesSettings {...settingProps} />}
           autoCancelFriendRequests={<AutoCancelFriendRequestSettings {...settingProps} />}
+          lockChannels={<LockSettings {...settingProps} />}
         />
       )}
     </div>

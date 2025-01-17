@@ -1,6 +1,6 @@
 /**
  * @name 0Danholibrary
- * @version 1.6.1
+ * @version 1.7.0
  * @author danielsimonsen90
  * @authorLink https://github.com/danielsimonsen90
  * @description Library for Danho's plugins
@@ -54,7 +54,7 @@ let meta = {
   "name": "0danholibrary",
   "description": "Library for Danho's plugins",
   "author": "danielsimonsen90",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "development": true,
   "dependencies": {
     "dium": "*",
@@ -1053,6 +1053,15 @@ const Stores = {
     getEmojiUrl
 };
 
+const wait = (callback, time) => new Promise((resolve, reject) => {
+    try {
+        setTimeout(() => resolve(callback()), time);
+    }
+    catch (err) {
+        reject(err);
+    }
+});
+
 const UserNoteActions = byKeys(["updateNote"]);
 
 const UserUtils = {
@@ -1819,7 +1828,7 @@ const DOM = {
     removeAllInjections
 };
 
-const styles$1 = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible__content.hidden {\n  display: none;\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.custom-message {\n  display: grid;\n  grid-template-columns: auto 1fr;\n  gap: 0.5ch;\n}\n.custom-message__avatar {\n  --size: 2.5rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  object-fit: cover;\n}\n.custom-message__main {\n  display: flex;\n  flex-direction: column;\n  gap: 0.5ch;\n}\n.custom-message__main header {\n  display: flex;\n  align-items: center;\n  gap: 0.5ch;\n}\n.custom-message .user-mention, .custom-message .role-mention {\n  color: var(--mention-foreground);\n  background-color: var(--mention-background);\n}\n.custom-message .user-mention::before, .custom-message .role-mention::before {\n  content: \"@\";\n}\n.custom-message .channel-mention::before {\n  content: \"#\";\n}\n\n.progress-bar {\n  width: 100%;\n  height: 0.5rem;\n  border-radius: 0.5rem;\n  overflow: hidden;\n}\n.progress-bar__fill {\n  height: 100%;\n  background-color: var(--primary-600);\n  transition: width 0.3s;\n}\n\n.tab-bar {\n  max-width: 100%;\n}\n.tab-bar * {\n  color: var(--text-primary);\n  box-sizing: border-box;\n}\n\n.tab-bar__tabs {\n  display: grid;\n  grid-auto-flow: column;\n  max-width: 100%;\n  overflow-x: auto;\n}\n.tab-bar__tabs--no-color .tab-bar__tab {\n  background-color: transparent;\n  border: none;\n}\n\n.tab-bar__tab {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  border: none;\n  background-color: var(--primary-630);\n  color: var(--text-muted);\n  border: 1px solid var(--border-faint);\n  padding: 0.3rem 1rem;\n}\n.tab-bar__tab:hover {\n  background-color: var(--primary-600);\n  color: var(--text-primary);\n}\n.tab-bar__tab--active {\n  border: 1px solid var(--border-faint);\n  border-bottom: 1px solid var(--text-primary) !important;\n  color: var(--text-primary);\n}\n\n.tab-bar__content {\n  padding: 1em;\n  background-color: var(--primary-630);\n  border: 1px solid var(--border-faint);\n}\n.tab-bar__content--no-color {\n  background-color: transparent;\n  border: none;\n}\n.tab-bar__content-page:not(.tab-bar__content-page--active) {\n  opacity: 0;\n  z-index: -1;\n  pointer-events: none;\n  height: 0;\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
+const styles$1 = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible__content.hidden {\n  display: none;\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.custom-message {\n  display: grid;\n  grid-template-columns: auto 1fr;\n  gap: 0.5ch;\n}\n.custom-message__avatar {\n  --size: 2.5rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  object-fit: cover;\n}\n.custom-message__main {\n  display: flex;\n  flex-direction: column;\n  gap: 0.5ch;\n}\n.custom-message__main header {\n  display: flex;\n  align-items: center;\n  gap: 0.5ch;\n}\n.custom-message .user-mention, .custom-message .role-mention {\n  color: var(--mention-foreground);\n  background-color: var(--mention-background);\n}\n.custom-message .user-mention::before, .custom-message .role-mention::before {\n  content: \"@\";\n}\n.custom-message .channel-mention::before {\n  content: \"#\";\n}\n\n.progress-bar {\n  width: 100%;\n  height: 0.5rem;\n  border-radius: 0.5rem;\n  overflow: hidden;\n}\n.progress-bar__fill {\n  height: 100%;\n  background-color: var(--primary-600);\n  transition: width 0.3s;\n}\n\n.tab-bar {\n  max-width: 100%;\n}\n.tab-bar * {\n  color: var(--text-primary);\n  box-sizing: border-box;\n}\n\n.tab-bar__tabs {\n  display: grid;\n  grid-auto-flow: column;\n  max-width: 100%;\n  overflow-x: auto;\n}\n.tab-bar__tabs--no-color .tab-bar__tab {\n  background-color: transparent;\n  border: none;\n}\n\n.tab-bar__tab {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  border: none;\n  background-color: var(--primary-630);\n  color: var(--text-muted);\n  border: 1px solid var(--border-faint);\n  padding: 0.3rem 1rem;\n}\n.tab-bar__tab:hover {\n  background-color: var(--primary-600);\n  color: var(--text-primary);\n}\n.tab-bar__tab--active {\n  border: 1px solid var(--border-faint);\n  border-bottom: 1px solid var(--text-primary) !important;\n  color: var(--text-primary);\n}\n\n.tab-bar__content {\n  padding: 1em;\n  background-color: var(--primary-630);\n  border: 1px solid var(--border-faint);\n}\n.tab-bar__content--no-color {\n  background-color: transparent;\n  border: none;\n}\n.tab-bar__content-page:not(.tab-bar__content-page--active) {\n  opacity: 0;\n  z-index: -1;\n  pointer-events: none;\n  height: 0;\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-form-select, .setting-group {\n  display: flex;\n  flex-direction: column-reverse;\n  gap: 0.5rem;\n  margin-top: 1rem;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
 
 class DanhoLibrary {
     constructor() {
@@ -1843,6 +1852,112 @@ function buildPlugin(plugin) {
 }
 
 const { useCallback, useContext, useDebugValue, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useReducer, useRef, useState, useId, useDeferredValue, useInsertionEffect, useSyncExternalStore, useTransition, createRef, createContext, createElement, createFactory, forwardRef, cloneElement, lazy, memo, isValidElement, Component, PureComponent, Fragment, Suspense, } = React;
+
+function Setting({ setting, settings, set, titles, ...props }) {
+    const { beforeChange, onChange, formatValue, type } = props;
+    const [v, _setV] = useState(formatValue ? formatValue(settings[setting]) : settings[setting]);
+    const setV = (value) => _setV(formatValue ? formatValue(value) : value);
+    if (type === undefined ? typeof v === 'boolean' : type === 'switch')
+        return (React.createElement(FormSwitch, { className: 'danho-form-switch', key: setting.toString(), note: titles[setting.toString()], value: Boolean(v), hideBorder: true, onChange: inputValue => {
+                const checked = beforeChange ? beforeChange(inputValue) : inputValue;
+                set({ [setting]: checked });
+                onChange?.(checked);
+                setV(checked);
+            } }));
+    if (type === undefined ? typeof v === 'number' : type === 'number')
+        return (React.createElement("div", { className: "setting-group" },
+            React.createElement(TextInput, { key: setting.toString(), value: v, onChange: inputValue => {
+                    const value = beforeChange ? beforeChange(Number(inputValue)) : Number(inputValue);
+                    set({ [setting]: value });
+                    onChange?.(value);
+                    setV(value);
+                } }),
+            React.createElement(FormText, { className: 'note' }, titles[setting])));
+    if (type === undefined ? typeof v === 'string' : type === 'text')
+        return (React.createElement("div", { className: "setting-group" },
+            React.createElement(TextInput, { key: setting.toString(), value: v, onChange: inputValue => {
+                    const value = beforeChange ? beforeChange(inputValue) : inputValue;
+                    set({ [setting]: value });
+                    onChange?.(value);
+                    setV(value);
+                } }),
+            React.createElement(FormText, { className: 'note' }, titles[setting])));
+    if (type && type !== 'select')
+        return (React.createElement("div", { className: "danho-form-switch", key: setting.toString() },
+            React.createElement("input", { type: type, key: setting.toString(), value: v, onChange: e => {
+                    const value = beforeChange ? beforeChange(e.target.value) : e.target.value;
+                    set({ [setting]: value });
+                    onChange?.(value);
+                    setV(value);
+                } }),
+            React.createElement(FormText, { className: 'note' }, titles[setting])));
+    if (type === 'select' && Array.isArray(settings[setting]))
+        return (React.createElement("div", { className: "danho-form-select", key: setting.toString() },
+            React.createElement(Select, { options: props.selectValues.map(value => ({ label: value, value })), isSelected: value => Array.isArray(settings[setting]) ? v.includes(value) : false, serialize: value => JSON.stringify(value), select: (value) => {
+                    const selected = [...settings[setting]];
+                    if (selected.includes(value))
+                        selected.splice(selected.indexOf(value), 1);
+                    else
+                        selected.push(value);
+                    set({ [setting]: selected });
+                    setV(selected);
+                } }),
+            React.createElement(FormText, { className: 'note' }, titles[setting])));
+    return (React.createElement("div", { className: 'settings-error' },
+        React.createElement("h1", null, "Unknown value type"),
+        React.createElement("h3", null,
+            "Recieved ",
+            typeof v),
+        React.createElement("h5", null, JSON.stringify(v))));
+}
+
+function TabBar({ tabs, ...props }) {
+    const [activeTab, _setActiveTab] = useState(props.defaultTab
+        ?? tabs.filter(([_, value]) => value)[0]?.[0]);
+    const internalTabs = useMemo(() => {
+        const set = tabs
+            .filter(([_, value]) => value !== undefined)
+            .reduce((acc, [key, value]) => acc.set(key, value), new Map());
+        return [...set.entries()];
+    }, [tabs, props.id]);
+    const getKeyName = useCallback((key) => props.id ? `#${props.id}-${key}` : key, [props.id]);
+    const TabContent = useCallback(function TabContent() {
+        const contentChildren = internalTabs.map(([tab]) => [tab, typeof props[tab] === 'function'
+                ? props[tab]
+                : () => props[tab]]);
+        return (React.createElement(React.Fragment, null, contentChildren.map(([tab, Content], key) => (React.createElement("div", { key: getKeyName(`content-${key}`), className: classNames("tab-bar__content-page", tab === (props.tab ?? activeTab) && 'tab-bar__content-page--active') },
+            React.createElement(Content, null))))));
+    }, [tabs, activeTab, props.tab]);
+    const setActiveTab = useCallback((tab) => {
+        if (!tab)
+            return;
+        if (props.beforeTabChange)
+            props.beforeTabChange(tab);
+        (props.setTab ?? _setActiveTab)(tab);
+    }, [props.beforeTabChange, props.setTab]);
+    useEffect(function onTabChanged() {
+        if (props.onTabChange)
+            props.onTabChange(props.tab ?? activeTab);
+    }, [activeTab, props.tab, props.onTabChange]);
+    useEffect(function onTabsOptionsChanged() {
+        if (!tabs.find(([key]) => key === (props.tab ?? activeTab))?.[1]) {
+            setActiveTab(tabs[0][0]);
+        }
+    }, [tabs]);
+    useEffect(function onControlledTabChanged() {
+        if (props.tab)
+            setActiveTab(props.tab);
+    }, [props.tab]);
+    return (React.createElement("div", { id: props.id, className: classNames("tab-bar", props.className) },
+        React.createElement("header", { className: classNames('tab-bar__tabs') },
+            internalTabs.map(([tab, title]) => title &&
+                React.createElement("button", { key: getKeyName(tab), className: classNames("tab-bar__tab", activeTab === tab && 'tab-bar__tab--active'), onClick: () => setActiveTab(tab) }, title)),
+            props.children),
+        React.createElement("section", { className: classNames('tab-bar__content') },
+            React.createElement(TabContent, null))));
+}
+
+const renderChildren = (children, props = {}) => children.map(child => React.createElement(child.tagName, Array.from(child.attributes).reduce((acc, { name, value }) => ({ ...acc, [name]: value }), props), child.outerHTML.match(/</g).length > 2 ? renderChildren(Array.from(child.children)) : child.textContent));
 
 const UserBadges = Finder.BDFDB_findByStrings(['QUEST_CONTENT_VIEWED', '"PRESS_BADGE"', 'badgeClassName'], { defaultExport: false }).exports;
 const RenderedUserProfileBadgeList = UserBadges;
@@ -1935,6 +2050,11 @@ const Settings = createSettings({
     folderNames: new Array(),
     showGuildMembersInHeader: true,
     addToDungeon: true,
+    lockChannels: true,
+    lockPassword: 'hello',
+    lockUnlockForMinutes: 5,
+    initialLockState: true,
+    nonObnoxiousProfileEffects: true,
 });
 const titles = {
     prettyRoles: `Remove role circle, add more color to the roles`,
@@ -1952,6 +2072,11 @@ const titles = {
     folderNames: `Folder names that should block all incoming friend requests`,
     showGuildMembersInHeader: `Show guild members in the header`,
     addToDungeon: `"Add to / Remove from Dungeon" context menu on users in the Deadly Ninja server`,
+    lockChannels: `Lock channels with a password`,
+    lockPassword: `Password for locking channels`,
+    lockUnlockForMinutes: `Minutes to lock channels for`,
+    initialLockState: `Initial lock state for channels`,
+    nonObnoxiousProfileEffects: `Lower the opacity of profile effects (on hover) so they aren't as obnoxious`,
 };
 const Badges$1 = createSettings({
     developer: {
@@ -1965,112 +2090,6 @@ const Badges$1 = createSettings({
         size: '14px'
     },
 });
-
-function Setting({ setting, settings, set, titles, ...props }) {
-    const { beforeChange, onChange, formatValue, type } = props;
-    const [v, _setV] = useState(formatValue ? formatValue(settings[setting]) : settings[setting]);
-    const setV = (value) => _setV(formatValue ? formatValue(value) : value);
-    if (type === undefined ? typeof v === 'boolean' : type === 'switch')
-        return (React.createElement(FormSwitch, { className: 'danho-form-switch', key: setting.toString(), note: titles[setting.toString()], value: Boolean(v), hideBorder: true, onChange: inputValue => {
-                const checked = beforeChange ? beforeChange(inputValue) : inputValue;
-                set({ [setting]: checked });
-                onChange?.(checked);
-                setV(checked);
-            } }));
-    if (type === undefined ? typeof v === 'number' : type === 'number')
-        return (React.createElement("div", { className: "setting-group" },
-            React.createElement(TextInput, { key: setting.toString(), value: v, onChange: inputValue => {
-                    const value = beforeChange ? beforeChange(Number(inputValue)) : Number(inputValue);
-                    set({ [setting]: value });
-                    onChange?.(value);
-                    setV(value);
-                } }),
-            React.createElement(FormText, { className: 'note' }, titles[setting])));
-    if (type === undefined ? typeof v === 'string' : type === 'text')
-        return (React.createElement("div", { className: "setting-group" },
-            React.createElement(TextInput, { key: setting.toString(), value: v, onChange: inputValue => {
-                    const value = beforeChange ? beforeChange(inputValue) : inputValue;
-                    set({ [setting]: value });
-                    onChange?.(value);
-                    setV(value);
-                } }),
-            React.createElement(FormText, { className: 'note' }, titles[setting])));
-    if (type && type !== 'select')
-        return (React.createElement("div", { className: "danho-form-switch", key: setting.toString() },
-            React.createElement("input", { type: type, key: setting.toString(), value: v, onChange: e => {
-                    const value = beforeChange ? beforeChange(e.target.value) : e.target.value;
-                    set({ [setting]: value });
-                    onChange?.(value);
-                    setV(value);
-                } }),
-            React.createElement(FormText, { className: 'note' }, titles[setting])));
-    if (type === 'select' && Array.isArray(settings[setting]))
-        return (React.createElement("div", { className: "danho-form-select", key: setting.toString() },
-            React.createElement(Select, { options: props.selectValues.map(value => ({ label: value, value })), isSelected: value => Array.isArray(settings[setting]) ? v.includes(value) : false, serialize: value => JSON.stringify(value), select: (value) => {
-                    const selected = [...settings[setting]];
-                    if (selected.includes(value))
-                        selected.splice(selected.indexOf(value), 1);
-                    else
-                        selected.push(value);
-                    set({ [setting]: selected });
-                    setV(selected);
-                } }),
-            React.createElement(FormText, { className: 'note' }, titles[setting])));
-    return (React.createElement("div", { className: 'settings-error' },
-        React.createElement("h1", null, "Unknown value type"),
-        React.createElement("h3", null,
-            "Recieved ",
-            typeof v),
-        React.createElement("h5", null, JSON.stringify(v))));
-}
-
-function TabBar({ tabs, ...props }) {
-    const [activeTab, _setActiveTab] = useState(props.defaultTab
-        ?? tabs.filter(([_, value]) => value)[0][0]);
-    const internalTabs = useMemo(() => {
-        const set = tabs
-            .filter(([_, value]) => value !== undefined)
-            .reduce((acc, [key, value]) => acc.set(key, value), new Map());
-        return [...set.entries()];
-    }, [tabs, props.id]);
-    const getKeyName = useCallback((key) => props.id ? `#${props.id}-${key}` : key, [props.id]);
-    const TabContent = useCallback(function TabContent() {
-        const contentChildren = internalTabs.map(([tab]) => [tab, typeof props[tab] === 'function'
-                ? props[tab]
-                : () => props[tab]]);
-        return (React.createElement(React.Fragment, null, contentChildren.map(([tab, Content], key) => (React.createElement("div", { key: getKeyName(`content-${key}`), className: classNames("tab-bar__content-page", tab === (props.tab ?? activeTab) && 'tab-bar__content-page--active') },
-            React.createElement(Content, null))))));
-    }, [tabs, activeTab, props.tab]);
-    const setActiveTab = useCallback((tab) => {
-        if (!tab)
-            return;
-        if (props.beforeTabChange)
-            props.beforeTabChange(tab);
-        (props.setTab ?? _setActiveTab)(tab);
-    }, [props.beforeTabChange, props.setTab]);
-    useEffect(function onTabChanged() {
-        if (props.onTabChange)
-            props.onTabChange(props.tab ?? activeTab);
-    }, [activeTab, props.tab, props.onTabChange]);
-    useEffect(function onTabsOptionsChanged() {
-        if (!tabs.find(([key]) => key === (props.tab ?? activeTab))?.[1]) {
-            setActiveTab(tabs[0][0]);
-        }
-    }, [tabs]);
-    useEffect(function onControlledTabChanged() {
-        if (props.tab)
-            setActiveTab(props.tab);
-    }, [props.tab]);
-    return (React.createElement("div", { id: props.id, className: classNames("tab-bar", props.className) },
-        React.createElement("header", { className: classNames('tab-bar__tabs') },
-            internalTabs.map(([tab, title]) => title &&
-                React.createElement("button", { key: getKeyName(tab), className: classNames("tab-bar__tab", activeTab === tab && 'tab-bar__tab--active'), onClick: () => setActiveTab(tab) }, title)),
-            props.children),
-        React.createElement("section", { className: classNames('tab-bar__content') },
-            React.createElement(TabContent, null))));
-}
-
-const renderChildren = (children, props = {}) => children.map(child => React.createElement(child.tagName, Array.from(child.attributes).reduce((acc, { name, value }) => ({ ...acc, [name]: value }), props), child.outerHTML.match(/</g).length > 2 ? renderChildren(Array.from(child.children)) : child.textContent));
 
 function CreateSettingsGroup(callback) {
     return function SettingsGroup(props) {
@@ -2107,7 +2126,8 @@ const PrettyRolesSettings = CreateSettingsGroup((React, props, Setting, { FormSe
 
 const BadgesSettings = CreateSettingsGroup((React, props, Setting, { FormSection }) => {
     return (React.createElement(FormSection, { title: "Badges Settings" },
-        React.createElement(Setting, { setting: "movePremiumBadge", ...props })));
+        React.createElement(Setting, { setting: "movePremiumBadge", ...props }),
+        React.createElement(Setting, { setting: "useClientCustomBadges", ...props })));
 });
 
 const AutoCancelFriendRequestSettings = CreateSettingsGroup((React, props, Setting, { FormSection }) => {
@@ -2116,12 +2136,20 @@ const AutoCancelFriendRequestSettings = CreateSettingsGroup((React, props, Setti
         React.createElement(Setting, { setting: "folderNames", type: 'select', selectValues: folderNames, ...props })));
 });
 
+const LockSettings = CreateSettingsGroup((React, props, Setting, { FormSection }) => {
+    return (React.createElement(FormSection, { title: "Lock Settings" },
+        React.createElement(Setting, { setting: "lockPassword", ...props }),
+        React.createElement(Setting, { setting: "lockUnlockForMinutes", ...props, type: "number" }),
+        React.createElement(Setting, { setting: "initialLockState", ...props })));
+});
+
 function SettingsPanel() {
     const [settings, set] = Settings.useState();
     const tabs = Settings.useSelector(({ prettyRoles, badges, autoCancelFriendRequests }) => [
         ['prettyRoles', prettyRoles ? 'Pretty Roles' : null],
         ['badges', badges ? 'Badges' : null],
         ['autoCancelFriendRequests', autoCancelFriendRequests ? 'Auto Cancel Friend Requests' : null],
+        ['lockChannels', settings.lockChannels ? 'Lock Channels' : null],
     ]);
     const settingProps = { settings, set, titles };
     return (React.createElement("div", { className: "danho-plugin-settings" },
@@ -2133,8 +2161,11 @@ function SettingsPanel() {
             React.createElement(Setting, { setting: "expandBioAgain", ...settingProps }),
             React.createElement(Setting, { setting: "wakeUp", ...settingProps }),
             React.createElement(Setting, { setting: "autoCancelFriendRequests", ...settingProps }),
-            React.createElement(Setting, { setting: "showGuildMembersInHeader", ...settingProps })),
-        tabs.some(([_, value]) => value) && (React.createElement(TabBar, { tabs: tabs, prettyRoles: React.createElement(PrettyRolesSettings, { ...settingProps }), badges: React.createElement(BadgesSettings, { ...settingProps }), autoCancelFriendRequests: React.createElement(AutoCancelFriendRequestSettings, { ...settingProps }) }))));
+            React.createElement(Setting, { setting: "showGuildMembersInHeader", ...settingProps }),
+            React.createElement(Setting, { setting: "addToDungeon", ...settingProps }),
+            React.createElement(Setting, { setting: "lockChannels", ...settingProps }),
+            React.createElement(Setting, { setting: "nonObnoxiousProfileEffects", ...settingProps })),
+        tabs.some(([_, value]) => value) && (React.createElement(TabBar, { tabs: tabs, prettyRoles: React.createElement(PrettyRolesSettings, { ...settingProps }), badges: React.createElement(BadgesSettings, { ...settingProps }), autoCancelFriendRequests: React.createElement(AutoCancelFriendRequestSettings, { ...settingProps }), lockChannels: React.createElement(LockSettings, { ...settingProps }) }))));
 }
 
 const PrettyRolesManager = new class PrettyRolesManager {
@@ -2231,10 +2262,10 @@ function afterUserProfileModalAboutMe() {
     }, { name: 'UserProfileModalAboutMe' });
 }
 
-const prettyRoles = "*[role=list][data-list-id*=roles] > div div:has([class*=roleRemoveButton][role=button]),\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveButton][role=button],\n*[role=list][data-list-id*=roles] > div [class*=roleFlowerStar],\n*[role=list][data-list-id*=roles] > div [class*=roleCircle] {\n  position: absolute;\n  inset: 0;\n  z-index: 1;\n}\n\n*[role=list][data-list-id*=roles] {\n  padding: 1rem;\n}\n*[role=list][data-list-id*=roles]:has(.danho-library__pretty-roles__group-role) div:has([class*=expandButton]) {\n  flex: 1 1 50%;\n}\n\n*[role=list][data-list-id*=roles] > div {\n  --role-color--default: rgb(86, 105, 118);\n  --role-color: var(--role-color--default);\n  --role-color-alpha: .125;\n  position: relative;\n  border: 1px solid rgb(var(--role-color, --role-color--default));\n  background-color: rgba(var(--role-color, --role-color--default), var(--role-color-alpha));\n  border-radius: 0.25rem;\n  height: 25px;\n  box-sizing: border-box;\n  justify-content: center;\n}\n*[role=list][data-list-id*=roles] > div [class*=roleCircle],\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveIcon] {\n  height: 100%;\n  width: 100%;\n}\n*[role=list][data-list-id*=roles] > div span[class*=roleCircle] {\n  background-color: unset !important;\n}\n*[role=list][data-list-id*=roles] > div svg[class*=roleRemoveIcon] {\n  display: none;\n}\n*[role=list][data-list-id*=roles] > div div:has(svg[class*=roleVerifiedIcon]) {\n  position: absolute;\n  top: -0.5rem;\n  left: -0.75rem;\n}\n*[role=list][data-list-id*=roles] > div:hover svg[class*=roleVerifiedIcon] {\n  display: inline-block !important;\n}\n\n.danho-library__pretty-roles__group-role {\n  flex: 1 1 100% !important;\n  margin-inline: -1rem;\n}";
+const prettyRoles = "*[role=list][data-list-id*=roles] > div div:has([class*=roleRemoveButton][role=button]),\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveButton][role=button],\n*[role=list][data-list-id*=roles] > div [class*=roleFlowerStar],\n*[role=list][data-list-id*=roles] > div [class*=roleCircle] {\n  position: absolute;\n  inset: 0;\n  z-index: 1;\n}\n\n*[role=list][data-list-id*=roles] {\n  padding: 1rem;\n}\n*[role=list][data-list-id*=roles]:has(.danho-library__pretty-roles__group-role) div:has([class*=expandButton]) {\n  flex: 1 1 50%;\n}\n\n*[role=list][data-list-id*=roles] > div {\n  --role-color--default: rgb(86, 105, 118);\n  --role-color: var(--role-color--default);\n  --role-color-alpha: .125;\n  position: relative;\n  border: 1px solid rgb(var(--role-color, --role-color--default));\n  background-color: rgba(var(--role-color, --role-color--default), var(--role-color-alpha));\n  border-radius: 0.25rem;\n  height: 25px;\n  box-sizing: border-box;\n  justify-content: center;\n}\n*[role=list][data-list-id*=roles] > div [class*=roleCircle],\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveIcon] {\n  height: 100%;\n  width: 100%;\n}\n*[role=list][data-list-id*=roles] > div span[class*=roleCircle] {\n  background-color: unset !important;\n}\n*[role=list][data-list-id*=roles] > div svg[class*=roleRemoveIcon] {\n  display: none;\n}\n*[role=list][data-list-id*=roles] > div div:has(svg[class*=linkIcon]) {\n  position: absolute;\n  top: -0.5rem;\n  left: -0.75rem;\n}\n*[role=list][data-list-id*=roles] > div:hover svg[class*=linkIcon] {\n  display: inline-block !important;\n}\n\n.danho-library__pretty-roles__group-role {\n  flex: 1 1 100% !important;\n  margin-inline: -1rem;\n}";
 
 const isPrettyRolesEnabled = () => Settings.current.prettyRoles;
-function Feature$8() {
+function Feature$b() {
     if (!isPrettyRolesEnabled())
         return;
     insteadRolesList();
@@ -2245,7 +2276,7 @@ function Feature$8() {
 
 const PrettyRoles = {
     __proto__: null,
-    default: Feature$8,
+    default: Feature$b,
     isPrettyRolesEnabled,
     styles: prettyRoles
 };
@@ -2328,7 +2359,7 @@ function afterBadgeList() {
     }, { name: 'BadgeList' });
 }
 
-function Feature$7() {
+function Feature$a() {
     if (!Settings.current.badges)
         return;
     Badges$1.load();
@@ -2337,7 +2368,7 @@ function Feature$7() {
 
 const Badges = {
     __proto__: null,
-    default: Feature$7
+    default: Feature$a
 };
 
 const TextModule = Finder.findBySourceStrings('lineClamp', 'tabularNumbers', 'scaleFontToUserSetting');
@@ -2346,11 +2377,11 @@ const transformTextIntoLinks = createPatcherAfterCallback(({ args: [props], resu
     const { className, children: text } = props;
     if (!className || !className.includes('pronounsText'))
         return;
-    const regex = text.match(/pronouns\.page\/@(\w+)/);
+    const regex = text.match(/\w{2}\.pronouns\.page\/@(\w+)/);
     if (!regex)
         return;
-    const [matched, username] = regex;
-    result.props.children = (React.createElement("a", { href: `https://pronouns.page/@${username}`, target: "_blank", rel: "noreferrer noopener" }, matched));
+    const [matched] = regex;
+    result.props.children = (React.createElement("a", { href: `https://${matched}`, target: "_blank", rel: "noreferrer noopener" }, matched));
 });
 
 function afterTextModule() {
@@ -2359,7 +2390,7 @@ function afterTextModule() {
     }, { name: 'TextModule--Pronouns' });
 }
 
-function Feature$6() {
+function Feature$9() {
     if (!Settings.current.pronounsPageLinks)
         return;
     afterTextModule();
@@ -2367,7 +2398,7 @@ function Feature$6() {
 
 const PronounsPageLinks = {
     __proto__: null,
-    default: Feature$6
+    default: Feature$9
 };
 
 const { focused } = byKeys(['focused', 'item', 'labelContainer']);
@@ -2452,7 +2483,7 @@ function testForumChannel() {
     return channel.type === 15 ;
 }
 
-function Feature$5() {
+function Feature$8() {
     if (!Settings.current.allowForumSortByAuthor)
         return;
     patchSortAndView();
@@ -2460,12 +2491,12 @@ function Feature$5() {
 
 const SortForumsByAuthor = {
     __proto__: null,
-    default: Feature$5
+    default: Feature$8
 };
 
-const style = ".danho-expand-bio-again div[class*=descriptionClamp] {\n  display: block !important;\n  max-height: unset !important;\n}\n.danho-expand-bio-again button[class*=viewFullBio] {\n  display: none !important;\n}";
+const style$2 = ".danho-expand-bio-again div[class*=descriptionClamp] {\n  display: block !important;\n  max-height: unset !important;\n}\n.danho-expand-bio-again button[class*=viewFullBio] {\n  display: none !important;\n}";
 
-function Feature$4() {
+function Feature$7() {
     if (!Settings.current.expandBioAgain)
         return;
     $('#app-mount').addClass('danho-expand-bio-again');
@@ -2473,11 +2504,11 @@ function Feature$4() {
 
 const ExpandBioAgain = {
     __proto__: null,
-    default: Feature$4,
-    styles: style
+    default: Feature$7,
+    styles: style$2
 };
 
-function Feature$3() {
+function Feature$6() {
     if (!Settings.current.wakeUp)
         return;
     const status = UserUtils.me.status;
@@ -2512,7 +2543,7 @@ function Feature$3() {
 
 const WakeUp = {
     __proto__: null,
-    default: Feature$3
+    default: Feature$6
 };
 
 const RelationshipActions = Finder.findBySourceStrings("cancelFriendRequest", "addRelationship", "removeRelationship");
@@ -2535,7 +2566,7 @@ function buildTextItemElement(id, label, action, props = {}) {
     return BdApi.ContextMenu.buildItem(buildTextItem(id, label, action, props));
 }
 
-function Feature$2() {
+function Feature$5() {
     if (!Settings.current.autoCancelFriendRequests || Settings.current.folderNames.length === 0)
         return;
     ActionsEmitter.on('RELATIONSHIP_ADD', ({ relationship }) => {
@@ -2574,24 +2605,28 @@ function Feature$2() {
 
 const BlockFriendRequests = {
     __proto__: null,
-    default: Feature$2
+    default: Feature$5
 };
 
-function Feature$1() {
+function Feature$4() {
     const headerMemo = Finder.findBySourceStrings("hasCommunityInfoSubheader()", "ANIMATED_BANNER", "header");
     if (!headerMemo)
         return Logger.error("Failed to find header memo");
-    after(headerMemo, 'type', ({ args: [props] }) => {
+    const MemberListItem = Finder.findBySourceStrings("ownerTooltipText", "onClickPremiumGuildIcon:", { defaultExport: false });
+    if (!MemberListItem)
+        return Logger.error("Failed to find MemberListItem");
+    after(MemberListItem, 'Z', ({ args: [props] }) => {
         let showGuildMembers = $('.danho-lib__header-members', false);
         if (showGuildMembers.length >= 1)
             return;
-        const guild = props.children.props.guild;
+        const guild = GuildStore.getGuild(props.guildId);
         if (!guild)
             return;
         const members = GuildMemberStore.getMembers(guild.id);
         const presenceState = PresenceStore.getState();
         const nonOfflineMembers = members.filter(member => presenceState.statuses[member.userId] && presenceState.statuses[member.userId] !== 'offline');
-        const header = $(s => s.className('container', 'nav').and.ariaLabel(`${guild.name} (server)`).className('header', 'header'));
+        const header = $(s => s.className('container', 'nav').and.ariaLabel(`${guild.name} (server)`)
+            .className('header', 'header'));
         if (!header)
             return;
         header.appendComponent(React.createElement(Text, { variant: "heading-md/normal" },
@@ -2601,7 +2636,7 @@ function Feature$1() {
         setTimeout(() => {
             showGuildMembers = $('danho-lib__header-members', false);
             if (showGuildMembers.length > 1) {
-                showGuildMembers.pop();
+                showGuildMembers.shift();
                 showGuildMembers.forEach(e => e.unmount());
             }
         }, 100);
@@ -2610,7 +2645,7 @@ function Feature$1() {
 
 const ShowGuildMembersInHeader = {
     __proto__: null,
-    default: Feature$1
+    default: Feature$4
 };
 
 function PatchUserContextMenu(callback) {
@@ -2619,7 +2654,7 @@ function PatchUserContextMenu(callback) {
 
 const DEADLY_NINJA_ID = '405763731079823380';
 const DUNGEON_ID = '760145289956294716';
-function Feature() {
+function Feature$3() {
     if (!Settings.current.addToDungeon)
         return;
     const permissionActions = Finder.findBySourceStrings("addRecipient", "clearPermissionOverwrite", "updatePermissionOverwrite", "backupId=493683");
@@ -2669,7 +2704,150 @@ function Feature() {
 
 const QuickAddMemberToDungeon = {
     __proto__: null,
-    default: Feature
+    default: Feature$3
+};
+
+class ChannelLock {
+    constructor(stayUnlockedForMinutes, initialState) {
+        this._locked = initialState;
+        this._timeoutDuration = stayUnlockedForMinutes * 60 * 1000;
+    }
+    get isLocked() {
+        return this._locked;
+    }
+    lock() {
+        this._locked = true;
+    }
+    unlock() {
+        this._locked = false;
+        if (this._timeout)
+            clearTimeout(this._timeout);
+        this._timeout = setTimeout(() => {
+            if (!this._locked)
+                this._locked = true;
+        }, this._timeoutDuration);
+    }
+}
+
+const LOGIN_ID = 'secret-channel-login';
+function Login({ onSubmit }) {
+    function handleSubmit(e) {
+        e.preventDefault();
+        const password = e.currentTarget.password.value;
+        onSubmit(password);
+    }
+    return (React.createElement("form", { id: LOGIN_ID, onSubmit: handleSubmit },
+        React.createElement(Text, null, "This channel is locked. Please enter the password to access it."),
+        React.createElement("div", { className: 'form-group' },
+            React.createElement(FormItem, { title: 'Password' }),
+            React.createElement("input", { type: "password", name: "password" })),
+        React.createElement(Button, { type: "submit" }, "Login")));
+}
+
+const style$1 = ".bdd-wrapper:has(#secret-channel-login) {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  position: absolute;\n  inset: 0;\n  background-color: var(--background-primary);\n  height: 100%;\n  width: 100%;\n  z-index: 9999;\n}\n\n#secret-channel-login {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 1rem;\n}\n\ndiv:has(> #secret-channel-login) {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}";
+
+const DUNGEON_GUILD_ID = '460926327269359626';
+const HELLO_CHANNEL_ID = '1303419756572835930';
+let debouncedLoginRemover;
+function Feature$2() {
+    const Lock = new ChannelLock(Settings.current.lockUnlockForMinutes, Settings.current.initialLockState);
+    ActionsEmitter.on('CHANNEL_SELECT', async ({ channelId, guildId }) => {
+        if (!channelId
+            || !guildId
+            || guildId !== DUNGEON_GUILD_ID
+            || channelId !== HELLO_CHANNEL_ID) {
+            if (debouncedLoginRemover)
+                clearTimeout(debouncedLoginRemover);
+            if (document.getElementById(LOGIN_ID))
+                debouncedLoginRemover = setTimeout(() => document.getElementById(LOGIN_ID)?.parentElement.remove(), 100);
+            return;
+        }
+        await wait(() => { }, 1);
+        const contentContainer = $(`[class*='content']:has(> main[class*='chatContent'])`);
+        if (!contentContainer)
+            return Logger.log(`Could not find content container`, {
+                get contentContainer() {
+                    return $(`[class*='content']:has(> main[class*='chatContent'])`);
+                }
+            });
+        if (Lock.isLocked)
+            contentContainer.insertComponent('afterbegin', React.createElement(Login, { onSubmit: password => {
+                    const correct = password === Settings.current.lockPassword;
+                    if (!correct)
+                        return BdApi.UI.showToast('Incorrect password', { type: 'error' });
+                    $(`#${LOGIN_ID}`).parent.unmount();
+                    Lock.unlock();
+                } }));
+    });
+}
+
+const LockHello = {
+    __proto__: null,
+    default: Feature$2,
+    style: style$1
+};
+
+function PatchChannelContextMenu(callback) {
+    return BdApi.ContextMenu.patch('channel-context', callback);
+}
+
+const handleVoiceConnect = Finder.findBySourceStrings("handleVoiceConnect");
+const VoiceActions = Finder.findBySourceStrings("setVideoEnabled", "setVideoDevice");
+function joinWithCamera(channelId) {
+    const preferredWebcamId = MediaEngineStore.getVideoDeviceId();
+    handleVoiceConnect({ channelId });
+    if (!preferredWebcamId) {
+        BdApi.UI.showToast("No preferred webcam set", { type: "error" });
+        $(s => s.className('button', 'button').ariaLabelContains("Turn On Camera"))?.element?.click();
+        return;
+    }
+    VoiceActions.setVideoDevice(preferredWebcamId);
+    VoiceActions.setVideoEnabled(true);
+}
+
+function Feature$1() {
+    PatchChannelContextMenu((menu, props) => {
+        const options = menu.props.children;
+        const voiceOptions = options[3].props.children;
+        voiceOptions.unshift(buildTextItemElement("join-with-camera", "Join with Camera", () => joinWithCamera(props.channel.id)));
+    });
+    PatchHomeVoiceChannel();
+}
+function PatchHomeVoiceChannel() {
+    const ChannelItem = Finder.findBySourceStrings("tutorialId", "visible", "shouldShow", { defaultExport: false });
+    const HOME_CHANNEL_ID = '1266581800428245094';
+    after(ChannelItem, "Z", ({ args: [props] }) => {
+        if (!props.children?.props?.children?.[1]?.props?.channel)
+            return;
+        const channel = props.children.props.children[1].props.channel;
+        if (!channel || channel.id !== HOME_CHANNEL_ID)
+            return;
+        const { className, 'data-dnd-name': dndName } = props.children.props;
+        const node = $(s => s.className(className).and.data('dnd-name', dndName));
+        node?.on('dblclick', (e) => {
+            e.preventDefault();
+            joinWithCamera(HOME_CHANNEL_ID);
+        });
+    });
+}
+
+const JoinVoiceWithCamera = {
+    __proto__: null,
+    default: Feature$1
+};
+
+const style = ".danho-non-obnoxious-profile-effects [class*=profileEffects]:hover {\n  opacity: 0.2;\n}";
+
+function Feature() {
+    if (!Settings.current.nonObnoxiousProfileEffects)
+        return;
+    $('#app-mount').addClass('danho-non-obnoxious-profile-effects');
+}
+
+const NonObnoxiousProfileEffects = {
+    __proto__: null,
+    default: Feature,
+    styles: style
 };
 
 const features = [
@@ -2682,6 +2860,9 @@ const features = [
     BlockFriendRequests,
     ShowGuildMembersInHeader,
     QuickAddMemberToDungeon,
+    LockHello,
+    JoinVoiceWithCamera,
+    NonObnoxiousProfileEffects
 ];
 const Features = () => features.forEach(feature => feature.default());
 const styles = features.map(feature => 'styles' in feature ? feature.styles

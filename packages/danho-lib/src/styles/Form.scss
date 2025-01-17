@@ -10,3 +10,10 @@
     width: 100%;
   }  
 }
+
+.danho-form-select, .setting-group {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: .5rem;
+  margin-top: 1rem;
+}

@@ -9,6 +9,7 @@ import * as ShowGuildMembersInHeader from './show-guild-members-in-header';
 import * as QuickAddMemberToDungeon from './quick-add-member-to-dungeon';
 import * as LockHello from './lock-hello';
 import * as JoinVoiceWithCamera from './join-voice-with-camera';
+import * as NonObnoxiousProfileEffects from './non-obnoxious-profile-effects';
 
 const features = [
   PrettyRoles,
@@ -21,7 +22,8 @@ const features = [
   ShowGuildMembersInHeader,
   QuickAddMemberToDungeon,
   LockHello,
-  JoinVoiceWithCamera
+  JoinVoiceWithCamera,
+  NonObnoxiousProfileEffects
 ];
 
 export const Features = () => features.forEach(feature => feature.default());
