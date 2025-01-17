@@ -1,5 +1,6 @@
 import { createDiumStore } from "@danho-lib/Stores";
 import { createSettings } from "@dium/settings";
+import { formatDate } from "./methods";
 
 export type Settings = {
   leftAlign: string;
@@ -19,7 +20,7 @@ export type Highscores = {
 }
 export const Highscores = createDiumStore<Highscores>({
   best: 0,
-  bestDate: new Date().toLocaleDateString(),
+  bestDate: formatDate(new Date()),
   today: 0,
-  todayDate: new Date().toLocaleDateString()
+  todayDate: formatDate(new Date())
 }, 'highscores');

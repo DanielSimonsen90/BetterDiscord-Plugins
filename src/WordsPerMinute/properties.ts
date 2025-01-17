@@ -20,8 +20,8 @@ let observer = new MutationObserver(() => {
 export const activelyTyping = createProperty({
   defaultValue: false,
   afterSet: (value) => {
-    if (value) observer.disconnect();
-    else observer.observe(document.body, { childList: true, subtree: true });
+    if (value) observer.observe(document.body, { childList: true, subtree: true });
+    else observer.disconnect();
   }
 });
 

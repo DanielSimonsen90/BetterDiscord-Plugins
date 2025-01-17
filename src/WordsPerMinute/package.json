@@ -1,6 +1,6 @@
 {
   "name": "words-per-minute",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "View your words per minute while typing your message",
   "author": "danielsimonsen90",
   "dependencies": {

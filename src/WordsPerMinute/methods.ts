@@ -3,6 +3,10 @@ import { log } from "@danho-lib/dium/api/logger";
 import { typingEndTime, typingStartTime, wpm } from "./properties";
 import { Highscores } from "./settings";
 
+export function formatDate(date: Date) {
+  return date.toLocaleDateString('en-GB');
+}
+
 export function calculateWPM(messageContent: string) {
   // If, by mistake/debug, the start or end time is not set, return
   if (typingStartTime.hasNoValue() || typingEndTime.hasNoValue() || !messageContent) return;
@@ -26,7 +30,7 @@ export function updateHighscores() {
   } = Highscores.current;
 
   const current = wpm.get();
-  const today = new Date().toLocaleDateString() === new Date(todayDate).toLocaleDateString() ? storedTodayScore : 0;
+  const today = formatDate(new Date()) === formatDate(new Date(todayDate)) ? storedTodayScore : 0;
   const notification = (
     current > best ? `New best highscore! ${current} wpm`
     : current > today ? `New today's highscore! ${current} wpm`
@@ -37,9 +41,9 @@ export function updateHighscores() {
 
   Highscores.update({
     best: Math.max(best, current),
-    bestDate: current > best ? new Date().toLocaleDateString() : new Date(bestDate).toLocaleDateString(),
+    bestDate: current > best ? formatDate(new Date()) : formatDate(new Date(bestDate)),
     today: Math.max(today, current),
-    todayDate: new Date().toLocaleDateString()
+    todayDate: formatDate(new Date())
   });
 
   log(notification, Highscores.current, { best, today, todayDate });

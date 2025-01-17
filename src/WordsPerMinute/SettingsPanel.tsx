@@ -1,6 +1,7 @@
 import { React, useMemo } from '@react';
 import { Settings, Highscores } from './settings';
 import { getMeta } from '@dium/meta';
+import { formatDate } from './methods';
 
 const PluginName = getMeta().name;
 
@@ -27,8 +28,8 @@ const SettingsGroup: React.FC<{
       <div className="bd-flex bd-flex-horizontal" style={{ gap: '.5rem' }}>
         <input type={
           typeof defaults[settingsKey] === 'number' ? 'number'
-            : typeof defaults[settingsKey] === 'boolean' ? 'checkbox'
-              : 'text'}
+          : typeof defaults[settingsKey] === 'boolean' ? 'checkbox'
+          : 'text'}
           value={current[settingsKey]}
           readOnly={readonly}
           onChange={event => {
@@ -56,7 +57,7 @@ const HighscoresGroup: React.FC<{
       <h3>{type === 'best' ? 'Best' : `Today's`} Highscore</h3>
       <p>
         <span id={`${PluginName}-${type}`}>{value} wpm</span>
-        <span id={`${PluginName}-${type}-date`}>{date.toLocaleDateString()}</span>
+        <span id={`${PluginName}-${type}-date`}>{formatDate(date)}</span>
       </p>
     </div>
   );
@@ -65,8 +66,8 @@ const HighscoresGroup: React.FC<{
 export default function SettingsPanel() {
   const { todayDate } = Highscores.current;
 
-  if (new Date(todayDate).toLocaleDateString() !== new Date().toLocaleDateString()) {
-    Highscores.update({ today: 0, todayDate: new Date().toLocaleDateString() });
+  if (formatDate(new Date(todayDate)) !== formatDate(new Date())) {
+    Highscores.update({ today: 0, todayDate: formatDate(new Date()) });
   }
 
   return (

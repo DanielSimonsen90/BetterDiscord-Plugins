@@ -1,6 +1,6 @@
 /**
  * @name WordsPerMinute
- * @version 1.0.4
+ * @version 1.0.5
  * @author danielsimonsen90
  * @authorLink https://github.com/danielsimonsen90
  * @description View your words per minute while typing your message
@@ -52,7 +52,7 @@ WScript.Quit();
 
 let meta = {
   "name": "words-per-minute",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "View your words per minute while typing your message",
   "author": "danielsimonsen90",
   "dependencies": {
@@ -995,23 +995,6 @@ function createProperty(options) {
     return { get, set, reset, nullableSet, hasNoValue };
 }
 
-const typingStartTime = createProperty(undefined);
-const typingEndTime = createProperty(undefined);
-const wpm = createProperty({
-    defaultValue: 0,
-    beforeSet: value => parseInt(value.toFixed(0)),
-    afterSet: (value) => {
-        const wpmCountElement = document.getElementById(WPMCountId);
-        if (wpmCountElement)
-            wpmCountElement.textContent = `${value} wpm`;
-    }
-});
-function resetProperties() {
-    typingStartTime.reset();
-    typingEndTime.reset();
-    wpm.reset();
-}
-
 const Settings = createSettings({
     leftAlign: '1ch'
 }, function onLoad() {
@@ -1019,11 +1002,14 @@ const Settings = createSettings({
 });
 const Highscores = createDiumStore({
     best: 0,
-    bestDate: new Date().toLocaleDateString(),
+    bestDate: formatDate(new Date()),
     today: 0,
-    todayDate: new Date().toLocaleDateString()
+    todayDate: formatDate(new Date())
 }, 'highscores');
 
+function formatDate(date) {
+    return date.toLocaleDateString('en-GB');
+}
 function calculateWPM(messageContent) {
     if (typingStartTime.hasNoValue() || typingEndTime.hasNoValue() || !messageContent)
         return;
@@ -1040,7 +1026,7 @@ function calculateWPM(messageContent) {
 function updateHighscores() {
     const { best, bestDate, today: storedTodayScore, todayDate } = Highscores.current;
     const current = wpm.get();
-    const today = new Date().toLocaleDateString() === new Date(todayDate).toLocaleDateString() ? storedTodayScore : 0;
+    const today = formatDate(new Date()) === formatDate(new Date(todayDate)) ? storedTodayScore : 0;
     const notification = (current > best ? `New best highscore! ${current} wpm`
         : current > today ? `New today's highscore! ${current} wpm`
             : null);
@@ -1048,9 +1034,9 @@ function updateHighscores() {
         return;
     Highscores.update({
         best: Math.max(best, current),
-        bestDate: current > best ? new Date().toLocaleDateString() : new Date(bestDate).toLocaleDateString(),
+        bestDate: current > best ? formatDate(new Date()) : formatDate(new Date(bestDate)),
         today: Math.max(today, current),
-        todayDate: new Date().toLocaleDateString()
+        todayDate: formatDate(new Date())
     });
     log(notification, Highscores.current, { best, today, todayDate });
     BdApi.UI.showToast(notification);
@@ -1059,6 +1045,7 @@ function updateHighscores() {
 function onKeyDown(event) {
     if (event.key.length !== 1)
         return;
+    activelyTyping.set(true);
     typingStartTime.nullableSet(Date.now());
 }
 function onKeyUp(event) {
@@ -1068,9 +1055,6 @@ function onKeyUp(event) {
     const messageContent = event.target.textContent;
     calculateWPM(messageContent);
     debugLog(`[${new Date(typingStartTime.get()).toLocaleTimeString()} - ${new Date(typingEndTime.get()).toLocaleTimeString()}] ${wpm}: ${messageContent}`);
-    if ((event.key === 'Enter' || event.key === 'NumpadEnter') && !event.shiftKey) {
-        onSubmit();
-    }
     if (event.key === 'Backspace' && !messageContent.trim()) {
         debugLog('Reset', event);
         typingStartTime.reset();
@@ -1079,7 +1063,39 @@ function onKeyUp(event) {
 }
 function onSubmit() {
     typingStartTime.reset();
+    activelyTyping.set(false);
     updateHighscores();
+}
+
+const typingStartTime = createProperty(undefined);
+const typingEndTime = createProperty(undefined);
+const wpm = createProperty({
+    defaultValue: 0,
+    beforeSet: value => parseInt(value.toFixed(0)),
+    afterSet: (value) => {
+        const wpmCountElement = document.getElementById(WPMCountId);
+        if (wpmCountElement)
+            wpmCountElement.textContent = `${value} wpm`;
+    }
+});
+let observer = new MutationObserver(() => {
+    const placeholder = document.querySelector('[class*=textArea] > div > [class*=placeholder]');
+    if (placeholder)
+        onSubmit();
+});
+const activelyTyping = createProperty({
+    defaultValue: false,
+    afterSet: (value) => {
+        if (value)
+            observer.observe(document.body, { childList: true, subtree: true });
+        else
+            observer.disconnect();
+    }
+});
+function resetProperties() {
+    typingStartTime.reset();
+    typingEndTime.reset();
+    wpm.reset();
 }
 
 const styles = "@charset \"UTF-8\";\n.words-per-minute-settings {\n  display: flex;\n  flex-direction: column;\n  gap: 1rem;\n}\n.words-per-minute-settings h3 {\n  font-size: 1.25rem;\n  font-weight: bold;\n  color: var(--header-primary);\n  margin-bottom: 0.5rem;\n}\n.words-per-minute-settings input {\n  box-sizing: border-box;\n  width: 100%;\n  padding: 0.25rem;\n  border: 1px solid var(--interactive-normal);\n  border-radius: 0.5rem;\n  font-size: 1rem;\n  background-color: var(--background-modifier-accent);\n  color: var(--text-normal);\n}\n.words-per-minute-settings .words-per-minute-highscores {\n  margin-top: 1rem;\n}\n.words-per-minute-settings .words-per-minute-highscores section {\n  display: grid;\n  grid-template-columns: repeat(2, 1fr);\n  gap: 1rem;\n  place-items: center;\n}\n.words-per-minute-settings .words-per-minute-highscores h3 {\n  font-size: 1.25rem;\n  font-weight: bold;\n  color: var(--header-primary);\n  margin-bottom: 0.5rem;\n  text-align: center;\n}\n.words-per-minute-settings .words-per-minute-highscores h3::after {\n  content: \"\";\n  display: block;\n  width: 100%;\n  height: 1px;\n  background-color: var(--background-modifier-accent);\n  margin-top: 0.5rem;\n}\n.words-per-minute-settings .words-per-minute-highscores h4 {\n  font-size: 1.2rem;\n  font-weight: bold;\n  color: var(--header-secondary);\n  margin-bottom: 0.5rem;\n}\n.words-per-minute-settings .words-per-minute-highscores p {\n  color: var(--text-normal);\n  font-size: 1rem;\n}\n.words-per-minute-settings .words-per-minute-highscores span:first-child {\n  font-weight: bold;\n}\n.words-per-minute-settings .words-per-minute-highscores span:last-child::before {\n  content: \" • \";\n}\n.words-per-minute-settings .words-per-minute-highscores button {\n  padding: 0.5rem;\n  font-size: 0.8rem;\n  border-radius: 0.5rem;\n  margin-inline: auto;\n  color: var(--button-danger-background) !important;\n}\n.words-per-minute-settings .words-per-minute-highscores button:hover {\n  color: var(--white-500) !important;\n}\n\n#wpm-count {\n  display: none;\n  transition: top 0.25s ease-in-out 1s;\n}\n\nform:not(:has(span[class*=emptyText])) #wpm-count {\n  --leftAlign: $defaultLeftAlign;\n  display: block;\n  color: var(--text-message-preview-low-sat);\n  font-size: 12px;\n  font-weight: bold;\n  position: absolute;\n  margin: 0;\n  top: 0.3rem;\n  left: var(--leftAlign, \"1.5rem\");\n}\n\nform:has(#wpm-count) {\n  position: relative;\n}\n\ndiv[class*=inner]:has([class*=textArea] [data-slate-string]:not(:empty)) {\n  padding-top: 1rem;\n}";
@@ -1113,12 +1129,12 @@ const HighscoresGroup = ({ type }) => {
             React.createElement("span", { id: `${PluginName}-${type}` },
                 value,
                 " wpm"),
-            React.createElement("span", { id: `${PluginName}-${type}-date` }, date.toLocaleDateString()))));
+            React.createElement("span", { id: `${PluginName}-${type}-date` }, formatDate(date)))));
 };
 function SettingsPanel() {
     const { todayDate } = Highscores.current;
-    if (new Date(todayDate).toLocaleDateString() !== new Date().toLocaleDateString()) {
-        Highscores.update({ today: 0, todayDate: new Date().toLocaleDateString() });
+    if (formatDate(new Date(todayDate)) !== formatDate(new Date())) {
+        Highscores.update({ today: 0, todayDate: formatDate(new Date()) });
     }
     return (React.createElement("div", { className: `${PluginName}-settings`, style: { width: '100%' } },
         React.createElement(SettingsGroup, { settingsKey: "leftAlign", title: "Left Align" }),
