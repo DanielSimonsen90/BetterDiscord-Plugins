@@ -1,7 +1,8 @@
 import { Settings } from "src/0DanhoLibrary/Settings";
-import patchSortAndView from "./patchSortAndView";
+import { addSortAndViewButtonClick } from "./functions";
 
 export default function Feature() {
   if (!Settings.current.allowForumSortByAuthor) return;
-  patchSortAndView();
+  
+  addSortAndViewButtonClick();
 }

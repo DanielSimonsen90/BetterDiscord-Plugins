@@ -99,7 +99,7 @@ type ChannelContextMenuTargetProps = {
   theme: string;
 };
 
-type Callback = (menu: ChannelContextMenuFiber, targetProps?: ChannelContextMenuTargetProps) => void;
+export type Callback = (menu: ChannelContextMenuFiber, targetProps?: ChannelContextMenuTargetProps) => void;
 
 export function PatchChannelContextMenu(callback: Callback) {
   return BdApi.ContextMenu.patch('channel-context', callback);

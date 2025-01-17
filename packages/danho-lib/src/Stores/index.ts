@@ -27,5 +27,5 @@ export function findStore(storeName: string, allowMultiple = false) {
     : result.map(store =>
       Finder.byName(store.name) as { getName(): string; }
       ?? new class InvalidStore { node = store; getName() { return store.name; } }
-    ).find(store => store.getName() === storeName);
+    )[0];
 }

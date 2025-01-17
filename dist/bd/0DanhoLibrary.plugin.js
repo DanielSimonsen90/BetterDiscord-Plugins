@@ -1,6 +1,6 @@
 /**
  * @name 0DanhoLibrary
- * @version 1.7.0
+ * @version 2.0.0
  * @author danielsimonsen90
  * @authorLink https://github.com/danielsimonsen90
  * @description Library for Danho's plugins
@@ -54,7 +54,7 @@ let meta = {
   "name": "0danho-library",
   "description": "Library for Danho's plugins",
   "author": "danielsimonsen90",
-  "version": "1.7.0",
+  "version": "2.0.0",
   "development": true,
   "dependencies": {
     "dium": "*",
@@ -226,6 +226,7 @@ const DiumFinder = {
     byName,
     byProtos,
     bySource,
+    get controller () { return controller; },
     demangle,
     find: find$2,
     findWithKey,
@@ -448,12 +449,13 @@ const BDFDB_Finder = {
 };
 
 const debugLog = (...data) => getMeta().development ? log(...data) : undefined;
+const debugWarn = (...data) => getMeta().development ? warn(...data) : undefined;
 const Logger = {
     ...diumLogger,
     debugLog,
 };
 
-const findBySourceStrings = (...keywords) => {
+function findBySourceStrings(...keywords) {
     const searchOptions = keywords.find(k => typeof k === 'object');
     if (searchOptions)
         keywords.splice(keywords.indexOf(searchOptions), 1);
@@ -463,39 +465,46 @@ const findBySourceStrings = (...keywords) => {
     if (backupIdKeywordIndex > -1)
         keywords.splice(backupIdKeywordIndex, 1);
     if (backupId)
-        log(`[findBySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
+        debugLog(`[findBySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
     const showMultiple = keywords.find(k => k === 'showMultiple=true');
     const showMultipleIndex = keywords.indexOf(showMultiple);
     if (showMultipleIndex > -1)
         keywords.splice(showMultipleIndex, 1);
     if (showMultiple)
-        log(`[findBySourceStrings] Showing multiple results - [${keywords.join(',')}]`, keywords);
+        debugLog(`[findBySourceStrings] Showing multiple results - [${keywords.join(',')}]`, keywords);
+    const lazy = keywords.find(k => k === 'lazy=true');
+    const lazyIndex = keywords.indexOf(lazy);
+    if (lazyIndex > -1)
+        keywords.splice(lazyIndex, 1);
+    if (lazy)
+        debugLog(`[findBySourceStrings] Using lazy search - [${keywords.join(',')}]`, keywords);
+    const _keywords = keywords;
     const moduleCallback = (exports, _, id) => {
         if (!exports || exports === window)
             return false;
         const eIsFunctionAndHasKeywords = typeof exports === 'function'
-            && keywords.every(keyword => exports.toString().includes(keyword));
+            && _keywords.every(keyword => exports.toString().includes(keyword));
         if (eIsFunctionAndHasKeywords)
             return true;
         const eIsObject = Object.keys(exports).length > 0;
         const moduleIsMethodOrFunctionComponent = Object.keys(exports).some(k => typeof exports[k] === 'function'
-            && keywords.every(keyword => exports[k].toString().includes(keyword)));
-        const eIsObjectAsE = keywords.every(keyword => Object.keys(exports).reduce((acc, k) => acc += exports[k]?.toString?.(), '').includes(keyword));
+            && _keywords.every(keyword => exports[k].toString().includes(keyword)));
+        const eIsObjectAsE = _keywords.every(keyword => Object.keys(exports).reduce((acc, k) => acc += exports[k]?.toString?.(), '').includes(keyword));
         const moduleIsObjectFromE = Object.keys(exports).some(k => exports[k] && typeof exports[k] === 'object'
-            && keywords.every(keyword => Object.keys(exports[k])
+            && _keywords.every(keyword => Object.keys(exports[k])
                 .reduce((acc, key) => acc += exports[k][key]?.toString?.(), '')
                 .includes(keyword)));
         const moduleIsClassComponent = Object.keys(exports).some(k => typeof exports[k] === 'function'
             && exports[k].prototype
             && 'render' in exports[k].prototype
-            && keywords.every(keyword => exports[k].prototype.render.toString().includes(keyword)));
+            && _keywords.every(keyword => exports[k].prototype.render.toString().includes(keyword)));
         const moduleIsObjectOfObjects = Object.keys(exports).some(k => exports[k] && typeof exports[k] === 'object'
             && Object.keys(exports[k]).some(k2 => exports[k][k2] && typeof exports[k][k2] === 'object'
-                && keywords.every(keyword => Object.keys(exports[k][k2])
+                && _keywords.every(keyword => Object.keys(exports[k][k2])
                     .reduce((acc, k3) => exports[k][k2] === window ? acc : acc += exports[k][k2][k3]?.toString?.(), '')
                     .includes(keyword))));
-        const eIsClassAsE = typeof exports === 'object' && 'constructor' in exports && keywords.every(keyword => exports.constructor.toString().includes(keyword));
-        const eIsObjectWithKeywords = keywords.every(keyword => Object.keys(exports).reduce((acc, k) => acc += k + exports[k]?.toString?.(), '').includes(keyword));
+        const eIsClassAsE = typeof exports === 'object' && 'constructor' in exports && _keywords.every(keyword => exports.constructor.toString().includes(keyword));
+        const eIsObjectWithKeywords = _keywords.every(keyword => Object.keys(exports).reduce((acc, k) => acc += k + exports[k]?.toString?.(), '').includes(keyword));
         const filter = eIsObject ? (moduleIsMethodOrFunctionComponent
             || eIsObjectAsE
             || moduleIsClassComponent
@@ -503,8 +512,8 @@ const findBySourceStrings = (...keywords) => {
             || moduleIsObjectOfObjects
             || eIsClassAsE
             || eIsObjectWithKeywords) : eIsFunctionAndHasKeywords;
-        if ((filter && id !== backupId) || !filter && id === backupId)
-            log(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, {
+        if ((filter && backupId && id !== backupId) || !filter && id === backupId)
+            debugWarn(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, {
                 exports,
                 internal: {
                     eIsFunctionAndHasKeywords,
@@ -521,14 +530,37 @@ const findBySourceStrings = (...keywords) => {
                 }
             });
         if (backupId && backupId === id)
-            log('Found by id', { exports, id });
+            debugLog('Found by id', { exports, id });
         return filter;
     };
+    const moduleCallbackBoundary = (exports, _, id) => {
+        try {
+            return moduleCallback(exports, _, id);
+        }
+        catch (err) {
+            const expectedErrorMessages = [
+                `%TypedArray%`,
+                `from 'Window'`,
+                `Cannot convert a Symbol value to a string`
+            ];
+            if (err instanceof Error && expectedErrorMessages.some(message => err.message.includes(message)))
+                return undefined;
+            error(`[findBySourceStrings] Error in moduleCallback`, err);
+        }
+    };
+    if (lazy)
+        return BdApi.Webpack.waitForModule(moduleCallbackBoundary, {
+            signal: controller.signal,
+            ...searchOptions
+        }).then(module => {
+            debugLog(`[findBySourceStrings] Found lazy module for [${keywords.join(',')}]`, module);
+            return module;
+        });
     const moduleSearchOptions = searchOptions ?? { searchExports: true };
     return showMultiple
-        ? BdApi.Webpack.getModules(moduleCallback, moduleSearchOptions)
-        : BdApi.Webpack.getModule(moduleCallback, moduleSearchOptions);
-};
+        ? BdApi.Webpack.getModules(moduleCallbackBoundary, moduleSearchOptions)
+        : BdApi.Webpack.getModule(moduleCallbackBoundary, moduleSearchOptions);
+}
 const findComponentBySourceStrings = async (...keywords) => {
     const jsxModule = Finder.byKeys(['jsx']);
     const ReactModule = Finder.byKeys(['createElement', 'cloneElement']);
@@ -583,6 +615,7 @@ const Finder$1 = {
     byName,
     byProtos,
     bySource,
+    get controller () { return controller; },
     default: Finder,
     demangle,
     find: find$2,
@@ -905,6 +938,8 @@ var SupportedFeatures;
     SupportedFeatures[SupportedFeatures["SAMPLE_PLAYBACK"] = 38] = "SAMPLE_PLAYBACK";
 })(SupportedFeatures || (SupportedFeatures = {}));
 
+const RTCConnectionStore = byName("RTCConnectionStore");
+
 const VoiceStore = byKeys(["getVoiceStateForUser"]);
 
 const ApplicationStore = Finder.byName("ApplicationStore");
@@ -1006,7 +1041,7 @@ function findStore(storeName, allowMultiple = false) {
                     this.node = store;
                 }
                 getName() { return store.name; }
-            }).find(store => store.getName() === storeName);
+            })[0];
 }
 
 const Stores = {
@@ -1032,6 +1067,7 @@ const Stores = {
     MediaEngineStore,
     MessageStore,
     PresenceStore,
+    RTCConnectionStore,
     RelationshipStore,
     SelectedChannelStore,
     SelectedGuildStore,
@@ -1166,6 +1202,10 @@ const Utils = {
     get currentUser() { return currentUser(); }
 };
 
+const createActionCallback = (action, callback) => {
+    return callback;
+};
+
 const navigate = Finder.findBySourceStrings("transitionTo -", { defaultExport: false, searchExports: true });
 const navigateToGuild = Finder.findBySourceStrings("transitionToGuild -", { defaultExport: false, searchExports: true });
 const AppActions = {
@@ -1178,6 +1218,13 @@ const ApplicationActions = Finder.findBySourceStrings("fetchApplications", "crea
 const ChannelActions = byKeys(["selectChannel"]);
 
 const MessageActions = byKeys(["sendMessage"]);
+
+const PermissionActions = Finder.findBySourceStrings("addRecipient", "clearPermissionOverwrite", "updatePermissionOverwrite", "backupId=493683");
+
+const dispatch = Finder.findBySourceStrings('getStatus()', 'updateAsync("status",');
+const UserStatusActions = {
+    dispatch,
+};
 
 const InternalVoiceActions = Finder.findBySourceStrings("setVideoEnabled", "setVideoDevice");
 const handleVoiceConnect = Finder.findBySourceStrings("handleVoiceConnect");
@@ -1258,8 +1305,12 @@ const Actions = {
     DISPATCH_ACTIONS,
     GuildActions,
     MessageActions,
+    PermissionActions,
     UserNoteActions,
+    UserStatusActions,
     VoiceActions,
+    createActionCallback,
+    dispatch,
     find
 };
 
@@ -1835,7 +1886,7 @@ const DOM = {
     removeAllInjections
 };
 
-const styles$1 = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible__content.hidden {\n  display: none;\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.custom-message {\n  display: grid;\n  grid-template-columns: auto 1fr;\n  gap: 0.5ch;\n}\n.custom-message__avatar {\n  --size: 2.5rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  object-fit: cover;\n}\n.custom-message__main {\n  display: flex;\n  flex-direction: column;\n  gap: 0.5ch;\n}\n.custom-message__main header {\n  display: flex;\n  align-items: center;\n  gap: 0.5ch;\n}\n.custom-message .user-mention, .custom-message .role-mention {\n  color: var(--mention-foreground);\n  background-color: var(--mention-background);\n}\n.custom-message .user-mention::before, .custom-message .role-mention::before {\n  content: \"@\";\n}\n.custom-message .channel-mention::before {\n  content: \"#\";\n}\n\n.progress-bar {\n  width: 100%;\n  height: 0.5rem;\n  border-radius: 0.5rem;\n  overflow: hidden;\n}\n.progress-bar__fill {\n  height: 100%;\n  background-color: var(--primary-600);\n  transition: width 0.3s;\n}\n\n.tab-bar {\n  max-width: 100%;\n}\n.tab-bar * {\n  color: var(--text-primary);\n  box-sizing: border-box;\n}\n\n.tab-bar__tabs {\n  display: grid;\n  grid-auto-flow: column;\n  max-width: 100%;\n  overflow-x: auto;\n}\n.tab-bar__tabs--no-color .tab-bar__tab {\n  background-color: transparent;\n  border: none;\n}\n\n.tab-bar__tab {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  border: none;\n  background-color: var(--primary-630);\n  color: var(--text-muted);\n  border: 1px solid var(--border-faint);\n  padding: 0.3rem 1rem;\n}\n.tab-bar__tab:hover {\n  background-color: var(--primary-600);\n  color: var(--text-primary);\n}\n.tab-bar__tab--active {\n  border: 1px solid var(--border-faint);\n  border-bottom: 1px solid var(--text-primary) !important;\n  color: var(--text-primary);\n}\n\n.tab-bar__content {\n  padding: 1em;\n  background-color: var(--primary-630);\n  border: 1px solid var(--border-faint);\n}\n.tab-bar__content--no-color {\n  background-color: transparent;\n  border: none;\n}\n.tab-bar__content-page:not(.tab-bar__content-page--active) {\n  opacity: 0;\n  z-index: -1;\n  pointer-events: none;\n  height: 0;\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-form-select, .setting-group {\n  display: flex;\n  flex-direction: column-reverse;\n  gap: 0.5rem;\n  margin-top: 1rem;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
+const styles$1 = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible__content.hidden {\n  display: none;\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.custom-message {\n  display: grid;\n  grid-template-columns: auto 1fr;\n  gap: 0.5ch;\n}\n.custom-message__avatar {\n  --size: 2.5rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  object-fit: cover;\n}\n.custom-message__main {\n  display: flex;\n  flex-direction: column;\n  gap: 0.5ch;\n}\n.custom-message__main header {\n  display: flex;\n  align-items: center;\n  gap: 0.5ch;\n}\n.custom-message .user-mention, .custom-message .role-mention {\n  color: var(--mention-foreground);\n  background-color: var(--mention-background);\n}\n.custom-message .user-mention::before, .custom-message .role-mention::before {\n  content: \"@\";\n}\n.custom-message .channel-mention::before {\n  content: \"#\";\n}\n.custom-message .custom-message__attachments img {\n  max-height: 100%;\n  max-width: 100%;\n}\n\n.progress-bar {\n  width: 100%;\n  height: 0.5rem;\n  border-radius: 0.5rem;\n  overflow: hidden;\n}\n.progress-bar__fill {\n  height: 100%;\n  background-color: var(--primary-600);\n  transition: width 0.3s;\n}\n\n.tab-bar {\n  max-width: 100%;\n}\n.tab-bar * {\n  color: var(--text-primary);\n  box-sizing: border-box;\n}\n\n.tab-bar__tabs {\n  display: grid;\n  grid-auto-flow: column;\n  max-width: 100%;\n  overflow-x: auto;\n}\n.tab-bar__tabs--no-color .tab-bar__tab {\n  background-color: transparent;\n  border: none;\n}\n\n.tab-bar__tab {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  border: none;\n  background-color: var(--primary-630);\n  color: var(--text-muted);\n  border: 1px solid var(--border-faint);\n  padding: 0.3rem 1rem;\n}\n.tab-bar__tab:hover {\n  background-color: var(--primary-600);\n  color: var(--text-primary);\n}\n.tab-bar__tab--active {\n  border: 1px solid var(--border-faint);\n  border-bottom: 1px solid var(--text-primary) !important;\n  color: var(--text-primary);\n}\n\n.tab-bar__content {\n  padding: 1em;\n  background-color: var(--primary-630);\n  border: 1px solid var(--border-faint);\n}\n.tab-bar__content--no-color {\n  background-color: transparent;\n  border: none;\n}\n.tab-bar__content-page:not(.tab-bar__content-page--active) {\n  opacity: 0;\n  z-index: -1;\n  pointer-events: none;\n  height: 0;\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-form-select, .setting-group {\n  display: flex;\n  flex-direction: column-reverse;\n  gap: 0.5rem;\n  margin-top: 1rem;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
 
 class DanhoLibrary {
     constructor() {
@@ -2251,155 +2302,22 @@ function SettingsPanel() {
         tabs.some(([_, value]) => value) && (React.createElement(TabBar, { tabs: tabs, styleChanges: React.createElement(StyleSettings, { ...settingProps }), discordEnhancements: React.createElement(DiscordChangesSettings, { ...settingProps }), danhoEnhancements: React.createElement(DanhoChangesSettings, { ...settingProps }) }))));
 }
 
-const RelationshipActions = Finder.findBySourceStrings("cancelFriendRequest", "addRelationship", "removeRelationship");
+const GuildHeader = Finder.findBySourceStrings("hasCommunityInfoSubheader()", "ANIMATED_BANNER", "header");
 
-function PatchGuildContextMenu(callback) {
-    return BdApi.ContextMenu.patch('guild-context', callback);
-}
+const MemberListItem = Finder.findBySourceStrings("ownerTooltipText", "onClickPremiumGuildIcon:", { defaultExport: false });
 
-function buildTextItem(id, label, action, props = {}) {
-    return {
-        type: 'text',
-        label,
-        action,
-        id,
-        onClose: props.onClose ?? (() => { }),
-        ...props
-    };
-}
-function buildTextItemElement(id, label, action, props = {}) {
-    return BdApi.ContextMenu.buildItem(buildTextItem(id, label, action, props));
-}
-
-function Feature$b() {
-    if (!Settings.current.autoCancelFriendRequests || Settings.current.folderNames.length === 0)
+function Feature$5() {
+    if (!Settings.current.showGuildMembersInHeader)
         return;
-    ActionsEmitter.on('RELATIONSHIP_ADD', ({ relationship }) => {
-        const blockFolderNames = Settings.current.folderNames;
-        const blockFolders = SortedGuildStore.getGuildFolders().filter(folder => blockFolderNames.includes(folder.folderName));
-        if (blockFolders.length === 0)
-            return;
-        const cancelFriendRequest = () => {
-            RelationshipActions.cancelFriendRequest(relationship.user.id, 'friends');
-            const message = `Blocked friend request from ${relationship.user.username} (${relationship.user.id}) because they are in a blocked folder`;
-            log(message);
-            BdApi.UI.showToast(message, { type: 'success' });
-        };
-        const mutualGuildIds = UserProfileStore.getMutualGuilds(relationship.user.id)?.map(v => v.guild.id);
-        if (mutualGuildIds === undefined)
-            return cancelFriendRequest();
-        else if (mutualGuildIds.length === 0)
-            return;
-        const mutualGuildIdsInBlockFolders = mutualGuildIds.filter(guildId => blockFolders.some(folder => folder.guildIds.includes(guildId)));
-        if (mutualGuildIdsInBlockFolders.length === 0)
-            return;
-        else if (mutualGuildIdsInBlockFolders.length !== mutualGuildIds.length)
-            return;
-    });
-    PatchGuildContextMenu((menu, props) => {
-        if (!props.folderName)
-            return;
-        const isInBlockedFolder = Settings.current.folderNames.includes(props.folderName);
-        menu.props.children.push(buildTextItemElement('danho-block-friend-requests', isInBlockedFolder ? 'Unblock friend requests' : 'Block friend requests', () => {
-            Settings.update(cur => ({ ...cur, folderNames: isInBlockedFolder
-                    ? cur.folderNames.filter(v => v !== props.folderName)
-                    : [...cur.folderNames, props.folderName] }));
-        }, { color: 'danger' }));
-    });
-}
-
-const AutoCancelFriendRequests = {
-    __proto__: null,
-    default: Feature$b
-};
-
-function PatchChannelContextMenu(callback) {
-    return BdApi.ContextMenu.patch('channel-context', callback);
-}
-
-function joinWithCamera(channelId) {
-    const preferredWebcamId = MediaEngineStore.getVideoDeviceId();
-    VoiceActions.handleVoiceConnect({ channelId });
-    if (!preferredWebcamId) {
-        BdApi.UI.showToast("No preferred webcam set", { type: "error" });
-        $(s => s.className('button', 'button').ariaLabelContains("Turn On Camera"))?.element?.click();
-        return;
-    }
-    VoiceActions.setVideoDevice(preferredWebcamId);
-    VoiceActions.setVideoEnabled(true);
-}
-
-async function Feature$a() {
-    if (!Settings.current.joinVoiceWithCamera)
-        return;
-    PatchChannelContextMenu((menu, props) => {
-        const options = menu.props.children;
-        const voiceOptions = options[3].props.children;
-        voiceOptions.unshift(buildTextItemElement("join-with-camera", "Join with Camera", () => joinWithCamera(props.channel.id)));
-    });
-    PatchHomeVoiceChannel();
-}
-function PatchHomeVoiceChannel() {
-    const ChannelItem = Finder.findBySourceStrings("tutorialId", "visible", "shouldShow", { defaultExport: false });
-    const HOME_CHANNEL_ID = '1266581800428245094';
-    after(ChannelItem, "Z", ({ args: [props] }) => {
-        if (!props.children?.props?.children?.[1]?.props?.channel)
-            return;
-        const channel = props.children.props.children[1].props.channel;
-        if (!channel || channel.id !== HOME_CHANNEL_ID)
-            return;
-        const { className, 'data-dnd-name': dndName } = props.children.props;
-        const node = $(s => s.className(className).and.data('dnd-name', dndName));
-        node?.on('dblclick', (e) => {
-            e.preventDefault();
-            joinWithCamera(HOME_CHANNEL_ID);
-        });
-    });
-}
-
-const JoinVoiceWithCamera = {
-    __proto__: null,
-    default: Feature$a
-};
-
-function Feature$9() {
-    const headerMemo = Finder.findBySourceStrings("hasCommunityInfoSubheader()", "ANIMATED_BANNER", "header");
-    if (!headerMemo)
+    if (!GuildHeader)
         return Logger.error("Failed to find header memo");
-    const MemberListItem = Finder.findBySourceStrings("ownerTooltipText", "onClickPremiumGuildIcon:", { defaultExport: false });
     if (!MemberListItem)
         return Logger.error("Failed to find MemberListItem");
-    after(MemberListItem, 'Z', ({ args: [props] }) => {
-        let showGuildMembers = $('.danho-lib__header-members', false);
-        if (showGuildMembers.length >= 1)
-            return;
-        const guild = GuildStore.getGuild(props.guildId);
-        if (!guild)
-            return;
-        const members = GuildMemberStore.getMembers(guild.id);
-        const presenceState = PresenceStore.getState();
-        const nonOfflineMembers = members.filter(member => presenceState.statuses[member.userId] && presenceState.statuses[member.userId] !== 'offline');
-        const header = $(s => s.className('container', 'nav').and.ariaLabel(`${guild.name} (server)`)
-            .className('header', 'header'));
-        if (!header)
-            return;
-        header.appendComponent(React.createElement(Text, { variant: "heading-md/normal" },
-            nonOfflineMembers.length,
-            "/",
-            members.length), { className: 'danho-lib__header-members' });
-        setTimeout(() => {
-            showGuildMembers = $('danho-lib__header-members', false);
-            if (showGuildMembers.length > 1) {
-                showGuildMembers.shift();
-                showGuildMembers.forEach(e => e.unmount());
-            }
-        }, 100);
-    }, { name: 'GuildHeader' });
 }
 
 const ShowGuildMembersInHeader = {
     __proto__: null,
-    default: Feature$9
+    default: Feature$5
 };
 
 const { focused } = byKeys(['focused', 'item', 'labelContainer']);
@@ -2462,19 +2380,12 @@ function orderPostsByAuthor() {
     });
 }
 
-async function patchSortAndView() {
-    const addSortAndViewButtonClick = () => {
-        if (!testForumChannel())
-            return;
-        const sortAndViewButton = $(s => s.ariaLabel('Sort & view').and.type('button'));
-        sortAndViewButton?.on('click', addSortByAuthorOnDOM);
-        debugLog(sortAndViewButton ? 'Sort and view button found' : 'Sort and view button not found');
-    };
-    addSortAndViewButtonClick();
-    ActionsEmitter.on('CHANNEL_SELECT', async () => {
-        await sleep(1000);
-        addSortAndViewButtonClick();
-    });
+function addSortAndViewButtonClick() {
+    if (!testForumChannel())
+        return;
+    const sortAndViewButton = $(s => s.ariaLabel('Sort & view').and.type('button'));
+    sortAndViewButton?.on('click', addSortByAuthorOnDOM);
+    debugLog(sortAndViewButton ? 'Sort and view button found' : 'Sort and view button not found');
 }
 function testForumChannel() {
     const [_blank, _channelsString, _guildId, channelId] = window.location.pathname.split('/');
@@ -2484,23 +2395,333 @@ function testForumChannel() {
     return channel.type === 15 ;
 }
 
-function Feature$8() {
+function Feature$4() {
     if (!Settings.current.allowForumSortByAuthor)
         return;
-    patchSortAndView();
+    addSortAndViewButtonClick();
 }
 
 const SortForumsByAuthor = {
     __proto__: null,
-    default: Feature$8
+    default: Feature$4
 };
 
 const DiscordEnhancements = [
-    AutoCancelFriendRequests,
-    JoinVoiceWithCamera,
     ShowGuildMembersInHeader,
     SortForumsByAuthor,
 ];
+
+function Feature$3() {
+    if (!Settings.current.badges)
+        return;
+    Badges$1.load();
+}
+
+const Badges = {
+    __proto__: null,
+    default: Feature$3
+};
+
+const style$2 = ".bdd-wrapper:has(#secret-channel-login) {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  position: absolute;\n  inset: 0;\n  background-color: var(--background-primary);\n  height: 100%;\n  width: 100%;\n  z-index: 9999;\n}\n\n#secret-channel-login {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 1rem;\n}\n\ndiv:has(> #secret-channel-login) {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}";
+
+const LockHello = {
+    __proto__: null,
+    style: style$2
+};
+
+function handleHiding() {
+    const status = UserUtils.me.status;
+    const isHiding = status === 'invisible';
+    const { isHidingOnPurpose } = Settings.current;
+    if (isHidingOnPurpose && !isHiding)
+        Settings.update({ isHidingOnPurpose: false });
+    else if (!isHidingOnPurpose && isHiding) {
+        const close = BdApi.UI.showNotice(`You appear to be hiding... Is this on purpose?`, {
+            buttons: [
+                {
+                    label: 'Yes, stay hidden',
+                    onClick: () => {
+                        Settings.update({ isHidingOnPurpose: true });
+                        close();
+                    }
+                },
+                {
+                    label: 'No, get me back online',
+                    onClick: () => {
+                        if (!UserStatusActions.dispatch)
+                            return BdApi.UI.showToast('Could not find dispatcher', { type: 'error' });
+                        UserStatusActions.dispatch('online', status, undefined, undefined);
+                        close();
+                    }
+                },
+            ]
+        });
+    }
+}
+
+function Feature$2() {
+    if (!Settings.current.wakeUp)
+        return;
+    handleHiding();
+}
+
+const WakeUp = {
+    __proto__: null,
+    default: Feature$2
+};
+
+const DanhoEnhancements = [
+    Badges,
+    LockHello,
+    WakeUp,
+];
+
+const style$1 = ".danho-expand-bio-again div[class*=descriptionClamp] {\n  display: block !important;\n  max-height: unset !important;\n}\n.danho-expand-bio-again button[class*=viewFullBio] {\n  display: none !important;\n}";
+
+function Feature$1() {
+    if (!Settings.current.expandBioAgain)
+        return;
+    $('#app-mount').addClass('danho-expand-bio-again');
+}
+
+const ExpandBioAgain = {
+    __proto__: null,
+    default: Feature$1,
+    styles: style$1
+};
+
+const style = ".danho-non-obnoxious-profile-effects [class*=profileEffects]:hover {\n  opacity: 0.2;\n}";
+
+function Feature() {
+    if (!Settings.current.nonObnoxiousProfileEffects)
+        return;
+    $('#app-mount').addClass('danho-non-obnoxious-profile-effects');
+}
+
+const NonObnoxiousProfileEffects = {
+    __proto__: null,
+    default: Feature,
+    styles: style
+};
+
+const prettyRoles$1 = "*[role=list][data-list-id*=roles] > div div:has([class*=roleRemoveButton][role=button]),\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveButton][role=button],\n*[role=list][data-list-id*=roles] > div [class*=roleFlowerStar],\n*[role=list][data-list-id*=roles] > div [class*=roleCircle] {\n  position: absolute;\n  inset: 0;\n  z-index: 1;\n}\n\n*[role=list][data-list-id*=roles] {\n  padding: 1rem;\n}\n*[role=list][data-list-id*=roles]:has(.danho-library__pretty-roles__group-role) div:has([class*=expandButton]) {\n  flex: 1 1 50%;\n}\n\n*[role=list][data-list-id*=roles] > div {\n  --role-color--default: rgb(86, 105, 118);\n  --role-color: var(--role-color--default);\n  --role-color-alpha: .125;\n  position: relative;\n  border: 1px solid rgb(var(--role-color, --role-color--default));\n  background-color: rgba(var(--role-color, --role-color--default), var(--role-color-alpha));\n  border-radius: 0.25rem;\n  height: 25px;\n  box-sizing: border-box;\n  justify-content: center;\n}\n*[role=list][data-list-id*=roles] > div [class*=roleCircle],\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveIcon] {\n  height: 100%;\n  width: 100%;\n}\n*[role=list][data-list-id*=roles] > div span[class*=roleCircle] {\n  background-color: unset !important;\n}\n*[role=list][data-list-id*=roles] > div svg[class*=roleRemoveIcon] {\n  display: none;\n}\n*[role=list][data-list-id*=roles] > div div:has(svg[class*=linkIcon]) {\n  position: absolute;\n  top: -0.5rem;\n  left: -0.75rem;\n}\n*[role=list][data-list-id*=roles] > div:hover svg[class*=linkIcon] {\n  display: inline-block !important;\n}\n\n.danho-library__pretty-roles__group-role {\n  flex: 1 1 100% !important;\n  margin-inline: -1rem;\n}";
+
+const PrettyRoles = {
+    __proto__: null,
+    styles: prettyRoles$1
+};
+
+const StyleChanges = [
+    ExpandBioAgain,
+    NonObnoxiousProfileEffects,
+    PrettyRoles,
+];
+
+const features = [
+    ...DiscordEnhancements,
+    ...DanhoEnhancements,
+    ...StyleChanges,
+];
+const Features = () => features.forEach(feature => 'default' in feature && feature.default());
+const styles = features.map(feature => 'styles' in feature ? feature.styles
+    : 'style' in feature ? feature.style
+        : '').join("\n\n");
+
+const DUNGEON_GUILD_ID = '460926327269359626';
+const HELLO_CHANNEL_ID = '1303419756572835930';
+
+const LOGIN_ID = 'secret-channel-login';
+function Login({ onSubmit }) {
+    function handleSubmit(e) {
+        e.preventDefault();
+        const password = e.currentTarget.password.value;
+        onSubmit(password);
+    }
+    return (React.createElement("form", { id: LOGIN_ID, onSubmit: handleSubmit },
+        React.createElement(Text, null, "This channel is locked. Please enter the password to access it."),
+        React.createElement("div", { className: 'form-group' },
+            React.createElement(FormItem, { title: 'Password' }),
+            React.createElement("input", { type: "password", name: "password" })),
+        React.createElement(Button, { type: "submit" }, "Login")));
+}
+
+class ChannelLock {
+    static instance(stayUnlockedForMinutes, initialState = false) {
+        if (!this._instance || this._instance._timeoutDuration !== stayUnlockedForMinutes * 60 * 1000) {
+            return this._instance = new ChannelLock(stayUnlockedForMinutes, initialState);
+        }
+        return this._instance;
+    }
+    constructor(stayUnlockedForMinutes, initialState) {
+        this._locked = initialState;
+        this._timeoutDuration = stayUnlockedForMinutes * 60 * 1000;
+    }
+    get isLocked() {
+        return this._locked;
+    }
+    lock() {
+        this._locked = true;
+    }
+    unlock() {
+        this._locked = false;
+        if (this._timeout)
+            clearTimeout(this._timeout);
+        this._timeout = setTimeout(() => {
+            if (!this._locked)
+                this._locked = true;
+        }, this._timeoutDuration);
+    }
+}
+ChannelLock._instance = null;
+
+let debouncedLoginRemover;
+const LockChannels = createActionCallback('CHANNEL_SELECT', async ({ channelId, guildId }) => {
+    if (!channelId
+        || !guildId
+        || guildId !== DUNGEON_GUILD_ID
+        || channelId !== HELLO_CHANNEL_ID) {
+        if (debouncedLoginRemover)
+            clearTimeout(debouncedLoginRemover);
+        if (document.getElementById(LOGIN_ID))
+            debouncedLoginRemover = setTimeout(() => document.getElementById(LOGIN_ID)?.parentElement.remove(), 100);
+        return;
+    }
+    await wait(() => { }, 1);
+    const contentContainer = $(`[class*='content']:has(> main[class*='chatContent'])`);
+    if (!contentContainer)
+        return log(`Could not find content container`, {
+            get contentContainer() {
+                return $(`[class*='content']:has(> main[class*='chatContent'])`);
+            }
+        });
+    const Lock = ChannelLock.instance(Settings.current.lockUnlockForMinutes, Settings.current.initialLockState);
+    if (Lock.isLocked)
+        contentContainer.insertComponent('afterbegin', React.createElement(Login, { onSubmit: password => {
+                const correct = password === Settings.current.lockPassword;
+                if (!correct)
+                    return BdApi.UI.showToast('Incorrect password', { type: 'error' });
+                $(`#${LOGIN_ID}`).parent.unmount();
+                Lock.unlock();
+            } }));
+});
+
+const RegisterSortByAuthorOptionInForums = createActionCallback('CHANNEL_SELECT', async () => {
+    await sleep(1000);
+    addSortAndViewButtonClick();
+});
+
+function onChannelSelect$1() {
+    if (!Settings.current.lockChannels
+        || !Settings.current.allowForumSortByAuthor)
+        return;
+    ActionsEmitter.on('CHANNEL_SELECT', data => {
+        if (Settings.current.lockChannels)
+            LockChannels(data);
+        if (Settings.current.allowForumSortByAuthor)
+            RegisterSortByAuthorOptionInForums(data);
+    });
+}
+
+const RelationshipActions = Finder.findBySourceStrings("cancelFriendRequest", "addRelationship", "removeRelationship");
+
+const CancelFriendRequest = createActionCallback('RELATIONSHIP_ADD', ({ relationship }) => {
+    const blockFolderNames = Settings.current.folderNames;
+    const blockFolders = SortedGuildStore.getGuildFolders().filter(folder => blockFolderNames.includes(folder.folderName));
+    if (blockFolders.length === 0)
+        return;
+    const cancelFriendRequest = () => {
+        RelationshipActions.cancelFriendRequest(relationship.user.id, 'friends');
+        const message = `Blocked friend request from ${relationship.user.username} (${relationship.user.id}) because they are in a blocked folder`;
+        log(message);
+        BdApi.UI.showToast(message, { type: 'success' });
+    };
+    const mutualGuildIds = UserProfileStore.getMutualGuilds(relationship.user.id)?.map(v => v.guild.id);
+    if (mutualGuildIds === undefined)
+        return cancelFriendRequest();
+    else if (mutualGuildIds.length === 0)
+        return;
+    const mutualGuildIdsInBlockFolders = mutualGuildIds.filter(guildId => blockFolders.some(folder => folder.guildIds.includes(guildId)));
+    if (mutualGuildIdsInBlockFolders.length === 0)
+        return;
+    else if (mutualGuildIdsInBlockFolders.length !== mutualGuildIds.length)
+        return;
+});
+
+function onRelationshipAdd() {
+    if (!Settings.current.autoCancelFriendRequests
+        || Settings.current.folderNames.length === 0)
+        return;
+    ActionsEmitter.on('RELATIONSHIP_ADD', data => {
+        if (Settings.current.autoCancelFriendRequests)
+            CancelFriendRequest(data);
+    });
+}
+
+class JoinWithCameraManager {
+    static get instance() {
+        return this._instance ??= new JoinWithCameraManager();
+    }
+    constructor() {
+        this._shouldEnableCamera = false;
+    }
+    get() {
+        return {
+            channelId: this._channelId,
+            shouldEnableCamera: this._shouldEnableCamera,
+        };
+    }
+    set(channelId, shouldEnableCamera) {
+        this._channelId = channelId;
+        this._shouldEnableCamera = shouldEnableCamera;
+    }
+    reset() {
+        this._channelId = undefined;
+        this._shouldEnableCamera = false;
+    }
+}
+
+async function joinWithCamera(channelId) {
+    JoinWithCameraManager.instance.set(channelId, true);
+    if (RTCConnectionStore.isDisconnected()
+        || RTCConnectionStore.getRTCConnection?.().channelId !== channelId) {
+        VoiceActions.handleVoiceConnect({ channelId });
+    }
+    else
+        enableCamera();
+}
+const onVoiceStatesUpdates = createActionCallback('VOICE_STATE_UPDATES', ({ voiceStates }) => {
+    const { channelId, shouldEnableCamera } = JoinWithCameraManager.instance.get();
+    const update = voiceStates.find(state => state.channelId === channelId && state.userId === UserUtils.me.id);
+    if (!update || !shouldEnableCamera)
+        return;
+    JoinWithCameraManager.instance.reset();
+    enableCamera();
+});
+function enableCamera() {
+    const preferredWebcamId = MediaEngineStore.getVideoDeviceId();
+    if (!preferredWebcamId) {
+        BdApi.UI.showToast("No preferred webcam set", { type: "error" });
+        $(s => s.className('button', 'button').ariaLabelContains("Turn On Camera"))?.element?.click();
+        return;
+    }
+    VoiceActions.setVideoDevice(preferredWebcamId);
+    VoiceActions.setVideoEnabled(true);
+}
+
+function onChannelSelect() {
+    if (!Settings.current.joinVoiceWithCamera)
+        return;
+    ActionsEmitter.on('VOICE_STATE_UPDATES', data => {
+        if (Settings.current.joinVoiceWithCamera)
+            onVoiceStatesUpdates(data);
+    });
+}
+
+function listenToActions() {
+    onChannelSelect$1();
+    onRelationshipAdd();
+    onChannelSelect();
+}
 
 const createPatcherCallback = (callback) => callback;
 const createPatcherAfterCallback = (callback) => callback;
@@ -2579,234 +2800,80 @@ const modifyBadges = createPatcherAfterCallback(({ result }) => {
 });
 
 function afterBadgeList() {
+    if (!Settings.current.badges)
+        return;
     after(RenderedUserProfileBadgeList, 'Z', data => {
-        modifyBadges(data);
+        if (Settings.current.badges)
+            modifyBadges(data);
     }, { name: 'BadgeList' });
 }
 
-function Feature$7() {
-    if (!Settings.current.badges)
+const ChannelItem = Finder.findBySourceStrings("tutorialId", "visible", "shouldShow", { defaultExport: false });
+
+const HOME_CHANNEL_ID = '1266581800428245094';
+
+const addJoinWithCameraDoubleClick = createPatcherAfterCallback(({ args: [props] }) => {
+    if (!props.children?.props?.children?.[1]?.props?.channel)
         return;
-    Badges$1.load();
-    afterBadgeList();
-}
-
-const Badges = {
-    __proto__: null,
-    default: Feature$7
-};
-
-class ChannelLock {
-    constructor(stayUnlockedForMinutes, initialState) {
-        this._locked = initialState;
-        this._timeoutDuration = stayUnlockedForMinutes * 60 * 1000;
-    }
-    get isLocked() {
-        return this._locked;
-    }
-    lock() {
-        this._locked = true;
-    }
-    unlock() {
-        this._locked = false;
-        if (this._timeout)
-            clearTimeout(this._timeout);
-        this._timeout = setTimeout(() => {
-            if (!this._locked)
-                this._locked = true;
-        }, this._timeoutDuration);
-    }
-}
-
-const LOGIN_ID = 'secret-channel-login';
-function Login({ onSubmit }) {
-    function handleSubmit(e) {
+    const channel = props.children.props.children[1].props.channel;
+    if (!channel || channel.id !== HOME_CHANNEL_ID)
+        return;
+    const { className, 'data-dnd-name': dndName } = props.children.props;
+    const node = $(s => s.className(className).and.data('dnd-name', dndName));
+    node?.on('dblclick', (e) => {
         e.preventDefault();
-        const password = e.currentTarget.password.value;
-        onSubmit(password);
-    }
-    return (React.createElement("form", { id: LOGIN_ID, onSubmit: handleSubmit },
-        React.createElement(Text, null, "This channel is locked. Please enter the password to access it."),
-        React.createElement("div", { className: 'form-group' },
-            React.createElement(FormItem, { title: 'Password' }),
-            React.createElement("input", { type: "password", name: "password" })),
-        React.createElement(Button, { type: "submit" }, "Login")));
-}
-
-const style$2 = ".bdd-wrapper:has(#secret-channel-login) {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  position: absolute;\n  inset: 0;\n  background-color: var(--background-primary);\n  height: 100%;\n  width: 100%;\n  z-index: 9999;\n}\n\n#secret-channel-login {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 1rem;\n}\n\ndiv:has(> #secret-channel-login) {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}";
-
-const DUNGEON_GUILD_ID = '460926327269359626';
-const HELLO_CHANNEL_ID = '1303419756572835930';
-let debouncedLoginRemover;
-function Feature$6() {
-    const Lock = new ChannelLock(Settings.current.lockUnlockForMinutes, Settings.current.initialLockState);
-    ActionsEmitter.on('CHANNEL_SELECT', async ({ channelId, guildId }) => {
-        if (!channelId
-            || !guildId
-            || guildId !== DUNGEON_GUILD_ID
-            || channelId !== HELLO_CHANNEL_ID) {
-            if (debouncedLoginRemover)
-                clearTimeout(debouncedLoginRemover);
-            if (document.getElementById(LOGIN_ID))
-                debouncedLoginRemover = setTimeout(() => document.getElementById(LOGIN_ID)?.parentElement.remove(), 100);
-            return;
-        }
-        await wait(() => { }, 1);
-        const contentContainer = $(`[class*='content']:has(> main[class*='chatContent'])`);
-        if (!contentContainer)
-            return Logger.log(`Could not find content container`, {
-                get contentContainer() {
-                    return $(`[class*='content']:has(> main[class*='chatContent'])`);
-                }
-            });
-        if (Lock.isLocked)
-            contentContainer.insertComponent('afterbegin', React.createElement(Login, { onSubmit: password => {
-                    const correct = password === Settings.current.lockPassword;
-                    if (!correct)
-                        return BdApi.UI.showToast('Incorrect password', { type: 'error' });
-                    $(`#${LOGIN_ID}`).parent.unmount();
-                    Lock.unlock();
-                } }));
+        joinWithCamera(HOME_CHANNEL_ID);
     });
-}
+});
 
-const LockHello = {
-    __proto__: null,
-    default: Feature$6,
-    style: style$2
-};
-
-function PatchUserContextMenu(callback) {
-    return BdApi.ContextMenu.patch('user-context', callback);
-}
-
-const DEADLY_NINJA_ID = '405763731079823380';
-const DUNGEON_ID = '760145289956294716';
-function Feature$5() {
-    if (!Settings.current.addToDungeon)
+function afterChannelItem() {
+    if (!Settings.current.joinVoiceWithCamera)
         return;
-    const permissionActions = Finder.findBySourceStrings("addRecipient", "clearPermissionOverwrite", "updatePermissionOverwrite", "backupId=493683");
-    const hasPermission = (channel, userId, accessPermissions) => {
-        if (!accessPermissions)
-            return false;
-        const userPermissions = channel.permissionOverwrites[userId]?.allow ?? 0n;
-        return BigInt(userPermissions & accessPermissions) === accessPermissions;
-    };
-    PatchUserContextMenu((menu, props) => {
-        const isGuildContextMenu = !!props.guildId;
-        if (!isGuildContextMenu)
-            return menu;
-        const guild = GuildStore.getGuild(props.guildId);
-        if (guild.id !== DEADLY_NINJA_ID)
-            return menu;
-        const memberIds = GuildMemberStore.getMemberIds(guild.id);
-        const dungeon = GuildChannelStore.getChannels(guild.id).VOCAL.find(stored => stored.channel.id === DUNGEON_ID)?.channel;
-        if (!dungeon)
-            return menu;
-        const accessPermission = dungeon.accessPermission ?? 1049600n;
-        if (typeof accessPermission !== "bigint") {
-            console.error("Invalid accessPermission value", accessPermission);
-            return menu;
+    after(ChannelItem, 'Z', (...args) => {
+        if (Settings.current.joinVoiceWithCamera)
+            addJoinWithCameraDoubleClick(...args);
+    }, { name: 'ChannelItem' });
+}
+
+const updateGuildHeader = createPatcherAfterCallback(({ args: [props] }) => {
+    let showGuildMembers = $('.danho-lib__header-members', false);
+    if (showGuildMembers.length >= 1)
+        return;
+    const guild = GuildStore.getGuild(props.guildId);
+    if (!guild)
+        return;
+    const members = GuildMemberStore.getMembers(guild.id);
+    const presenceState = PresenceStore.getState();
+    const nonOfflineMembers = members.filter(member => presenceState.statuses[member.userId] && presenceState.statuses[member.userId] !== 'offline');
+    const header = $(s => s.className('container', 'nav').and.ariaLabel(`${guild.name} (server)`)
+        .className('header', 'header'));
+    if (!header)
+        return;
+    header.appendComponent(React.createElement(Text, { variant: "heading-md/normal" },
+        nonOfflineMembers.length,
+        "/",
+        members.length), { className: 'danho-lib__header-members' });
+    setTimeout(() => {
+        showGuildMembers = $('danho-lib__header-members', false);
+        if (showGuildMembers.length > 1) {
+            showGuildMembers.shift();
+            showGuildMembers.forEach(e => e.unmount());
         }
-        const permittedUsers = memberIds
-            .map(UserStore.getUser)
-            .filter(Boolean)
-            .filter(user => hasPermission(dungeon, user.id, accessPermission));
-        if (!permittedUsers.length)
-            return menu;
-        const hasAccess = permittedUsers.some(user => user.id === props.user.id);
-        const allow = (userId) => ({
-            allow: accessPermission,
-            deny: 0n,
-            id: userId,
-            type: 1,
-        });
-        menu.props.children[0].props.children[5].props.children.push(buildTextItemElement(hasAccess ? "remove-from-dungeon" : "add-to-dungeon", hasAccess ? "Remove from Dungeon" : "Add to Dungeon", () => {
-            if (hasAccess)
-                permissionActions.clearPermissionOverwrite(DUNGEON_ID, props.user.id);
-            else
-                permissionActions.updatePermissionOverwrite(DUNGEON_ID, allow(props.user.id));
-        }));
-    });
-}
+    }, 100);
+});
 
-const QuickAddMemberToDungeon = {
-    __proto__: null,
-    default: Feature$5
-};
-
-function Feature$4() {
-    if (!Settings.current.wakeUp)
+function afterMemberListItem() {
+    if (!Settings.current.showGuildMembersInHeader)
         return;
-    const status = UserUtils.me.status;
-    const isHiding = status === 'invisible';
-    const { isHidingOnPurpose } = Settings.current;
-    if (isHidingOnPurpose && !isHiding)
-        Settings.update({ isHidingOnPurpose: false });
-    else if (!isHidingOnPurpose && isHiding) {
-        const close = BdApi.UI.showNotice(`You appear to be hiding... Is this on purpose?`, {
-            buttons: [
-                {
-                    label: 'Yes, stay hidden',
-                    onClick: () => {
-                        Settings.update({ isHidingOnPurpose: true });
-                        close();
-                    }
-                },
-                {
-                    label: 'No, get me back online',
-                    onClick: () => {
-                        const dispatch = Finder.findBySourceStrings('getStatus()', 'updateAsync("status",');
-                        if (!dispatch)
-                            return BdApi.UI.showToast('Could not find dispatcher', { type: 'error' });
-                        dispatch('online', status, undefined, undefined);
-                        close();
-                    }
-                },
-            ]
-        });
-    }
+    after(MemberListItem, 'Z', (...args) => {
+        if (Settings.current.showGuildMembersInHeader)
+            updateGuildHeader(...args);
+    }, { name: 'MemberListItem' });
 }
 
-const WakeUp = {
-    __proto__: null,
-    default: Feature$4
-};
-
-const DanhoEnhancements = [
-    Badges,
-    LockHello,
-    QuickAddMemberToDungeon,
-    WakeUp,
-];
-
-const style$1 = ".danho-expand-bio-again div[class*=descriptionClamp] {\n  display: block !important;\n  max-height: unset !important;\n}\n.danho-expand-bio-again button[class*=viewFullBio] {\n  display: none !important;\n}";
-
-function Feature$3() {
-    if (!Settings.current.expandBioAgain)
-        return;
-    $('#app-mount').addClass('danho-expand-bio-again');
-}
-
-const ExpandBioAgain = {
-    __proto__: null,
-    default: Feature$3,
-    styles: style$1
-};
-
-const style = ".danho-non-obnoxious-profile-effects [class*=profileEffects]:hover {\n  opacity: 0.2;\n}";
-
-function Feature$2() {
-    if (!Settings.current.nonObnoxiousProfileEffects)
-        return;
-    $('#app-mount').addClass('danho-non-obnoxious-profile-effects');
-}
-
-const NonObnoxiousProfileEffects = {
-    __proto__: null,
-    default: Feature$2,
-    styles: style
-};
+const RolesListModule = demangle({
+    RolesList: bySource$1('onAddRole')
+}, null, true);
 
 const PrettyRolesManager = new class PrettyRolesManager {
     getRole(roleId) {
@@ -2824,6 +2891,129 @@ const PrettyRolesManager = new class PrettyRolesManager {
             || (this.context.canManageRoles && this.context.highestRole.id !== this.role.id);
     }
 };
+
+function prettyRoles() {
+    $(s => s.role('list', 'div').and.ariaLabelContains('Role'))?.children().forEach(el => {
+        const roleId = el.attr('data-list-item-id')?.split('_').pop();
+        if (!roleId)
+            return;
+        const role = PrettyRolesManager.getRole(roleId);
+        if (!role)
+            return;
+        el.setStyleProperty('--role-color', hexToRgb(role.colorString
+            ?? rgbToHex(DEFAULT_DISCORD_ROLE_COLOR.split(',').map(Number))).join(','));
+        if (Settings.current.groupRoles) {
+            const isGroupRole = role.name.toLowerCase().includes('roles');
+            if (isGroupRole)
+                el.addClass('danho-library__pretty-roles__group-role');
+        }
+    });
+}
+
+function afterRolesList() {
+    if (!Settings.current.prettyRoles)
+        return;
+    after(RolesListModule, 'RolesList', () => {
+        if (Settings.current.prettyRoles)
+            prettyRoles();
+    });
+}
+
+const TextModule = Finder.findBySourceStrings('lineClamp', 'tabularNumbers', 'scaleFontToUserSetting');
+
+const transformTextIntoLinks = createPatcherAfterCallback(({ args: [props], result }) => {
+    const { className, children: text } = props;
+    if (!className || !className.includes('pronounsText'))
+        return;
+    const regex = text.match(/\w{2}\.pronouns\.page\/@(\w+)/);
+    if (!regex)
+        return;
+    const [matched] = regex;
+    result.props.children = (React.createElement("a", { href: `https://${matched}`, target: "_blank", rel: "noreferrer noopener" }, matched));
+});
+
+function afterTextModule() {
+    if (!Settings.current.pronounsPageLinks)
+        return;
+    after(TextModule, 'render', (data) => {
+        if (Settings.current.pronounsPageLinks)
+            transformTextIntoLinks(data);
+    }, { name: 'TextModule--Pronouns' });
+}
+
+const UserProfileModalAboutMe = Finder.findBySourceStrings('look:"profile_modal"', 'lazy=true', { defaultExport: false });
+
+async function afterUserProfileModalAboutMe() {
+    if (!Settings.current.prettyRoles)
+        return;
+    UserProfileModalAboutMe.then(module => {
+        if (!module)
+            return Logger.error('UserProfileModalAboutMe module not found');
+        after(module, 'Z', () => {
+            if (Settings.current.prettyRoles)
+                prettyRoles();
+        }, { name: 'UserProfileModalAboutMe' });
+    });
+}
+
+function PatchChannelContextMenu$1(callback) {
+    return BdApi.ContextMenu.patch('channel-context', callback);
+}
+
+function buildTextItem(id, label, action, props = {}) {
+    return {
+        type: 'text',
+        label,
+        action,
+        id,
+        onClose: props.onClose ?? (() => { }),
+        ...props
+    };
+}
+function buildTextItemElement(id, label, action, props = {}) {
+    return BdApi.ContextMenu.buildItem(buildTextItem(id, label, action, props));
+}
+
+const patched$2 = function (menu, props) {
+    const options = menu.props.children;
+    const voiceOptions = options[3].props.children;
+    voiceOptions.unshift(buildTextItemElement("join-with-camera", "Join with Camera", () => joinWithCamera(props.channel.id)));
+};
+
+function PatchChannelContextMenu() {
+    if (!Settings.current.joinVoiceWithCamera)
+        return;
+    PatchChannelContextMenu$1((menu, props) => {
+        if (Settings.current.joinVoiceWithCamera)
+            patched$2(menu, props);
+    });
+}
+
+function PatchGuildContextMenu$1(callback) {
+    return BdApi.ContextMenu.patch('guild-context', callback);
+}
+
+const patched$1 = function (menu, props) {
+    if (!props.folderName)
+        return;
+    const isInBlockedFolder = Settings.current.folderNames.includes(props.folderName);
+    menu.props.children.push(buildTextItemElement('danho-block-friend-requests', isInBlockedFolder ? 'Unblock friend requests' : 'Block friend requests', () => {
+        Settings.update(cur => ({
+            ...cur, folderNames: isInBlockedFolder
+                ? cur.folderNames.filter(v => v !== props.folderName)
+                : [...cur.folderNames, props.folderName]
+        }));
+    }, { color: 'danger' }));
+};
+
+function PatchGuildContextMenu() {
+    if (!Settings.current.autoCancelFriendRequests)
+        return;
+    PatchGuildContextMenu$1((menu, props) => {
+        if (Settings.current.autoCancelFriendRequests)
+            patched$1(menu, props);
+    });
+}
 
 function modifyRoleContextMenu(result) {
     if (!PrettyRolesManager.context)
@@ -2844,129 +3034,109 @@ function modifyRoleContextMenu(result) {
 }
 
 function afterRoleContextMenu() {
+    if (!Settings.current.prettyRoles)
+        return;
     contextMenu('dev-context', result => {
-        return modifyRoleContextMenu(result);
+        if (Settings.current.prettyRoles)
+            modifyRoleContextMenu(result);
     });
 }
 
-const RolesListModule = demangle({
-    RolesList: bySource$1('onAddRole')
-}, null, true);
+function PatchUserContextMenu$1(callback) {
+    return BdApi.ContextMenu.patch('user-context', callback);
+}
+
+const DEADLY_NINJA_ID = '405763731079823380';
+const DUNGEON_ID = '760145289956294716';
+
+function hasPermission(channel, userId, accessPermissions) {
+    if (!accessPermissions)
+        return false;
+    const userPermissions = channel.permissionOverwrites[userId]?.allow ?? 0n;
+    return BigInt(userPermissions & accessPermissions) === accessPermissions;
+}
+
+const patched = function (menu, props) {
+    const isGuildContextMenu = !!props.guildId;
+    if (!isGuildContextMenu)
+        return menu;
+    const guild = GuildStore.getGuild(props.guildId);
+    if (guild.id !== DEADLY_NINJA_ID)
+        return menu;
+    const memberIds = GuildMemberStore.getMemberIds(guild.id);
+    const dungeon = GuildChannelStore.getChannels(guild.id).VOCAL.find(stored => stored.channel.id === DUNGEON_ID)?.channel;
+    if (!dungeon)
+        return menu;
+    const accessPermission = dungeon.accessPermission ?? 1049600n;
+    if (typeof accessPermission !== "bigint") {
+        console.error("Invalid accessPermission value", accessPermission);
+        return menu;
+    }
+    const permittedUsers = memberIds
+        .map(UserStore.getUser)
+        .filter(Boolean)
+        .filter(user => hasPermission(dungeon, user.id, accessPermission));
+    if (!permittedUsers.length)
+        return menu;
+    const hasAccess = permittedUsers.some(user => user.id === props.user.id);
+    const allow = (userId) => ({
+        allow: accessPermission,
+        deny: 0n,
+        id: userId,
+        type: 1,
+    });
+    menu.props.children[0].props.children[5].props.children.push(buildTextItemElement(hasAccess ? "remove-from-dungeon" : "add-to-dungeon", hasAccess ? "Remove from Dungeon" : "Add to Dungeon", () => {
+        if (hasAccess)
+            PermissionActions.clearPermissionOverwrite(DUNGEON_ID, props.user.id);
+        else
+            PermissionActions.updatePermissionOverwrite(DUNGEON_ID, allow(props.user.id));
+    }));
+};
+
+function PatchUserContextMenu() {
+    if (!Settings.current.addToDungeon)
+        return;
+    PatchUserContextMenu$1((menu, props) => {
+        if (Settings.current.addToDungeon)
+            patched(menu, props);
+    });
+}
 
 const setManagerContext = createPatcherCallback$1(({ args, original }) => {
-    const result = original(...args);
+    const result = original.__originalFunction(...args);
     PrettyRolesManager.context = result.props;
     return result;
 });
 
 function insteadRolesList() {
+    if (!Settings.current.prettyRoles)
+        return;
     instead(RolesListModule, 'RolesList', (data) => {
-        return setManagerContext(data);
+        if (Settings.current.prettyRoles)
+            return setManagerContext(data);
+        return data.original(...data.args);
     });
 }
 
-function prettyRoles$1() {
-    $(s => s.role('list', 'div').and.ariaLabelContains('Role'))?.children().forEach(el => {
-        const roleId = el.attr('data-list-item-id')?.split('_').pop();
-        if (!roleId)
-            return;
-        const role = PrettyRolesManager.getRole(roleId);
-        if (!role)
-            return;
-        el.setStyleProperty('--role-color', hexToRgb(role.colorString
-            ?? rgbToHex(DEFAULT_DISCORD_ROLE_COLOR.split(',').map(Number))).join(','));
-        if (Settings.current.groupRoles) {
-            const isGroupRole = role.name.toLowerCase().includes('roles');
-            if (isGroupRole)
-                el.addClass('danho-library__pretty-roles__group-role');
-        }
-    });
-}
-
-function afterRolesList() {
-    after(RolesListModule, 'RolesList', () => {
-        prettyRoles$1();
-    });
-}
-
-function afterUserProfileModalAboutMe() {
-    const UserProfileModalAboutMe = Finder.findBySourceStrings('look:"profile_modal"', { defaultExport: false });
-    if (!UserProfileModalAboutMe)
-        return console.error('UserProfileModalAboutMe not found');
-    after(UserProfileModalAboutMe, 'Z', () => {
-        prettyRoles$1();
-    }, { name: 'UserProfileModalAboutMe' });
-}
-
-const prettyRoles = "*[role=list][data-list-id*=roles] > div div:has([class*=roleRemoveButton][role=button]),\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveButton][role=button],\n*[role=list][data-list-id*=roles] > div [class*=roleFlowerStar],\n*[role=list][data-list-id*=roles] > div [class*=roleCircle] {\n  position: absolute;\n  inset: 0;\n  z-index: 1;\n}\n\n*[role=list][data-list-id*=roles] {\n  padding: 1rem;\n}\n*[role=list][data-list-id*=roles]:has(.danho-library__pretty-roles__group-role) div:has([class*=expandButton]) {\n  flex: 1 1 50%;\n}\n\n*[role=list][data-list-id*=roles] > div {\n  --role-color--default: rgb(86, 105, 118);\n  --role-color: var(--role-color--default);\n  --role-color-alpha: .125;\n  position: relative;\n  border: 1px solid rgb(var(--role-color, --role-color--default));\n  background-color: rgba(var(--role-color, --role-color--default), var(--role-color-alpha));\n  border-radius: 0.25rem;\n  height: 25px;\n  box-sizing: border-box;\n  justify-content: center;\n}\n*[role=list][data-list-id*=roles] > div [class*=roleCircle],\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveIcon] {\n  height: 100%;\n  width: 100%;\n}\n*[role=list][data-list-id*=roles] > div span[class*=roleCircle] {\n  background-color: unset !important;\n}\n*[role=list][data-list-id*=roles] > div svg[class*=roleRemoveIcon] {\n  display: none;\n}\n*[role=list][data-list-id*=roles] > div div:has(svg[class*=linkIcon]) {\n  position: absolute;\n  top: -0.5rem;\n  left: -0.75rem;\n}\n*[role=list][data-list-id*=roles] > div:hover svg[class*=linkIcon] {\n  display: inline-block !important;\n}\n\n.danho-library__pretty-roles__group-role {\n  flex: 1 1 100% !important;\n  margin-inline: -1rem;\n}";
-
-const isPrettyRolesEnabled = () => Settings.current.prettyRoles;
-function Feature$1() {
-    if (!isPrettyRolesEnabled())
-        return;
-    insteadRolesList();
-    afterRolesList();
-    afterUserProfileModalAboutMe();
+function Patch() {
+    PatchChannelContextMenu();
+    PatchGuildContextMenu();
     afterRoleContextMenu();
-}
-
-const PrettyRoles = {
-    __proto__: null,
-    default: Feature$1,
-    isPrettyRolesEnabled,
-    styles: prettyRoles
-};
-
-const TextModule = Finder.findBySourceStrings('lineClamp', 'tabularNumbers', 'scaleFontToUserSetting');
-
-const transformTextIntoLinks = createPatcherAfterCallback(({ args: [props], result }) => {
-    const { className, children: text } = props;
-    if (!className || !className.includes('pronounsText'))
-        return;
-    const regex = text.match(/\w{2}\.pronouns\.page\/@(\w+)/);
-    if (!regex)
-        return;
-    const [matched] = regex;
-    result.props.children = (React.createElement("a", { href: `https://${matched}`, target: "_blank", rel: "noreferrer noopener" }, matched));
-});
-
-function afterTextModule() {
-    after(TextModule, 'render', (data) => {
-        transformTextIntoLinks(data);
-    }, { name: 'TextModule--Pronouns' });
-}
-
-function Feature() {
-    if (!Settings.current.pronounsPageLinks)
-        return;
+    PatchUserContextMenu();
+    afterBadgeList();
+    afterChannelItem();
+    afterMemberListItem();
+    afterRolesList();
     afterTextModule();
+    afterUserProfileModalAboutMe();
+    insteadRolesList();
 }
-
-const PronounsPageLinks = {
-    __proto__: null,
-    default: Feature
-};
-
-const StyleChanges = [
-    ExpandBioAgain,
-    NonObnoxiousProfileEffects,
-    PrettyRoles,
-    PronounsPageLinks
-];
-
-const features = [
-    ...DiscordEnhancements,
-    ...DanhoEnhancements,
-    ...StyleChanges,
-];
-const Features = () => features.forEach(feature => feature.default());
-const styles = features.map(feature => 'styles' in feature ? feature.styles
-    : 'style' in feature ? feature.style
-        : '').join("\n\n");
 
 const index = buildPlugin({
     start() {
         Features();
+        listenToActions();
+        Patch();
     },
     stop() {
         ActionsEmitter.removeAllListeners();

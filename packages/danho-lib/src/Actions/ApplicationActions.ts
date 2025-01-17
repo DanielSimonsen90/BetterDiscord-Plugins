@@ -10,5 +10,5 @@ export type ApplicationActions = {
   transferApplication(e: any): any;
 };
 
-export const ApplicationActions: ApplicationActions = Finder.findBySourceStrings("fetchApplications", "createApplication");
+export const ApplicationActions = Finder.findBySourceStrings<ApplicationActions>("fetchApplications", "createApplication");
 export default ApplicationActions;

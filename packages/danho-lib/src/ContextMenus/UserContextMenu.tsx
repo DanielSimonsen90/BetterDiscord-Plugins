@@ -79,7 +79,7 @@ type UserContextMenuTargetProps = {
   user: User
 };
 
-type Callback = (menu: UserContextMenuFiber, targetProps: UserContextMenuTargetProps) => void;
+export type Callback = (menu: UserContextMenuFiber, targetProps: UserContextMenuTargetProps) => void;
 
 export function PatchUserContextMenu(callback: Callback) {
   return BdApi.ContextMenu.patch('user-context', callback);

@@ -1,16 +1,16 @@
 import * as Logger from "./logger";
-import {getMeta} from "../meta";
+import { getMeta } from "../meta";
 
 /** Patcher options. */
 export interface Options {
-    /** Execute the patch once, then unpatch. */
-    once?: boolean;
+  /** Execute the patch once, then unpatch. */
+  once?: boolean;
 
-    /** Disable console output when patching. */
-    silent?: boolean;
+  /** Disable console output when patching. */
+  silent?: boolean;
 
-    /** Name of the patch target displayed in console output. */
-    name?: string;
+  /** Name of the patch target displayed in console output. */
+  name?: string;
 }
 
 export type Cancel = () => void;
@@ -20,65 +20,65 @@ type Args<T> = T extends (...args: any) => any ? Parameters<T> : IArguments;
 type Return<T> = T extends (...args: any) => any ? ReturnType<T> : any;
 
 type This<T, P> = ThisParameterType<T> extends unknown ? (
-    P extends React.Component<any, any> ? P : any
+  P extends React.Component<any, any> ? P : any
 ) : ThisParameterType<T>;
 
 export interface PatchData<Original, Parent = any> {
-    cancel: Cancel;
-    original: Original;
-    context: This<Original, Parent>;
-    args: Args<Original>;
+  cancel: Cancel;
+  original: Original;
+  context: This<Original, Parent>;
+  args: Args<Original>;
 }
 
 export interface PatchDataWithResult<Original, Parent = any> extends PatchData<Original, Parent> {
-    result: Return<Original>;
+  result: Return<Original>;
 }
 
 const patch = <Module, Key extends keyof Module>(
-    type: "before" | "after" | "instead",
-    object: Module,
-    method: Key,
-    callback: (cancel: Cancel, original: Module[Key], ...args: any) => any,
-    options: Options
+  type: "before" | "after" | "instead",
+  object: Module,
+  method: Key,
+  callback: (cancel: Cancel, original: Module[Key], ...args: any) => any,
+  options: Options
 ) => {
-    const original = object?.[method];
-    if (!(original instanceof Function)) {
-        Logger.error(`Patch target ${original} is not a function`, object, method, options.name);
-        BdApi.UI.alert("Error", `Patch target ${original} is not a function`);
-        throw TypeError(`patch target ${original} is not a function`);
-        return () => {};
-    }
+  const original = object?.[method];
+  if (!(original instanceof Function)) {
+    Logger.error(`Patch target ${original} is not a function`, object, method, options.name);
+    BdApi.UI.alert("Error", `Patch target ${original} is not a function`);
+    throw TypeError(`patch target ${original} is not a function`);
+    return () => { };
+  }
 
-    const cancel = BdApi.Patcher[type](
-        getMeta().name,
-        object,
-        method,
-        options.once ? (...args: any) => {
-            const result = callback(cancel, original, ...args);
-            cancel();
-            return result;
-        } : (...args: any) => callback(cancel, original, ...args)
-    );
+  const cancel = BdApi.Patcher[type](
+    getMeta().name,
+    object,
+    method,
+    options.once ? (...args: any) => {
+      const result = callback(cancel, original, ...args);
+      cancel();
+      return result;
+    } : (...args: any) => callback(cancel, original, ...args)
+  );
 
-    if (!options.silent) {
-        Logger.log(`Patched ${type} ${options.name ?? String(method)}`);
-    }
+  if (!options.silent) {
+    Logger.log(`Patched ${type} ${options.name ?? String(method)}`);
+  }
 
-    return cancel;
+  return cancel;
 };
 
 /** Patches the method, executing a callback **instead** of the original. */
 export const instead = <Module, Key extends keyof Module>(
-    object: Module,
-    method: Key,
-    callback: (data: PatchData<Module[Key], Module>) => Module[Key] extends (...args: any) => infer R ? R : Module[Key],
-    options: Options = {}
+  object: Module,
+  method: Key,
+  callback: (data: PatchData<Module[Key], Module>) => Module[Key] extends (...args: any) => infer R ? R : Module[Key],
+  options: Options = {}
 ): Cancel => patch(
-    "instead",
-    object,
-    method,
-    (cancel, original, context, args) => callback({cancel, original, context, args}),
-    options
+  "instead",
+  object,
+  method,
+  (cancel, original, context, args) => callback({ cancel, original, context, args }),
+  options
 );
 
 /**
@@ -87,16 +87,16 @@ export const instead = <Module, Key extends keyof Module>(
  * Typically used to modify arguments passed to the original.
  */
 export const before = <Module, Key extends keyof Module>(
-    object: Module,
-    method: Key,
-    callback: (data: PatchData<Module[Key], Module>) => unknown,
-    options: Options = {}
+  object: Module,
+  method: Key,
+  callback: (data: PatchData<Module[Key], Module>) => unknown,
+  options: Options = {}
 ): Cancel => patch(
-    "before",
-    object,
-    method,
-    (cancel, original, context, args) => callback({cancel, original, context, args}),
-    options
+  "before",
+  object,
+  method,
+  (cancel, original, context, args) => callback({ cancel, original, context, args }),
+  options
 );
 
 /**
@@ -107,16 +107,16 @@ export const before = <Module, Key extends keyof Module>(
  * Has access to the original method's return value via `result`.
  */
 export const after = <Module, Key extends keyof Module>(
-    object: Module,
-    method: Key,
-    callback: (data: PatchDataWithResult<Module[Key], Module>) => unknown,
-    options: Options = {}
+  object: Module,
+  method: Key,
+  callback: (data: PatchDataWithResult<Module[Key], Module>) => unknown,
+  options: Options = {}
 ): Cancel => patch(
-    "after",
-    object,
-    method,
-    (cancel, original, context, args, result) => callback({cancel, original, context, args, result}),
-    options
+  "after",
+  object,
+  method,
+  (cancel, original, context, args, result) => callback({ cancel, original, context, args, result }),
+  options
 );
 
 /** Storage for context menu patches. */
@@ -124,32 +124,32 @@ let menuPatches: Cancel[] = [];
 
 /** Patches a context menu using its "navId". */
 export const contextMenu = (
-    navId: string,
-    callback: (result: JSX.Element) => JSX.Element | void,
-    options: Options = {}
+  navId: string,
+  callback: (result: JSX.Element) => JSX.Element | void,
+  options: Options = {}
 ): Cancel => {
-    const cancel = BdApi.ContextMenu.patch(navId, options.once ? (tree) => {
-        const result = callback(tree);
-        cancel();
-        return result;
-    } : callback);
-    menuPatches.push(cancel);
+  const cancel = BdApi.ContextMenu.patch(navId, options.once ? (tree) => {
+    const result = callback(tree);
+    cancel();
+    return result;
+  } : callback);
+  menuPatches.push(cancel);
 
-    if (!options.silent) {
-        Logger.log(`Patched ${options.name ?? `"${navId}"`} context menu`);
-    }
+  if (!options.silent) {
+    Logger.log(`Patched ${options.name ?? `"${navId}"`} context menu`);
+  }
 
-    return cancel;
+  return cancel;
 };
 
 /** Reverts all patches done by this patcher. */
 export const unpatchAll = (): void => {
-    if (menuPatches.length + BdApi.Patcher.getPatchesByCaller(getMeta().name).length > 0) {
-        for (const cancel of menuPatches) {
-            cancel();
-        }
-        menuPatches = [];
-        BdApi.Patcher.unpatchAll(getMeta().name);
-        Logger.log("Unpatched all");
+  if (menuPatches.length + BdApi.Patcher.getPatchesByCaller(getMeta().name).length > 0) {
+    for (const cancel of menuPatches) {
+      cancel();
     }
+    menuPatches = [];
+    BdApi.Patcher.unpatchAll(getMeta().name);
+    Logger.log("Unpatched all");
+  }
 };

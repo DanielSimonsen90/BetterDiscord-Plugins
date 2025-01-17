@@ -1,5 +1,14 @@
 export default class ChannelLock {
-  constructor(
+  public static instance(stayUnlockedForMinutes: number, initialState = false) {
+    if (!this._instance || this._instance._timeoutDuration !== stayUnlockedForMinutes * 60 * 1000) {
+      return this._instance = new ChannelLock(stayUnlockedForMinutes, initialState);
+    }
+
+    return this._instance;
+  }
+  private static _instance: ChannelLock | null = null;
+
+  private constructor(
     stayUnlockedForMinutes: number,
     initialState: boolean
   ) {
@@ -24,7 +33,7 @@ export default class ChannelLock {
     if (this._timeout) clearTimeout(this._timeout);
 
     this._timeout = setTimeout(() => {
-    if (!this._locked) this._locked = true;
+      if (!this._locked) this._locked = true;
     }, this._timeoutDuration);
   }
 }

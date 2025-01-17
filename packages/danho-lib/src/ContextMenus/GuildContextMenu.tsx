@@ -34,7 +34,7 @@ type GuildContextMenuTargetProps = {
   unread: boolean;
 };
 
-type Callback = (menu: GuildContextMenuFiber, targetProps?: GuildContextMenuTargetProps) => void;
+export type Callback = (menu: GuildContextMenuFiber, targetProps?: GuildContextMenuTargetProps) => void;
 
 export function PatchGuildContextMenu(callback: Callback) {
   return BdApi.ContextMenu.patch('guild-context', callback);

@@ -99,7 +99,7 @@ export const demangle = <M extends Mapping>(mapping: M, required?: (keyof M)[], 
     ) as any;
 };
 
-let controller = new AbortController();
+export let controller = new AbortController();
 
 /** Waits for a lazy loaded module. */
 // TODO: waitFor with callback that is skipped when aborted?

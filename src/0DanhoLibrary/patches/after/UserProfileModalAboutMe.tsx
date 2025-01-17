@@ -1,13 +1,16 @@
-import Finder from "@danho-lib/dium/api/finder";
+import { Logger } from "@danho-lib/dium/api/logger";
+import UserProfileModalAboutMe from "@danho-lib/Patcher/UserProfileModalAboutMe";
 import { Patcher } from "@dium";
 import prettifyRoles from "src/0DanhoLibrary/features/style-changes/pretty-roles/patches/prettifyRoles";
+import { Settings } from "src/0DanhoLibrary/Settings";
 
-
-
-export default function afterUserProfileModalAboutMe() {
-  const UserProfileModalAboutMe = Finder.findBySourceStrings('look:"profile_modal"', { defaultExport: false }) as { Z: Function }
-  if (!UserProfileModalAboutMe) return console.error('UserProfileModalAboutMe not found')
-  Patcher.after(UserProfileModalAboutMe, 'Z', () => {
-    prettifyRoles()
-  }, { name: 'UserProfileModalAboutMe' });
+export default async function afterUserProfileModalAboutMe() {
+  if (!Settings.current.prettyRoles) return;
+  
+  UserProfileModalAboutMe.then(module => {
+    if (!module) return Logger.error('UserProfileModalAboutMe module not found');
+    Patcher.after(module, 'Z', () => {
+      if (Settings.current.prettyRoles) prettifyRoles()
+    }, { name: 'UserProfileModalAboutMe' });
+  });
 }

@@ -2,12 +2,16 @@ import { Dispatcher, EventEmitter } from '@dium/modules';
 import { Actions } from './ActionTypes';
 import { Logger } from '@danho-lib/dium/api/logger';
 
+export * from './CreateActionCallback';
+
 export * from './AppActions';
 export * from './ApplicationActions';
 export * from './ChannelActions';
 export * from './GuildActions';
 export * from './MessageActions';
+export * from './PermissionsActions';
 export * from './UserNoteActions';
+export * from './UserStatusActions';
 export * from './VoiceActions';
 
 export const DISPATCH_ACTIONS = Dispatcher._subscriptions;
@@ -20,10 +24,10 @@ export const ActionsEmitter = new class ActionsEmitter extends EventEmitter<Acti
 
   on<K>(eventName: keyof Actions | K, listener:
     K extends keyof Actions
-    ? Actions[K] extends unknown[]
-    ? (...args: Actions[K]) => void
-    : never
-    : (...args: any[]) => void
+      ? Actions[K] extends unknown[]
+        ? (...args: Actions[K]) => void
+        : never
+      : (...args: any[]) => void
   ): this {
     const callback = (...args: any[]) => {
       try {
