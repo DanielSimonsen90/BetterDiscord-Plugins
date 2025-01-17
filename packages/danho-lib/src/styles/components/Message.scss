@@ -34,4 +34,9 @@
   .channel-mention::before {
     content: '#';
   }
+
+  .custom-message__attachments img {
+    max-height: 100%;
+    max-width: 100%;
+  }
 }
