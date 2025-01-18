@@ -30,7 +30,7 @@ export function updateHighscores() {
   } = Highscores.current;
 
   const current = wpm.get();
-  const today = formatDate(new Date()) === formatDate(new Date(todayDate)) ? storedTodayScore : 0;
+  const today = formatDate(new Date()) === todayDate ? storedTodayScore : 0;
   const notification = (
     current > best ? `New best highscore! ${current} wpm`
     : current > today ? `New today's highscore! ${current} wpm`
@@ -41,11 +41,11 @@ export function updateHighscores() {
 
   Highscores.update({
     best: Math.max(best, current),
-    bestDate: current > best ? formatDate(new Date()) : formatDate(new Date(bestDate)),
+    bestDate: current > best ? formatDate(new Date()) : bestDate,
     today: Math.max(today, current),
     todayDate: formatDate(new Date())
   });
 
-  log(notification, Highscores.current, { best, today, todayDate });
+  log(notification, Highscores.current, { best, today: current, todayDate });
   BdApi.UI.showToast(notification);
 }

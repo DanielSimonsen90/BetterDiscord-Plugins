@@ -36,8 +36,6 @@ export function onKeyUp(event: KeyboardEvent) {
 }
 
 export function onSubmit() {
-  // Reset the typing start time
-  typingStartTime.reset();
-  activelyTyping.set(false);
   updateHighscores();
+  activelyTyping.set(false);
 }

@@ -47,8 +47,8 @@ const HighscoresGroup: React.FC<{
 }> = ({ type }) => {
   const { best, bestDate, today, todayDate } = Highscores.useCurrent();
   const [value, date] = useMemo(() => type === 'best'
-    ? [best, new Date(bestDate)]
-    : [today, new Date(todayDate)],
+    ? [best, bestDate]
+    : [today, todayDate],
     [type, best, bestDate, today, todayDate]
   );
 
@@ -57,7 +57,7 @@ const HighscoresGroup: React.FC<{
       <h3>{type === 'best' ? 'Best' : `Today's`} Highscore</h3>
       <p>
         <span id={`${PluginName}-${type}`}>{value} wpm</span>
-        <span id={`${PluginName}-${type}-date`}>{formatDate(date)}</span>
+        <span id={`${PluginName}-${type}-date`}>{date}</span>
       </p>
     </div>
   );
@@ -66,7 +66,7 @@ const HighscoresGroup: React.FC<{
 export default function SettingsPanel() {
   const { todayDate } = Highscores.current;
 
-  if (formatDate(new Date(todayDate)) !== formatDate(new Date())) {
+  if (todayDate !== formatDate(new Date())) {
     Highscores.update({ today: 0, todayDate: formatDate(new Date()) });
   }
 

@@ -1,6 +1,6 @@
 /**
  * @name WordsPerMinute
- * @version 1.0.5
+ * @version 1.1.1
  * @author danielsimonsen90
  * @authorLink https://github.com/danielsimonsen90
  * @description View your words per minute while typing your message
@@ -52,7 +52,7 @@ WScript.Quit();
 
 let meta = {
   "name": "words-per-minute",
-  "version": "1.0.5",
+  "version": "1.1.1",
   "description": "View your words per minute while typing your message",
   "author": "danielsimonsen90",
   "dependencies": {
@@ -1026,7 +1026,7 @@ function calculateWPM(messageContent) {
 function updateHighscores() {
     const { best, bestDate, today: storedTodayScore, todayDate } = Highscores.current;
     const current = wpm.get();
-    const today = formatDate(new Date()) === formatDate(new Date(todayDate)) ? storedTodayScore : 0;
+    const today = formatDate(new Date()) === todayDate ? storedTodayScore : 0;
     const notification = (current > best ? `New best highscore! ${current} wpm`
         : current > today ? `New today's highscore! ${current} wpm`
             : null);
@@ -1034,11 +1034,11 @@ function updateHighscores() {
         return;
     Highscores.update({
         best: Math.max(best, current),
-        bestDate: current > best ? formatDate(new Date()) : formatDate(new Date(bestDate)),
+        bestDate: current > best ? formatDate(new Date()) : bestDate,
         today: Math.max(today, current),
         todayDate: formatDate(new Date())
     });
-    log(notification, Highscores.current, { best, today, todayDate });
+    log(notification, Highscores.current, { best, today: current, todayDate });
     BdApi.UI.showToast(notification);
 }
 
@@ -1062,9 +1062,8 @@ function onKeyUp(event) {
     }
 }
 function onSubmit() {
-    typingStartTime.reset();
-    activelyTyping.set(false);
     updateHighscores();
+    activelyTyping.set(false);
 }
 
 const typingStartTime = createProperty(undefined);
@@ -1088,8 +1087,10 @@ const activelyTyping = createProperty({
     afterSet: (value) => {
         if (value)
             observer.observe(document.body, { childList: true, subtree: true });
-        else
+        else {
             observer.disconnect();
+            resetProperties();
+        }
     }
 });
 function resetProperties() {
@@ -1119,8 +1120,8 @@ const SettingsGroup = ({ settingsKey, title, readonly }) => {
 const HighscoresGroup = ({ type }) => {
     const { best, bestDate, today, todayDate } = Highscores.useCurrent();
     const [value, date] = useMemo(() => type === 'best'
-        ? [best, new Date(bestDate)]
-        : [today, new Date(todayDate)], [type, best, bestDate, today, todayDate]);
+        ? [best, bestDate]
+        : [today, todayDate], [type, best, bestDate, today, todayDate]);
     return (React.createElement("div", { className: `${PluginName}-${type}` },
         React.createElement("h3", null,
             type === 'best' ? 'Best' : `Today's`,
@@ -1129,11 +1130,11 @@ const HighscoresGroup = ({ type }) => {
             React.createElement("span", { id: `${PluginName}-${type}` },
                 value,
                 " wpm"),
-            React.createElement("span", { id: `${PluginName}-${type}-date` }, formatDate(date)))));
+            React.createElement("span", { id: `${PluginName}-${type}-date` }, date))));
 };
 function SettingsPanel() {
     const { todayDate } = Highscores.current;
-    if (formatDate(new Date(todayDate)) !== formatDate(new Date())) {
+    if (todayDate !== formatDate(new Date())) {
         Highscores.update({ today: 0, todayDate: formatDate(new Date()) });
     }
     return (React.createElement("div", { className: `${PluginName}-settings`, style: { width: '100%' } },
