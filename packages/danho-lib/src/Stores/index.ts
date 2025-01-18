@@ -1,4 +1,5 @@
 import Finder from '@danho-lib/dium/api/finder';
+import { Store } from '@dium/modules/flux';
 
 export * from './ChannelStores';
 export * from './GuildStores';
@@ -9,6 +10,25 @@ export * from './ApplicationStore';
 export * from './DiumStore';
 export * from './MessagesStore';
 export * from './ThemeStore';
+
+export const DiscordStores = (() => (
+  Array.from(BdApi.Webpack
+    .getModules(m => m?._dispatchToken && m?.getName)
+    .reduce<Map<string, Store>>((acc, store) => {
+      const storeName = store.constructor.displayName
+        ?? store.constructor.persistKey
+        ?? store.constructor.name
+        ?? store.getName();
+
+      if (storeName.length !== 1) acc.set(storeName, store);
+      return acc;
+    }, new Map())
+  ).sort(([aStoreName], [bStoreName]) => aStoreName.localeCompare(bStoreName))
+    .reduce((acc, [storeName, store]) => {
+      acc[storeName] = store;
+      return acc;
+    }, {})
+))();
 
 export function findStore(storeName: string, allowMultiple = false) {
   const result = Object.values<{

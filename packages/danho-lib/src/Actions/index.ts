@@ -14,9 +14,20 @@ export * from './UserNoteActions';
 export * from './UserStatusActions';
 export * from './VoiceActions';
 
-export const DISPATCH_ACTIONS = Dispatcher._subscriptions;
+export const DISPATCH_ACTIONS = (() => {
+  const actions = new Set<string>();
+
+  // gather all events
+  Object.values(Dispatcher._actionHandlers._dependencyGraph.nodes)
+    .forEach(node => Object.keys(node.actionHandler)
+      .forEach(event => actions.add(event)));
+
+  Object.keys(Dispatcher._subscriptions).forEach(event => actions.add(event));
+
+  return [...actions].sort((a, b) => a.localeCompare(b));
+})();
 export function find(action: string) {
-  return Object.keys(DISPATCH_ACTIONS).filter(key => key.toLowerCase().includes(action.toLowerCase()));
+  return DISPATCH_ACTIONS.filter(key => key.toLowerCase().includes(action.toLowerCase()));
 }
 
 export const ActionsEmitter = new class ActionsEmitter extends EventEmitter<Actions> {

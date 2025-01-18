@@ -1,6 +1,6 @@
 import listenToChannelSelect from './channelSelect';
 import listenToRelationshipAdd from './relationshipAdd';
-import listenToVoiceStatesUpdates from './voiceStateUpdates';
+import listenToVoiceStatesUpdates from './voiceChannelSelect';
 
 export default function listenToActions() {
   listenToChannelSelect();

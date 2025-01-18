@@ -1,9 +1,9 @@
-import { MediaEngineStore } from "@stores";
+import { createActionCallback, VoiceActions } from "@actions";
+import { MediaEngineStore, RTCConnectionStore } from "@stores";
+
 import { Snowflake } from "@discord/types";
 import $ from "@danho-lib/DOM/dquery";
-import { createActionCallback, VoiceActions } from "@actions";
-import { RTCConnectionStore } from '@stores';
-import { UserUtils } from "@danho-lib/Utils";
+
 import JoinWithCameraManager from "./JoinWithCameraManager";
 
 export default async function joinWithCamera(channelId: Snowflake) {
@@ -15,11 +15,9 @@ export default async function joinWithCamera(channelId: Snowflake) {
   } else enableCamera();
 }
 
-export const onVoiceStatesUpdates = createActionCallback('VOICE_STATE_UPDATES', ({ voiceStates }) => {
+export const onVoiceChannelSelect = createActionCallback('VOICE_CHANNEL_SELECT', ({ channelId: selectedChannelId, currentVoiceChannelId }) => {
   const { channelId, shouldEnableCamera } = JoinWithCameraManager.instance.get();
-
-  const update = voiceStates.find(state => state.channelId === channelId && state.userId === UserUtils.me.id);
-  if (!update || !shouldEnableCamera) return;
+  if (selectedChannelId !== channelId || !shouldEnableCamera) return;
 
   JoinWithCameraManager.instance.reset();
   enableCamera();

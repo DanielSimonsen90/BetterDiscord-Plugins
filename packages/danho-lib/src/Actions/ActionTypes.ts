@@ -65,6 +65,13 @@ type ActionProps = {
   VOICE_STATE_UPDATES: {
     voiceStates: Array<VoiceStateUpdate>;
   };
+  VOICE_CHANNEL_SELECT: {
+    channelId: Snowflake;
+    currentVoiceChannelId: Snowflake;
+    guildId: Snowflake;
+    stream: boolean;
+    video: boolean;
+  }
 };
 
 export type Actions = {
