@@ -5,9 +5,13 @@ import joinWithCamera from './joinWithCamera';
 
 const patched: Callback = function (menu, props) {
   const options = menu.props.children;
-  const voiceOptions = options[3].props.children;
+  const voiceOptions = options.find(option => (
+    option.key.toLowerCase().includes('voice') 
+    && option.key.toLowerCase().includes('actions')
+  ));
+  if (!voiceOptions) return;
 
-  voiceOptions.unshift(
+  (voiceOptions as any).unshift(
     buildTextItemElement(
       "join-with-camera",
       "Join with Camera",

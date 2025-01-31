@@ -3010,7 +3010,10 @@ function buildTextItemElement(id, label, action, props = {}) {
 
 const patched$2 = function (menu, props) {
     const options = menu.props.children;
-    const voiceOptions = options[3].props.children;
+    const voiceOptions = options.find(option => (option.key.toLowerCase().includes('voice')
+        && option.key.toLowerCase().includes('actions')));
+    if (!voiceOptions)
+        return;
     voiceOptions.unshift(buildTextItemElement("join-with-camera", "Join with Camera", () => joinWithCamera(props.channel.id)));
 };
 
