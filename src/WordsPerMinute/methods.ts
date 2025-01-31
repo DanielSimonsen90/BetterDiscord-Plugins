@@ -1,13 +1,19 @@
 import { log } from "@danho-lib/dium/api/logger";
 
-import { typingEndTime, typingStartTime, wpm } from "./properties";
-import { Highscores } from "./settings";
+import type { Highscores } from "./settings";
+import type { DiumStore } from "@stores";
+import { DanhoProperty } from "@danho-lib/Utils";
 
 export function formatDate(date: Date) {
   return date.toLocaleDateString('en-GB');
 }
 
-export function calculateWPM(messageContent: string) {
+export function calculateWPM(
+  messageContent: string, 
+  wpm: DanhoProperty<number>, 
+  typingStartTime: DanhoProperty<number>, 
+  typingEndTime: DanhoProperty<number>
+) {
   // If, by mistake/debug, the start or end time is not set, return
   if (typingStartTime.hasNoValue() || typingEndTime.hasNoValue() || !messageContent) return;
 
@@ -23,11 +29,14 @@ export function calculateWPM(messageContent: string) {
   wpm.set(value);
 }
 
-export function updateHighscores() {
+export function updateHighscores(
+  highscores: DiumStore<Highscores>,
+  wpm: DanhoProperty<number>
+) {
   const {
     best, bestDate,
     today: storedTodayScore, todayDate
-  } = Highscores.current;
+  } = highscores.current;
 
   const current = wpm.get();
   const today = formatDate(new Date()) === todayDate ? storedTodayScore : 0;
@@ -39,13 +48,13 @@ export function updateHighscores() {
 
   if (!notification) return;
 
-  Highscores.update({
+  highscores.update({
     best: Math.max(best, current),
     bestDate: current > best ? formatDate(new Date()) : bestDate,
     today: Math.max(today, current),
     todayDate: formatDate(new Date())
   });
 
-  log(notification, Highscores.current, { best, today: current, todayDate });
+  log(notification, highscores.current, { best, today: current, todayDate });
   BdApi.UI.showToast(notification);
 }

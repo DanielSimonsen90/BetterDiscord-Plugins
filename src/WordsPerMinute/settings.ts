@@ -1,4 +1,4 @@
-import { createDiumStore } from "@danho-lib/Stores";
+import { createDiumStore } from "@stores";
 import { createSettings } from "@dium/settings";
 import { formatDate } from "./methods";
 

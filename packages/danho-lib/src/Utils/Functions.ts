@@ -36,3 +36,5 @@ export function createProperty<T>(options: PropertyOptions<T> | T) {
 
   return { get, set, reset, nullableSet, hasNoValue };
 }
+
+export type DanhoProperty<T> = ReturnType<typeof createProperty<T>>

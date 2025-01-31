@@ -5,9 +5,9 @@ import {
   injectElement, removeAllInjections 
 } from "@danho-lib/DOM";
 
-import { WPMCountId, ChatFormSelector } from "./Selectors";
-import { resetProperties, wpm } from "./properties";
-import { onKeyDown, onKeyUp } from "./events";
+import { WPMCountId, ChatFormSelector, ChatSubmitButton } from "./Selectors";
+import { activelyTyping, didSubmit, resetProperties, typingEndTime, typingStartTime, wpm } from "./properties";
+import { getOnKeyDown, getOnKeyUp, getOnSubmitButtonClicked } from "./events";
 
 import { Settings } from './settings';
 import styles from './styles/index.scss';
@@ -16,9 +16,12 @@ import SettingsPanel from "./SettingsPanel";
 async function initChatForm(chatForm: HTMLElement) {
   if (!chatForm) return;
 
-  addEventListener(chatForm, 'keydown', onKeyDown);
-  addEventListener(chatForm, 'keyup', onKeyUp);
+  addEventListener(chatForm, 'keydown', getOnKeyDown(activelyTyping, typingStartTime));
+  addEventListener(chatForm, 'keyup', getOnKeyUp(wpm, typingStartTime, typingEndTime, didSubmit));
   injectElement(chatForm, createElement(`<p id="${WPMCountId}" style="--leftAlign: ${Settings.current.leftAlign}">${wpm.get()} wpm</p>`));
+
+  const submitButton = document.querySelector<HTMLElement>(ChatSubmitButton);
+  if (submitButton) addEventListener(submitButton, 'click', getOnSubmitButtonClicked(didSubmit));
 }
 
 async function checkChatFormMod(forceClear: boolean) {
