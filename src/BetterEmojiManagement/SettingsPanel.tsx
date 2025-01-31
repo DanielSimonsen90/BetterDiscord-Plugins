@@ -1,5 +1,5 @@
 import { React, useEffect, useMemo } from '@react';
-import { FormDivider, FormLabel, FormSection } from '@dium/components/form';
+import { FormDivider, FormText, FormSection } from '@dium/components/form';
 import { SecondaryButton } from '@discord/components';
 
 import { Collapsible, Setting, GuildListItem } from '@components';
@@ -22,7 +22,7 @@ export default function SettingsPanel({ updatePatches }: Props) {
   return (
     <div className='danho-plugin-settings'>
       <FormSection>
-        <FormLabel>Features</FormLabel>
+        <FormText>Features</FormText>
         <Setting settings={Settings.current} setting='enableBannedEmojis' set={set} titles={titles} />
         <Setting settings={Settings.current} setting='enableFavorFavoriteEmojis' set={set} titles={titles} />
       </FormSection>
@@ -47,7 +47,7 @@ function BannedEmojiSection() {
 
   return (
     <FormSection className='banned-emojis'>
-      <FormLabel>Banned emojis</FormLabel>
+      <FormText>Banned emojis</FormText>
       <Collapsible title={disableCollapsible ? 'There are no banned emojis.' : 'View banned emojis'} disabled={disableCollapsible}>
         <ul className="banned-emojis__guilds-list">
           {guilds.map(({ guild, bannedEmojis }) => (
