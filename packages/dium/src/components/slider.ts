@@ -1,3 +1,5 @@
+import {Finder} from "../api";
+
 export interface SliderProps extends Record<string, any> {
     initialValue?: number;
     maxValue?: number;
@@ -53,4 +55,4 @@ export interface Slider extends React.ComponentClass<SliderProps, SliderState> {
     };
 }
 
-export const Slider: Slider = undefined;
+export const Slider: Slider = /* @__PURE__ */ Finder.bySource(["markerPositions:", "asValueChanges:"], {entries: true});

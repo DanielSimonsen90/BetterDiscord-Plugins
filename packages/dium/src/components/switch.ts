@@ -1,3 +1,5 @@
+import {Finder} from "../api";
+
 export interface SwitchProps {
     id?: any;
     onChange?: (checked: boolean) => void;
@@ -8,4 +10,4 @@ export interface SwitchProps {
     innerRef?: any;
 }
 
-export const Switch: React.FunctionComponent<SwitchProps> = undefined;
+export const Switch: React.FunctionComponent<SwitchProps> = /* @__PURE__ */ Finder.bySource(["checked:", "reducedMotion:"], {entries: true});

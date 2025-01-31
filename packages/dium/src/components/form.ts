@@ -1,3 +1,5 @@
+import {Finder, Filters} from "../api";
+
 export const enum FormTags {
     H1 = "h1",
     H2 = "h2",
@@ -124,7 +126,7 @@ interface FormComponents {
     FormItem: FormItem;
     FormTitle: FormTitle;
     FormText: FormText;
-    FormLabel: React.FunctionComponent<any>;
+    // FormLabel: React.FunctionComponent<any>;
     FormDivider: React.FunctionComponent<any>;
     FormSwitch: React.FunctionComponent<FormSwitchProps>;
     FormNotice: FormNotice;
@@ -135,17 +137,16 @@ export const {
     FormItem,
     FormTitle,
     FormText,
-    FormLabel,
+    // FormLabel,
     FormDivider,
     FormSwitch,
     FormNotice
-} = {
-    FormSection: undefined,
-    FormItem: undefined,
-    FormTitle: undefined,
-    FormText: undefined,
-    FormLabel: undefined,
-    FormDivider: undefined,
-    FormSwitch: undefined,
-    FormNotice: undefined
-}
+}: FormComponents = /* @__PURE__ */ Finder.demangle({
+    FormSection: Filters.bySource("titleClassName:", ".sectionTitle"),
+    FormItem: Filters.bySource("titleClassName:", "required:"),
+    FormTitle: Filters.bySource("faded:", "required:"),
+    FormText: (target) => target.Types?.INPUT_PLACEHOLDER,
+    FormDivider: Filters.bySource(".divider", "style:"),
+    FormSwitch: Filters.bySource("tooltipNote:"),
+    FormNotice: Filters.bySource("imageData:", ".formNotice")
+} as const, ["FormSection", "FormItem", "FormDivider"]);

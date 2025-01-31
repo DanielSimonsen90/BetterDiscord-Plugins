@@ -1,3 +1,5 @@
+import {Finder} from "../api";
+
 export interface ClickableProps {
     role?: string;
     tabIndex?: number;
@@ -21,4 +23,4 @@ export interface Clickable extends React.ComponentClass<ClickableProps, any> {
     };
 }
 
-export const Clickable: Clickable = undefined;
+export const Clickable: Clickable = /* @__PURE__ */ Finder.bySource(["ignoreKeyPress:"], {entries: true});

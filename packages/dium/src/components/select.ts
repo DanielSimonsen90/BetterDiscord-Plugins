@@ -1,3 +1,5 @@
+import {Finder, Filters} from "../api";
+
 export interface SelectOption<T> {
     label: React.ReactNode;
     value: T;
@@ -22,7 +24,7 @@ export interface SelectProps<T, O extends SelectOption<T>> {
     optionClassName?: string;
     closeOnSelect?: any;
     select?: (value: T) => void;
-    isSelected: (value: T) => boolean;
+    isSelected?: (value: T) => boolean;
     clear?: () => void;
     serialize?: (value: T) => string;
     hideIcon?: boolean;
@@ -40,7 +42,7 @@ interface SelectComponents {
     SingleSelect: <T, O extends SelectOption<T>>(props: SingleSelectProps<T, O>) => JSX.Element;
 }
 
-export const { Select, SingleSelect } = {
-    Select: undefined,
-    SingleSelect: undefined
-};
+export const {Select, SingleSelect}: SelectComponents = /* @__PURE */ Finder.demangle({
+    Select: Filters.bySource("renderOptionLabel:", "renderOptionValue:", "popoutWidth:"),
+    SingleSelect: Filters.bySource((source) => /{value:[a-zA-Z_$],onChange:[a-zA-Z_$],...[a-zA-Z_$]}/.test(source))
+}, ["Select"]);

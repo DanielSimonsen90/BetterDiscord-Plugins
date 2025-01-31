@@ -1,4 +1,4 @@
-import {Finder} from "../api";
+import {Finder, Filters} from "../api";
 
 export const enum TextInputSizes {
     DEFAULT = "default",
@@ -47,10 +47,10 @@ interface InputComponents {
     InputError: React.FunctionComponent<any>;
 }
 
-export const {TextInput, InputError} = {
-    TextInput: undefined,
-    InputError: undefined
-}
+export const {TextInput, InputError}: InputComponents = /* @__PURE__ */ Finder.demangle({
+    TextInput: (target) => target?.defaultProps?.type === "text",
+    InputError: Filters.bySource("error:", "text-danger")
+} as const, ["TextInput"]);
 
 export const ImageInput: React.ComponentClass<any> = /* @__PURE__ */ Finder.find(
     (target) => typeof target.defaultProps?.multiple === "boolean" && typeof target.defaultProps?.maxFileSizeBytes === "number"

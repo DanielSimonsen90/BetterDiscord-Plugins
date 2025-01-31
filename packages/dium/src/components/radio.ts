@@ -1,3 +1,5 @@
+import {Finder} from "../api";
+
 export interface RadioGroupOption<T> {
     name: React.ReactNode;
     value: T;
@@ -29,4 +31,4 @@ export interface RadioGroup {
     };
 }
 
-export const RadioGroup: RadioGroup = undefined;
+export const RadioGroup: RadioGroup = /* @__PURE__ */ Finder.bySource(["radioItemClassName:", "options:"], {entries: true});
