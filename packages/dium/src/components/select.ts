@@ -1,5 +1,3 @@
-import {Common} from "./common";
-
 export interface SelectOption<T> {
     label: React.ReactNode;
     value: T;
@@ -42,4 +40,7 @@ interface SelectComponents {
     SingleSelect: <T, O extends SelectOption<T>>(props: SingleSelectProps<T, O>) => JSX.Element;
 }
 
-export const {Select, SingleSelect} = Common as SelectComponents;
+export const { Select, SingleSelect } = {
+    Select: undefined,
+    SingleSelect: undefined
+};

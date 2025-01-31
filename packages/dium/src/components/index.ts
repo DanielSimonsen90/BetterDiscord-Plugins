@@ -1,6 +1,5 @@
 export * from "./button";
 export * from "./clickable";
-export * from "./common";
 export * from "./embed";
 export * from "./flex";
 export * from "./form";

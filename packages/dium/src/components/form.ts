@@ -1,5 +1,3 @@
-import {Common} from "./common";
-
 export const enum FormTags {
     H1 = "h1",
     H2 = "h2",
@@ -141,4 +139,13 @@ export const {
     FormDivider,
     FormSwitch,
     FormNotice
-} = Common as FormComponents;
+} = {
+    FormSection: undefined,
+    FormItem: undefined,
+    FormTitle: undefined,
+    FormText: undefined,
+    FormLabel: undefined,
+    FormDivider: undefined,
+    FormSwitch: undefined,
+    FormNotice: undefined
+}

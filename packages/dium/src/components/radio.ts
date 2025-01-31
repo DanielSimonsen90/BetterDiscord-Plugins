@@ -1,5 +1,3 @@
-import {Common} from "./common";
-
 export interface RadioGroupOption<T> {
     name: React.ReactNode;
     value: T;
@@ -31,4 +29,4 @@ export interface RadioGroup {
     };
 }
 
-export const RadioGroup: RadioGroup = Common.RadioGroup;
+export const RadioGroup: RadioGroup = undefined;

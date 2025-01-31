@@ -21,7 +21,7 @@ export type UserBadges<Rendered extends boolean> = Rendered extends true ?
       delay: 300;
       onTooltipHide: () => void;
       onTooltipShow: () => void;
-      text: string;
+      text: string | JSX.BD.Rendered<any>;
       tooltipClassName: undefined;
     }, true>>;
     className: 'container_...';

@@ -1,5 +1,3 @@
-import {Common} from "./common";
-
 export interface TextProps {
     variant?: TextVariants;
     tag?: any;
@@ -68,4 +66,4 @@ type TextVariants =
     | "text-xxs/normal"
     | "text-xxs/semibold";
 
-export const Text: React.FunctionComponent<TextProps> = Common.Text;
+export const Text: React.FunctionComponent<TextProps> = undefined;

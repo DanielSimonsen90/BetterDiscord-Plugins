@@ -127,7 +127,7 @@ export function findBySourceStrings<TResult = any>(...keywords: FindBySourceStri
       return moduleCallback(exports, _, id);
     } catch (err) {
       const expectedErrorMessages = [
-        `%TypedArray%`,
+        `TypedArray`,
         `from 'Window'`,
         `Cannot convert a Symbol value to a string`
       ];

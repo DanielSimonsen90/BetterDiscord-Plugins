@@ -1,5 +1,3 @@
-import {Common} from "./common";
-
 export interface SliderProps extends Record<string, any> {
     initialValue?: number;
     maxValue?: number;
@@ -55,4 +53,4 @@ export interface Slider extends React.ComponentClass<SliderProps, SliderState> {
     };
 }
 
-export const Slider: Slider = Common.Slider;
+export const Slider: Slider = undefined;

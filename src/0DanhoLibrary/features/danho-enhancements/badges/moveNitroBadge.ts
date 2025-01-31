@@ -4,7 +4,7 @@ type Props = ReturnType<UserBadges<true>>['props']
 
 export function movePremiumBeforeBoost(props: Props): Props {
   const nitroBadge = props.children.find(badge => badge.props.children.props.href?.includes(BadgeTypes.NITRO_ANY));
-  const boosterBadgePos = props.children.findIndex(badge => badge.props.text.toLowerCase().includes('boost'));
+  const boosterBadgePos = props.children.findIndex(badge => typeof badge.props.text === 'string' && badge.props.text.toLowerCase().includes('boost'));
 
   // Ensure nitroBadge and boosterBadge exist
   if (!nitroBadge || boosterBadgePos === -1) return props;

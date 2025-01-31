@@ -1,5 +1,3 @@
-import {Common} from "./common";
-
 export interface ClickableProps {
     role?: string;
     tabIndex?: number;
@@ -23,4 +21,4 @@ export interface Clickable extends React.ComponentClass<ClickableProps, any> {
     };
 }
 
-export const Clickable: Clickable = Common.Clickable;
+export const Clickable: Clickable = undefined;
