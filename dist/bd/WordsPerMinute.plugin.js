@@ -1,6 +1,6 @@
 /**
  * @name WordsPerMinute
- * @version 1.1.1
+ * @version 1.2.0
  * @author danielsimonsen90
  * @authorLink https://github.com/danielsimonsen90
  * @description View your words per minute while typing your message
@@ -52,7 +52,7 @@ WScript.Quit();
 
 let meta = {
   "name": "words-per-minute",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "View your words per minute while typing your message",
   "author": "danielsimonsen90",
   "dependencies": {
@@ -208,13 +208,20 @@ const { default: Legacy, Dispatcher, Store, BatchedStoreListener, useStateFromSt
 const { React } = BdApi;
 const classNames = /* @__PURE__ */ find((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
 
-const Common = /* @__PURE__ */ byKeys(["Button", "Switch", "Select"]);
+const Button = /* @__PURE__ */ byKeys(["Colors", "Link"], { entries: true });
 
-const Button = Common.Button;
+const Flex = /* @__PURE__ */ byKeys(["Child", "Justify", "Align"], { entries: true });
 
-const Flex = /* @__PURE__ */ byKeys(["Child", "Justify"], { entries: true });
-
-const { FormSection, FormItem, FormTitle, FormText, FormLabel, FormDivider, FormSwitch, FormNotice } = Common;
+const { FormSection, FormItem, FormTitle, FormText,
+FormDivider, FormSwitch, FormNotice } = /* @__PURE__ */ demangle({
+    FormSection: bySource("titleClassName:", ".sectionTitle"),
+    FormItem: bySource("titleClassName:", "required:"),
+    FormTitle: bySource("faded:", "required:"),
+    FormText: (target) => target.Types?.INPUT_PLACEHOLDER,
+    FormDivider: bySource(".divider", "style:"),
+    FormSwitch: bySource("tooltipNote:"),
+    FormNotice: bySource("imageData:", ".formNotice")
+}, ["FormSection", "FormItem", "FormDivider"]);
 
 const margins = /* @__PURE__ */ byKeys(["marginBottom40", "marginTop4"]);
 
@@ -889,6 +896,7 @@ function removeAllInjections() {
 }
 
 const ChatFormSelector = "[class*=chatContent] form div:has(> [class*=textAreaSlate])";
+const ChatSubmitButton = `button[aria-label="Send Message"]`;
 const WPMCountId = 'wpm-count';
 
 const debugLog = (...data) => getMeta().development ? log(...data) : undefined;
@@ -995,22 +1003,10 @@ function createProperty(options) {
     return { get, set, reset, nullableSet, hasNoValue };
 }
 
-const Settings = createSettings({
-    leftAlign: '1ch'
-}, function onLoad() {
-    Highscores.load();
-});
-const Highscores = createDiumStore({
-    best: 0,
-    bestDate: formatDate(new Date()),
-    today: 0,
-    todayDate: formatDate(new Date())
-}, 'highscores');
-
 function formatDate(date) {
     return date.toLocaleDateString('en-GB');
 }
-function calculateWPM(messageContent) {
+function calculateWPM(messageContent, wpm, typingStartTime, typingEndTime) {
     if (typingStartTime.hasNoValue() || typingEndTime.hasNoValue() || !messageContent)
         return;
     const timeDiffMs = typingEndTime.get() - typingStartTime.get();
@@ -1023,8 +1019,8 @@ function calculateWPM(messageContent) {
         return;
     wpm.set(value);
 }
-function updateHighscores() {
-    const { best, bestDate, today: storedTodayScore, todayDate } = Highscores.current;
+function updateHighscores(highscores, wpm) {
+    const { best, bestDate, today: storedTodayScore, todayDate } = highscores.current;
     const current = wpm.get();
     const today = formatDate(new Date()) === todayDate ? storedTodayScore : 0;
     const notification = (current > best ? `New best highscore! ${current} wpm`
@@ -1032,39 +1028,66 @@ function updateHighscores() {
             : null);
     if (!notification)
         return;
-    Highscores.update({
+    highscores.update({
         best: Math.max(best, current),
         bestDate: current > best ? formatDate(new Date()) : bestDate,
         today: Math.max(today, current),
         todayDate: formatDate(new Date())
     });
-    log(notification, Highscores.current, { best, today: current, todayDate });
+    log(notification, highscores.current, { best, today: current, todayDate });
     BdApi.UI.showToast(notification);
 }
 
-function onKeyDown(event) {
-    if (event.key.length !== 1)
-        return;
-    activelyTyping.set(true);
-    typingStartTime.nullableSet(Date.now());
+function getOnKeyDown(activelyTyping, typingStartTime) {
+    return function onKeyDown(event) {
+        if (event.key.length !== 1)
+            return;
+        activelyTyping.set(true);
+        typingStartTime.nullableSet(Date.now());
+    };
 }
-function onKeyUp(event) {
-    typingEndTime.set(Date.now());
-    if (!(event.target instanceof HTMLElement))
-        return;
-    const messageContent = event.target.textContent;
-    calculateWPM(messageContent);
-    debugLog(`[${new Date(typingStartTime.get()).toLocaleTimeString()} - ${new Date(typingEndTime.get()).toLocaleTimeString()}] ${wpm}: ${messageContent}`);
-    if (event.key === 'Backspace' && !messageContent.trim()) {
-        debugLog('Reset', event);
-        typingStartTime.reset();
-        wpm.reset();
-    }
+function getOnKeyUp(wpm, typingStartTime, typingEndTime, didSubmit) {
+    return function onKeyUp(event) {
+        typingEndTime.set(Date.now());
+        if (!(event.target instanceof HTMLElement))
+            return;
+        const messageContent = event.target.textContent;
+        calculateWPM(messageContent, wpm, typingStartTime, typingEndTime);
+        debugLog(`[${new Date(typingStartTime.get()).toLocaleTimeString()} - ${new Date(typingEndTime.get()).toLocaleTimeString()}] ${wpm}: ${messageContent}`);
+        if (event.key === 'Backspace' && !messageContent.trim()) {
+            debugLog('Reset', event);
+            typingStartTime.reset();
+            wpm.reset();
+        }
+        else if (event.key === 'Enter'
+            || event.key === 'NumpadEnter') {
+            debugLog('Submit through enter-type key');
+            didSubmit.set(true);
+        }
+    };
 }
-function onSubmit() {
-    updateHighscores();
+function getOnSubmitButtonClicked(didSubmit) {
+    return function onSubmitButtonClicked(event) {
+        if (!didSubmit.get())
+            didSubmit.set(true);
+    };
+}
+function onSubmit(activelyTyping, wpm, highscores) {
+    updateHighscores(highscores, wpm);
     activelyTyping.set(false);
 }
+
+const Settings = createSettings({
+    leftAlign: '1ch'
+}, function onLoad() {
+    Highscores.load();
+});
+const Highscores = createDiumStore({
+    best: 0,
+    bestDate: formatDate(new Date()),
+    today: 0,
+    todayDate: formatDate(new Date())
+}, 'highscores');
 
 const typingStartTime = createProperty(undefined);
 const typingEndTime = createProperty(undefined);
@@ -1079,8 +1102,8 @@ const wpm = createProperty({
 });
 let observer = new MutationObserver(() => {
     const placeholder = document.querySelector('[class*=textArea] > div > [class*=placeholder]');
-    if (placeholder)
-        onSubmit();
+    if (placeholder && didSubmit.get())
+        onSubmit(activelyTyping, wpm, Highscores);
 });
 const activelyTyping = createProperty({
     defaultValue: false,
@@ -1093,9 +1116,13 @@ const activelyTyping = createProperty({
         }
     }
 });
+const didSubmit = createProperty({
+    defaultValue: false,
+});
 function resetProperties() {
     typingStartTime.reset();
     typingEndTime.reset();
+    didSubmit.reset();
     wpm.reset();
 }
 
@@ -1150,9 +1177,12 @@ function SettingsPanel() {
 async function initChatForm(chatForm) {
     if (!chatForm)
         return;
-    addEventListener(chatForm, 'keydown', onKeyDown);
-    addEventListener(chatForm, 'keyup', onKeyUp);
+    addEventListener(chatForm, 'keydown', getOnKeyDown(activelyTyping, typingStartTime));
+    addEventListener(chatForm, 'keyup', getOnKeyUp(wpm, typingStartTime, typingEndTime, didSubmit));
     injectElement(chatForm, createElement$1(`<p id="${WPMCountId}" style="--leftAlign: ${Settings.current.leftAlign}">${wpm.get()} wpm</p>`));
+    const submitButton = document.querySelector(ChatSubmitButton);
+    if (submitButton)
+        addEventListener(submitButton, 'click', getOnSubmitButtonClicked(didSubmit));
 }
 async function checkChatFormMod(forceClear) {
     const wpmCount = document.getElementById(WPMCountId);

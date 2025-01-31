@@ -539,7 +539,7 @@ function findBySourceStrings(...keywords) {
         }
         catch (err) {
             const expectedErrorMessages = [
-                `%TypedArray%`,
+                `TypedArray`,
                 `from 'Window'`,
                 `Cannot convert a Symbol value to a string`
             ];
@@ -670,19 +670,25 @@ const { React } = BdApi;
 const classNames = /* @__PURE__ */ find$2((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
 const EventEmitter = /* @__PURE__ */ find$2((exports) => exports.prototype instanceof Object && Object.prototype.hasOwnProperty.call(exports.prototype, "prependOnceListener"));
 
-const Common = /* @__PURE__ */ byKeys(["Button", "Switch", "Select"]);
+const Button = /* @__PURE__ */ byKeys(["Colors", "Link"], { entries: true });
 
-const Button = Common.Button;
+const Flex = /* @__PURE__ */ byKeys(["Child", "Justify", "Align"], { entries: true });
 
-const Flex = /* @__PURE__ */ byKeys(["Child", "Justify"], { entries: true });
-
-const { FormSection, FormItem, FormTitle, FormText, FormLabel, FormDivider, FormSwitch, FormNotice } = Common;
+const { FormSection, FormItem, FormTitle, FormText,
+FormDivider, FormSwitch, FormNotice } = /* @__PURE__ */ demangle({
+    FormSection: bySource$1("titleClassName:", ".sectionTitle"),
+    FormItem: bySource$1("titleClassName:", "required:"),
+    FormTitle: bySource$1("faded:", "required:"),
+    FormText: (target) => target.Types?.INPUT_PLACEHOLDER,
+    FormDivider: bySource$1(".divider", "style:"),
+    FormSwitch: bySource$1("tooltipNote:"),
+    FormNotice: bySource$1("imageData:", ".formNotice")
+}, ["FormSection", "FormItem", "FormDivider"]);
 
 const FormElements = {
     __proto__: null,
     FormDivider,
     FormItem,
-    FormLabel,
     FormNotice,
     FormSection,
     FormSwitch,
@@ -694,11 +700,17 @@ const margins = /* @__PURE__ */ byKeys(["marginBottom40", "marginTop4"]);
 
 const { Menu, Group: MenuGroup, Item: MenuItem, Separator: MenuSeparator, CheckboxItem: MenuCheckboxItem, RadioItem: MenuRadioItem, ControlItem: MenuControlItem } = BdApi.ContextMenu;
 
-const { Select, SingleSelect } = Common;
+const { Select, SingleSelect } =  demangle({
+    Select: bySource$1("renderOptionLabel:", "renderOptionValue:", "popoutWidth:"),
+    SingleSelect: bySource$1((source) => /{value:[a-zA-Z_$],onChange:[a-zA-Z_$],...[a-zA-Z_$]}/.test(source))
+}, ["Select"]);
 
-const { TextInput, InputError } = Common;
+const { TextInput, InputError } = /* @__PURE__ */ demangle({
+    TextInput: (target) => target?.defaultProps?.type === "text",
+    InputError: bySource$1("error:", "text-danger")
+}, ["TextInput"]);
 
-const Text = Common.Text;
+const Text = /* @__PURE__ */ bySource(["lineClamp:", "variant:", "tabularNumbers:"], { entries: true });
 
 const queryFiber = (fiber, predicate, direction = "up" , depth = 30) => {
     if (depth < 0) {
@@ -1025,6 +1037,21 @@ const MessageStore = byName("MessageStore");
 
 const ThemeStore = byKeys(["theme"]);
 
+const DiscordStores = (() => (Array.from(BdApi.Webpack
+    .getModules(m => m?._dispatchToken && m?.getName)
+    .reduce((acc, store) => {
+    const storeName = store.constructor.displayName
+        ?? store.constructor.persistKey
+        ?? store.constructor.name
+        ?? store.getName();
+    if (storeName.length !== 1)
+        acc.set(storeName, store);
+    return acc;
+}, new Map())).sort(([aStoreName], [bStoreName]) => aStoreName.localeCompare(bStoreName))
+    .reduce((acc, [storeName, store]) => {
+    acc[storeName] = store;
+    return acc;
+}, {})))();
 function findStore(storeName, allowMultiple = false) {
     const result = Object.values(Finder.byName("UserSettingsAccountStore")
         ._dispatcher._actionHandlers._dependencyGraph.nodes).sort((a, b) => a.name.localeCompare(b.name))
@@ -1053,6 +1080,7 @@ const Stores = {
     ChannelMemberStore,
     ChannelStore,
     ContentInventoryStore,
+    DiscordStores,
     DiumStore,
     EmojiStore,
     ExpandedGuildFolderStore,
@@ -1232,9 +1260,16 @@ const VoiceActions = Object.assign({}, InternalVoiceActions, {
     handleVoiceConnect
 });
 
-const DISPATCH_ACTIONS = Dispatcher$1._subscriptions;
+const DISPATCH_ACTIONS = (() => {
+    const actions = new Set();
+    Object.values(Dispatcher$1._actionHandlers._dependencyGraph.nodes)
+        .forEach(node => Object.keys(node.actionHandler)
+        .forEach(event => actions.add(event)));
+    Object.keys(Dispatcher$1._subscriptions).forEach(event => actions.add(event));
+    return [...actions].sort((a, b) => a.localeCompare(b));
+})();
 function find(action) {
-    return Object.keys(DISPATCH_ACTIONS).filter(key => key.toLowerCase().includes(action.toLowerCase()));
+    return DISPATCH_ACTIONS.filter(key => key.toLowerCase().includes(action.toLowerCase()));
 }
 const ActionsEmitter = new class ActionsEmitter extends EventEmitter {
     constructor() {
@@ -2610,7 +2645,7 @@ const RegisterSortByAuthorOptionInForums = createActionCallback('CHANNEL_SELECT'
     addSortAndViewButtonClick();
 });
 
-function onChannelSelect$1() {
+function onChannelSelect() {
     if (!Settings.current.lockChannels
         || !Settings.current.allowForumSortByAuthor)
         return;
@@ -2689,10 +2724,9 @@ async function joinWithCamera(channelId) {
     else
         enableCamera();
 }
-const onVoiceStatesUpdates = createActionCallback('VOICE_STATE_UPDATES', ({ voiceStates }) => {
+const onVoiceChannelSelect$1 = createActionCallback('VOICE_CHANNEL_SELECT', ({ channelId: selectedChannelId, currentVoiceChannelId }) => {
     const { channelId, shouldEnableCamera } = JoinWithCameraManager.instance.get();
-    const update = voiceStates.find(state => state.channelId === channelId && state.userId === UserUtils.me.id);
-    if (!update || !shouldEnableCamera)
+    if (selectedChannelId !== channelId || !shouldEnableCamera)
         return;
     JoinWithCameraManager.instance.reset();
     enableCamera();
@@ -2708,19 +2742,19 @@ function enableCamera() {
     VoiceActions.setVideoEnabled(true);
 }
 
-function onChannelSelect() {
+function onVoiceChannelSelect() {
     if (!Settings.current.joinVoiceWithCamera)
         return;
-    ActionsEmitter.on('VOICE_STATE_UPDATES', data => {
+    ActionsEmitter.on('VOICE_CHANNEL_SELECT', data => {
         if (Settings.current.joinVoiceWithCamera)
-            onVoiceStatesUpdates(data);
+            onVoiceChannelSelect$1(data);
     });
 }
 
 function listenToActions() {
-    onChannelSelect$1();
-    onRelationshipAdd();
     onChannelSelect();
+    onRelationshipAdd();
+    onVoiceChannelSelect();
 }
 
 const createPatcherCallback = (callback) => callback;
@@ -2783,7 +2817,7 @@ function insertBadges(result, badgeData) {
 
 function movePremiumBeforeBoost(props) {
     const nitroBadge = props.children.find(badge => badge.props.children.props.href?.includes(BadgeTypes.NITRO_ANY));
-    const boosterBadgePos = props.children.findIndex(badge => badge.props.text.toLowerCase().includes('boost'));
+    const boosterBadgePos = props.children.findIndex(badge => typeof badge.props.text === 'string' && badge.props.text.toLowerCase().includes('boost'));
     if (!nitroBadge || boosterBadgePos === -1)
         return props;
     props.children.splice(props.children.indexOf(nitroBadge), 1);

@@ -83,7 +83,7 @@ const byKeys$1 = (...keys) => {
 const byProtos = (...protos) => {
     return (target) => target instanceof Object && target.prototype instanceof Object && protos.every((proto) => proto in target.prototype);
 };
-const bySource = (...fragments) => {
+const bySource$1 = (...fragments) => {
     return (target) => {
         while (target instanceof Object && "$$typeof" in target) {
             target = target.render ?? target.type;
@@ -137,6 +137,7 @@ const find = (filter, { resolve = true, entries = false } = {}) => BdApi.Webpack
 });
 const byName = (name, options) => find(byName$1(name), options);
 const byKeys = (keys, options) => find(byKeys$1(...keys), options);
+const bySource = (contents, options) => find(bySource$1(...contents), options);
 const demangle = (mapping, required, proxy = false) => {
     const req = required ?? Object.keys(mapping);
     const found = find((target) => (checkObjectValues(target)
@@ -208,27 +209,40 @@ const { default: Legacy, Dispatcher, Store, BatchedStoreListener, useStateFromSt
     Dispatcher: byProtos("dispatch"),
     Store: byProtos("emitChange"),
     BatchedStoreListener: byProtos("attach", "detach"),
-    useStateFromStores: bySource("useStateFromStores")
+    useStateFromStores: bySource$1("useStateFromStores")
 }, ["Store", "Dispatcher", "useStateFromStores"]);
 
 const { React } = BdApi;
 const classNames = /* @__PURE__ */ find((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
 
-const Common = /* @__PURE__ */ byKeys(["Button", "Switch", "Select"]);
+const Button$1 = /* @__PURE__ */ byKeys(["Colors", "Link"], { entries: true });
 
-const Button$1 = Common.Button;
+const Flex = /* @__PURE__ */ byKeys(["Child", "Justify", "Align"], { entries: true });
 
-const Flex = /* @__PURE__ */ byKeys(["Child", "Justify"], { entries: true });
-
-const { FormSection, FormItem, FormTitle, FormText, FormLabel, FormDivider, FormSwitch, FormNotice } = Common;
+const { FormSection, FormItem, FormTitle, FormText,
+FormDivider, FormSwitch, FormNotice } = /* @__PURE__ */ demangle({
+    FormSection: bySource$1("titleClassName:", ".sectionTitle"),
+    FormItem: bySource$1("titleClassName:", "required:"),
+    FormTitle: bySource$1("faded:", "required:"),
+    FormText: (target) => target.Types?.INPUT_PLACEHOLDER,
+    FormDivider: bySource$1(".divider", "style:"),
+    FormSwitch: bySource$1("tooltipNote:"),
+    FormNotice: bySource$1("imageData:", ".formNotice")
+}, ["FormSection", "FormItem", "FormDivider"]);
 
 const margins = /* @__PURE__ */ byKeys(["marginBottom40", "marginTop4"]);
 
 const { Menu, Group: MenuGroup, Item: MenuItem, Separator: MenuSeparator, CheckboxItem: MenuCheckboxItem, RadioItem: MenuRadioItem, ControlItem: MenuControlItem } = BdApi.ContextMenu;
 
-const { Select, SingleSelect } = Common;
+const { Select, SingleSelect } =  demangle({
+    Select: bySource$1("renderOptionLabel:", "renderOptionValue:", "popoutWidth:"),
+    SingleSelect: bySource$1((source) => /{value:[a-zA-Z_$],onChange:[a-zA-Z_$],...[a-zA-Z_$]}/.test(source))
+}, ["Select"]);
 
-const { TextInput, InputError } = Common;
+const { TextInput, InputError } = /* @__PURE__ */ demangle({
+    TextInput: (target) => target?.defaultProps?.type === "text",
+    InputError: bySource$1("error:", "text-danger")
+}, ["TextInput"]);
 
 const queryFiber = (fiber, predicate, direction = "up" , depth = 30) => {
     if (depth < 0) {
@@ -1033,7 +1047,7 @@ function insteadGetSearchResultsOrder() {
 }
 
 async function WaitForEmojiPicker(callback) {
-    return waitFor(bySource(...['showEmojiFavoriteTooltip']), { resolve: false }).then(module => {
+    return waitFor(bySource$1(...['showEmojiFavoriteTooltip']), { resolve: false }).then(module => {
         const key = 'default' in module ? 'default' : Object.keys(module)[0];
         return callback(module, key);
     });
@@ -1123,7 +1137,7 @@ var Colors;
     Colors[Colors["WHITE"] = 8] = "WHITE";
     Colors[Colors["YELLOW"] = 9] = "YELLOW";
 })(Colors || (Colors = {}));
-const Button = byKeys(["Button"]).Button;
+const Button = bySource([".Size", ".Looks", ".Colors"]);
 const SecondaryButton = (props) => React.createElement(Button, { ...props, color: Button.Colors.PRIMARY, look: Button.Looks.OUTLINED, "data-type": "secondary" });
 
 function Setting({ setting, settings, set, titles, ...props }) {
@@ -1197,7 +1211,7 @@ function SettingsPanel({ updatePatches }) {
     }, [current.enableBannedEmojis, current.enableFavorFavoriteEmojis]);
     return (React.createElement("div", { className: 'danho-plugin-settings' },
         React.createElement(FormSection, null,
-            React.createElement(FormLabel, null, "Features"),
+            React.createElement(FormText, null, "Features"),
             React.createElement(Setting, { settings: Settings.current, setting: 'enableBannedEmojis', set: set, titles: titles }),
             React.createElement(Setting, { settings: Settings.current, setting: 'enableFavorFavoriteEmojis', set: set, titles: titles })),
         current.enableBannedEmojis && (React.createElement(React.Fragment, null,
@@ -1215,7 +1229,7 @@ function BannedEmojiSection() {
     })), [bannedEmojis]);
     const disableCollapsible = bannedEmojis.length === 0;
     return (React.createElement(FormSection, { className: 'banned-emojis' },
-        React.createElement(FormLabel, null, "Banned emojis"),
+        React.createElement(FormText, null, "Banned emojis"),
         React.createElement(Collapsible, { title: disableCollapsible ? 'There are no banned emojis.' : 'View banned emojis', disabled: disableCollapsible },
             React.createElement("ul", { className: "banned-emojis__guilds-list" }, guilds.map(({ guild, bannedEmojis }) => (React.createElement("li", { key: guild.id, className: "banned-emojis__guilds-list-item" },
                 React.createElement(Collapsible, { title: React.createElement("div", { className: 'banned-emojis__guilds-list-item__header' },
@@ -1243,7 +1257,7 @@ function BannedEmojiSection() {
                         }) }))))))))))));
 }
 
-const styles = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible__content.hidden {\n  display: none;\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n[data-banned-emoji=true] {\n  filter: saturate(0.4);\n  border: 1px solid var(--button-danger-background);\n}\n\n.banned-emojis {\n  margin-top: 0.5rem;\n}\n.banned-emojis__guilds-list {\n  border: 1px solid var(--background-secondary);\n}\n.banned-emojis__guilds-list-item__header {\n  width: 100%;\n  display: flex;\n  justify-content: space-between;\n}\n.banned-emojis__emojis-list {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 0.5rem;\n}";
+const styles = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible__content.hidden {\n  display: none;\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-form-select, .setting-group {\n  display: flex;\n  flex-direction: column-reverse;\n  gap: 0.5rem;\n  margin-top: 1rem;\n}\n\n[data-banned-emoji=true] {\n  filter: saturate(0.4);\n  border: 1px solid var(--button-danger-background);\n}\n\n.banned-emojis {\n  margin-top: 0.5rem;\n}\n.banned-emojis__guilds-list {\n  border: 1px solid var(--background-secondary);\n}\n.banned-emojis__guilds-list-item__header {\n  width: 100%;\n  display: flex;\n  justify-content: space-between;\n}\n.banned-emojis__emojis-list {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 0.5rem;\n}";
 
 function updatePatches() {
     unpatchAll();
