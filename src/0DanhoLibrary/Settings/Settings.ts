@@ -29,7 +29,6 @@ const DiscordEnhancements = {
   showGuildMembersInHeader: true,
 
   allowForumSortByAuthor: true,
-
 }
 
 const DanhoEnhancements = {

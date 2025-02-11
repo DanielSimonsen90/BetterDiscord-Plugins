@@ -3,12 +3,12 @@ import { Store } from '@dium/modules/flux';
 
 export * from './ChannelStores';
 export * from './GuildStores';
+export * from './MessageStores';
 export * from './UserStores';
 export * from './VoiceAndMediaStores';
 
 export * from './ApplicationStore';
 export * from './DiumStore';
-export * from './MessagesStore';
 export * from './ThemeStore';
 
 export const DiscordStores = (() => (
