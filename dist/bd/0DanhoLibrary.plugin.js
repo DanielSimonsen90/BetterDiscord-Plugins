@@ -646,6 +646,12 @@ const GuildStore = byName("GuildStore");
 
 const SelectedGuildStore = byKeys(["getLastSelectedGuildId"]);
 
+const MessageStore = byName("MessageStore");
+
+const MessageRequestStore = byName("MessageRequestStore");
+
+const SpamMessageRequestStore = byName("SpamMessageRequestStore");
+
 const PresenceStore = /* @__PURE__ */ byName("PresenceStore");
 
 const RelationshipStore = /* @__PURE__ */ byName("RelationshipStore");
@@ -1033,8 +1039,6 @@ class DiumStore {
 }
 const createDiumStore = (defaults, dataKey, onLoad) => new DiumStore(defaults, dataKey, onLoad);
 
-const MessageStore = byName("MessageStore");
-
 const ThemeStore = byKeys(["theme"]);
 
 const DiscordStores = (() => (Array.from(BdApi.Webpack
@@ -1093,6 +1097,7 @@ const Stores = {
     get MediaEngineContextTypes () { return MediaEngineContextTypes; },
     get MediaEngineEvent () { return MediaEngineEvent; },
     MediaEngineStore,
+    MessageRequestStore,
     MessageStore,
     PresenceStore,
     RTCConnectionStore,
@@ -1100,6 +1105,7 @@ const Stores = {
     SelectedChannelStore,
     SelectedGuildStore,
     SortedGuildStore,
+    SpamMessageRequestStore,
     get SupportedFeatures () { return SupportedFeatures; },
     ThemeStore,
     UserActivityStore,
@@ -2671,8 +2677,12 @@ const CancelFriendRequest = createActionCallback('RELATIONSHIP_ADD', ({ relation
         BdApi.UI.showToast(message, { type: 'success' });
     };
     const mutualGuildIds = UserProfileStore.getMutualGuilds(relationship.user.id)?.map(v => v.guild.id);
-    if (mutualGuildIds === undefined)
-        return cancelFriendRequest();
+    if (mutualGuildIds === undefined) {
+        const mutualFriends = UserProfileStore.getMutualFriends(relationship.user.id);
+        if (!mutualFriends?.length)
+            cancelFriendRequest();
+        return;
+    }
     else if (mutualGuildIds.length === 0)
         return;
     const mutualGuildIdsInBlockFolders = mutualGuildIds.filter(guildId => blockFolders.some(folder => folder.guildIds.includes(guildId)));

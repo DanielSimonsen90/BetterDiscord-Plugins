@@ -18,7 +18,11 @@ export default createActionCallback('RELATIONSHIP_ADD', ({ relationship }) => {
   };
 
   const mutualGuildIds = UserProfileStore.getMutualGuilds(relationship.user.id)?.map(v => v.guild.id);
-  if (mutualGuildIds === undefined) return cancelFriendRequest();
+  if (mutualGuildIds === undefined) {
+    const mutualFriends = UserProfileStore.getMutualFriends(relationship.user.id);
+    if (!mutualFriends?.length) cancelFriendRequest();
+    return;
+  }
   else if (mutualGuildIds.length === 0) return;
 
   const mutualGuildIdsInBlockFolders = mutualGuildIds.filter(guildId => blockFolders.some(folder => folder.guildIds.includes(guildId)));
