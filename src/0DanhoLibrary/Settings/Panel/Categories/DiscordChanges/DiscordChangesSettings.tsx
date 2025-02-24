@@ -1,43 +1,34 @@
 import CreateSettingsGroup from "../../_CreateSettingsGroup";
 import AutoCancelFriendRequestSettings from "./AutoCancelFriendRequestSettings";
+import { DiscordEnhancements, DiscordEnhancementsTitles } from '../../../Settings';
+import TimezoneSettings from "./TimezoneSettings";
+import BirthdateSettings from "./BirthdateSettings";
 
 export default CreateSettingsGroup((React, props, Setting, { FormSection, FormDivider }) => {
-  const AutoCancelFriendRequests = () => (
-    <FormSection title="Auto Cancel Friend Requests">
-      <Setting setting="autoCancelFriendRequests" {...props} />
-      {props.settings.autoCancelFriendRequests ? <AutoCancelFriendRequestSettings {...props} /> : null}
-    </FormSection>
-  )
+  const AdditionalSettings = ({ setting }) => {
+    switch (setting) {
+      case 'autoCancelFriendRequests': return props.settings.autoCancelFriendRequests ? <AutoCancelFriendRequestSettings {...props} /> : null;
+      case 'showUserTimezone': return props.settings.showUserTimezone ? <TimezoneSettings {...props} /> : null;
+      case 'showUserBirthdate': return props.settings.showUserBirthdate ? <BirthdateSettings {...props} /> : null;
+      default: return null;
+    }
+  };
 
-  const JoinVoiceWithCamera = () => (
-    <FormSection title="Join Voice With Camera">
-      <Setting setting="joinVoiceWithCamera" {...props} />
-    </FormSection>
-  )
-
-  const ShowGuildMembersInHeader = () => (
-    <FormSection title="Show Guild Members In Header">
-      <Setting setting="showGuildMembersInHeader" {...props} />
-    </FormSection>
-  )
-
-  const AllowForumSortByAuthor = () => (
-    <FormSection title="Allow Forum Sort By Author">
-      <Setting setting="allowForumSortByAuthor" {...props} />
-    </FormSection>
-  )
+  const ignoredSettings: Array<keyof typeof DiscordEnhancements> = [
+    'folderNames',
+    'hideTimezoneIcon', 'hideTimezoneTimestamp',
+    'hideBirthdateIcon', 'hideBirthdateTimestamp', 'birthdateTimestampStyle',
+  ];
 
   return (<>
-    <AutoCancelFriendRequests />
-    <FormDivider />
-    
-    <JoinVoiceWithCamera />
-    <FormDivider />
-    
-    <ShowGuildMembersInHeader />
-    <FormDivider />
-    
-    <AllowForumSortByAuthor />
-
+    {Object.keys(DiscordEnhancements)
+      .filter(key => !ignoredSettings.includes(key as any))
+      .map((key, index) => (<>
+      <FormSection title={DiscordEnhancementsTitles[key]} key={index}>
+        <Setting setting={key as any} {...props} />
+        <AdditionalSettings setting={key} />
+      </FormSection>
+      <FormDivider />
+    </>))}
   </>);
 });

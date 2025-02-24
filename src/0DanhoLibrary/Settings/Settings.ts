@@ -4,7 +4,7 @@ import { BadgeTypes } from "@discord/components";
 import { CustomBadgeData } from "../features/danho-enhancements/badges/CustomBadge";
 import { DEFAULT_DISCORD_ROLE_COLOR, USER_TAGS } from "../constants";
 
-const StyleChanges = {
+export const StyleChanges = {
   styleChanges: true,
 
   movePremiumBadge: true,
@@ -18,7 +18,7 @@ const StyleChanges = {
   nonObnoxiousProfileEffects: true,
 }
 
-const DiscordEnhancements = {
+export const DiscordEnhancements = {
   discordEnhancements: true,
 
   autoCancelFriendRequests: true,
@@ -29,9 +29,20 @@ const DiscordEnhancements = {
   showGuildMembersInHeader: true,
 
   allowForumSortByAuthor: true,
+
+  showUserTimezone: true,
+  hideTimezoneIcon: false,
+  hideTimezoneTimestamp: false,
+
+  showUserBirthdate: true,
+  hideBirthdateIcon: false,
+  hideBirthdateTimestamp: false,
+  birthdateTimestampStyle: 'd',
+  showBirthdayCalendar: true,
+  showBirthdayOnNameTag: true,
 }
 
-const DanhoEnhancements = {
+export const DanhoEnhancements = {
   danhoEnhancements: true,
 
   badges: true,
@@ -54,7 +65,7 @@ export const Settings = createSettings({
   ...DanhoEnhancements,
 });
 
-const StyleChangesTitles: Record<keyof typeof StyleChanges, string> = {
+export const StyleChangesTitles: Record<keyof typeof StyleChanges, string> = {
   styleChanges: `Style changes`,
 
   movePremiumBadge: `Move the Nitro badge before the Server Boosting badge again`,
@@ -68,7 +79,7 @@ const StyleChangesTitles: Record<keyof typeof StyleChanges, string> = {
   nonObnoxiousProfileEffects: `Lower the opacity of profile effects (on hover) so they aren't as obnoxious`,
 };
 
-const DiscordEnhancementsTitles: Record<keyof typeof DiscordEnhancements, string> = {
+export const DiscordEnhancementsTitles: Record<keyof typeof DiscordEnhancements, string> = {
   discordEnhancements: `Discord enhancements`,
 
   autoCancelFriendRequests: `Auto cancel friend requests on bigger servers`,
@@ -79,9 +90,20 @@ const DiscordEnhancementsTitles: Record<keyof typeof DiscordEnhancements, string
   showGuildMembersInHeader: `Show guild members in the header`,
 
   allowForumSortByAuthor: `Allow sorting forum posts by author`,
+
+  showUserTimezone: `Show user's timezone in the user popout/profile`,
+  hideTimezoneIcon: `Hide the timezone icon`,
+  hideTimezoneTimestamp: `Hide the timezone timestamp`,
+
+  showUserBirthdate: `Show user's birthdate in the user popout/profile`,
+  hideBirthdateIcon: `Hide the birthdate icon`,
+  hideBirthdateTimestamp: `Hide the birthdate timestamp`,
+  birthdateTimestampStyle: `Birthdate timestamp style`,
+  showBirthdayCalendar: `Show birthday calendar in global navigation`,
+  showBirthdayOnNameTag: `Show birthday on name tag`,
 };
 
-const DanhoEnhancementsTitles: Record<keyof typeof DanhoEnhancements, string> = {
+export const DanhoEnhancementsTitles: Record<keyof typeof DanhoEnhancements, string> = {
   danhoEnhancements: `Danho enhancements`,
 
   badges: `User badge modifications`,

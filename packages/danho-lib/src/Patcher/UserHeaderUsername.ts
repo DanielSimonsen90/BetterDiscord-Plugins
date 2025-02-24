@@ -2,7 +2,7 @@ import type { Snowflake, User, DisplayProfile } from "@discord/types";
 import { Finder } from "@dium/api";
 import type { TextVairants } from '@danho-lib/Patcher/Text'
 
-type UserHeaderUsernameModule = {
+export type UserHeaderUsernameModule = {
   Z: (props: UserHeaderUsernameProps) => JSX.BD.Rendered<{
     className: 'container_...';
     children: [
@@ -28,7 +28,51 @@ type UserHeaderUsernameModule = {
           }>
         ]
       }>,
-      tagsPanelPronouns: JSX.BD.Rendered<{}>,
+      tagsPanelPronouns: JSX.BD.Rendered<{
+        className: 'tags__... panel__... pronouns__...';
+        children: [
+          tag: JSX.BD.Rendered<{
+            className: 'clickableUsername__...',
+            onClick: (e: any) => any;
+            role: 'button';
+            tabIndex: 0;
+            tag: 'div';
+            children: JSX.BD.Rendered<{
+              className: 'userTag__...';
+              discriminatorClass: 'userTagDiscriminator__...';
+              forcePomelo: undefined;
+              forceUsername: true;
+              hideBotTag: boolean;
+              user: User;
+              usernameClass: 'userTagUsername__...';
+              usernameIcon: undefined;
+            }>
+          }>,
+          pronounsContainer: [
+            dotSpacer: JSX.BD.Rendered<{}>,
+            pronounsTooltip: JSX.BD.Rendered<{
+              className: 'pronounsTooltip__...';
+              delay: 300;
+              text: 'Pronouns';
+              children: JSX.BD.Rendered<{
+                children: string;
+                className: 'pronounsText__... userTag__...';
+                color: 'header-primary';
+                variant: 'text-sm/medium'
+              }>
+            }>,
+          ],
+          clanTagContainer: JSX.BD.Rendered<{
+            className: 'clanTag__...';
+            containerClassName: 'clanTagContainer__...';
+            userId: Snowflake;
+          }>,
+          displayProfileBadges: JSX.BD.Rendered<{
+            displayProfile: DisplayProfile;
+            profileType: 'PANEL';
+          }>
+        ]
+      }>,
     ]
   }>
 };

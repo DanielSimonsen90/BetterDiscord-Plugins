@@ -70,18 +70,21 @@ export function Setting<
       <FormText className='note'>{titles[setting]}</FormText>
     </div>
   );
-  if (type === 'select' && Array.isArray(settings[setting])) return (
+  if (type === 'select') return (
     <div className="danho-form-select" key={setting.toString()}>
       <Select 
         options={props.selectValues.map(value => ({ label: value, value }))} 
-        isSelected={value => Array.isArray(settings[setting]) ? (v as Array<any>).includes(value) : false} 
+        isSelected={value => Array.isArray(settings[setting]) ? (v as Array<any>).includes(value) : value === settings[setting]} 
         serialize={value => JSON.stringify(value)}
-        select={(value) => {
+        select={Array.isArray(settings[setting]) ? (value) => {
           const selected = [...settings[setting] as Array<any>];
           if (selected.includes(value)) selected.splice(selected.indexOf(value), 1);
           else selected.push(value);
           set({ [setting]: selected } as any);
           setV(selected as any);
+        } : (value) => {
+          set({ [setting]: value } as any);
+          setV(value as any);
         }}
       />
       <FormText className='note'>{titles[setting]}</FormText>

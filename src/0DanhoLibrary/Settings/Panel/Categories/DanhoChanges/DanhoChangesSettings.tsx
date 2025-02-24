@@ -1,45 +1,34 @@
 import CreateSettingsGroup from "../../_CreateSettingsGroup";
 import BadgesSettings from "./BadgesSettings";
 import LockSettings from "./LockSettings";
+import { DanhoEnhancements, DanhoEnhancementsTitles } from '../../../Settings';
+import HidingSettings from "./HidingSettings";
 
 export default CreateSettingsGroup((React, props, Setting, { FormSection, FormDivider }) => {
-  const Badges = () => (
-    <FormSection title="Badges">
-      <Setting setting="badges" {...props} />
-      {props.settings.badges ? <BadgesSettings {...props} /> : null}
-    </FormSection>
-  );
+  const AdditionalSettings = ({ setting }) => {
+    switch (setting) {
+      case 'badges': return props.settings.badges ? <BadgesSettings {...props} /> : null;
+      case 'lockChannels': return props.settings.lockChannels ? <LockSettings {...props} /> : null;
+      case 'wakeUp': return props.settings.wakeUp ? <HidingSettings {...props} /> : null;
+      default: return null;
+    }
+  };
 
-  const LockChannels = () => (
-    <FormSection title="Lock Channels">
-      <Setting setting="lockChannels" {...props} />
-      {props.settings.lockChannels ? <LockSettings {...props} /> : null}
-    </FormSection>
-  )
-
-  const QuickAddMemberToDungeon = () => (
-    <FormSection title="Add To Dungeon">
-      <Setting setting="addToDungeon" {...props} />
-    </FormSection>
-  );
-
-  const WakeUp = () => (
-    <FormSection title="Wake Up">
-      <Setting setting="wakeUp" {...props} />
-    </FormSection>
-  );
+  const ignoredSettings: Array<keyof typeof DanhoEnhancements> = [
+    'useClientCustomBadges', 
+    'lockPassword', 'lockUnlockForMinutes', 'initialLockState',
+    'isHidingOnPurpose'
+  ];
 
   return (<>
-    <Badges />
-    <FormDivider />
-    
-    <LockChannels />
-    <FormDivider />
-    
-    <QuickAddMemberToDungeon />
-    <FormDivider />
-    
-    <WakeUp />
-
+    {Object.keys(DanhoEnhancements)
+      .filter(key => !ignoredSettings.includes(key as any))
+      .map((key, index) => (<>
+      <FormSection title={DanhoEnhancementsTitles[key]} key={index}>
+        <Setting setting={key as any} {...props} />
+        <AdditionalSettings setting={key} />
+      </FormSection>
+      <FormDivider />
+    </>))}
   </>);
 });

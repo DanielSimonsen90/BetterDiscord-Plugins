@@ -12,6 +12,16 @@ export const Timestamp = Finder.findBySourceStrings("timestampTooltip", { defaul
 
 type Props = {
   unix: number;
+
+  /**
+   * @t SHORT_TIME: HH:mm
+   * @T LONG_TIME: HH:mm:ss
+   * @d SHORT_DATE: dd/MM/yyyy
+   * @D LONG_DATE: dd Month yyyy
+   * @f SHORT_DATE/TIME: dd Month yyyy HH:mm
+   * @F LONG_DATE/TIME: Day, dd Month yyyy HH:mm
+   * @R RELATIVE: <x> <unit> ago | in <x> <unit>
+   */
   format: DiscordTimeFormat;
 }
 export default function TimestampComponent({ unix, format }: Props) {

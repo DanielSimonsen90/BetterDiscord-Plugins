@@ -1,8 +1,11 @@
 import afterBadgeList from "./after/BadgeList";
 import afterChannelItem from "./after/ChannelItem";
+import afterGlobalNavigation from "./after/GlobalNavigation";
 import afterMemberListItem from "./after/MemberListItem";
+import afterNameTag from "./after/NameTag";
 import afterRolesList from "./after/RolesList";
 import afterTextModule from "./after/TextModule";
+import afterUserHeaderUsername from './after/UserHeaderUsername'
 import afterUserProfileModalAboutMe from "./after/UserProfileModalAboutMe";
 
 import PatchChannelContextMenu from "./context-menus/ChannelContextMenu";
@@ -20,9 +23,12 @@ export default function Patch() {
 
   afterBadgeList();
   afterChannelItem();
+  afterGlobalNavigation();
   afterMemberListItem();
+  afterNameTag();
   afterRolesList();
   afterTextModule();
+  afterUserHeaderUsername();
   afterUserProfileModalAboutMe();
   
   insteadRolesList();

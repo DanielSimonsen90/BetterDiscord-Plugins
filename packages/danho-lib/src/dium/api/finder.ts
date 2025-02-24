@@ -129,7 +129,8 @@ export function findBySourceStrings<TResult = any>(...keywords: FindBySourceStri
       const expectedErrorMessages = [
         `TypedArray`,
         `from 'Window'`,
-        `Cannot convert a Symbol value to a string`
+        `Cannot convert a Symbol value to a string`,
+        '$$baseObject',
       ];
       if (err instanceof Error && expectedErrorMessages.some(message => err.message.includes(message))) return undefined;
       Logger.error(`[findBySourceStrings] Error in moduleCallback`, err);
@@ -142,6 +143,9 @@ export function findBySourceStrings<TResult = any>(...keywords: FindBySourceStri
   }).then(module => {
     Logger.debugLog(`[findBySourceStrings] Found lazy module for [${keywords.join(',')}]`, module);
     return module;
+  }).catch(err => {
+    Logger.error(`[findBySourceStrings] Error in lazy search`, err);
+    return undefined;
   });
 
   const moduleSearchOptions = searchOptions ?? { searchExports: true };

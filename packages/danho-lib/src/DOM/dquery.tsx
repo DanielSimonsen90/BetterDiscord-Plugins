@@ -126,14 +126,14 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
   }
 
   public addClass(className: string) {
-    this.element.classList.add(className);
+    if (!this.hasClass(className)) this.element.classList.add(className);
     return this;
   }
   public hasClass(className: string) {
     return this.element.classList.contains(className);
   }
   public removeClass(className: string) {
-    this.element.classList.remove(className);
+    if (this.hasClass(className)) this.element.classList.remove(className);
     return this;
   }
 
