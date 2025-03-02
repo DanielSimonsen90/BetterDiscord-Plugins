@@ -22,3 +22,5 @@ export type Functionable<T, Parameters extends any[] = any[]> = ((...args: Param
 
 // Pick properties from T if key is not in Store
 export type FilterStore<T extends Store> = Pick<T, Exclude<keyof T, keyof Store>>;
+
+export type PropsFromFC<T extends (props: any) => any> = T extends (props: infer Props) => any ? Props : unknown;

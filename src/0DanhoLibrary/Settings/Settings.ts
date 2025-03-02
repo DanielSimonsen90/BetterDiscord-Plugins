@@ -3,6 +3,7 @@ import { BadgeTypes } from "@discord/components";
 
 import { CustomBadgeData } from "../features/danho-enhancements/badges/CustomBadge";
 import { DEFAULT_DISCORD_ROLE_COLOR, USER_TAGS } from "../constants";
+import { createDiumStore } from "@danho-lib/Stores";
 
 export const StyleChanges = {
   styleChanges: true,
@@ -63,6 +64,8 @@ export const Settings = createSettings({
   ...StyleChanges,
   ...DiscordEnhancements,
   ...DanhoEnhancements,
+}, () => {
+  Badges.load();
 });
 
 export const StyleChangesTitles: Record<keyof typeof StyleChanges, string> = {
@@ -126,7 +129,7 @@ export const titles: Record<keyof typeof Settings.current, string> = {
   ...DanhoEnhancementsTitles,
 };
 
-export const Badges = createSettings({
+export const Badges = createDiumStore<Record<string, CustomBadgeData>>({
   developer: {
     name: 'Plugin Developer',
     iconUrl: 'https://i.imgur.com/f5MDiAd.png',
@@ -135,6 +138,22 @@ export const Badges = createSettings({
       before: BadgeTypes.ACTIVE_DEVELOPER,
       default: 0
     },
-    size: '14px'
-  } as CustomBadgeData,
-});
+    size: '14px',
+    href: 'https://github.com/DanielSimonsen90'
+  },
+  daniel_simonsen: {
+    name: 'Daniel Simonsen himself',
+    iconUrl: 'https://imgur.com/jva0EMf.png',
+    userTags: [USER_TAGS.DANHO],
+    position: 0,
+    size: '16px',
+    href: 'https://open.spotify.com/artist/2Ya69OwtcUqvAMPaE8vXdg?si=ELamxrqgR-KLZwTqYA6AXA'
+  },
+  mose_clan: {
+    name: 'Mose Clan',
+    iconUrl: 'https://imgur.com/Wm1pEfY.png',
+    userTags: [USER_TAGS.DANHO, USER_TAGS.THEGUNASS, USER_TAGS.BEAUTYKILLER, USER_TAGS.EMILIE, USER_TAGS.CARL],
+    size: '24px',
+    position: 1
+  }
+}, 'CustomBadges');

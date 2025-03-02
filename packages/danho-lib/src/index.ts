@@ -24,10 +24,12 @@ class DanhoLibrary implements Plugin<{}> {
 
 const LibraryPlugin: DanhoLibrary & Plugin<any> = new DanhoLibrary();
 window.DL = LibraryPlugin;
+window.Finder = Finder;
 
 declare global {
   interface Window {
     DL: DanhoLibrary;
+    Finder: DanhoLibrary['Finder'];
   }
 }
 

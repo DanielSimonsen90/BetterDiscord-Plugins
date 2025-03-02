@@ -6,8 +6,7 @@ import { Logger } from "@dium";
 import { Tooltip } from "@discord/components";
 import { UserStore } from "@danho-lib/Stores";
 
-export default createPatcherAfterCallback<NameTag>(({ result: _result, args: [props] }) => {
-  const result = _result as any as ReturnType<typeof _result>;
+export default createPatcherAfterCallback<NameTag['render']>(({ result, args: [props] }) => {
   if (!props.avatar.props.src) return result;
 
   // userId: src: https://cdn.discordapp.com/avatars/<userId>/<avatar>.webp

@@ -186,7 +186,7 @@ export const findComponentBySourceStrings = async <TResult = JSX.BD.FC>(...keywo
           cancelCE();
           resolve(component);
         }
-      }, { silent: true });
+      }, { name: `findComponentBySourceStrings([${keywords.join(',')}])`, });
 
       // According to actual plugin developers, default components are rendered using the `React` module
       const cancelCE = Patcher.after(ReactModule, 'createElement', ({ args: [component] }) => {

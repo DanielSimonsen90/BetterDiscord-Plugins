@@ -20,7 +20,12 @@ export type CallbableRenderedComponentResult<P = RenderedComponentResultDefaultP
 declare global {
   namespace JSX.BD {
     type Rendered<P = RenderedComponentResultDefaultProps, Type = unknown> = RenderedComponentResult<P, Type>;
-    type FC<P = RenderedComponentResultDefaultProps, RP = P> = CallbableRenderedComponentResult<RP>;
+    type FC<P = RenderedComponentResultDefaultProps, RP = P> = (props: P) => RenderedComponentResult<RP>;
     type FCF<P = RenderedComponentResultDefaultProps, RP = P> = (props: P) => CallbableRenderedComponentResult<RP>;
+
+    type FRC<Props, RenderedProps, RefElementType = HTMLDivElement> = {
+      displayName?: string;
+      render: (props: Props, ref: React.RefObject<RefElementType>) => JSX.BD.Rendered<RenderedProps>;
+    }
   }
 }

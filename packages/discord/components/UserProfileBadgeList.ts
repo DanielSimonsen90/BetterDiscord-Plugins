@@ -1,45 +1,40 @@
 import Finder from "@danho-lib/dium/api/finder";
+import { DisplayProfile } from "@discord/types";
 
-export type UserBadges<Rendered extends boolean> = Rendered extends true ?
-  () => JSX.BD.Rendered<{
-    'aria-label': 'User Badges';
-    children: Array<JSX.BD.Rendered<{
-      children: JSX.BD.Rendered<{
-        children: [
-          JSX.BD.Rendered<{
-            alt: ' ';
-            'aria-hidden': true;
-            className: 'badge_...';
-            src: string;
-          }, 'img'>,
-          false
-        ];
-        href: string;
-        onClick: (event: MouseEvent) => void;
-        onMouseEnter: () => void;
-      }, true>;
-      delay: 300;
-      onTooltipHide: () => void;
-      onTooltipShow: () => void;
-      text: string | JSX.BD.Rendered<any>;
-      tooltipClassName: undefined;
-    }, true>>;
-    className: 'container_...';
-    role: 'group';
-  }, 'div'> : JSX.BD.FCF<{
-    badges: Array<UserProfileBadge>;
-    className?: string,
-    badgeClassName?: string;
-    onClose: () => void;
-  }>;
+export type BadgeList = JSX.BD.FC<{
+  badges: Array<UserProfileBadge>;
+  displayProfile?: DisplayProfile;
+  onClose: (e: React.MouseEvent) => void;
+}, {
+  'aria-label': 'User Badges';
+  children: Array<JSX.BD.Rendered<{
+    'aria-label': string;
+    children: JSX.BD.Rendered<{
+      children: [
+        badgeIcon: JSX.BD.Rendered<{
+          alt: ' ';
+          'aria-hidden': true;
+          className: 'badge_...';
+          src: string;
+        }, 'img'>,
+        false
+      ];
+      href?: string;
+      onClick: (event: MouseEvent) => void;
+      onMouseEnter: () => void;
+    }, true>;
+    delay: 300;
+    onTooltipHide: () => void;
+    onTooltipShow: () => void;
+    text: string | JSX.BD.Rendered<any>;
+    tooltipClassName: undefined;
+  }, true>>;
+  className: 'container_...';
+  role: 'group';
+}>;
 
-export type UserProfileBadgeListModule<Rendered extends boolean = false> = {
-  Z: UserBadges<Rendered>;
-};
-
-export const UserBadges: UserProfileBadgeListModule = Finder.BDFDB_findByStrings(['QUEST_CONTENT_VIEWED', '"PRESS_BADGE"', 'badgeClassName'], { defaultExport: false }).exports;
-export const RenderedUserProfileBadgeList: UserProfileBadgeListModule<true> = UserBadges as any as UserProfileBadgeListModule<true>;
-export default UserBadges;
+export const BadgeList: Record<'Z', BadgeList> = Finder.findBySourceStrings("badges", "badgeClassName", "displayProfile", "QUEST_CONTENT_VIEWED", { defaultExport: false });
+export default BadgeList;
 
 type UserProfileBadge = {
   id: string;

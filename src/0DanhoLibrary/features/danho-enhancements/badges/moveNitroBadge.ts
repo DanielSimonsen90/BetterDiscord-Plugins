@@ -1,4 +1,4 @@
-import { BadgeTypes, UserBadges } from "@discord/components";
+import { BadgeTypes, BadgeList } from "@discord/components";
 
 type Props = ReturnType<UserBadges<true>>['props']
 
@@ -7,7 +7,7 @@ export function movePremiumBeforeBoost(props: Props): Props {
   const boosterBadgePos = props.children.findIndex(badge => typeof badge.props.text === 'string' && badge.props.text.toLowerCase().includes('boost'));
 
   // Ensure nitroBadge and boosterBadge exist
-  if (!nitroBadge || boosterBadgePos === -1) return props;
+  if (!nitroBadge && boosterBadgePos === -1) return props;
 
   // Delete nitroBadge from badges array
   props.children.splice(props.children.indexOf(nitroBadge), 1);

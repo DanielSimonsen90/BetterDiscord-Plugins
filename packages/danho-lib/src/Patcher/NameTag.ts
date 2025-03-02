@@ -29,7 +29,7 @@ type Name = JSX.BD.Rendered<{
   tooltipClassName: `overflowtooltip__...`;
 }>
 
-export type NameTag = JSX.BD.FCF<{
+export type NameTag = JSX.BD.FRC<{
   selected: boolean;
   muted?: boolean;
   highlighted?: boolean;
@@ -65,5 +65,5 @@ export type NameTag = JSX.BD.FCF<{
   ]
 }>;
 
-export const NameTag: Record<'Z', NameTag> = Finder.findBySourceStrings(`nameAndDecorators`, `o.subText`, { defaultExport: false });
+export const NameTag: NameTag = Finder.findBySourceStrings(`nameAndDecorators`, `AvatarWithText`);
 export default NameTag;

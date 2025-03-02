@@ -42,7 +42,7 @@ export type User = {
 
   get createdAt(): Date;
   get hasPremiumPerks(): boolean;
-  get tag(): string;
+  get tag(): string | undefined;
   get usernameNormalized(): string;
 
   addGuildAvatarHash(arg1: any, arg2: any): any;
