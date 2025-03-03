@@ -1,6 +1,7 @@
 import { Finder } from "@dium";
 import { Store } from "@dium/modules/flux";
 import { DisplayProfile, Guild, Snowflake, User, UserStatus } from '@discord/types'
+import { UserProfileBadge } from "@discord/components";
 
 export type UserProfileStore = Store & {
   getGuildMemberProfile(userId: Snowflake, guildId: Snowflake): DisplayProfile;
@@ -14,10 +15,37 @@ export type UserProfileStore = Store & {
     nick: string | null;
     guild: Guild;
   }>;
-  getUserProfile(userId: Snowflake): DisplayProfile & { badges: Array<any> };
+  getUserProfile(userId: Snowflake): DisplayProfile & { badges: Array<UserProfileBadge> };
   isFetchingFriends(userId: Snowflake): boolean;
   isFetchingProfile(userId: Snowflake): boolean;
   get isSubmitting(): boolean;
 };
 
 export const UserProfileStore: UserProfileStore = Finder.byName("UserProfileStore");
+
+/**
+ * This type is only used for successful fetch action
+ */
+export type MutualFriend = {
+  avatar: string;
+  avatar_decoration_data: null | {
+    asset: string;
+    expires_at: number | null;
+    sku_id: string;
+  };
+  clan: null;
+  discriminator: string;
+  global_name: string;
+  id: Snowflake;
+  primary_guild: null;
+  public_flags: number;
+  username: string;
+}
+
+/**
+ * This type is only used for successful fetch action
+ */
+export type MutualGuild = {
+  id: Snowflake;
+  nick: null | string;
+}

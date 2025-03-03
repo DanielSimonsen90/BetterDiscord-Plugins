@@ -36,7 +36,7 @@ export type BadgeList = JSX.BD.FC<{
 export const BadgeList: Record<'Z', BadgeList> = Finder.findBySourceStrings("badges", "badgeClassName", "displayProfile", "QUEST_CONTENT_VIEWED", { defaultExport: false });
 export default BadgeList;
 
-type UserProfileBadge = {
+export type UserProfileBadge = {
   id: string;
   description: string;
   icon: string;
@@ -110,6 +110,7 @@ export enum BadgeIconIds {
   legacy_username = "6de6d34650760ba5551a79732e98ed60",
   partner = "3f9748e53446a137a052f3454e2de41e",
   premium = "2ba85e8026a8614b640c2837bcdfe21b",
+  premium_tenure_12_month_v2 = "0334688279c8359120922938dcb1d6f8",
   premium_early_supporter = "7060786766c9c840eb3019e725d2b358",
   quest_completed = "7d9ae358c8c5e118768335dbe68b4fb8",
   staff = "5e74e9b61934fc1f67c65515d1f7e60d",

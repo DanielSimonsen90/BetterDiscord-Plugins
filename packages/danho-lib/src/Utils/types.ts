@@ -17,6 +17,7 @@ export type NewReturnType<
 export type PromisedReturn<
   Function extends (...args: any[]) => any,
 > = NewReturnType<Function, Promise<ReturnType<Function>>>;
+export type Promiseable<T> = T | Promise<T>;
 
 export type Functionable<T, Parameters extends any[] = any[]> = ((...args: Parameters) => T) | T;
 

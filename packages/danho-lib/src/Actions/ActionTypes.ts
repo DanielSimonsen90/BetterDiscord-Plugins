@@ -1,5 +1,6 @@
-import { VoiceStateUpdate } from "@stores";
-import { Snowflake, GuildMember, Message, User, Activity, UserStatus } from "@discord/types";
+import { MutualFriend, MutualGuild, VoiceStateUpdate } from "@stores";
+import { Snowflake, GuildMember, Message, User, Activity, UserStatus, ConnectedAccount, DisplayProfile } from "@discord/types";
+import { UserProfileBadge } from "@discord/components";
 
 type ActionProps = {
   CHANNEL_SELECT: {
@@ -49,6 +50,29 @@ type ActionProps = {
     },
     shouldNotify: boolean;
   }
+  USER_PROFILE_FETCH_SUCCESS: {
+    badges: Array<UserProfileBadge>;
+    connected_accounts: Array<ConnectedAccount>
+    guild_badges: [];
+    legacy_username: string | undefined;
+    mutual_friends: Array<MutualFriend>;
+    mutual_guilds: Array<MutualGuild>;
+    premium_guild_since: null | string;
+    premium_since: null | string;
+    premium_type: number;
+    profile_themes_experiment_bucket: number;
+    user: User;
+    user_profile: Pick<DisplayProfile, 'banner' | 'bio' | 'pronouns'> & {
+      accent_color: DisplayProfile['accentColor']
+      emoji: null;
+      popout_animation_particle_type: DisplayProfile['popoutAnimationparticleType'];
+      profile_effect: null | {
+        expires_at: DisplayProfile['profileEffectExpiresAt'];
+        id: DisplayProfile['profileEffectId'];
+      };
+      theme_colors: DisplayProfile['themeColors'];
+    }
+  };
   USER_PROFILE_MODAL_OPEN: {
     analyticsLocation?: undefined;
     channelId: Snowflake;

@@ -8,17 +8,35 @@ type UserContextMenuFiber = {
     children: [
       main: JSX.BD.Rendered<{
         children: [
-          unknnown: JSX.BD.Rendered<{ children: null; }>,
+          unknownCouldBeMarkAsRead: JSX.BD.Rendered<{ children: null; }>,
           userActions: JSX.BD.Rendered<{
-            children: [
-              RenderedMenuItem<"user-profile", "Profile">,
-              RenderedMenuItem<"message-user", "Message"> | RenderedMenuItem<"mention", "Mention">,
-              RenderedMenuItem<"call", "Call"> | RenderedMenuItem<"message-user", "Message">,
-              RenderedMenuItem<"note", "Edit Note">  | RenderedMenuItem<"call", "Call">,
-              RenderedMenuItem<"add-friend-nickname", "Add Friend Nickname"> | RenderedMenuItem<"note", "Edit Note">,
-              RenderedMenuItem<"add-friend-nickname", "Add Friend Nickname">,
-              null
-            ];
+            // children: [
+            //   RenderedMenuItem<"user-profile", "Profile">,
+            //   RenderedMenuItem<"message-user", "Message"> | RenderedMenuItem<"mention", "Mention">,
+            //   RenderedMenuItem<"call", "Call"> | RenderedMenuItem<"message-user", "Message">,
+            //   RenderedMenuItem<"note", "Edit Note">  | RenderedMenuItem<"call", "Call">,
+            //   RenderedMenuItem<"add-friend-nickname", "Add Friend Nickname"> | RenderedMenuItem<"note", "Edit Note">,
+            //   RenderedMenuItem<"add-friend-nickname", "Add Friend Nickname">,
+            //   null
+            // ];
+            children: (
+              [
+                RenderedMenuItem<"user-profile", "Profile">,
+                RenderedMenuItem<"message-user", "Message">,
+                RenderedMenuItem<"call", "Call">,
+                RenderedMenuItem<"note", "Edit Note">,
+                RenderedMenuItem<"add-friend-nickname", "Add Friend Nickname">,
+                null
+              ] | [
+                RenderedMenuItem<"user-profile", "Profile">,
+                RenderedMenuItem<"mention", "Mention">,
+                RenderedMenuItem<"message-user", "Message">,
+                RenderedMenuItem<"call", "Call">,
+                RenderedMenuItem<"note", "Edit Note">,
+                RenderedMenuItem<"add-friend-nickname", "Add Friend Nickname">,
+                null
+              ]
+            )
           }>,
           listenAlong: false | [
             listen: RenderedMenuItem<"invite-to-listen", "Invite to Listen Along">,

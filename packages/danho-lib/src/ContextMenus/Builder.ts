@@ -14,6 +14,21 @@ export function buildTextItem(id: string, label: string, action: () => void, pro
     ...props
   };
 }
+export function buildSubMenu(id: string, label: string, items: Array<Partial<ContextMenuItemProps>>, props: Partial<ContextMenuItemProps> = {}): ContextMenuItemProps {
+  return {
+    type: 'submenu',
+    label,
+    items,
+    id,
+    action: () => {},
+    onClose: props.onClose ?? (() => { }),
+    ...props
+  };
+}
+export function buildSubMenuElement(id: string, label: string, items: Array<Partial<ContextMenuItemProps>>, props: Partial<ContextMenuItemProps> = {}): JSX.Element {
+  return BdApi.ContextMenu.buildItem(buildSubMenu(id, label, items, props));
+}
+
 export function buildTextItemElement(id: string, label: string, action: () => void, props: Partial<ContextMenuItemProps> = {}): JSX.Element {
   return BdApi.ContextMenu.buildItem(buildTextItem(id, label, action, props));
 }

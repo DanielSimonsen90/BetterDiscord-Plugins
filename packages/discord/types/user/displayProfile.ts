@@ -20,7 +20,7 @@ export type DisplayProfile = Pick<User, 'accentColor' | 'banner' | 'bio' | 'pron
   get premiumType(): PremiumTypes;
   get primaryColor(): number;
 
-  getBadges(): any[];
+  getBadges?: () => any[];
   getBannerURL(): string;
   getLegacyUsername(): string;
   getPreviewBanner(): string;

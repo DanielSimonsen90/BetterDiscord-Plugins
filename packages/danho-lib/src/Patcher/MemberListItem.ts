@@ -23,7 +23,7 @@ export type MemberListItem = Record<'Z', JSX.BD.FCF<{
   status: UserStatus;
   user: User;
 }, {
-  children: ReturnType<NameTag>;
+  children: ReturnType<NameTag['render']>;
   renderPopout(e: any): void;
 }>>;
 
