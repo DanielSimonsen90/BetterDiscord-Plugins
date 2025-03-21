@@ -2,6 +2,7 @@ import Finder from "@danho-lib/dium/api/finder";
 import { DiscordTimeFormat } from "@discord/types";
 import { Logger, Patcher } from "@dium";
 import * as TimeUtils from '@danho-lib/Utils/Time';
+import { get } from "http";
 
 type TimeModuleArgs = {
   format: DiscordTimeFormat;
@@ -25,13 +26,21 @@ export default function Feature() {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     
-    if (diff < 0) return result;
-    if (diff < TimeUtils.MINUTE) return 'just now';
-    if (diff < TimeUtils.HOUR) return `${Math.floor(diff / TimeUtils.MINUTE)} minutes ago`; 
-    if (diff < TimeUtils.DAY) return `${Math.floor(diff / TimeUtils.HOUR)} hours ago`;
-    if (diff < TimeUtils.WEEK) return `${Math.floor(diff / TimeUtils.DAY)} days ago`;
-    if (diff < TimeUtils.MONTH) return `${Math.floor(diff / TimeUtils.WEEK)} weeks ago`;
-    if (diff < TimeUtils.YEAR) return `${Math.floor(diff / TimeUtils.MONTH)} months ago`;
-    return `${Math.floor(diff / TimeUtils.YEAR)} years ago`;
+    const getTime = (value: number, time: string) => {
+      const result = Math.floor(diff / value);
+      return result > 0 ? `${result} ${time}${result > 1 ? 's' : ''} ago` : null;
+    };
+
+    return (
+      diff < 0 && result
+      || getTime(TimeUtils.YEAR, 'year')
+      || getTime(TimeUtils.MONTH, 'month')
+      || getTime(TimeUtils.WEEK, 'week')
+      || getTime(TimeUtils.DAY, 'day')
+      || getTime(TimeUtils.HOUR, 'hour')
+      || getTime(TimeUtils.MINUTE, 'minute')
+      || getTime(TimeUtils.SECOND, 'second')
+      || `A long time ago, in a galaxy far, far away... (parsing failed)`
+    )
   })
 }

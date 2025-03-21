@@ -1,11 +1,10 @@
 import { ChannelStore, GuildChannelStore, SelectedChannelStore } from '@stores';
 import { BetterOmit, FilterStore } from './types';
-import { Channel } from '@dium/modules/channel';
+import { Channel } from '@discord/types';
 import { Snowflake } from '@discord/types/base';
 
 type CompiledChannelUtils = BetterOmit<
   & FilterStore<ChannelStore>
-  & FilterStore<GuildChannelStore>
   & FilterStore<SelectedChannelStore>
   , '__getLocalVars'> & {
     get current(): Channel | null;

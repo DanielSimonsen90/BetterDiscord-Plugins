@@ -7,11 +7,13 @@ import { getGroupContaining } from '@danho-lib/Utils/ContextMenu';
 const patched: Callback = (menu, props) => {
   const profile = UserProfileStore.getUserProfile(props.user.id);
   if (!profile) return;
+  
+  const modifyBadges = getGroupContaining('modify-badges', menu);
+  if (modifyBadges) return;
 
   const userActions = getGroupContaining('note', menu);
-
   userActions.push(buildSubMenuElement('modify-badges', 'Modify Badges', profile.badges.map((badge, id) => {
-    return  buildTextItem(badge.id, formatBadgeId(badge.id), () => {
+    return buildTextItem(badge.id, formatBadgeId(badge.id), () => {
       Logger.log('Badge', badge);
     });
   })) as any)

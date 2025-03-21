@@ -1,5 +1,4 @@
 import { RenderedMenuItem } from "@danho-lib/ContextMenus/Builder.types";
-import { Logger } from "@danho-lib/dium/api/logger";
 
 type BaseMenu = {
   props: {
@@ -12,7 +11,7 @@ export function getGroupContaining(itemId: string, menu: any): Array<RenderedMen
     if (!menu.props || !menu.props.children) return null;
     else if (!Array.isArray(menu.props.children)) return findItem(menu.props.children as BaseMenu);
 
-    for (const child of menu.props.children.filter(Boolean)) {
+    for (const child of menu.props.children.filter(child => child?.props)) {
       if ('id' in child.props && child.props.id === itemId) {
         return menu.props.children as Array<RenderedMenuItem<any, any>>;
       }

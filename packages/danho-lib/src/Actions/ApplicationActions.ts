@@ -1,6 +1,6 @@
 import Finder from "@danho-lib/dium/api/finder";
 import { Snowflake } from "@discord/types";
-import { Application } from "@stores/ApplicationStore";
+import { Application } from "@danho-lib/Stores/AppStores/ApplicationStore";
 
 export type ApplicationActions = {
   createApplication(e: any): Application

@@ -17,12 +17,14 @@ export default DanhoLibrary({
     registerActions();
     registerPatches();
 
+    test();
+
     createSlashCommand({
-      name: 'bd-test',
+      name: 'show-discord-badges',
       execute: () => ({
         content: JSON.stringify(DiscordBadgeStore.current, null, 2)
       })
-    })    
+    })
   },
   stop() {
     ActionsEmitter.removeAllListeners();
@@ -32,5 +34,9 @@ export default DanhoLibrary({
 
   styles,
   Settings,
-  SettingsPanel
+  SettingsPanel,
 });
+
+function test() {
+
+}

@@ -24,7 +24,7 @@ export default function Timezone(props: Props) {
   const timezoneIcon = useMemo(() => {
     if (hideIcon) return null;
     const clocks = ['🕛', '🕐', '🕑', '🕒', '🕓', '🕔', '🕕', '🕖', '🕗', '🕘', '🕙', '🕚'];
-    return clocks[(timezoneDate.getHours() % 12) || 12];
+    return clocks[(timezoneDate.getHours() % 12)];
   }, [hideIcon, timezoneHour]);
 
 useEffect(() => {

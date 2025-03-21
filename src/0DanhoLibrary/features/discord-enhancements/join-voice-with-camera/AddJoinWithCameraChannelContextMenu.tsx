@@ -6,7 +6,8 @@ import joinWithCamera from './joinWithCamera';
 const patched: Callback = function (menu, props) {
   const options = menu.props.children;
   const voiceOptions = options.find(option => (
-    option.key.toLowerCase().includes('voice') 
+    option.key 
+    && option.key.toLowerCase().includes('voice') 
     && option.key.toLowerCase().includes('actions')
   ));
   if (!voiceOptions) return;

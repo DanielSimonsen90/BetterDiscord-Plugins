@@ -19,7 +19,7 @@ class DanhoLibrary implements Plugin<{}> {
   public Finder = Finder;
   public Filters = Filters;
 
-  styles = styles;
+  public styles = styles;
 };
 
 const LibraryPlugin: DanhoLibrary & Plugin<any> = new DanhoLibrary();

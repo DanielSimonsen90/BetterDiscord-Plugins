@@ -37,6 +37,10 @@ export const DiscordEnhancements = {
   birthdateTimestampStyle: 'd',
   showBirthdayCalendar: true,
   showBirthdayOnNameTag: true,
+
+  betterQuickSwitcher: true,
+
+  expandActivityStatus: true,
 }
 
 export const DanhoEnhancements = {
@@ -98,6 +102,10 @@ export const DiscordEnhancementsTitles: Record<keyof typeof DiscordEnhancements,
   birthdateTimestampStyle: `Birthdate timestamp style`,
   showBirthdayCalendar: `Show birthday calendar in global navigation`,
   showBirthdayOnNameTag: `Show birthday on name tag`,
+
+  betterQuickSwitcher: `Better quickswitcher prioritizing friends and top guilds`,
+
+  expandActivityStatus: `Expand activity status to show more information i.e. what a user is listening to`,
 };
 
 export const DanhoEnhancementsTitles: Record<keyof typeof DanhoEnhancements, string> = {

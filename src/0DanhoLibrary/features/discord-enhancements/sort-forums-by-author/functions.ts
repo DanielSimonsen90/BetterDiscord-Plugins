@@ -2,8 +2,8 @@ import { $ } from "@danho-lib/DOM";
 import * as Logger from '@danho-lib/dium/api/logger';
 import { ChannelStore } from "@stores";
 
-import { ChannelTypes } from "@dium/modules/channel";
 import { addSortByAuthorOnDOM } from "./actions";
+import { ChannelTypes } from "@discord/types/channel/types";
 export function addSortAndViewButtonClick() {
   if (!testForumChannel()) return;
 

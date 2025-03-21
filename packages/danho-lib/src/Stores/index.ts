@@ -1,15 +1,14 @@
 import Finder from '@danho-lib/dium/api/finder';
 import { Store } from '@dium/modules/flux';
 
+export * from './AppStores';
 export * from './ChannelStores';
 export * from './GuildStores';
 export * from './MessageStores';
 export * from './UserStores';
 export * from './VoiceAndMediaStores';
 
-export * from './ApplicationStore';
 export * from './DiumStore';
-export * from './ThemeStore';
 
 export const DiscordStores = (() => (
   Array.from(BdApi.Webpack

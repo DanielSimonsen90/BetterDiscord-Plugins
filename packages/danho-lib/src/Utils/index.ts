@@ -5,6 +5,7 @@ import { Arrayable } from "./types";
 export * from './Functions';
 export * from './Net';
 export * from './Object';
+export * from './String';
 
 export function findNodeByIncludingClassName<NodeType = Element>(className: string, node = document.body): NodeType | null {
   return node.querySelector(`[class*="${className}"]`) as any;

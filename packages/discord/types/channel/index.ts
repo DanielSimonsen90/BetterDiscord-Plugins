@@ -4,6 +4,7 @@ import { ChannelTypes } from "./types";
 // import { Channel } from "@dium/modules";
 
 export interface Channel {
+  parent_id: Snowflake;
   id: Snowflake;
   name: string;
   type: ChannelTypes;
@@ -12,6 +13,7 @@ export interface Channel {
   bitrate: number;
   defaultAutoArchiveDuration?: any;
   icon?: any;
+  guild_id: Snowflake;
   userLimit: number;
 
   member?: any;

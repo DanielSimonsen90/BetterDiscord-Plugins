@@ -2,7 +2,7 @@ import type { Snowflake, Guild, Role } from "@discord/types";
 import { Finder } from "@dium/api";
 import { Store } from "@dium/modules/flux";
 
-export interface GuildStore extends Store {
+export type GuildStore = Store & {
   getAllGuildsRoles(): {
     [guildId: Snowflake]: {
       [roleId: Snowflake]: Role;

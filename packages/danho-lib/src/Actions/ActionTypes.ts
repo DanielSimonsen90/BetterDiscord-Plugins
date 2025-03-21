@@ -27,6 +27,13 @@ type ActionProps = {
     message: Message;
     optimistic: boolean;
   };
+  QUICKSWITCHER_SEARCH: {
+    query: string;
+    queryNode: null;
+  };
+  QUERYSWITCHER_SELECT: {
+    selectedIndex: number;
+  };
   PRESENCE_UPDATES: {
     updates: Array<{
       activities: Array<Activity>;

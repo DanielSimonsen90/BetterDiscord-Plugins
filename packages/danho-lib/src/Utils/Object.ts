@@ -48,3 +48,10 @@ export function combine<T extends Record<string, any | undefined>>(...objects: A
     return acc;
   }, {} as T) as T;
 }
+
+export const ObjectUtils = {
+  pick, exclude,
+  difference, combine,
+}
+
+export default ObjectUtils;
