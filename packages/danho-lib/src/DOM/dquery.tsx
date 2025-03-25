@@ -2,6 +2,7 @@ import { Arrayable } from '../Utils/types';
 import { Utils } from '@dium/index';
 import ElementSelector from './ElementSelector';
 import { If, PromisedReturn } from '../Utils/types';
+import { getFiber } from '@dium/utils';
 
 type Fiber = any;
 
@@ -152,13 +153,13 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     Single extends Select extends string ? boolean : never = Select extends string ? false : never
   >(selector?: Selector<El>, single?: Single): If<Single, DQuery<El>, Array<DQuery<El>>> {
     if (!this.element) return single ? undefined : [] as any;
-    if (!selector) return single ? new DQuery<El>(this.element.children[0] as El) : [...this.element.children].map(child => new DQuery<El>(child as El)) as any;
+    if (!selector) return single ? new DQuery<El>(this.element.children[0] as El) as any : [...this.element.children].map(child => new DQuery<El>(child as El)) as any;
 
     selector = typeof selector === 'function' ? selector(new ElementSelector(), $) as El : selector;
 
     if (typeof selector === 'string' || selector instanceof ElementSelector) {
       const elements = this.element.querySelectorAll(selector.toString());
-      return single ? new DQuery<El>(elements[0] as El) : [...elements.values()].map(child => new DQuery<El>(child as El)) as any;
+      return single ? new DQuery<El>(elements[0] as El) as any : [...elements.values()].map(child => new DQuery<El>(child as El)) as any;
     }
 
     const getElement = (element: Element): El => {
@@ -213,8 +214,9 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
   }
 
   public get fiber() {
-    const key = Object.keys(this.element).find(key => key.startsWith('__reactFiber$'));
-    return key ? this.element[key] as Fiber : undefined;
+    // const key = Object.keys(this.element).find(key => key.startsWith('__reactFiber$'));
+    // return key ? this.element[key] as Fiber : undefined;
+    return getFiber(this.element);
   }
   public get props() {
     try {
@@ -442,7 +444,8 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
   }
 
   public async forceUpdate() {
-    return Utils.forceFullRerender(this.fiber);
+    return Utils.forceFullRerender(getFiber(this.element));
+    // return BdApi.ReactUtils.getOwnerInstance(this.element).forceUpdate();
   }
 }
 export default $;

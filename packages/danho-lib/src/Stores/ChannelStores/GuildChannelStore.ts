@@ -5,7 +5,7 @@ import { ChannelTypes } from '@discord/types/channel/types';
 import { Finder } from "@dium/api";
 import { Store } from "@dium/modules/flux";
 
-interface GuildChannelStore extends Store {
+export interface GuildChannelStore extends Store {
   getAllGuilds(): Record<Snowflake, Guild>;
   getChannels(guildId: Snowflake): Record<'4' | 'SELECTABLE' | 'VOCAL', Array<StoredChannel>> & {
     count: number,

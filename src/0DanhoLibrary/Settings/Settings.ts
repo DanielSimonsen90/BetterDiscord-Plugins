@@ -13,6 +13,10 @@ export const StyleChanges = {
   pronounsPageLinks: true,
   expandBioAgain: true,
   nonObnoxiousProfileEffects: true,
+  
+  uiReworkFix: true,
+  removePrivateSearchButton: true,
+  groupPrivateChannelNavOptions: true,
 }
 
 export const DiscordEnhancements = {
@@ -78,6 +82,10 @@ export const StyleChangesTitles: Record<keyof typeof StyleChanges, string> = {
   pronounsPageLinks: `Turn pronouns.page links into clickable links`,
   expandBioAgain: `Expand the bio section again by default`,
   nonObnoxiousProfileEffects: `Lower the opacity of profile effects (on hover) so they aren't as obnoxious`,
+  
+  uiReworkFix: `Fix some of the Discord UI rework discomfort`,
+  removePrivateSearchButton: `Remove the search button in the private channel sidebar`,
+  groupPrivateChannelNavOptions: `Group navigation options (friends, nitro, shop) in the private channel sidebar`,
 };
 
 export const DiscordEnhancementsTitles: Record<keyof typeof DiscordEnhancements, string> = {

@@ -1,17 +1,21 @@
 import CreateSettingsGroup from "../../_CreateSettingsGroup";
 import { StyleChanges, StyleChangesTitles } from '../../../Settings';
+
 import PrettifyRoles from "./PrettifyRoles";
+import UiFix from './UiFix';
 
 export default CreateSettingsGroup((React, props, Setting, { FormSection, FormDivider }) => {
-  const AdditionalSettings = ({ setting }) => {
+  const AdditionalSettings = ({ setting }: { setting: keyof typeof StyleChanges }) => {
     switch (setting) {
       case 'prettyRoles': return props.settings.prettyRoles ? <PrettifyRoles {...props} /> : null;
+      case 'uiReworkFix': return props.settings.uiReworkFix ? <UiFix {...props} /> : null;
       default: return null;
     }
   };
 
   const ignoredSettings: Array<keyof typeof StyleChanges> = [
-    'defaultRoleColor', 'groupRoles'
+    'defaultRoleColor', 'groupRoles',
+    'removePrivateSearchButton', 'groupPrivateChannelNavOptions',
   ];
 
   return (<>
@@ -20,7 +24,7 @@ export default CreateSettingsGroup((React, props, Setting, { FormSection, FormDi
       .map((key, index) => (<>
         <FormSection title={StyleChangesTitles[key]} key={index}>
           <Setting setting={key as any} {...props} />
-          <AdditionalSettings setting={key} />
+          <AdditionalSettings setting={key as any} />
         </FormSection>
         <FormDivider />
       </>))}

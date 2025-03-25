@@ -10,15 +10,12 @@ export type BadgeList = JSX.BD.FC<{
   children: Array<JSX.BD.Rendered<{
     'aria-label': string;
     children: JSX.BD.Rendered<{
-      children: [
-        badgeIcon: JSX.BD.Rendered<{
-          alt: ' ';
-          'aria-hidden': true;
-          className: 'badge_...';
-          src: string;
-        }, 'img'>,
-        false
-      ];
+      children: JSX.BD.Rendered<{
+        alt: ' ';
+        'aria-hidden': true;
+        className: 'badge_...';
+        src: string;
+      }, 'img'>,
       href?: string;
       onClick: (event: MouseEvent) => void;
       onMouseEnter: () => void;

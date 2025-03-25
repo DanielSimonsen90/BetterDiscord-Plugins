@@ -50,7 +50,7 @@ export function patchBadgeComponent(result: ReturnType<BadgeList>) {
         <InnerBadge />
       </a>
     ) : (
-      <img src={iconUrl} alt={name} className={result.props.children[0].props.children.props.children[0].props.className} style={style} />
+      <img src={iconUrl} alt={name} className={result.props.children[0].props.children.props.children.props.className} style={style} />
     )
 
     return (
