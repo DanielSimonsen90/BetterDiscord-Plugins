@@ -206,6 +206,7 @@ const { default: Legacy, Dispatcher, Store, BatchedStoreListener, useStateFromSt
 }, ["Store", "Dispatcher", "useStateFromStores"]);
 
 const { React } = BdApi;
+const { ReactDOM } = BdApi;
 const classNames = /* @__PURE__ */ find((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
 
 const Button = /* @__PURE__ */ byKeys(["Colors", "Link"], { entries: true });
@@ -225,6 +226,17 @@ FormDivider, FormSwitch, FormNotice } = /* @__PURE__ */ demangle({
 
 const margins = /* @__PURE__ */ byKeys(["marginBottom40", "marginTop4"]);
 
+const [getInstanceFromNode, getNodeFromInstance, getFiberCurrentPropsFromNode, enqueueStateRestore, restoreStateIfNeeded, batchedUpdates] = ReactDOM?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?.Events ?? [];
+const ReactDOMInternals = {
+    getInstanceFromNode,
+    getNodeFromInstance,
+    getFiberCurrentPropsFromNode,
+    enqueueStateRestore,
+    restoreStateIfNeeded,
+    batchedUpdates
+};
+
+const getFiber = (node) => ReactDOMInternals.getInstanceFromNode(node ?? {});
 const queryFiber = (fiber, predicate, direction = "up" , depth = 30) => {
     if (depth < 0) {
         return null;
@@ -554,14 +566,16 @@ class DQuery {
         return;
     }
     addClass(className) {
-        this.element.classList.add(className);
+        if (!this.hasClass(className))
+            this.element.classList.add(className);
         return this;
     }
     hasClass(className) {
         return this.element.classList.contains(className);
     }
     removeClass(className) {
-        this.element.classList.remove(className);
+        if (this.hasClass(className))
+            this.element.classList.remove(className);
         return this;
     }
     hasDirectChild(selector) {
@@ -631,8 +645,7 @@ class DQuery {
         return new DQuery(this.element.closest(anscestorSelector));
     }
     get fiber() {
-        const key = Object.keys(this.element).find(key => key.startsWith('__reactFiber$'));
-        return key ? this.element[key] : undefined;
+        return getFiber(this.element);
     }
     get props() {
         try {
@@ -848,7 +861,7 @@ class DQuery {
         return this;
     }
     async forceUpdate() {
-        return forceFullRerender(this.fiber);
+        return forceFullRerender(getFiber(this.element));
     }
 }
 function createElement$1(html, props = {}, target) {

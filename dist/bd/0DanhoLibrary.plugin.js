@@ -1,6 +1,6 @@
 /**
  * @name 0DanhoLibrary
- * @version 2.0.0
+ * @version 2.1.0
  * @author danielsimonsen90
  * @authorLink https://github.com/danielsimonsen90
  * @description Library for Danho's plugins
@@ -54,7 +54,7 @@ let meta = {
   "name": "0danho-library",
   "description": "Library for Danho's plugins",
   "author": "danielsimonsen90",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "development": true,
   "dependencies": {
     "dium": "*",
@@ -78,10 +78,10 @@ const setMeta = (newMeta) => {
 const load = (key) => BdApi.Data.load(getMeta().name, key);
 const save = (key, value) => BdApi.Data.save(getMeta().name, key, value);
 
-const join = (...filters) => {
+const join$1 = (...filters) => {
     return ((...args) => filters.every((filter) => filter(...args)));
 };
-const query$1 = ({ filter, name, keys, protos, source }) => join(...[
+const query$1 = ({ filter, name, keys, protos, source }) => join$1(...[
     ...[filter].flat(),
     typeof name === "string" ? byName$1(name) : null,
     keys instanceof Array ? byKeys$1(...keys) : null,
@@ -133,7 +133,7 @@ const Filters = {
     byProtos: byProtos$1,
     bySource: bySource$1,
     checkObjectValues,
-    join,
+    join: join$1,
     query: query$1
 };
 
@@ -175,7 +175,7 @@ const find$2 = (filter, { resolve = true, entries = false } = {}) => BdApi.Webpa
     searchExports: entries
 });
 const query = (query, options) => find$2(query$1(query), options);
-const byEntries = (...filters) => find$2(join(...filters.map((filter) => byEntry(filter))));
+const byEntries = (...filters) => find$2(join$1(...filters.map((filter) => byEntry(filter))));
 const byName = (name, options) => find$2(byName$1(name), options);
 const byKeys = (keys, options) => find$2(byKeys$1(...keys), options);
 const byProtos = (protos, options) => find$2(byProtos$1(...protos), options);
@@ -541,7 +541,8 @@ function findBySourceStrings(...keywords) {
             const expectedErrorMessages = [
                 `TypedArray`,
                 `from 'Window'`,
-                `Cannot convert a Symbol value to a string`
+                `Cannot convert a Symbol value to a string`,
+                '$$baseObject',
             ];
             if (err instanceof Error && expectedErrorMessages.some(message => err.message.includes(message)))
                 return undefined;
@@ -555,6 +556,9 @@ function findBySourceStrings(...keywords) {
         }).then(module => {
             debugLog(`[findBySourceStrings] Found lazy module for [${keywords.join(',')}]`, module);
             return module;
+        }).catch(err => {
+            error(`[findBySourceStrings] Error in lazy search`, err);
+            return undefined;
         });
     const moduleSearchOptions = searchOptions ?? { searchExports: true };
     return showMultiple
@@ -573,7 +577,7 @@ const findComponentBySourceStrings = async (...keywords) => {
                     cancelCE();
                     resolve(component);
                 }
-            }, { silent: true });
+            }, { name: `findComponentBySourceStrings([${keywords.join(',')}])`, });
             const cancelCE = after(ReactModule, 'createElement', ({ args: [component] }) => {
                 if (typeof component === 'function' && keywords.every(keyword => component.toString().includes(keyword))) {
                     cancelJsx();
@@ -627,40 +631,9 @@ const Finder$1 = {
     waitFor
 };
 
-const ChannelMemberStore = byName('ChannelMemberStore');
+const ApplicationStore = Finder.byName("ApplicationStore");
 
-const ChannelStore = /* @__PURE__ */ byName("ChannelStore");
 const SelectedChannelStore = /* @__PURE__ */ byName("SelectedChannelStore");
-
-const GuildChannelStore = byKeys(["getTextChannelNameDisambiguations"]);
-
-const GuildMemberStore = /* @__PURE__ */ byName("GuildMemberStore");
-const SortedGuildStore = /* @__PURE__ */ byName("SortedGuildStore");
-const ExpandedGuildFolderStore = /* @__PURE__ */ byName("ExpandedGuildFolderStore");
-
-const GuildEmojiStore = byKeys(["getEmojis"]);
-
-const GuildIdentyStore = byKeys(["saveGuildIdentityChanges"]);
-
-const GuildStore = byName("GuildStore");
-
-const SelectedGuildStore = byKeys(["getLastSelectedGuildId"]);
-
-const MessageStore = byName("MessageStore");
-
-const MessageRequestStore = byName("MessageRequestStore");
-
-const SpamMessageRequestStore = byName("SpamMessageRequestStore");
-
-const PresenceStore = /* @__PURE__ */ byName("PresenceStore");
-
-const RelationshipStore = /* @__PURE__ */ byName("RelationshipStore");
-
-const UserActivityStore = byKeys(["getUser", "getCurrentUser"]);
-
-const UserMentionStore = byKeys(["getMentions", "everyoneFilter"]);
-
-const UserNoteStore = byKeys(["getNote", "_dispatcher"]);
 
 const Dispatcher$1 = /* @__PURE__ */ byKeys(["dispatch", "subscribe"]);
 
@@ -672,11 +645,21 @@ const { default: Legacy, Dispatcher, Store, BatchedStoreListener, useStateFromSt
     useStateFromStores: bySource$1("useStateFromStores")
 }, ["Store", "Dispatcher", "useStateFromStores"]);
 
+const GuildMemberStore = /* @__PURE__ */ byName("GuildMemberStore");
+const SortedGuildStore$1 = /* @__PURE__ */ byName("SortedGuildStore");
+const ExpandedGuildFolderStore = /* @__PURE__ */ byName("ExpandedGuildFolderStore");
+
 const { React } = BdApi;
+const { ReactDOM } = BdApi;
 const classNames = /* @__PURE__ */ find$2((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
 const EventEmitter = /* @__PURE__ */ find$2((exports) => exports.prototype instanceof Object && Object.prototype.hasOwnProperty.call(exports.prototype, "prependOnceListener"));
 
+const UserStore$1 = /* @__PURE__ */ byName("UserStore");
+const RelationshipStore = /* @__PURE__ */ byName("RelationshipStore");
+
 const Button = /* @__PURE__ */ byKeys(["Colors", "Link"], { entries: true });
+
+const Clickable = /* @__PURE__ */ bySource(["ignoreKeyPress:"], { entries: true });
 
 const Flex = /* @__PURE__ */ byKeys(["Child", "Justify", "Align"], { entries: true });
 
@@ -718,6 +701,17 @@ const { TextInput, InputError } = /* @__PURE__ */ demangle({
 
 const Text = /* @__PURE__ */ bySource(["lineClamp:", "variant:", "tabularNumbers:"], { entries: true });
 
+const [getInstanceFromNode, getNodeFromInstance, getFiberCurrentPropsFromNode, enqueueStateRestore, restoreStateIfNeeded, batchedUpdates] = ReactDOM?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?.Events ?? [];
+const ReactDOMInternals = {
+    getInstanceFromNode,
+    getNodeFromInstance,
+    getFiberCurrentPropsFromNode,
+    enqueueStateRestore,
+    restoreStateIfNeeded,
+    batchedUpdates
+};
+
+const getFiber = (node) => ReactDOMInternals.getInstanceFromNode(node ?? {});
 const queryFiber = (fiber, predicate, direction = "up" , depth = 30) => {
     if (depth < 0) {
         return null;
@@ -869,6 +863,55 @@ const createPlugin = (plugin) => (meta) => {
     };
 };
 
+const QuickSwitcherStore = byName("QuickSwitcherStore");
+
+const ThemeStore = byKeys(["theme"]);
+
+const ChannelMemberStore = byName('ChannelMemberStore');
+
+const ChannelStore = byName("ChannelStore");
+
+const GuildChannelStore = byKeys(["getTextChannelNameDisambiguations"]);
+GuildChannelStore.constructor.prototype.getSortedChannels = function getSortedChannels(guildId) {
+    const getChannelsResult = this.getChannels(guildId);
+    delete getChannelsResult.count;
+    delete getChannelsResult.id;
+    const channels = Object
+        .values(getChannelsResult)
+        .flat()
+        .filter((entry, index, array) => array.findIndex(bEntry => bEntry.channel.id === entry.channel.id) === index)
+        .map(entry => Object.assign({ channelType: entry.channel.type }, entry.channel));
+    const categories = channels.filter(channel => channel.type === 4 );
+    return categories.flatMap(category => [category, ...channels
+            .filter(channel => channel.parent_id === category.id)
+            .sort((a, b) => a.position - b.position)
+    ]);
+};
+
+const GuildEmojiStore = byKeys(["getEmojis"]);
+
+const GuildIdentyStore = byKeys(["saveGuildIdentityChanges"]);
+
+const GuildStore = byName("GuildStore");
+
+const SelectedGuildStore = byKeys(["getLastSelectedGuildId"]);
+
+const SortedGuildStore = SortedGuildStore$1;
+
+const MessageStore = byName("MessageStore");
+
+const MessageRequestStore = byName("MessageRequestStore");
+
+const SpamMessageRequestStore = byName("SpamMessageRequestStore");
+
+const PresenceStore = /* @__PURE__ */ byName("PresenceStore");
+
+const UserActivityStore = byKeys(["getUser", "getCurrentUser"]);
+
+const UserMentionStore = byKeys(["getMentions", "everyoneFilter"]);
+
+const UserNoteStore = byKeys(["getNote", "_dispatcher"]);
+
 const UserProfileStore = byName("UserProfileStore");
 
 const UserSettingsAccountStore = byName("UserSettingsAccountStore");
@@ -960,8 +1003,6 @@ const RTCConnectionStore = byName("RTCConnectionStore");
 
 const VoiceStore = byKeys(["getVoiceStateForUser"]);
 
-const ApplicationStore = Finder.byName("ApplicationStore");
-
 class DiumStore {
     constructor(defaults, dataKey, onLoad) {
         this.defaults = defaults;
@@ -1039,8 +1080,6 @@ class DiumStore {
 }
 const createDiumStore = (defaults, dataKey, onLoad) => new DiumStore(defaults, dataKey, onLoad);
 
-const ThemeStore = byKeys(["theme"]);
-
 const DiscordStores = (() => (Array.from(BdApi.Webpack
     .getModules(m => m?._dispatchToken && m?.getName)
     .reduce((acc, store) => {
@@ -1100,6 +1139,7 @@ const Stores = {
     MessageRequestStore,
     MessageStore,
     PresenceStore,
+    QuickSwitcherStore,
     RTCConnectionStore,
     RelationshipStore,
     SelectedChannelStore,
@@ -1131,6 +1171,30 @@ const wait = (callback, time) => new Promise((resolve, reject) => {
         reject(err);
     }
 });
+
+function exclude(from, ...properties) {
+    if (!from)
+        throw new Error("Cannot exclude from undefined!");
+    return Object.keys(from).reduce((acc, key) => {
+        if (!properties.includes(key))
+            acc[key] = from[key];
+        return acc;
+    }, {});
+}
+
+function join(args, separator = ',', includeAnd = true) {
+    const validArgs = args?.filter(arg => arg !== undefined && arg !== null && arg !== '');
+    if (!validArgs || validArgs.length === 0)
+        return '';
+    if (validArgs.length === 1)
+        return validArgs.shift();
+    const lastArg = validArgs.pop();
+    const combinedArgs = validArgs.join(separator);
+    return `${combinedArgs}${includeAnd ? ' & ' : ''}${lastArg}`;
+}
+const StringUtils = {
+    join,
+};
 
 const UserNoteActions = byKeys(["updateNote"]);
 
@@ -1547,14 +1611,16 @@ class DQuery {
         return;
     }
     addClass(className) {
-        this.element.classList.add(className);
+        if (!this.hasClass(className))
+            this.element.classList.add(className);
         return this;
     }
     hasClass(className) {
         return this.element.classList.contains(className);
     }
     removeClass(className) {
-        this.element.classList.remove(className);
+        if (this.hasClass(className))
+            this.element.classList.remove(className);
         return this;
     }
     hasDirectChild(selector) {
@@ -1624,8 +1690,7 @@ class DQuery {
         return new DQuery(this.element.closest(anscestorSelector));
     }
     get fiber() {
-        const key = Object.keys(this.element).find(key => key.startsWith('__reactFiber$'));
-        return key ? this.element[key] : undefined;
+        return getFiber(this.element);
     }
     get props() {
         try {
@@ -1841,7 +1906,7 @@ class DQuery {
         return this;
     }
     async forceUpdate() {
-        return forceFullRerender(this.fiber);
+        return forceFullRerender(getFiber(this.element));
     }
 }
 function createElement$1(html, props = {}, target) {
@@ -1927,7 +1992,7 @@ const DOM = {
     removeAllInjections
 };
 
-const styles$1 = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible__content.hidden {\n  display: none;\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.custom-message {\n  display: grid;\n  grid-template-columns: auto 1fr;\n  gap: 0.5ch;\n}\n.custom-message__avatar {\n  --size: 2.5rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  object-fit: cover;\n}\n.custom-message__main {\n  display: flex;\n  flex-direction: column;\n  gap: 0.5ch;\n}\n.custom-message__main header {\n  display: flex;\n  align-items: center;\n  gap: 0.5ch;\n}\n.custom-message .user-mention, .custom-message .role-mention {\n  color: var(--mention-foreground);\n  background-color: var(--mention-background);\n}\n.custom-message .user-mention::before, .custom-message .role-mention::before {\n  content: \"@\";\n}\n.custom-message .channel-mention::before {\n  content: \"#\";\n}\n.custom-message .custom-message__attachments img {\n  max-height: 100%;\n  max-width: 100%;\n}\n\n.progress-bar {\n  width: 100%;\n  height: 0.5rem;\n  border-radius: 0.5rem;\n  overflow: hidden;\n}\n.progress-bar__fill {\n  height: 100%;\n  background-color: var(--primary-600);\n  transition: width 0.3s;\n}\n\n.tab-bar {\n  max-width: 100%;\n}\n.tab-bar * {\n  color: var(--text-primary);\n  box-sizing: border-box;\n}\n\n.tab-bar__tabs {\n  display: grid;\n  grid-auto-flow: column;\n  max-width: 100%;\n  overflow-x: auto;\n}\n.tab-bar__tabs--no-color .tab-bar__tab {\n  background-color: transparent;\n  border: none;\n}\n\n.tab-bar__tab {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  border: none;\n  background-color: var(--primary-630);\n  color: var(--text-muted);\n  border: 1px solid var(--border-faint);\n  padding: 0.3rem 1rem;\n}\n.tab-bar__tab:hover {\n  background-color: var(--primary-600);\n  color: var(--text-primary);\n}\n.tab-bar__tab--active {\n  border: 1px solid var(--border-faint);\n  border-bottom: 1px solid var(--text-primary) !important;\n  color: var(--text-primary);\n}\n\n.tab-bar__content {\n  padding: 1em;\n  background-color: var(--primary-630);\n  border: 1px solid var(--border-faint);\n}\n.tab-bar__content--no-color {\n  background-color: transparent;\n  border: none;\n}\n.tab-bar__content-page:not(.tab-bar__content-page--active) {\n  opacity: 0;\n  z-index: -1;\n  pointer-events: none;\n  height: 0;\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-form-select, .setting-group {\n  display: flex;\n  flex-direction: column-reverse;\n  gap: 0.5rem;\n  margin-top: 1rem;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
+const styles$2 = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible__content.hidden {\n  display: none;\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.custom-message {\n  display: grid;\n  grid-template-columns: auto 1fr;\n  gap: 0.5ch;\n}\n.custom-message__avatar {\n  --size: 2.5rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  object-fit: cover;\n}\n.custom-message__main {\n  display: flex;\n  flex-direction: column;\n  gap: 0.5ch;\n}\n.custom-message__main header {\n  display: flex;\n  align-items: center;\n  gap: 0.5ch;\n}\n.custom-message .user-mention, .custom-message .role-mention {\n  color: var(--mention-foreground);\n  background-color: var(--mention-background);\n}\n.custom-message .user-mention::before, .custom-message .role-mention::before {\n  content: \"@\";\n}\n.custom-message .channel-mention::before {\n  content: \"#\";\n}\n.custom-message .custom-message__attachments img {\n  max-height: 100%;\n  max-width: 100%;\n}\n\n.progress-bar {\n  width: 100%;\n  height: 0.5rem;\n  border-radius: 0.5rem;\n  overflow: hidden;\n}\n.progress-bar__fill {\n  height: 100%;\n  background-color: var(--primary-600);\n  transition: width 0.3s;\n}\n\n.tab-bar {\n  max-width: 100%;\n}\n.tab-bar * {\n  color: var(--text-primary);\n  box-sizing: border-box;\n}\n\n.tab-bar__tabs {\n  display: grid;\n  grid-auto-flow: column;\n  max-width: 100%;\n  overflow-x: auto;\n}\n.tab-bar__tabs--no-color .tab-bar__tab {\n  background-color: transparent;\n  border: none;\n}\n\n.tab-bar__tab {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  border: none;\n  background-color: var(--primary-630);\n  color: var(--text-muted);\n  border: 1px solid var(--border-faint);\n  padding: 0.3rem 1rem;\n}\n.tab-bar__tab:hover {\n  background-color: var(--primary-600);\n  color: var(--text-primary);\n}\n.tab-bar__tab--active {\n  border: 1px solid var(--border-faint);\n  border-bottom: 1px solid var(--text-primary) !important;\n  color: var(--text-primary);\n}\n\n.tab-bar__content {\n  padding: 1em;\n  background-color: var(--primary-630);\n  border: 1px solid var(--border-faint);\n}\n.tab-bar__content--no-color {\n  background-color: transparent;\n  border: none;\n}\n.tab-bar__content-page:not(.tab-bar__content-page--active) {\n  opacity: 0;\n  z-index: -1;\n  pointer-events: none;\n  height: 0;\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-form-select, .setting-group {\n  display: flex;\n  flex-direction: column-reverse;\n  gap: 0.5rem;\n  margin-top: 1rem;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
 
 class DanhoLibrary {
     constructor() {
@@ -1939,21 +2004,151 @@ class DanhoLibrary {
         this.Actions = Actions;
         this.Finder = Finder$1;
         this.Filters = Filters;
-        this.styles = styles$1;
+        this.styles = styles$2;
     }
 }
 const LibraryPlugin = new DanhoLibrary();
 window.DL = LibraryPlugin;
+window.Finder = Finder$1;
 function buildPlugin(plugin) {
     const built = Object.assign({}, LibraryPlugin, plugin);
     built.styles = [LibraryPlugin.styles, plugin.styles].join('\n\n');
     return createPlugin(built);
 }
 
+const USER_TAGS = {
+    DANHO: 'danhosaur',
+    THEGUNASS: 'thegunass',
+    BEAUTYKILLER: 'thebeautykiller',
+    EMILIE: 'emi.2008',
+    CARL: 'carlbradsted'
+};
+const DEFAULT_DISCORD_ROLE_COLOR = `153, 170, 181`;
+
+const StyleChanges$1 = {
+    styleChanges: true,
+    movePremiumBadge: true,
+    prettyRoles: true,
+    defaultRoleColor: DEFAULT_DISCORD_ROLE_COLOR,
+    groupRoles: true,
+    pronounsPageLinks: true,
+    expandBioAgain: true,
+    nonObnoxiousProfileEffects: true,
+    uiReworkFix: true,
+    removePrivateSearchButton: true,
+    groupPrivateChannelNavOptions: true,
+};
+const DiscordEnhancements$1 = {
+    discordEnhancements: true,
+    autoCancelFriendRequests: true,
+    folderNames: new Array(),
+    joinVoiceWithCamera: true,
+    showGuildMembersInHeader: true,
+    allowForumSortByAuthor: true,
+    showUserTimezone: true,
+    hideTimezoneIcon: false,
+    hideTimezoneTimestamp: false,
+    showUserBirthdate: true,
+    hideBirthdateIcon: false,
+    hideBirthdateTimestamp: false,
+    birthdateTimestampStyle: 'd',
+    showBirthdayCalendar: true,
+    showBirthdayOnNameTag: true,
+    betterQuickSwitcher: true,
+    expandActivityStatus: true,
+};
+const DanhoEnhancements$1 = {
+    danhoEnhancements: true,
+    badges: true,
+    useClientCustomBadges: true,
+    wakeUp: true,
+    isHidingOnPurpose: false,
+    addToDungeon: true,
+    lockChannels: true,
+    lockPassword: 'hello',
+    lockUnlockForMinutes: 5,
+    initialLockState: true,
+};
+const Settings = createSettings({
+    ...StyleChanges$1,
+    ...DiscordEnhancements$1,
+    ...DanhoEnhancements$1,
+});
+const StyleChangesTitles = {
+    styleChanges: `Style changes`,
+    movePremiumBadge: `Move the Nitro badge before the Server Boosting badge again`,
+    prettyRoles: `Remove role circle, add more color to the roles`,
+    defaultRoleColor: `Default role color`,
+    groupRoles: `Widen roles that include "roles" in their name to make them stand out as a group`,
+    pronounsPageLinks: `Turn pronouns.page links into clickable links`,
+    expandBioAgain: `Expand the bio section again by default`,
+    nonObnoxiousProfileEffects: `Lower the opacity of profile effects (on hover) so they aren't as obnoxious`,
+    uiReworkFix: `Fix some of the Discord UI rework discomfort`,
+    removePrivateSearchButton: `Remove the search button in the private channel sidebar`,
+    groupPrivateChannelNavOptions: `Group navigation options (friends, nitro, shop) in the private channel sidebar`,
+};
+const DiscordEnhancementsTitles = {
+    discordEnhancements: `Discord enhancements`,
+    autoCancelFriendRequests: `Auto cancel friend requests on bigger servers`,
+    folderNames: `Folder names that should block all incoming friend requests`,
+    joinVoiceWithCamera: `Join voice channels with camera on`,
+    showGuildMembersInHeader: `Show guild members in the header`,
+    allowForumSortByAuthor: `Allow sorting forum posts by author`,
+    showUserTimezone: `Show user's timezone in the user popout/profile`,
+    hideTimezoneIcon: `Hide the timezone icon`,
+    hideTimezoneTimestamp: `Hide the timezone timestamp`,
+    showUserBirthdate: `Show user's birthdate in the user popout/profile`,
+    hideBirthdateIcon: `Hide the birthdate icon`,
+    hideBirthdateTimestamp: `Hide the birthdate timestamp`,
+    birthdateTimestampStyle: `Birthdate timestamp style`,
+    showBirthdayCalendar: `Show birthday calendar in global navigation`,
+    showBirthdayOnNameTag: `Show birthday on name tag`,
+    betterQuickSwitcher: `Better quickswitcher prioritizing friends and top guilds`,
+    expandActivityStatus: `Expand activity status to show more information i.e. what a user is listening to`,
+};
+const DanhoEnhancementsTitles = {
+    danhoEnhancements: `Danho enhancements`,
+    badges: `User badge modifications`,
+    useClientCustomBadges: `Use your own custom badges`,
+    wakeUp: `Reminds you that you're hiding. Why are you hiding?`,
+    isHidingOnPurpose: `User confirmed that they're hiding on purpose`,
+    addToDungeon: `"Add to / Remove from Dungeon" context menu on users in the Deadly Ninja server`,
+    lockChannels: `Lock channels with a password`,
+    lockPassword: `Password for locking channels`,
+    lockUnlockForMinutes: `Minutes to lock channels for`,
+    initialLockState: `Initial lock state for channels`,
+};
+const titles = {
+    ...StyleChangesTitles,
+    ...DiscordEnhancementsTitles,
+    ...DanhoEnhancementsTitles,
+};
+
 const { useCallback, useContext, useDebugValue, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useReducer, useRef, useState, useId, useDeferredValue, useInsertionEffect, useSyncExternalStore, useTransition, createRef, createContext, createElement, createFactory, forwardRef, cloneElement, lazy, memo, isValidElement, Component, PureComponent, Fragment, Suspense, } = React;
 
-const UserBadges = Finder.BDFDB_findByStrings(['QUEST_CONTENT_VIEWED', '"PRESS_BADGE"', 'badgeClassName'], { defaultExport: false }).exports;
-const RenderedUserProfileBadgeList = UserBadges;
+var Colors;
+(function (Colors) {
+    Colors[Colors["BLACK"] = 0] = "BLACK";
+    Colors[Colors["BRAND"] = 1] = "BRAND";
+    Colors[Colors["CUSTOM"] = 2] = "CUSTOM";
+    Colors[Colors["GREEN"] = 3] = "GREEN";
+    Colors[Colors["GREY"] = 4] = "GREY";
+    Colors[Colors["PRIMARY"] = 5] = "PRIMARY";
+    Colors[Colors["RED"] = 6] = "RED";
+    Colors[Colors["YELLOW"] = 7] = "YELLOW";
+})(Colors || (Colors = {}));
+var Positions;
+(function (Positions) {
+    Positions[Positions["BOTTOM"] = 0] = "BOTTOM";
+    Positions[Positions["CENTER"] = 1] = "CENTER";
+    Positions[Positions["LEFT"] = 2] = "LEFT";
+    Positions[Positions["RIGHT"] = 3] = "RIGHT";
+    Positions[Positions["WINDOW_CENTER"] = 4] = "WINDOW_CENTER";
+})(Positions || (Positions = {}));
+const TooltipModule = BdApi.Components.Tooltip;
+const Tooltip = TooltipModule;
+
+const BadgeList = Finder.findBySourceStrings("badges", "badgeClassName", "displayProfile", "QUEST_CONTENT_VIEWED", { defaultExport: false });
 var BadgeTypes;
 (function (BadgeTypes) {
     BadgeTypes["NITRO_ANY"] = "premium";
@@ -2016,99 +2211,25 @@ var BadgeIconIds;
     BadgeIconIds["legacy_username"] = "6de6d34650760ba5551a79732e98ed60";
     BadgeIconIds["partner"] = "3f9748e53446a137a052f3454e2de41e";
     BadgeIconIds["premium"] = "2ba85e8026a8614b640c2837bcdfe21b";
+    BadgeIconIds["premium_tenure_12_month_v2"] = "0334688279c8359120922938dcb1d6f8";
     BadgeIconIds["premium_early_supporter"] = "7060786766c9c840eb3019e725d2b358";
     BadgeIconIds["quest_completed"] = "7d9ae358c8c5e118768335dbe68b4fb8";
     BadgeIconIds["staff"] = "5e74e9b61934fc1f67c65515d1f7e60d";
     BadgeIconIds["verified_developer"] = "6df5892e0f35b051f8b61eace34f4967";
 })(BadgeIconIds || (BadgeIconIds = {}));
 
-const USER_TAGS = {
-    DANHO: 'danhosaur'
-};
-const DEFAULT_DISCORD_ROLE_COLOR = `153, 170, 181`;
-
-const StyleChanges$1 = {
-    styleChanges: true,
-    movePremiumBadge: true,
-    prettyRoles: true,
-    defaultRoleColor: DEFAULT_DISCORD_ROLE_COLOR,
-    groupRoles: true,
-    pronounsPageLinks: true,
-    expandBioAgain: true,
-    nonObnoxiousProfileEffects: true,
-};
-const DiscordEnhancements$1 = {
-    discordEnhancements: true,
-    autoCancelFriendRequests: true,
-    folderNames: new Array(),
-    joinVoiceWithCamera: true,
-    showGuildMembersInHeader: true,
-    allowForumSortByAuthor: true,
-};
-const DanhoEnhancements$1 = {
-    danhoEnhancements: true,
-    badges: true,
-    useClientCustomBadges: true,
-    wakeUp: true,
-    isHidingOnPurpose: false,
-    addToDungeon: true,
-    lockChannels: true,
-    lockPassword: 'hello',
-    lockUnlockForMinutes: 5,
-    initialLockState: true,
-};
-const Settings = createSettings({
-    ...StyleChanges$1,
-    ...DiscordEnhancements$1,
-    ...DanhoEnhancements$1,
-});
-const StyleChangesTitles = {
-    styleChanges: `Style changes`,
-    movePremiumBadge: `Move the Nitro badge before the Server Boosting badge again`,
-    prettyRoles: `Remove role circle, add more color to the roles`,
-    defaultRoleColor: `Default role color`,
-    groupRoles: `Widen roles that include "roles" in their name to make them stand out as a group`,
-    pronounsPageLinks: `Turn pronouns.page links into clickable links`,
-    expandBioAgain: `Expand the bio section again by default`,
-    nonObnoxiousProfileEffects: `Lower the opacity of profile effects (on hover) so they aren't as obnoxious`,
-};
-const DiscordEnhancementsTitles = {
-    discordEnhancements: `Discord enhancements`,
-    autoCancelFriendRequests: `Auto cancel friend requests on bigger servers`,
-    folderNames: `Folder names that should block all incoming friend requests`,
-    joinVoiceWithCamera: `Join voice channels with camera on`,
-    showGuildMembersInHeader: `Show guild members in the header`,
-    allowForumSortByAuthor: `Allow sorting forum posts by author`,
-};
-const DanhoEnhancementsTitles = {
-    danhoEnhancements: `Danho enhancements`,
-    badges: `User badge modifications`,
-    useClientCustomBadges: `Use your own custom badges`,
-    wakeUp: `Reminds you that you're hiding. Why are you hiding?`,
-    isHidingOnPurpose: `User confirmed that they're hiding on purpose`,
-    addToDungeon: `"Add to / Remove from Dungeon" context menu on users in the Deadly Ninja server`,
-    lockChannels: `Lock channels with a password`,
-    lockPassword: `Password for locking channels`,
-    lockUnlockForMinutes: `Minutes to lock channels for`,
-    initialLockState: `Initial lock state for channels`,
-};
-const titles = {
-    ...StyleChangesTitles,
-    ...DiscordEnhancementsTitles,
-    ...DanhoEnhancementsTitles,
-};
-const Badges$1 = createSettings({
-    developer: {
-        name: 'Plugin Developer',
-        iconUrl: 'https://i.imgur.com/f5MDiAd.png',
-        userTags: [USER_TAGS.DANHO],
-        position: {
-            before: BadgeTypes.ACTIVE_DEVELOPER,
-            default: 0
-        },
-        size: '14px'
-    },
-});
+const getNode = Finder.findBySourceStrings("timestamp", "format", "parsed", "full", { searchExports: true });
+const Timestamp = Finder.findBySourceStrings("timestampTooltip", { defaultExport: false, }).Z;
+function TimestampComponent({ unix, format }) {
+    const node = getNode(unix, format);
+    try {
+        return React.createElement(Timestamp, { node: node });
+    }
+    catch (e) {
+        console.error(e);
+        return React.createElement("p", null, new Date(unix * 1000).toLocaleString());
+    }
+}
 
 function Setting({ setting, settings, set, titles, ...props }) {
     const { beforeChange, onChange, formatValue, type } = props;
@@ -2148,9 +2269,9 @@ function Setting({ setting, settings, set, titles, ...props }) {
                     setV(value);
                 } }),
             React.createElement(FormText, { className: 'note' }, titles[setting])));
-    if (type === 'select' && Array.isArray(settings[setting]))
+    if (type === 'select')
         return (React.createElement("div", { className: "danho-form-select", key: setting.toString() },
-            React.createElement(Select, { options: props.selectValues.map(value => ({ label: value, value })), isSelected: value => Array.isArray(settings[setting]) ? v.includes(value) : false, serialize: value => JSON.stringify(value), select: (value) => {
+            React.createElement(Select, { options: props.selectValues.map(value => ({ label: value, value })), isSelected: value => Array.isArray(settings[setting]) ? v.includes(value) : value === settings[setting], serialize: value => JSON.stringify(value), select: Array.isArray(settings[setting]) ? (value) => {
                     const selected = [...settings[setting]];
                     if (selected.includes(value))
                         selected.splice(selected.indexOf(value), 1);
@@ -2158,6 +2279,9 @@ function Setting({ setting, settings, set, titles, ...props }) {
                         selected.push(value);
                     set({ [setting]: selected });
                     setV(selected);
+                } : (value) => {
+                    set({ [setting]: value });
+                    setV(value);
                 } }),
             React.createElement(FormText, { className: 'note' }, titles[setting])));
     return (React.createElement("div", { className: 'settings-error' },
@@ -2245,29 +2369,33 @@ function hexToRgb(hex) {
     return [r, g, b];
 }
 
+const PrettifyRoles = CreateSettingsGroup((React, props, Setting) => (React.createElement(React.Fragment, null,
+    React.createElement(Setting, { setting: "defaultRoleColor", type: "color", ...props, formatValue: rgbString => "#" + rgbToHex(rgbString.split(',').map(Number)), beforeChange: hex => hexToRgb(hex).join(',') }),
+    React.createElement(Setting, { setting: "groupRoles", ...props }))));
+
+const UiFix = CreateSettingsGroup((React, props, Setting) => (React.createElement(React.Fragment, null,
+    React.createElement(Setting, { setting: "removePrivateSearchButton", ...props }),
+    React.createElement(Setting, { setting: "groupPrivateChannelNavOptions", ...props }))));
+
 const StyleSettings = CreateSettingsGroup((React, props, Setting, { FormSection, FormDivider }) => {
-    const PrettyRoles = () => (React.createElement(FormSection, { title: "PrettyRoles Settings" },
-        React.createElement(Setting, { setting: "prettyRoles", ...props }),
-        React.createElement(Setting, { setting: "defaultRoleColor", type: "color", ...props, formatValue: rgbString => "#" + rgbToHex(rgbString.split(',').map(Number)), beforeChange: hex => hexToRgb(hex).join(',') }),
-        React.createElement(Setting, { setting: "groupRoles", ...props })));
-    const BadgeModification = () => (React.createElement(FormSection, { title: "Badge Modification" },
-        React.createElement(Setting, { setting: "movePremiumBadge", ...props })));
-    const PronounsPageLinks = () => (React.createElement(FormSection, { title: "Pronouns Page Links" },
-        React.createElement(Setting, { setting: "pronounsPageLinks", ...props })));
-    const ExpandBioAgain = () => (React.createElement(FormSection, { title: "Expand Bio Again" },
-        React.createElement(Setting, { setting: "expandBioAgain", ...props })));
-    const NonObnoxiousProfileEffects = () => (React.createElement(FormSection, { title: "Non-Obnoxious Profile Effects" },
-        React.createElement(Setting, { setting: "nonObnoxiousProfileEffects", ...props })));
-    return (React.createElement(React.Fragment, null,
-        React.createElement(BadgeModification, null),
-        React.createElement(FormDivider, null),
-        React.createElement(ExpandBioAgain, null),
-        React.createElement(FormDivider, null),
-        React.createElement(NonObnoxiousProfileEffects, null),
-        React.createElement(FormDivider, null),
-        React.createElement(PrettyRoles, null),
-        React.createElement(FormDivider, null),
-        React.createElement(PronounsPageLinks, null)));
+    const AdditionalSettings = ({ setting }) => {
+        switch (setting) {
+            case 'prettyRoles': return props.settings.prettyRoles ? React.createElement(PrettifyRoles, { ...props }) : null;
+            case 'uiReworkFix': return props.settings.uiReworkFix ? React.createElement(UiFix, { ...props }) : null;
+            default: return null;
+        }
+    };
+    const ignoredSettings = [
+        'defaultRoleColor', 'groupRoles',
+        'removePrivateSearchButton', 'groupPrivateChannelNavOptions',
+    ];
+    return (React.createElement(React.Fragment, null, Object.keys(StyleChanges$1)
+        .filter(key => !ignoredSettings.includes(key))
+        .map((key, index) => (React.createElement(React.Fragment, null,
+        React.createElement(FormSection, { title: StyleChangesTitles[key], key: index },
+            React.createElement(Setting, { setting: key, ...props }),
+            React.createElement(AdditionalSettings, { setting: key })),
+        React.createElement(FormDivider, null))))));
 });
 
 const AutoCancelFriendRequestSettings = CreateSettingsGroup((React, props, Setting, { FormSection }) => {
@@ -2275,24 +2403,47 @@ const AutoCancelFriendRequestSettings = CreateSettingsGroup((React, props, Setti
     return (React.createElement(Setting, { setting: "folderNames", type: 'select', selectValues: folderNames, ...props }));
 });
 
-const DiscordChangesSettings = CreateSettingsGroup((React, props, Setting, { FormSection, FormDivider }) => {
-    const AutoCancelFriendRequests = () => (React.createElement(FormSection, { title: "Auto Cancel Friend Requests" },
-        React.createElement(Setting, { setting: "autoCancelFriendRequests", ...props }),
-        props.settings.autoCancelFriendRequests ? React.createElement(AutoCancelFriendRequestSettings, { ...props }) : null));
-    const JoinVoiceWithCamera = () => (React.createElement(FormSection, { title: "Join Voice With Camera" },
-        React.createElement(Setting, { setting: "joinVoiceWithCamera", ...props })));
-    const ShowGuildMembersInHeader = () => (React.createElement(FormSection, { title: "Show Guild Members In Header" },
-        React.createElement(Setting, { setting: "showGuildMembersInHeader", ...props })));
-    const AllowForumSortByAuthor = () => (React.createElement(FormSection, { title: "Allow Forum Sort By Author" },
-        React.createElement(Setting, { setting: "allowForumSortByAuthor", ...props })));
+const TimezoneSettings = CreateSettingsGroup((React, props, Setting) => (React.createElement(React.Fragment, null,
+    React.createElement(Setting, { setting: "hideTimezoneIcon", ...props }),
+    React.createElement(Setting, { setting: "hideTimezoneTimestamp", ...props }))));
+
+const BirthdateSettings = CreateSettingsGroup((React, props, Setting) => {
+    const settings = Settings.useSelector(s => ({
+        timestampStyle: s.birthdateTimestampStyle
+    }));
     return (React.createElement(React.Fragment, null,
-        React.createElement(AutoCancelFriendRequests, null),
-        React.createElement(FormDivider, null),
-        React.createElement(JoinVoiceWithCamera, null),
-        React.createElement(FormDivider, null),
-        React.createElement(ShowGuildMembersInHeader, null),
-        React.createElement(FormDivider, null),
-        React.createElement(AllowForumSortByAuthor, null)));
+        React.createElement(Setting, { setting: "hideBirthdateIcon", ...props }),
+        React.createElement(Setting, { setting: "hideBirthdateTimestamp", ...props }),
+        React.createElement(Setting, { setting: "birthdateTimestampStyle", ...props, type: "select", selectValues: [
+                "D", "d",
+                "T", "t",
+                "F", "f",
+                "R"
+            ] }),
+        React.createElement(TimestampComponent, { format: settings.timestampStyle, unix: Date.now() / 1000 })));
+});
+
+const DiscordChangesSettings = CreateSettingsGroup((React, props, Setting, { FormSection, FormDivider }) => {
+    const AdditionalSettings = ({ setting }) => {
+        switch (setting) {
+            case 'autoCancelFriendRequests': return props.settings.autoCancelFriendRequests ? React.createElement(AutoCancelFriendRequestSettings, { ...props }) : null;
+            case 'showUserTimezone': return props.settings.showUserTimezone ? React.createElement(TimezoneSettings, { ...props }) : null;
+            case 'showUserBirthdate': return props.settings.showUserBirthdate ? React.createElement(BirthdateSettings, { ...props }) : null;
+            default: return null;
+        }
+    };
+    const ignoredSettings = [
+        'folderNames',
+        'hideTimezoneIcon', 'hideTimezoneTimestamp',
+        'hideBirthdateIcon', 'hideBirthdateTimestamp', 'birthdateTimestampStyle',
+    ];
+    return (React.createElement(React.Fragment, null, Object.keys(DiscordEnhancements$1)
+        .filter(key => !ignoredSettings.includes(key))
+        .map((key, index) => (React.createElement(React.Fragment, null,
+        React.createElement(FormSection, { title: DiscordEnhancementsTitles[key], key: index },
+            React.createElement(Setting, { setting: key, ...props }),
+            React.createElement(AdditionalSettings, { setting: key })),
+        React.createElement(FormDivider, null))))));
 });
 
 const BadgesSettings = CreateSettingsGroup((React, props, Setting, { FormSection }) => {
@@ -2306,25 +2457,29 @@ const LockSettings = CreateSettingsGroup((React, props, Setting, { FormSection }
         React.createElement(Setting, { setting: "initialLockState", ...props })));
 });
 
+const HidingSettings = CreateSettingsGroup((React, props, Setting) => (React.createElement(Setting, { setting: "isHidingOnPurpose", ...props })));
+
 const DanhoChangesSettings = CreateSettingsGroup((React, props, Setting, { FormSection, FormDivider }) => {
-    const Badges = () => (React.createElement(FormSection, { title: "Badges" },
-        React.createElement(Setting, { setting: "badges", ...props }),
-        props.settings.badges ? React.createElement(BadgesSettings, { ...props }) : null));
-    const LockChannels = () => (React.createElement(FormSection, { title: "Lock Channels" },
-        React.createElement(Setting, { setting: "lockChannels", ...props }),
-        props.settings.lockChannels ? React.createElement(LockSettings, { ...props }) : null));
-    const QuickAddMemberToDungeon = () => (React.createElement(FormSection, { title: "Add To Dungeon" },
-        React.createElement(Setting, { setting: "addToDungeon", ...props })));
-    const WakeUp = () => (React.createElement(FormSection, { title: "Wake Up" },
-        React.createElement(Setting, { setting: "wakeUp", ...props })));
-    return (React.createElement(React.Fragment, null,
-        React.createElement(Badges, null),
-        React.createElement(FormDivider, null),
-        React.createElement(LockChannels, null),
-        React.createElement(FormDivider, null),
-        React.createElement(QuickAddMemberToDungeon, null),
-        React.createElement(FormDivider, null),
-        React.createElement(WakeUp, null)));
+    const AdditionalSettings = ({ setting }) => {
+        switch (setting) {
+            case 'badges': return props.settings.badges ? React.createElement(BadgesSettings, { ...props }) : null;
+            case 'lockChannels': return props.settings.lockChannels ? React.createElement(LockSettings, { ...props }) : null;
+            case 'wakeUp': return props.settings.wakeUp ? React.createElement(HidingSettings, { ...props }) : null;
+            default: return null;
+        }
+    };
+    const ignoredSettings = [
+        'useClientCustomBadges',
+        'lockPassword', 'lockUnlockForMinutes', 'initialLockState',
+        'isHidingOnPurpose'
+    ];
+    return (React.createElement(React.Fragment, null, Object.keys(DanhoEnhancements$1)
+        .filter(key => !ignoredSettings.includes(key))
+        .map((key, index) => (React.createElement(React.Fragment, null,
+        React.createElement(FormSection, { title: DanhoEnhancementsTitles[key], key: index },
+            React.createElement(Setting, { setting: key, ...props }),
+            React.createElement(AdditionalSettings, { setting: key })),
+        React.createElement(FormDivider, null))))));
 });
 
 function SettingsPanel() {
@@ -2343,11 +2498,50 @@ function SettingsPanel() {
         tabs.some(([_, value]) => value) && (React.createElement(TabBar, { tabs: tabs, styleChanges: React.createElement(StyleSettings, { ...settingProps }), discordEnhancements: React.createElement(DiscordChangesSettings, { ...settingProps }), danhoEnhancements: React.createElement(DanhoChangesSettings, { ...settingProps }) }))));
 }
 
+const SECOND = 1000;
+const MINUTE = SECOND * 60;
+const HOUR = MINUTE * 60;
+const DAY = HOUR * 24;
+const WEEK = DAY * 7;
+const MONTH = DAY * 30;
+const YEAR = DAY * 365;
+
+function Feature$8() {
+    const relativeTimeModule = Finder.findBySourceStrings('"R"!==e.format', { defaultExport: false });
+    if (!relativeTimeModule)
+        return false;
+    after(relativeTimeModule, 'Z', ({ result, args: [args] }) => {
+        if (args.format !== 'R')
+            return result;
+        const date = args.parsed.toDate();
+        const now = new Date();
+        const diff = now.getTime() - date.getTime();
+        const getTime = (value, time) => {
+            const result = Math.floor(diff / value);
+            return result > 0 ? `${result} ${time}${result > 1 ? 's' : ''} ago` : null;
+        };
+        return (diff < 0 && result
+            || getTime(YEAR, 'year')
+            || getTime(MONTH, 'month')
+            || getTime(WEEK, 'week')
+            || getTime(DAY, 'day')
+            || getTime(HOUR, 'hour')
+            || getTime(MINUTE, 'minute')
+            || getTime(SECOND, 'second')
+            || `A long time ago, in a galaxy far, far away... (parsing failed)`);
+    });
+}
+
+const FixRelativeTimestamps = {
+    __proto__: null,
+    default: Feature$8
+};
+
 const GuildHeader = Finder.findBySourceStrings("hasCommunityInfoSubheader()", "ANIMATED_BANNER", "header");
 
 const MemberListItem = Finder.findBySourceStrings("ownerTooltipText", "onClickPremiumGuildIcon:", { defaultExport: false });
 
-function Feature$5() {
+function Feature$7() {
     if (!Settings.current.showGuildMembersInHeader)
         return;
     if (!GuildHeader)
@@ -2358,7 +2552,7 @@ function Feature$5() {
 
 const ShowGuildMembersInHeader = {
     __proto__: null,
-    default: Feature$5
+    default: Feature$7
 };
 
 const { focused } = byKeys(['focused', 'item', 'labelContainer']);
@@ -2436,7 +2630,7 @@ function testForumChannel() {
     return channel.type === 15 ;
 }
 
-function Feature$4() {
+function Feature$6() {
     if (!Settings.current.allowForumSortByAuthor)
         return;
     addSortAndViewButtonClick();
@@ -2444,23 +2638,114 @@ function Feature$4() {
 
 const SortForumsByAuthor = {
     __proto__: null,
-    default: Feature$4
+    default: Feature$6
 };
+
+const BirthdayStore = new class BirthdayStore extends DiumStore {
+    constructor() {
+        super({}, 'BirthdayStore');
+    }
+    isBirthdayChild(userResolvable) {
+        const user = typeof userResolvable === 'object' ? userResolvable : UserStore$1.getUser(userResolvable);
+        if (!user) {
+            warn(`User not found for ${userResolvable}`);
+            return false;
+        }
+        const date = this.current[user.id] ? new Date(this.current[user.id]) : null;
+        if (!date)
+            return false;
+        const now = new Date();
+        const sameDay = date.getDate() === now.getDate();
+        const sameMonth = date.getMonth() === now.getMonth();
+        return sameDay && sameMonth;
+    }
+};
+
+const style$3 = "span[class*=timestamp] {\n  color: var(--text-primary);\n}\n\nli.danho-birthday-calendar {\n  display: flex;\n  align-items: center;\n  margin-left: 8px;\n  border-radius: 4px;\n}\nli.danho-birthday-calendar > * {\n  padding: 8px;\n}\nli.danho-birthday-calendar svg {\n  margin-left: 4px;\n  margin-right: 12px;\n}\n\ndiv:has(> .birthday-child-icon) {\n  position: relative;\n}\n\n.birthday-child-icon {\n  z-index: 1;\n  position: absolute;\n  top: -0.3ch;\n  right: -0.5ch;\n  font-size: 1.4ch;\n}";
+
+function Feature$5() {
+    if (!Settings.current.showBirthdayOnNameTag)
+        return null;
+    BirthdayStore.load();
+    log('[BirthdayStore] Loaded birthday data', BirthdayStore.current);
+}
+
+const UserBirthday = {
+    __proto__: null,
+    default: Feature$5,
+    style: style$3
+};
+
+const UserTimezoneStyle = "span[class*=timestamp] {\n  color: var(--text-primary);\n}";
 
 const DiscordEnhancements = [
     ShowGuildMembersInHeader,
     SortForumsByAuthor,
+    FixRelativeTimestamps,
+    UserBirthday,
+    { style: UserTimezoneStyle, default: () => { } },
 ];
 
-function Feature$3() {
+const CustomBadgesStore = createDiumStore({
+    developer: {
+        name: 'Plugin Developer',
+        iconUrl: 'https://i.imgur.com/f5MDiAd.png',
+        userTags: [USER_TAGS.DANHO],
+        position: {
+            before: BadgeTypes.ACTIVE_DEVELOPER,
+            default: 0
+        },
+        size: '14px',
+        href: 'https://github.com/DanielSimonsen90'
+    },
+    daniel_simonsen: {
+        name: 'Daniel Simonsen himself',
+        iconUrl: 'https://imgur.com/jva0EMf.png',
+        userTags: [USER_TAGS.DANHO],
+        position: 0,
+        size: '16px',
+        href: 'https://open.spotify.com/artist/2Ya69OwtcUqvAMPaE8vXdg?si=ELamxrqgR-KLZwTqYA6AXA'
+    },
+    mose_clan: {
+        name: 'Mose Clan',
+        iconUrl: 'https://imgur.com/Wm1pEfY.png',
+        userTags: [USER_TAGS.DANHO, USER_TAGS.THEGUNASS, USER_TAGS.BEAUTYKILLER, USER_TAGS.EMILIE, USER_TAGS.CARL],
+        size: '24px',
+        position: 1
+    }
+}, 'CustomBadges');
+
+const DiscordBadgeStore = new class DiscordBadgeStore extends DiumStore {
+    constructor() {
+        super({}, 'DiscordBadgeStore', () => {
+            ActionsEmitter.on('USER_PROFILE_FETCH_SUCCESS', this.onUserProfileFetchSuccess.bind(this));
+        });
+        this.onUserProfileFetchSuccess = createActionCallback('USER_PROFILE_FETCH_SUCCESS', ({ badges }) => {
+            if (!badges?.length)
+                return;
+            const updates = badges.filter(badge => {
+                const stored = this.current[badge.id];
+                return !stored || stored.icon !== badge.icon;
+            });
+            if (updates.length)
+                this.update(updates.reduce((acc, badge) => {
+                    acc[badge.id] = badge;
+                    return acc;
+                }, {}));
+        });
+    }
+};
+
+function Feature$4() {
     if (!Settings.current.badges)
         return;
-    Badges$1.load();
+    DiscordBadgeStore.load();
+    CustomBadgesStore.load();
 }
 
 const Badges = {
     __proto__: null,
-    default: Feature$3
+    default: Feature$4
 };
 
 const style$2 = ".bdd-wrapper:has(#secret-channel-login) {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  position: absolute;\n  inset: 0;\n  background-color: var(--background-primary);\n  height: 100%;\n  width: 100%;\n  z-index: 9999;\n}\n\n#secret-channel-login {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 1rem;\n}\n\ndiv:has(> #secret-channel-login) {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}";
@@ -2500,7 +2785,7 @@ function handleHiding() {
     }
 }
 
-function Feature$2() {
+function Feature$3() {
     if (!Settings.current.wakeUp)
         return;
     handleHiding();
@@ -2508,7 +2793,7 @@ function Feature$2() {
 
 const WakeUp = {
     __proto__: null,
-    default: Feature$2
+    default: Feature$3
 };
 
 const DanhoEnhancements = [
@@ -2519,7 +2804,7 @@ const DanhoEnhancements = [
 
 const style$1 = ".danho-expand-bio-again div[class*=descriptionClamp] {\n  display: block !important;\n  max-height: unset !important;\n}\n.danho-expand-bio-again button[class*=viewFullBio] {\n  display: none !important;\n}";
 
-function Feature$1() {
+function Feature$2() {
     if (!Settings.current.expandBioAgain)
         return;
     $('#app-mount').addClass('danho-expand-bio-again');
@@ -2527,13 +2812,13 @@ function Feature$1() {
 
 const ExpandBioAgain = {
     __proto__: null,
-    default: Feature$1,
+    default: Feature$2,
     styles: style$1
 };
 
 const style = ".danho-non-obnoxious-profile-effects [class*=profileEffects]:hover {\n  opacity: 0.2;\n}";
 
-function Feature() {
+function Feature$1() {
     if (!Settings.current.nonObnoxiousProfileEffects)
         return;
     $('#app-mount').addClass('danho-non-obnoxious-profile-effects');
@@ -2541,7 +2826,7 @@ function Feature() {
 
 const NonObnoxiousProfileEffects = {
     __proto__: null,
-    default: Feature,
+    default: Feature$1,
     styles: style
 };
 
@@ -2552,10 +2837,46 @@ const PrettyRoles = {
     styles: prettyRoles$1
 };
 
+const PrivateChannelSidebarList = Finder.findBySourceStrings("PrivateChannels", "storeLink", { defaultExport: false });
+
+const styles$1 = ".danho-ui-rework-fix div[class*=channelBottomBarArea] {\n  margin-top: 0.5rem;\n}\n.danho-ui-rework-fix div[class*=channelTextArea] {\n  --custom-chat-input-margin-bottom: 24px;\n}\n.danho-ui-rework-fix [data-list-id=guildsnav] *[class*=icon] {\n  border-radius: 50% !important;\n}\n.danho-ui-rework-fix [data-list-id=guildsnav] div[class*=selected] *[class*=icon] {\n  border-radius: 25% !important;\n  transition: border-radius 300ms;\n  transition-delay: 100ms;\n}\n.danho-ui-rework-fix .danho-nav-group {\n  display: grid;\n  grid-auto-flow: column;\n}\n.danho-ui-rework-fix .danho-nav-group:has([class*=interactive]:hover) > * {\n  margin-right: 1ch;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=interactive]:hover div[class*=content] {\n  display: block;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=interactive] a[class*=link]:not([class*=interactive]:hover a[class*=link]) {\n  padding-inline: 0;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] {\n  justify-content: center;\n  gap: 1ch;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] div[class*=avatar] {\n  margin-right: 0;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] div[class*=content] {\n  display: none;\n}\n\nhtml[class*=visual-refresh]:has(.danho-ui-rework-fix) {\n  --custom-channel-textarea-text-area-height: 2.75rem;\n  --custom-rtc-account-height: 2.5rem;\n}\nhtml[class*=visual-refresh]:has(.danho-ui-rework-fix) section[class*=panels] {\n  bottom: calc(var(--space-xs) * 1.5);\n}";
+
+function Feature() {
+    const { uiReworkFix, removePrivateSearchButton, groupPrivateChannelNavOptions } = Settings.current;
+    if (!uiReworkFix)
+        return;
+    $('#app-mount').addClass('danho-ui-rework-fix');
+    if (removePrivateSearchButton || groupPrivateChannelNavOptions) {
+        after(PrivateChannelSidebarList, 'Z', ({ result }) => {
+            after(result.type, 'type', ({ result }) => {
+                if (groupPrivateChannelNavOptions) {
+                    const navOptions = result.props.children[1].props.children;
+                    const dividerIndex = navOptions.findIndex(child => child?.key.includes('divider'));
+                    const [divider] = navOptions.splice(dividerIndex, 1);
+                    const replacedChildren = [
+                        React.createElement("div", { className: 'danho-nav-group' }, navOptions),
+                        divider
+                    ];
+                    result.props.children[1].props.children = replacedChildren;
+                }
+                if (Settings.current.removePrivateSearchButton)
+                    result.props.children.shift();
+            }, { silent: true });
+        }, { once: true, name: 'PrivateChannelSidebarList' });
+    }
+}
+
+const UiReworkFix = {
+    __proto__: null,
+    default: Feature,
+    styles: styles$1
+};
+
 const StyleChanges = [
     ExpandBioAgain,
     NonObnoxiousProfileEffects,
     PrettyRoles,
+    UiReworkFix,
 ];
 
 const features = [
@@ -2781,72 +3102,71 @@ function patchBadgeComponent(result) {
         if (!name || !iconUrl)
             return null;
         const InnerBadge = ({ href }) => href ? (React.createElement("a", { href: href, target: "_blank", rel: "noreferrer noopener" },
-            React.createElement(InnerBadge, null))) : (React.createElement("img", { src: iconUrl, alt: name, className: result.props.children[0].props.children.props.children[0].props.className, style: style }));
+            React.createElement(InnerBadge, null))) : (React.createElement("img", { src: iconUrl, alt: name, className: result.props.children[0].props.children.props.children.props.className, style: style }));
         return (React.createElement(TooltipWrapper, { text: name },
             React.createElement(TooltipContent, null,
                 React.createElement(InnerBadge, { href: href }))));
     };
 }
-function insertBadges(result, badgeData) {
-    if (!result)
-        return;
-    if (result.props.children.some(badge => badge.type === CustomBadge))
+function insertBadges(props, result, badgeData) {
+    if (!result || result.props.children.some(badge => badge.type === CustomBadge))
         return;
     const badges = result.props.children;
+    const user = props.displayProfile ? UserStore.getUser(props.displayProfile.userId) : undefined;
     const newBadges = badgeData
-        .filter(({ userTags }) => userTags ? checkUserId(userTags) : true)
-        .sort((a, b) => getPosition(a.position) - getPosition(b.position))
+        .filter(({ userTags }) => userTags ? user ? userTags.includes(user.username) : checkUserId(userTags) : true)
+        .sort((a, b) => getPosition(a.position, badges) - getPosition(b.position, badges))
         .map(({ size, position, ...props }) => [position, React.createElement(CustomBadge, { key: props.name, ...props, style: { width: size, height: size } })]);
     for (const [position, badge] of newBadges) {
-        badges.splice(getPosition(position), 0, badge);
+        badges.splice(getPosition(position, badges), 0, badge);
     }
-    function checkUserId(userTags) {
-        const userTag = $(s => s.role('dialog').className('userTag'))?.value.toString()
-            ?? $(s => s.className('userProfileOuter').className('userTag'))?.value.toString()
-            ?? $(s => s.className('accountProfileCard').className('usernameInnerRow'), false)
-                .map(dq => dq.children(undefined, true).value.toString())[1];
-        return userTags.includes(userTag);
-    }
-    function getPosition(position) {
-        if (position === undefined || position === 'end')
-            return badges.length;
-        if (position === 'start')
-            return 0;
-        if (typeof position === 'number')
-            return position;
-        const [startIndex, endIndex] = [position.before, position.after].map((badgeType, i) => badgeType
-            ? badges.findIndex(badge => badge.key.includes(badgeType.toLowerCase())) + i
-            : -1);
-        return startIndex === -1 && endIndex === -1 ? badges.length
-            : startIndex === -1 ? endIndex
-                : endIndex === -1 ? startIndex
-                    : position.default === undefined ? Math.max(startIndex, endIndex) - Math.min(startIndex, endIndex)
-                        : position.default ?? badges.length;
-    }
+}
+function checkUserId(userTags) {
+    const userTag = $(s => s.role('dialog').className('userTag'))?.value.toString()
+        ?? $(s => s.className('userProfileOuter').className('userTag'))?.value.toString()
+        ?? $(s => s.className('accountProfileCard').className('usernameInnerRow'), false)
+            .map(dq => dq.children(undefined, true).value.toString())[1];
+    return userTags.includes(userTag);
+}
+function getPosition(position, badges) {
+    if (position === undefined || position === 'end')
+        return badges.length;
+    if (position === 'start')
+        return 0;
+    if (typeof position === 'number')
+        return position;
+    const [startIndex, endIndex] = [position.before, position.after].map((badgeType, i) => badgeType
+        ? badges.findIndex(badge => badge.key.includes(badgeType.toLowerCase())) + i
+        : -1);
+    return startIndex === -1 && endIndex === -1 ? badges.length
+        : startIndex === -1 ? endIndex
+            : endIndex === -1 ? startIndex
+                : position.default === undefined ? Math.max(startIndex, endIndex) - Math.min(startIndex, endIndex)
+                    : position.default ?? badges.length;
 }
 
 function movePremiumBeforeBoost(props) {
     const nitroBadge = props.children.find(badge => badge.props.children.props.href?.includes(BadgeTypes.NITRO_ANY));
     const boosterBadgePos = props.children.findIndex(badge => typeof badge.props.text === 'string' && badge.props.text.toLowerCase().includes('boost'));
-    if (!nitroBadge || boosterBadgePos === -1)
+    if (!nitroBadge && boosterBadgePos === -1)
         return props;
     props.children.splice(props.children.indexOf(nitroBadge), 1);
     props.children.splice(boosterBadgePos - 1, 0, nitroBadge);
     return props;
 }
 
-const modifyBadges = createPatcherAfterCallback(({ result }) => {
+const modifyBadges = createPatcherAfterCallback(({ args: [props], result }) => {
     if (!CustomBadge)
         return patchBadgeComponent(result);
     if (Settings.current.movePremiumBadge)
         movePremiumBeforeBoost(result.props);
-    insertBadges(result, Object.values(Badges$1.current));
+    insertBadges(props, result, Object.values(CustomBadgesStore.current));
 });
 
 function afterBadgeList() {
     if (!Settings.current.badges)
         return;
-    after(RenderedUserProfileBadgeList, 'Z', data => {
+    after(BadgeList, 'Z', data => {
         if (Settings.current.badges)
             modifyBadges(data);
     }, { name: 'BadgeList' });
@@ -2879,6 +3199,119 @@ function afterChannelItem() {
     }, { name: 'ChannelItem' });
 }
 
+const GlobalNavigation = Finder.findBySourceStrings("ConnectedPrivateChannelsList", { defualtExport: false });
+
+const CalendarIcon = Finder.findBySourceStrings("M7 1a1 1 0 0 1 1 1v.75c0");
+
+const DanhoBirthdayCalendarKey = "danho-birthday-calendar";
+const BIRTHDAY_REGEX = /\d{1,2}\/\d{1,2}(\/(\d{4}|\d{2}))?/;
+function getBirthdate(birthdate) {
+    const now = new Date();
+    const [day, month, year] = birthdate
+        .split('/')
+        .map((value, index) => Number(value) + (value.length === 2 && index === 2
+        ? now.getFullYear() - 2000 > Number(value) ? 2000 : 1900
+        : 0));
+    return new Date(year || now.getFullYear(), month - 1, day);
+}
+
+let selectedClassName = null;
+function useBirthdayNavProps(props) {
+    const globalNav = $(s => s.ariaLabel('Direct Messages', 'ul'));
+    useEffect(() => {
+        globalNav.children().forEach(child => {
+            child.on('click', props.onSiblingClick);
+        });
+    }, []);
+    const firstNavItem = globalNav.children('li', true);
+    if (!firstNavItem.element)
+        return null;
+    const clickableProps = firstNavItem.children(undefined, true).props;
+    const result = {
+        listItemProps: exclude(firstNavItem.props, 'children', 'onBlur', 'onClick', 'onFocus'),
+        selectedClassName: getSelectedClassName(),
+        clickableProps: Object.assign({}, clickableProps, {
+            className: clickableProps.className
+                .split(' ')
+                .filter(className => !className.includes('selected'))
+                .join(' '),
+            onClick: (e) => {
+                globalNav.children('li').forEach(listItem => {
+                    listItem.children(`.${getSelectedClassName()}`)
+                        .forEach(child => child.removeClass(getSelectedClassName()));
+                });
+                props.onClick(e);
+            }
+        })
+    };
+    return result;
+}
+function getSelectedClassName() {
+    log('SelectedClassName requested: ', selectedClassName);
+    return selectedClassName ||= $(s => s.ariaLabel('Direct Messages', 'ul'))
+        .children(s => s.className('selected'), true)
+        .props?.className
+        .split(' ')
+        .filter((className) => className.includes('selected'))
+        .join(' ');
+}
+
+function CalendarPage() {
+    const friends = RelationshipStore.getFriendIDs();
+    const friendBirthdays = friends
+        .map(userId => Object.assign({}, UserNoteStore.getNote(userId), { userId }))
+        .filter(noteState => !noteState.loading && BIRTHDAY_REGEX.test(noteState.note))
+        .map(noteStateData => ({
+        birthdate: getBirthdate(noteStateData.note.match(BIRTHDAY_REGEX)[0]),
+        userId: noteStateData.userId
+    }));
+    return (React.createElement("div", { className: "calendar-page" },
+        React.createElement(Text, { variant: "heading-md/medium", style: { color: 'var(--text-primary);' } }, "Hello, World!"),
+        React.createElement("br", null),
+        React.createElement("ul", null, friendBirthdays.map(({ userId, birthdate }) => (React.createElement("li", { key: userId },
+            React.createElement("img", { src: UserStore.getUser(userId)?.getAvatarURL(), alt: UserStore.getUser(userId)?.username ?? userId }),
+            React.createElement(TimestampComponent, { format: "D", unix: birthdate.getTime() / 1000 })))))));
+}
+
+function BirthdayCalendarNavItem() {
+    const [selected, setSelected] = useState(false);
+    const props = useBirthdayNavProps({
+        onClick: () => {
+            setSelected(true);
+            renderCalendarPage();
+        },
+        onSiblingClick: () => setSelected(false)
+    });
+    return (React.createElement("li", { ...props?.listItemProps ?? {}, className: classNames(selected ? props?.selectedClassName : props?.listItemProps.className, 'danho-birthday-calendar'), key: DanhoBirthdayCalendarKey },
+        React.createElement(Clickable, { ...props?.clickableProps },
+            React.createElement(CalendarIcon, null),
+            React.createElement(Text, null, "Birthdays"))));
+}
+function renderCalendarPage() {
+    const sidebar = $(s => s.className('base').className('content').className('sidebar'));
+    const base = sidebar.parent;
+    const children = base.children(undefined);
+    children.shift();
+    children.forEach(child => child.unmount());
+    base.appendComponent(React.createElement(CalendarPage, null));
+}
+
+const addToGlobalNav = createPatcherAfterCallback(({ result }) => {
+    const navItems = result.props.children.props.children;
+    if (navItems.some(i => i?.key === DanhoBirthdayCalendarKey))
+        return;
+    navItems.splice(navItems.length, 0, React.createElement(BirthdayCalendarNavItem, null));
+});
+
+function afterGlobalNavigation() {
+    if (!Settings.current.showBirthdayCalendar)
+        return;
+    after(GlobalNavigation, 'Z', (data) => {
+        if (Settings.current.showBirthdayCalendar)
+            addToGlobalNav(data);
+    }, { name: 'GlobalNavigation' });
+}
+
 const updateGuildHeader = createPatcherAfterCallback(({ args: [props] }) => {
     let showGuildMembers = $('.danho-lib__header-members', false);
     if (showGuildMembers.length >= 1)
@@ -2906,13 +3339,197 @@ const updateGuildHeader = createPatcherAfterCallback(({ args: [props] }) => {
     }, 100);
 });
 
+const applyBirthdayIconOnMemberListItem = createPatcherAfterCallback(({ result: _result, args: [props] }) => {
+    const result = _result;
+    const isBirthdayChild = BirthdayStore.isBirthdayChild(props.user);
+    if (!isBirthdayChild)
+        return result;
+    after(result.props, 'children', ({ result }) => {
+        const avatar = result.props.avatar;
+        if (!avatar)
+            return;
+        avatar.props.children = [
+            avatar.props.children,
+            React.createElement(Tooltip, { text: `It's ${props.user.globalName ?? props.user.username}'s birthday!` }, props => React.createElement("span", { ...props, className: "birthday-child-icon" }, "\uD83C\uDF82"))
+        ];
+    }, { name: 'MemberListItem Avatar children', once: true });
+});
+
 function afterMemberListItem() {
     if (!Settings.current.showGuildMembersInHeader)
         return;
-    after(MemberListItem, 'Z', (...args) => {
+    after(MemberListItem, 'Z', (data) => {
         if (Settings.current.showGuildMembersInHeader)
-            updateGuildHeader(...args);
+            updateGuildHeader(data);
+        if (Settings.current.showBirthdayOnNameTag)
+            applyBirthdayIconOnMemberListItem(data);
     }, { name: 'MemberListItem' });
+}
+
+const NameTag = Finder.findBySourceStrings(`nameAndDecorators`, `AvatarWithText`);
+
+const applyBirthdayIconOnNameTag = createPatcherAfterCallback(({ result, args: [props] }) => {
+    if (!props.avatar.props.src)
+        return result;
+    const USER_AVATAR_ID_REGEX = /\/avatars\/(\d+)\//;
+    const userId = props.avatar.props.src.match(USER_AVATAR_ID_REGEX)?.[1];
+    if (!userId)
+        return result;
+    const user = UserStore.getUser(userId);
+    if (!user)
+        return result;
+    const isBirthdayChild = BirthdayStore.isBirthdayChild(user);
+    if (!isBirthdayChild)
+        return result;
+    result.props.children[0].props.children = [
+        result.props.children[0].props.children,
+        React.createElement(Tooltip, { text: `It's ${user.globalName ?? user.username}'s birthday!` }, props => React.createElement("span", { ...props, className: "birthday-child-icon" }, "\uD83C\uDF82"))
+    ];
+});
+
+function afterNameTag() {
+    if (!Settings.current.showBirthdayOnNameTag)
+        return;
+    after(NameTag, 'render', (...args) => {
+        if (Settings.current.showBirthdayOnNameTag)
+            applyBirthdayIconOnNameTag(...args);
+    }, { name: 'NameTag' });
+}
+
+class SortableArray extends Array {
+    constructor(...items) {
+        super(...items);
+    }
+    orderBy(...comparators) {
+        const result = this.sort((a, b) => {
+            for (const comparator of comparators) {
+                const result = comparator(a, b);
+                if (result !== 0)
+                    return result;
+            }
+            return 0;
+        });
+        return new SortableArray(...result);
+    }
+    orderByDescending(...comparators) {
+        const result = this.orderBy(...comparators.map(comparator => (a, b) => -comparator(a, b)));
+        return new SortableArray(...result);
+    }
+    take(count) {
+        const result = this.slice(0, count);
+        return new SortableArray(...result);
+    }
+}
+
+const redefineQuickSwitcherProps = createPatcherAfterCallback(({ result, ...props }) => {
+    const { query } = result;
+    const log$1 = (...data) => log('[CustomizedQuickSwitcher]', ...data);
+    let { channels, guilds, users } = {
+        guilds: SortedGuildStore.guildIds.map(GuildStore.getGuild),
+        users: RelationshipStore.getFriendIDs().map(UserStore.getUser),
+        channels: SortedGuildStore.guildIds
+            .flatMap(ChannelStore.getChannelIds)
+            .map(ChannelStore.getChannel)
+            .filter(channel => [2 , 0 ].includes(channel.type))
+    };
+    log$1('Initial data', { channels, guilds, users });
+    guilds = guilds.filter(guild => guild.name.toLowerCase().includes(query.toLowerCase()));
+    users = new SortableArray(...users
+        .filter(user => [user.globalName, user.username]
+        .filter(Boolean)
+        .some(name => name.toLowerCase().includes(query.toLowerCase())))).orderBy((a, b) => (RelationshipStore.isFriend(a.id) && !RelationshipStore.isFriend(b.id)
+        ? -1
+        : RelationshipStore.isFriend(b.id) && !RelationshipStore.isFriend(a.id)
+            ? 1
+            : 0), (a, b) => a.globalName?.localeCompare(b.globalName) || a.username.localeCompare(b.username)).take(10);
+    const allChannels = channels
+        .filter(channel => channel.name.toLowerCase().includes(query.toLowerCase()));
+    channels = new SortableArray(...allChannels)
+        .orderBy((a, b) => a.name.localeCompare(b.name), (a, b) => guilds.indexOf(GuildStore.getGuild(a.guild_id)) - guilds.indexOf(GuildStore.getGuild(b.guild_id))).take(10);
+    log$1('Filtered data', { channels, guilds, users });
+    const isUserRequest = query.startsWith('@');
+    const isTextChannelRequest = query.startsWith('#');
+    const isVoiceChannelRequest = query.startsWith('!');
+    const isGuildRequest = query.startsWith('*');
+    if (isUserRequest) {
+        result.results = users.map((user, index) => ({
+            type: 'USER',
+            record: user,
+            comparator: user.username,
+            score: index + 1000
+        }));
+        return;
+    }
+    else if (isTextChannelRequest) {
+        result.results = Object.values(channels).filter(channel => channel.type === 0 ).map((channel, index) => ({
+            type: 'TEXT_CHANNEL',
+            record: channel,
+            comparator: channel.name,
+            score: index + 1000
+        }));
+        return;
+    }
+    else if (isVoiceChannelRequest) {
+        result.results = Object.values(channels).filter(channel => channel.type === 2 ).map((channel, index) => ({
+            type: 'VOICE_CHANNEL',
+            record: channel,
+            comparator: channel.name,
+            score: index + 1000
+        }));
+        return;
+    }
+    else if (isGuildRequest) {
+        result.results = Object.values(guilds).map((guild, index) => ({
+            type: 'GUILD',
+            record: guild,
+            comparator: guild.name,
+            score: index + 1000
+        }));
+        return;
+    }
+    const combined = [
+        ...users.map((user, index) => ({
+            type: 'USER',
+            record: user,
+            comparator: user.username,
+            score: index + 1000,
+            index
+        })),
+        ...channels.map((channel, index) => ({
+            type: channel.type === 0  ? 'TEXT_CHANNEL' : 'VOICE_CHANNEL',
+            record: channel,
+            comparator: channel.name,
+            score: index + 1000,
+            sortable: channel.name,
+            guildName: GuildStore.getGuild(channel.guild_id).name,
+            index
+        })),
+        ...guilds.map((guild, index) => ({
+            type: 'GUILD',
+            record: guild,
+            comparator: guild.name,
+            score: index + 1000,
+            sortable: guild.name,
+            index
+        }))
+    ].sort((a, b) => a.score - b.score);
+    log('CustomizedQuickSwitcher', {
+        query,
+        users,
+        channels,
+        guilds,
+        combined,
+    });
+    result.results = combined;
+});
+
+function afterQuickSwitcherStore_getProps() {
+    if (!Settings.current.betterQuickSwitcher)
+        return;
+    after(QuickSwitcherStore, 'getProps', (data) => {
+        if (Settings.current.betterQuickSwitcher)
+            redefineQuickSwitcherProps(data);
+    }, { name: 'QuickSwitcherStore.getProps()' });
 }
 
 const RolesListModule = demangle({
@@ -2954,7 +3571,7 @@ function prettyRoles() {
     });
 }
 
-function afterRolesList() {
+function afterRolesList$1() {
     if (!Settings.current.prettyRoles)
         return;
     after(RolesListModule, 'RolesList', () => {
@@ -2983,6 +3600,149 @@ function afterTextModule() {
         if (Settings.current.pronounsPageLinks)
             transformTextIntoLinks(data);
     }, { name: 'TextModule--Pronouns' });
+}
+
+const UserActivityStatus = Finder.findBySourceStrings("activity:", ".LISTENING", "textVariant", { defaultExport: false });
+
+var ActivityIndexes;
+(function (ActivityIndexes) {
+    ActivityIndexes[ActivityIndexes["PLAYING"] = 0] = "PLAYING";
+    ActivityIndexes[ActivityIndexes["STREAMING"] = 1] = "STREAMING";
+    ActivityIndexes[ActivityIndexes["LISTENING"] = 2] = "LISTENING";
+    ActivityIndexes[ActivityIndexes["WATCHING"] = 3] = "WATCHING";
+    ActivityIndexes[ActivityIndexes["CUSTOM"] = 4] = "CUSTOM";
+    ActivityIndexes[ActivityIndexes["COMPETING"] = 5] = "COMPETING";
+})(ActivityIndexes || (ActivityIndexes = {}));
+
+const expandActivityStatusString = createPatcherAfterCallback(({ result, args: [props] }) => {
+    if (props.activity.type !== ActivityIndexes.LISTENING)
+        return;
+    const { details: title, state: artistsString, } = props.activity;
+    const artists = StringUtils.join(artistsString.split(";"));
+    try {
+        const children = result.props.children[1].props.children;
+        children[1] = typeof children[1] !== 'object' ? children[1] : (React.createElement("span", null,
+            React.createElement("strong", null, title),
+            " by ",
+            React.createElement("strong", null, artists)));
+    }
+    catch (err) {
+        Logger.error(err, {
+            result, props, title, artists,
+        });
+    }
+});
+
+function afterRolesList() {
+    if (!Settings.current.expandActivityStatus)
+        return;
+    after(UserActivityStatus, 'Z', (data) => {
+        if (Settings.current.expandActivityStatus)
+            expandActivityStatusString(data);
+    });
+}
+
+const UserHeaderUsernameModule = bySource([".pronouns", "discriminatorClass"], { resolve: false });
+
+function Birthday(props) {
+    const { birthdate } = props;
+    const { hideTimestamp = false, hideIcon = false, timestampStyle = 'T' } = props;
+    const birthdateDate = useMemo(() => getBirthdate(birthdate), [birthdate]);
+    const BirthdateContent = () => (React.createElement("span", { className: "birthdate" },
+        React.createElement(TimestampComponent, { format: timestampStyle, unix: birthdateDate.getTime() / 1000 }),
+        ",",
+        React.createElement(TimestampComponent, { format: "R", unix: birthdateDate.getTime() / 1000 })));
+    const BirthdateComponent = (props = {}) => (React.createElement("div", { className: "birthday", ...props },
+        !hideIcon && React.createElement("span", { className: "birthday-icon" }, "\uD83C\uDF82"),
+        !hideTimestamp && React.createElement(BirthdateContent, null)));
+    return (hideTimestamp
+        ? React.createElement(Tooltip, { text: React.createElement(BirthdateContent, null), children: BirthdateComponent })
+        : React.createElement(BirthdateComponent, null));
+}
+
+function BirthdayContainer({ birthdate }) {
+    const settings = Settings.useSelector(state => ({
+        hideIcon: state.hideBirthdateIcon,
+        hideTimestamp: state.hideBirthdateTimestamp,
+        timestampStyle: state.birthdateTimestampStyle
+    }));
+    return React.createElement(Birthday, { birthdate: birthdate, ...settings });
+}
+
+const appendUserBirthday = createPatcherAfterCallback(({ result, args: [props] }) => {
+    const noteData = UserNoteStore.getNote(props.user.id);
+    if (!noteData?.note)
+        return result;
+    const { note } = noteData;
+    const match = note.match(BIRTHDAY_REGEX);
+    if (!match)
+        return result;
+    const [birthdate] = match;
+    if (BirthdayStore.current[props.user.id]?.toString() !== getBirthdate(birthdate).toString()) {
+        BirthdayStore.update({ [props.user.id]: getBirthdate(birthdate) });
+        log(`[BirthdayStore (appendUserBirthday)] Added birthday for ${props.user.id}`);
+    }
+    const children = result.props.children[1].props.children;
+    children.splice(children.length, 0, React.createElement(BirthdayContainer, { birthdate: birthdate }));
+});
+
+function Timezone(props) {
+    const { timezoneHour } = props;
+    const { hideTimestamp = false, hideIcon = false } = props;
+    const getTimezoneDate = useCallback(() => {
+        const date = new Date();
+        date.setHours(date.getHours() + timezoneHour);
+        return date;
+    }, [timezoneHour]);
+    const [timezoneDate, setTimezoneDate] = useState(getTimezoneDate);
+    const timezoneIcon = useMemo(() => {
+        if (hideIcon)
+            return null;
+        const clocks = ['🕛', '🕐', '🕑', '🕒', '🕓', '🕔', '🕕', '🕖', '🕗', '🕘', '🕙', '🕚'];
+        return clocks[(timezoneDate.getHours() % 12)];
+    }, [hideIcon, timezoneHour]);
+    useEffect(() => {
+        const interval = setInterval(() => setTimezoneDate(getTimezoneDate), 1000 * 60);
+        return () => clearInterval(interval);
+    }, []);
+    const TimezoneComponent = (props = {}) => (React.createElement("div", { className: "timezone", ...props },
+        !hideIcon && React.createElement("span", { className: "timezone-icon" }, timezoneIcon),
+        !hideTimestamp && React.createElement(TimestampComponent, { format: 't', unix: timezoneDate.getTime() / 1000 })));
+    return (hideTimestamp
+        ? React.createElement(Tooltip, { text: React.createElement(TimestampComponent, { format: 't', unix: timezoneDate.getTime() / 1000 }), children: TimezoneComponent })
+        : React.createElement(TimezoneComponent, null));
+}
+
+function TimezoneContainer({ timezoneHour }) {
+    const settings = Settings.useSelector(state => ({
+        hideIcon: state.hideTimezoneIcon,
+        hideTimestamp: state.hideTimezoneTimestamp
+    }));
+    return React.createElement(Timezone, { timezoneHour: timezoneHour, ...settings });
+}
+
+const appendUserTimezone = createPatcherAfterCallback(({ result, args: [props] }) => {
+    const noteData = UserNoteStore.getNote(props.user.id);
+    if (!noteData?.note)
+        return result;
+    const { note } = noteData;
+    const regex = /\[(\+|\-)(\d{1,2})\]/;
+    const match = note.match(regex);
+    if (!match)
+        return result;
+    const [, sign, hours] = match;
+    const timezone = parseInt(hours) * (sign === '+' ? 1 : -1);
+    const children = result.props.children[1].props.children;
+    children.splice(children.length, 0, React.createElement(TimezoneContainer, { timezoneHour: timezone }));
+});
+
+function afterUserHeaderUsername() {
+    after(UserHeaderUsernameModule, 'Z', data => {
+        if (Settings.current.showUserTimezone)
+            appendUserTimezone(data);
+        if (Settings.current.showUserBirthdate)
+            appendUserBirthday(data);
+    }, { name: 'UserHeaderUsernameModule' });
 }
 
 const UserProfileModalAboutMe = Finder.findBySourceStrings('look:"profile_modal"', 'lazy=true', { defaultExport: false });
@@ -3014,13 +3774,28 @@ function buildTextItem(id, label, action, props = {}) {
         ...props
     };
 }
+function buildSubMenu(id, label, items, props = {}) {
+    return {
+        type: 'submenu',
+        label,
+        items,
+        id,
+        action: () => { },
+        onClose: props.onClose ?? (() => { }),
+        ...props
+    };
+}
+function buildSubMenuElement(id, label, items, props = {}) {
+    return BdApi.ContextMenu.buildItem(buildSubMenu(id, label, items, props));
+}
 function buildTextItemElement(id, label, action, props = {}) {
     return BdApi.ContextMenu.buildItem(buildTextItem(id, label, action, props));
 }
 
-const patched$2 = function (menu, props) {
+const patched$3 = function (menu, props) {
     const options = menu.props.children;
-    const voiceOptions = options.find(option => (option.key.toLowerCase().includes('voice')
+    const voiceOptions = options.find(option => (option.key
+        && option.key.toLowerCase().includes('voice')
         && option.key.toLowerCase().includes('actions')));
     if (!voiceOptions)
         return;
@@ -3032,7 +3807,7 @@ function PatchChannelContextMenu() {
         return;
     PatchChannelContextMenu$1((menu, props) => {
         if (Settings.current.joinVoiceWithCamera)
-            patched$2(menu, props);
+            patched$3(menu, props);
     });
 }
 
@@ -3040,7 +3815,7 @@ function PatchGuildContextMenu$1(callback) {
     return BdApi.ContextMenu.patch('guild-context', callback);
 }
 
-const patched$1 = function (menu, props) {
+const patched$2 = function (menu, props) {
     if (!props.folderName)
         return;
     const isInBlockedFolder = Settings.current.folderNames.includes(props.folderName);
@@ -3058,7 +3833,7 @@ function PatchGuildContextMenu() {
         return;
     PatchGuildContextMenu$1((menu, props) => {
         if (Settings.current.autoCancelFriendRequests)
-            patched$1(menu, props);
+            patched$2(menu, props);
     });
 }
 
@@ -3091,6 +3866,43 @@ function afterRoleContextMenu() {
 
 function PatchUserContextMenu$1(callback) {
     return BdApi.ContextMenu.patch('user-context', callback);
+}
+
+function getGroupContaining(itemId, menu) {
+    const findItem = (menu) => {
+        if (!menu.props || !menu.props.children)
+            return null;
+        else if (!Array.isArray(menu.props.children))
+            return findItem(menu.props.children);
+        for (const child of menu.props.children.filter(child => child?.props)) {
+            if ('id' in child.props && child.props.id === itemId) {
+                return menu.props.children;
+            }
+            const found = findItem(child);
+            if (found)
+                return found;
+        }
+        return null;
+    };
+    return findItem(menu);
+}
+
+const patched$1 = (menu, props) => {
+    const profile = UserProfileStore.getUserProfile(props.user.id);
+    if (!profile)
+        return;
+    const modifyBadges = getGroupContaining('modify-badges', menu);
+    if (modifyBadges)
+        return;
+    const userActions = getGroupContaining('note', menu);
+    userActions.push(buildSubMenuElement('modify-badges', 'Modify Badges', profile.badges.map((badge, id) => {
+        return buildTextItem(badge.id, formatBadgeId(badge.id), () => {
+            Logger.log('Badge', badge);
+        });
+    })));
+};
+function formatBadgeId(id) {
+    return id.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }
 
 const DEADLY_NINJA_ID = '405763731079823380';
@@ -3146,7 +3958,29 @@ function PatchUserContextMenu() {
     PatchUserContextMenu$1((menu, props) => {
         if (Settings.current.addToDungeon)
             patched(menu, props);
+        patched$1(menu, props);
     });
+}
+
+function extendSortedGuildStore() {
+    const updateGuildIds = () => {
+        SortedGuildStore.guildIds = SortedGuildStore.getGuildFolders()
+            .map(folder => folder.guildIds)
+            .flat();
+    };
+    const actionDependencies = [
+        'GUILD_CREATE', 'GUILD_DELETE',
+        'GUILD_MOVE_BY_ID',
+        'GUILD_FOLDER_CREATE_LOCAL', 'GUILD_FOLDER_EDIT_LOCAL', 'GUILD_FOLDER_DELETE_LOCAL',
+    ];
+    for (const action of actionDependencies) {
+        ActionsEmitter.on(action, updateGuildIds);
+    }
+    updateGuildIds();
+}
+
+function registerExtensions() {
+    extendSortedGuildStore();
 }
 
 const setManagerContext = createPatcherCallback$1(({ args, original }) => {
@@ -3166,17 +4000,46 @@ function insteadRolesList() {
 }
 
 function Patch() {
+    registerExtensions();
     PatchChannelContextMenu();
     PatchGuildContextMenu();
     afterRoleContextMenu();
     PatchUserContextMenu();
     afterBadgeList();
     afterChannelItem();
+    afterGlobalNavigation();
     afterMemberListItem();
-    afterRolesList();
+    afterNameTag();
+    afterQuickSwitcherStore_getProps();
+    afterRolesList$1();
     afterTextModule();
+    afterRolesList();
+    afterUserHeaderUsername();
     afterUserProfileModalAboutMe();
     insteadRolesList();
+}
+
+var SlashCommandOptionType;
+(function (SlashCommandOptionType) {
+    SlashCommandOptionType[SlashCommandOptionType["SUB_COMMAND"] = 1] = "SUB_COMMAND";
+    SlashCommandOptionType[SlashCommandOptionType["SUB_COMMAND_GROUP"] = 2] = "SUB_COMMAND_GROUP";
+    SlashCommandOptionType[SlashCommandOptionType["STRING"] = 3] = "STRING";
+    SlashCommandOptionType[SlashCommandOptionType["INTEGER"] = 4] = "INTEGER";
+    SlashCommandOptionType[SlashCommandOptionType["BOOLEAN"] = 5] = "BOOLEAN";
+    SlashCommandOptionType[SlashCommandOptionType["USER"] = 6] = "USER";
+    SlashCommandOptionType[SlashCommandOptionType["CHANNEL"] = 7] = "CHANNEL";
+    SlashCommandOptionType[SlashCommandOptionType["ROLE"] = 8] = "ROLE";
+})(SlashCommandOptionType || (SlashCommandOptionType = {}));
+function createSlashCommand(options) {
+    const pluginName = getMeta().name;
+    return BdApi.Commands.register(pluginName, {
+        id: `${pluginName}-${options.name}`,
+        ...options,
+    });
+}
+function deleteAllSlashCommands() {
+    const pluginName = getMeta().name;
+    BdApi.Commands.unregisterAll(pluginName);
 }
 
 const index = buildPlugin({
@@ -3184,13 +4047,20 @@ const index = buildPlugin({
         Features();
         listenToActions();
         Patch();
+        createSlashCommand({
+            name: 'show-discord-badges',
+            execute: () => ({
+                content: JSON.stringify(DiscordBadgeStore.current, null, 2)
+            })
+        });
     },
     stop() {
         ActionsEmitter.removeAllListeners();
+        deleteAllSlashCommands();
     },
     styles,
     Settings,
-    SettingsPanel
+    SettingsPanel,
 });
 
 module.exports = index;

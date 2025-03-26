@@ -6,7 +6,7 @@
   }
 
   @include className('channelTextArea') {
-    --custom-chat-input-margin-bottom: 8px;
+    --custom-chat-input-margin-bottom: 24px;
   }
 
   [data-list-id=guildsnav] {
@@ -64,5 +64,9 @@
   &:has(.danho-ui-rework-fix) {
     --custom-channel-textarea-text-area-height: 2.75rem;
     --custom-rtc-account-height: 2.5rem;
+
+    @include className('panels', section) {
+      bottom: calc(var(--space-xs) * 1.5);
+    }
   }
 }
