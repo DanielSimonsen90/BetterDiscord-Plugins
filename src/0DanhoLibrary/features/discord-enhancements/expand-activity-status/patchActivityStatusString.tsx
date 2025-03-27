@@ -16,7 +16,9 @@ export default createPatcherAfterCallback<UserActivityStatus>(({ result, args: [
   const artists = StringUtils.join(artistsString.split(";"));
 
   try {
-    const children = result.props.children[1].props.children;
+    const children = result.props.children[1] 
+      ? result.props.children[1].props.children 
+      : result.props.children;
     children[1] = typeof children[1] !== 'object' ? children[1] : (
       <span>
         <strong>{title}</strong> by <strong>{artists}</strong>

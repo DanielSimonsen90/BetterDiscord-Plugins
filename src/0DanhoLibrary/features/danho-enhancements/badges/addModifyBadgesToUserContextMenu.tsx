@@ -11,7 +11,7 @@ const patched: Callback = (menu, props) => {
   const modifyBadges = getGroupContaining('modify-badges', menu);
   if (modifyBadges) return;
 
-  const userActions = getGroupContaining('note', menu);
+  const userActions = getGroupContaining('user-profile', menu);
   userActions.push(buildSubMenuElement('modify-badges', 'Modify Badges', profile.badges.map((badge, id) => {
     return buildTextItem(badge.id, formatBadgeId(badge.id), () => {
       Logger.log('Badge', badge);

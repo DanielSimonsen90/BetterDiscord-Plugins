@@ -58,6 +58,10 @@
       }
     }
   }
+
+  @include className('button') {
+    border-radius: 3px;
+  }
 }
 
 @include className('visual-refresh', 'html') {
