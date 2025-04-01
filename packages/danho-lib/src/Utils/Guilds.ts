@@ -89,13 +89,7 @@ export const GuildUtils: CompiledGuildUtils = {
     return Object.values(GuildStore.getGuilds()).find(guild => guild.name === name) || null;
   },
   getGuildRoleWithoutGuildId(roleId) {
-    const allGuildsRoles = GuildStore.getAllGuildsRoles();
-    for (const guildId in allGuildsRoles) {
-      if (allGuildsRoles[guildId][roleId]) {
-        return allGuildsRoles[guildId][roleId];
-      }
-    }
-    return null;
+    return GuildStore.getRole(SelectedGuildStore.getGuildId(), roleId);
   },
   getMemberAvatar(memberId, guildId, size) {
     const avatar = GuildMemberStore.getMember(guildId, memberId).avatar;

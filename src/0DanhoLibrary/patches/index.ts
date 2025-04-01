@@ -8,7 +8,6 @@ import afterRolesList from "./after/RolesList";
 import afterTextModule from "./after/TextModule";
 import afterUserActivityStatus from "./after/UserActivityStatus";
 import afterUserHeaderUsername from './after/UserHeaderUsername'
-import afterUserProfileModalAboutMe from "./after/UserProfileModalAboutMe";
 
 import PatchChannelContextMenu from "./context-menus/ChannelContextMenu";
 import PatchGuildContextMenu from "./context-menus/GuildContextMenu";
@@ -37,7 +36,6 @@ export default function Patch() {
   afterTextModule();
   afterUserActivityStatus();
   afterUserHeaderUsername();
-  afterUserProfileModalAboutMe();
   
   insteadRolesList();
 }

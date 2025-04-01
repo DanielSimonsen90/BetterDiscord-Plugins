@@ -186,7 +186,6 @@ const HiddenChannelStore = new class HiddenChannelStore extends DiumStore<Hidden
       }
     }
 
-    console.log('Category does not render');
     return false;
   }
   // #endregion

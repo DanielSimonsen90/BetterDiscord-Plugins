@@ -22,7 +22,7 @@ export type ActivityTypes = [
     application_id: string,
     assets: Assets,
     details: string,
-    timestamps: { start: TimestampString; },
+    timestamps?: { start: TimestampString; },
   },
   Streaming: BaseActivityType<1> & {
     assets: Assets,
