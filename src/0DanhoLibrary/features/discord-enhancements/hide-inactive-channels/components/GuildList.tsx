@@ -59,6 +59,10 @@ export default function GuildList(ListClass: typeof React.PureComponent<any, any
       this.renderSection = this.patchedRenderSection.bind(this);
 
       this.handleListScroll = this.onScroll.bind(this);
+      HiddenChannelStore.addListener(state => {
+        const guild = state.guilds[props.guild.id];
+        if (guild) this.forceUpdate();
+      })
     }
 
     declare public _list: {
