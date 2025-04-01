@@ -1,6 +1,7 @@
 import { MutualFriend, MutualGuild, VoiceStateUpdate } from "@stores";
 import { Snowflake, GuildMember, Message, User, Activity, UserStatus, ConnectedAccount, DisplayProfile } from "@discord/types";
 import { UserProfileBadge } from "@discord/components";
+import { SpeakingFlags } from "@discord/types/channel/types";
 
 type ActionProps = {
   CHANNEL_SELECT: {
@@ -56,7 +57,12 @@ type ActionProps = {
       user: User;
     },
     shouldNotify: boolean;
-  }
+  };
+  SPEAKING: {
+    context: 'default';
+    userId: Snowflake;
+    speakingFlags: SpeakingFlags
+  };
   USER_PROFILE_FETCH_SUCCESS: {
     badges: Array<UserProfileBadge>;
     connected_accounts: Array<ConnectedAccount>

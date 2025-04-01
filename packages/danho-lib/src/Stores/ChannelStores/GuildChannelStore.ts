@@ -1,6 +1,6 @@
 // import { Channel, Guild, Snowflake } from "../Discord";
 import { SortableArray } from '@danho-lib/Utils/Array';
-import type { Channel, Guild, Snowflake } from '@discord/types';
+import type { Channel, Guild, Snowflake, SortedChannel } from '@discord/types';
 import { ChannelTypes } from '@discord/types/channel/types';
 import { Finder } from "@dium/api";
 import { Store } from "@dium/modules/flux";
@@ -22,10 +22,10 @@ export interface GuildChannelStore extends Store {
 }
 
 export interface ExtendedGuildChannelStore extends GuildChannelStore {
-  getSortedChannels(guildId: Snowflake): Array<Channel>;
+  getSortedChannels(guildId: Snowflake): Array<SortedChannel>;
 }
 
-export const GuildChannelStore: GuildChannelStore = Finder.byKeys(["getTextChannelNameDisambiguations"]);
+export const GuildChannelStore: ExtendedGuildChannelStore = Finder.byKeys(["getTextChannelNameDisambiguations"]);
 export default GuildChannelStore;
 
 type StoredChannel = {

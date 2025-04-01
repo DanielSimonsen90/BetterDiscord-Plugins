@@ -1,3 +1,6 @@
+import Finder from "@danho-lib/dium/api/finder";
+import { Logger } from "@danho-lib/dium/api/logger";
+
 export function pick<From, Properties extends keyof From>(from: From, ...properties: Properties[]): Pick<From, Properties> {
   if (!from) throw new Error("Cannot pick from undefined!");
 
@@ -49,9 +52,36 @@ export function combine<T extends Record<string, any | undefined>>(...objects: A
   }, {} as T) as T;
 }
 
+export function combineModules<T extends Record<string, any | undefined>>(...modules: Array<Array<string>>): T {
+  return modules.reduce((combined, sourceStrings) => {
+    const module = Finder.byKeys(sourceStrings);
+    if (!module) {
+      Logger.warn(`[ObjectUtils.combineModules] Module not found for source strings: ${sourceStrings.join(', ')}`);
+      return combined;
+    }
+
+    for (const key in module) {
+      let prop = key;
+      if (key in combined) {
+        const duplicateIndex = Object.keys(combined).filter(k => k.startsWith(`${key}--`)).length;
+        prop = `${key}--${duplicateIndex}`;
+      }
+      
+      const element = module[key];
+      if (typeof element === 'object' && !Array.isArray(element)) {
+        combined[prop] = combine(combined[prop], element) as any;
+      } else if (element !== undefined && element !== null && element !== '') {
+        combined[prop] = element;
+      }
+    }
+
+    return combined;
+  }, {}) as T;
+}
+
 export const ObjectUtils = {
   pick, exclude,
-  difference, combine,
+  difference, combine, combineModules,
 }
 
 export default ObjectUtils;

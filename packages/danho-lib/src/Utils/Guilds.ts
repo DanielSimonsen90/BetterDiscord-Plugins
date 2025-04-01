@@ -15,6 +15,9 @@ import { GuildMember } from "@discord/types/guild/member";
 
 import { BetterOmit, FilterStore } from "./types";
 import { Snowflake } from "@discord/types/base";
+import Finder from '@danho-lib/dium/api/finder';
+
+const useGuildFeatures = Finder.findBySourceStrings("hasFeature", "GUILD_SCHEDULED_EVENTS") as (guild: Guild) => Array<string>;
 
 type CompiledGuildUtils = BetterOmit<
   & FilterStore<GuildStore>
@@ -26,7 +29,10 @@ type CompiledGuildUtils = BetterOmit<
 
   & typeof GuildActions
   , '__getLocalVars' | 'getState'> & {
+    useGuildFeatures(guild: Guild): Array<string>;
+  } & {
     get current(): Guild | null;
+    get currentId(): Snowflake | null;
     get me(): GuildMember | null;
 
     meFor(guildId: Snowflake): GuildMember;
@@ -35,6 +41,7 @@ type CompiledGuildUtils = BetterOmit<
     getGuildByName(name: string): Guild | null;
     getGuildRoleWithoutGuildId(roleId: Snowflake): Role | null;
     getEmojiIcon(emojiId: Snowflake, size?: number): string;
+    getMemberAvatar(memberId: Snowflake, guildId: Snowflake, size?: number): string;
   };
 
 export const GuildUtils: CompiledGuildUtils = {
@@ -47,9 +54,17 @@ export const GuildUtils: CompiledGuildUtils = {
 
   ...GuildActions,
 
+  useGuildFeatures(guild) {
+    return useGuildFeatures(guild) || [];
+  },
+
   get current() {
     return GuildStore.getGuild(SelectedGuildStore.getGuildId());
   },
+  get currentId() {
+    return SelectedGuildStore.getGuildId();
+  },
+
   get me() {
     return GuildMemberStore.getMember(SelectedGuildStore.getGuildId(), UserStore.getCurrentUser().id) as any as GuildMember;
   },
@@ -81,5 +96,10 @@ export const GuildUtils: CompiledGuildUtils = {
       }
     }
     return null;
+  },
+  getMemberAvatar(memberId, guildId, size) {
+    const avatar = GuildMemberStore.getMember(guildId, memberId).avatar;
+    if (avatar) return `https://cdn.discordapp.com/guilds/${guildId}/users/${memberId}/avatars/${avatar}.webp?size=${size}`;
+    return 
   },
 };

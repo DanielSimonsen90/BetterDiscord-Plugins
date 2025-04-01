@@ -1,9 +1,9 @@
-import { DiumStore } from "@danho-lib/Stores";
+import { DanhoStores, DiumStore } from "@stores";
 import { Snowflake, User } from "@discord/types";
 import { Logger } from "@dium";
 import { UserStore } from "@dium/modules";
 
-export default new class BirthdayStore extends DiumStore<Record<Snowflake, Date>> {
+const BirthdayStore = new class BirthdayStore extends DiumStore<Record<Snowflake, string>> {
   constructor() {
     super({}, 'BirthdayStore');
   }
@@ -24,3 +24,7 @@ export default new class BirthdayStore extends DiumStore<Record<Snowflake, Date>
     return sameDay && sameMonth;
   }
 }
+
+DanhoStores.register(BirthdayStore);
+
+export default BirthdayStore;

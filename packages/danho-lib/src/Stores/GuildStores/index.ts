@@ -5,3 +5,4 @@ export * from './GuildMemberStore';
 export * from './GuildStore';
 export * from './SelectedGuildStore';
 export * from './SortedGuildStore';
+export * from './UserGuildSettingsStore';

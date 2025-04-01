@@ -1,8 +1,12 @@
 import { Snowflake } from "@dium/modules";
 import type { User } from "../user";
 
-export type GuildMember = Pick<User, 'avatar' | 'flags'> & {
-  avatarDecoration: undefined,
+export type GuildMember = Pick<User, 'flags'> & {
+  avatar: string | null,
+  avatarDecoration: undefined | {
+    asset: string;
+    skuId: string;
+  }
   colorRoleId: Snowflake,
   colorString: string,
   communicatinDisabledUntil: null,

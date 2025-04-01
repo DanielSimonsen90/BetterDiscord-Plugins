@@ -45,6 +45,9 @@ export const DiscordEnhancements = {
   betterQuickSwitcher: true,
 
   expandActivityStatus: true,
+
+  hideChannelUntilActivity: true,
+  keepChannelVisibleAfterActivityTimeoutMin: 5,
 }
 
 export const DanhoEnhancements = {
@@ -114,6 +117,9 @@ export const DiscordEnhancementsTitles: Record<keyof typeof DiscordEnhancements,
   betterQuickSwitcher: `Better quickswitcher prioritizing friends and top guilds`,
 
   expandActivityStatus: `Expand activity status to show more information i.e. what a user is listening to`,
+
+  hideChannelUntilActivity: `Hide channels from your channel list until they have activity`,
+  keepChannelVisibleAfterActivityTimeoutMin: `Keep recently active hidden channel visible for x minutes`,
 };
 
 export const DanhoEnhancementsTitles: Record<keyof typeof DanhoEnhancements, string> = {

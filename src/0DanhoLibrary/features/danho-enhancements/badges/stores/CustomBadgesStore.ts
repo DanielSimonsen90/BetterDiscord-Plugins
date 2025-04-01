@@ -1,9 +1,9 @@
-import { createDiumStore } from "@stores";
+import { createDiumStore, DanhoStores } from "@stores";
+import { BadgeTypes } from "@discord/components";
 import { CustomBadgeData } from "../CustomBadge";
 import { USER_TAGS } from "src/0DanhoLibrary/constants";
-import { BadgeTypes } from "@discord/components";
 
-export default createDiumStore<Record<string, CustomBadgeData>>({
+const CustomBadgesStore = createDiumStore<Record<string, CustomBadgeData>>({
   developer: {
     name: 'Plugin Developer',
     iconUrl: 'https://i.imgur.com/f5MDiAd.png',
@@ -31,3 +31,7 @@ export default createDiumStore<Record<string, CustomBadgeData>>({
     position: 1
   }
 }, 'CustomBadges');
+
+DanhoStores.register(CustomBadgesStore);
+
+export default CustomBadgesStore;

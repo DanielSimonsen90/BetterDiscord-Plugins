@@ -19,7 +19,7 @@ export default createPatcherAfterCallback<UserHeaderUsernameModule['Z']>(({ resu
   const [birthdate] = match;
   
   if (BirthdayStore.current[props.user.id]?.toString() !== getBirthdate(birthdate).toString()) {
-    BirthdayStore.update({ [props.user.id]: getBirthdate(birthdate) });
+    BirthdayStore.update({ [props.user.id]: getBirthdate(birthdate).toString() });
     Logger.log(`[BirthdayStore (appendUserBirthday)] Added birthday for ${props.user.id}`);
   }
 

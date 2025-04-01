@@ -13,6 +13,7 @@ export default createPatcherAfterCallback<UserActivityStatus>(({ result, args: [
     state: artistsString,
   } = props.activity;
 
+  if (!title || !artistsString) return; // Bots can use "listening" too, but they don't have a title or artists.
   const artists = StringUtils.join(artistsString.split(";"));
 
   try {

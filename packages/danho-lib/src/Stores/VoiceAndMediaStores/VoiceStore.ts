@@ -13,7 +13,7 @@ export interface VoiceStore extends Store {
   getUserVoiceChannelId(guildId: Snowflake, userId: Snowflake): Snowflake;
   getVideoVoiceStatesForChannel(channelId: Snowflake): GuildVoiceState | {};
   getVoiceState(guildId: Snowflake, userId: Snowflake): GuildVoiceState;
-  getVoiceStateForChannel(channelId: Snowflake, userId?: Snowflake): GuildVoiceState;
+  getVoiceStateForChannel(channelId: Snowflake, userId?: Snowflake): GuildVoiceState | undefined;
   getVoiceStateForSession(userId: Snowflake, sessionId?: string): VoiceState;
   getVoiceStateForUser(userId: Snowflake): VoiceState | undefined;
   /** @default me */
@@ -23,8 +23,18 @@ export interface VoiceStore extends Store {
   isCurrentClientInVoiceChannel(): boolean;
   isInChannel(channelId: Snowflake, userId?: Snowflake): boolean;
 }
-export const VoiceStore: VoiceStore = Finder.byKeys(["getVoiceStateForUser"]);
+
+interface VoiceStoreExtension extends VoiceStore {
+  getVoiceStateArrayForChannel(channelId: Snowflake): VoiceState[];
+}
+
+export const VoiceStore: VoiceStoreExtension = Finder.byKeys(["getVoiceStateForUser"]);
 export default VoiceStore;
+
+VoiceStore.getVoiceStateArrayForChannel = (function (this: VoiceStore, channelId: Snowflake) {
+  const voiceStates = this.getVoiceStatesForChannel(channelId);
+  return Object.values(voiceStates);
+}).bind(VoiceStore);
 
 export type VoiceState = {
   channelId: Snowflake;

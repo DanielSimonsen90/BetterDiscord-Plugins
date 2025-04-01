@@ -21,5 +21,5 @@ export type UserActivityStatus = JSX.BD.FC<{
   ];
 }>;
 
-export const UserActivityStatus: Record<'Z', UserActivityStatus> = Finder.findBySourceStrings("activity:", ".LISTENING", "textVariant", { defaultExport: false });
+export const UserActivityStatus: Record<'Z', UserActivityStatus> = Finder.findBySourceStrings("PresenceActivityStatus", "textVariant", { defaultExport: false });
 export default UserActivityStatus;

@@ -4,7 +4,7 @@ import { buildTextItemElement } from "@danho-lib/ContextMenus/Builder";
 import { Settings } from 'src/0DanhoLibrary/Settings';
 
 const patched: Callback = function (menu, props) {
-  if (!props.folderName) return;
+  if (!('folderName' in props)) return;
   const isInBlockedFolder = Settings.current.folderNames.includes(props.folderName);
 
   menu.props.children.push(

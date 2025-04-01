@@ -493,6 +493,127 @@ function getElementFromReactInstance(instance, allowMultiple = false) {
         document.querySelector(selector.toString());
 }
 
+const debugLog = (...data) => getMeta().development ? log(...data) : undefined;
+
+class DiumStore {
+    constructor(defaults, dataKey, onLoad) {
+        this.defaults = defaults;
+        this.dataKey = dataKey;
+        this.onLoad = onLoad;
+        this.listeners = new Set();
+        this.update = (item, replace = false) => {
+            const current = replace ? {} : this.current;
+            this.current = typeof item === "function"
+                ? ({ ...current, ...item(this.current) })
+                : ({ ...current, ...item });
+            this._dispatch(true);
+        };
+        this.addReactChangeListener = this.addListener;
+        this.removeReactChangeListener = this.removeListener;
+    }
+    load() {
+        this.current = { ...this.defaults, ...load(this.dataKey) };
+        this.onLoad?.();
+        this._dispatch(false);
+    }
+    _dispatch(save$1) {
+        for (const listener of this.listeners) {
+            listener(this.current);
+        }
+        if (save$1) {
+            save(this.dataKey, this.current);
+        }
+    }
+    reset() {
+        this.current = { ...this.defaults };
+        this._dispatch(true);
+    }
+    delete(...keys) {
+        for (const key of keys) {
+            delete this.current[key];
+        }
+        this._dispatch(true);
+    }
+    useCurrent() {
+        return useStateFromStores([this], () => this.current, undefined, () => false);
+    }
+    useSelector(selector, deps, compare) {
+        return useStateFromStores([this], () => selector(this.current), deps, compare);
+    }
+    useState() {
+        return useStateFromStores([this], () => [
+            this.current,
+            this.update
+        ]);
+    }
+    useStateWithDefaults() {
+        return useStateFromStores([this], () => [
+            this.current,
+            this.defaults,
+            this.update
+        ]);
+    }
+    useListener(listener, deps) {
+        React.useEffect(() => {
+            this.addListener(listener);
+            return () => this.removeListener(listener);
+        }, deps ?? [listener]);
+    }
+    addListener(listener) {
+        this.listeners.add(listener);
+        return listener;
+    }
+    removeListener(listener) {
+        this.listeners.delete(listener);
+    }
+    removeAllListeners() {
+        this.listeners.clear();
+    }
+}
+const createDiumStore = (defaults, dataKey, onLoad) => new DiumStore(defaults, dataKey, onLoad);
+
+function createProperty(options) {
+    const optionsCompiled = typeof options === 'object' ? options : { defaultValue: options };
+    const { defaultValue, beforeGet, beforeSet, afterSet } = optionsCompiled;
+    let value = defaultValue;
+    function get() {
+        return beforeGet?.(value) ?? value;
+    }
+    function set(newValue) {
+        value = beforeSet?.(newValue, false) ?? newValue;
+        afterSet?.(value, false);
+    }
+    function nullableSet(newValue) {
+        if (value === null || value === undefined)
+            return set(newValue);
+    }
+    function reset() {
+        value = defaultValue;
+        afterSet?.(defaultValue, true);
+    }
+    function hasNoValue() {
+        return value === null && value === undefined;
+    }
+    return { get, set, reset, nullableSet, hasNoValue };
+}
+
+function join(args, separator = ',', includeAnd = true) {
+    const validArgs = args?.filter(arg => arg !== undefined && arg !== null && arg !== '');
+    if (!validArgs || validArgs.length === 0)
+        return '';
+    if (validArgs.length === 1)
+        return validArgs.shift();
+    const lastArg = validArgs.pop();
+    const combinedArgs = validArgs.join(separator);
+    return `${combinedArgs}${includeAnd ? ' & ' : ''}${lastArg}`;
+}
+function kebabCaseFromCamelCase(str) {
+    return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+}
+const StringUtils = {
+    join, kebabCaseFromCamelCase
+};
+
 function $(selector, single = true) {
     if (single) {
         const dq = new DQuery(selector);
@@ -557,7 +678,7 @@ class DQuery {
         }
     }
     setStyleProperty(key, value) {
-        key = key.toString();
+        key = StringUtils.kebabCaseFromCamelCase(key.toString());
         const style = this.attr('style') ?? '';
         if (!style.includes(key))
             return this.attr('style', `${this.attr('style') ?? ''}${key}: ${value};`, false);
@@ -911,110 +1032,6 @@ function removeAllInjections() {
 const ChatFormSelector = "[class*=chatContent] form div:has(> [class*=textAreaSlate])";
 const ChatSubmitButton = `button[aria-label="Send Message"]`;
 const WPMCountId = 'wpm-count';
-
-const debugLog = (...data) => getMeta().development ? log(...data) : undefined;
-
-class DiumStore {
-    constructor(defaults, dataKey, onLoad) {
-        this.defaults = defaults;
-        this.dataKey = dataKey;
-        this.onLoad = onLoad;
-        this.listeners = new Set();
-        this.update = (item, replace = false) => {
-            const current = replace ? {} : this.current;
-            this.current = typeof item === "function"
-                ? ({ ...current, ...item(this.current) })
-                : ({ ...current, ...item });
-            this._dispatch(true);
-        };
-        this.addReactChangeListener = this.addListener;
-        this.removeReactChangeListener = this.removeListener;
-    }
-    load() {
-        this.current = { ...this.defaults, ...load(this.dataKey) };
-        this.onLoad?.();
-        this._dispatch(false);
-    }
-    _dispatch(save$1) {
-        for (const listener of this.listeners) {
-            listener(this.current);
-        }
-        if (save$1) {
-            save(this.dataKey, this.current);
-        }
-    }
-    reset() {
-        this.current = { ...this.defaults };
-        this._dispatch(true);
-    }
-    delete(...keys) {
-        for (const key of keys) {
-            delete this.current[key];
-        }
-        this._dispatch(true);
-    }
-    useCurrent() {
-        return useStateFromStores([this], () => this.current, undefined, () => false);
-    }
-    useSelector(selector, deps, compare) {
-        return useStateFromStores([this], () => selector(this.current), deps, compare);
-    }
-    useState() {
-        return useStateFromStores([this], () => [
-            this.current,
-            this.update
-        ]);
-    }
-    useStateWithDefaults() {
-        return useStateFromStores([this], () => [
-            this.current,
-            this.defaults,
-            this.update
-        ]);
-    }
-    useListener(listener, deps) {
-        React.useEffect(() => {
-            this.addListener(listener);
-            return () => this.removeListener(listener);
-        }, deps ?? [listener]);
-    }
-    addListener(listener) {
-        this.listeners.add(listener);
-        return listener;
-    }
-    removeListener(listener) {
-        this.listeners.delete(listener);
-    }
-    removeAllListeners() {
-        this.listeners.clear();
-    }
-}
-const createDiumStore = (defaults, dataKey, onLoad) => new DiumStore(defaults, dataKey, onLoad);
-
-function createProperty(options) {
-    const optionsCompiled = typeof options === 'object' ? options : { defaultValue: options };
-    const { defaultValue, beforeGet, beforeSet, afterSet } = optionsCompiled;
-    let value = defaultValue;
-    function get() {
-        return beforeGet?.(value) ?? value;
-    }
-    function set(newValue) {
-        value = beforeSet?.(newValue, false) ?? newValue;
-        afterSet?.(value, false);
-    }
-    function nullableSet(newValue) {
-        if (value === null || value === undefined)
-            return set(newValue);
-    }
-    function reset() {
-        value = defaultValue;
-        afterSet?.(defaultValue, true);
-    }
-    function hasNoValue() {
-        return value === null && value === undefined;
-    }
-    return { get, set, reset, nullableSet, hasNoValue };
-}
 
 function formatDate(date) {
     return date.toLocaleDateString('en-GB');

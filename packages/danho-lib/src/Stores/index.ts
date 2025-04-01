@@ -1,5 +1,6 @@
 import Finder from '@danho-lib/dium/api/finder';
 import { Store } from '@dium/modules/flux';
+import { DiumStore } from './DiumStore';
 
 export * from './AppStores';
 export * from './ChannelStores';
@@ -47,4 +48,10 @@ export function findStore(storeName: string, allowMultiple = false) {
       Finder.byName(store.name) as { getName(): string; }
       ?? new class InvalidStore { node = store; getName() { return store.name; } }
     )[0];
+}
+
+export const DanhoStores = new class DanhoStores {
+  public register(store: DiumStore<any>) {
+    this[store.dataKey] = store;
+  }
 }

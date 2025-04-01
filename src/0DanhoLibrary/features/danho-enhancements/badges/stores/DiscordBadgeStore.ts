@@ -1,14 +1,12 @@
-import { ActionsEmitter } from "@danho-lib/Actions";
-import createActionCallback from "@danho-lib/Actions/CreateActionCallback";
-import { DiumStore } from "@danho-lib/Stores";
+import { ActionsEmitter, createActionCallback } from "@actions";
+import { DanhoStores, DiumStore } from "@stores";
 import { UserProfileBadge } from "@discord/components";
-import { Logger } from "@dium";
 
 type State = {
   [badgeId: string]: UserProfileBadge;
 };
 
-export default new class DiscordBadgeStore extends DiumStore<State> {
+const DiscordBadgesStore = new class DiscordBadgeStore extends DiumStore<State> {
   constructor() {
     super({}, 'DiscordBadgeStore', () => {
       ActionsEmitter.on('USER_PROFILE_FETCH_SUCCESS', this.onUserProfileFetchSuccess.bind(this));
@@ -30,3 +28,7 @@ export default new class DiscordBadgeStore extends DiumStore<State> {
       }, {} as State));
     });
 };
+
+DanhoStores.register(DiscordBadgesStore);
+
+export default DiscordBadgesStore;

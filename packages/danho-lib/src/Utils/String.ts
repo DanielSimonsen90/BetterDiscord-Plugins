@@ -8,8 +8,12 @@ export function join(args?: Array<string | undefined>, separator = ',', includeA
   return `${combinedArgs}${includeAnd ? ' & ' : ''}${lastArg}`;
 }
 
+export function kebabCaseFromCamelCase(str: string): string {
+  return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+}
+
 export const StringUtils = {
-  join,
+  join, kebabCaseFromCamelCase
 }
 
 export default StringUtils;

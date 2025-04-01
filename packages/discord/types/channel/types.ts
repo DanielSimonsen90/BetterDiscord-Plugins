@@ -13,3 +13,8 @@ export const enum ChannelTypes {
   GuildDirectory = 14,
   GuildForum = 15
 }
+
+export const enum SpeakingFlags {
+  SILENT = 0,
+  SPEAKING = 1,
+}

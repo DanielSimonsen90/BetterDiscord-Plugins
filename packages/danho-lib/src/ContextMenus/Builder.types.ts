@@ -44,7 +44,15 @@ export type RenderedMenuItem<id, label, action = (() => void)> = JSX.BD.Rendered
   action: action,
   id: id,
   label: label,
+  checked?: undefined | boolean,
 }>;
+
+export type RenderedMenuItemWithGroup<id, label, groupName, action = (() => void)> = JSX.BD.Rendered<{
+  action: action,
+  group: groupName,
+  id: id,
+  label: label,
+}>
 
 export type RenderedMenuItemChildren<id, label, children> = JSX.BD.Rendered<{
   children: children,

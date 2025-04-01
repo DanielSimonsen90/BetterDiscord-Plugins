@@ -7,6 +7,13 @@ export * from './Net';
 export * from './Object';
 export * from './String';
 
+import { ChannelUtils } from './Channels';
+import { ClassNamesUtils } from "./ClassNames";
+import { GuildUtils } from './Guilds';
+import { UserUtils } from './Users'
+import { StringUtils } from './String';
+import { ObjectUtils } from './Object';
+
 export function findNodeByIncludingClassName<NodeType = Element>(className: string, node = document.body): NodeType | null {
   return node.querySelector(`[class*="${className}"]`) as any;
 }
@@ -44,7 +51,10 @@ export const Utils = {
   get currentGuild() { return currentGuild(); },
   get currentChannel() { return currentChannel(); },
   get currentGuildMembers() { return currentGuildMembers(); },
-  get currentUser() { return currentUser(); }
+  get currentUser() { return currentUser(); },
+
+  StringUtils, ObjectUtils, ClassNamesUtils,
+  ChannelUtils, GuildUtils, UserUtils,
 };
 
 export * from './Users';

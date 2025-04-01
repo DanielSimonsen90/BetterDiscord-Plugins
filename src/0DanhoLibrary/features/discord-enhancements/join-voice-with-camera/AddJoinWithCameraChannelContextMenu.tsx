@@ -12,7 +12,7 @@ const patched: Callback = function (menu, props) {
   ));
   if (!voiceOptions) return;
 
-  (voiceOptions as any).unshift(
+  (voiceOptions.props.children as any[]).unshift(
     buildTextItemElement(
       "join-with-camera",
       "Join with Camera",

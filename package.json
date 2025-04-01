@@ -7,8 +7,13 @@
     "private": true,
     "scripts": {
         "build": "ts-node scripts/build.ts",
+        
         "dev": "ts-node scripts/build.ts --dev --watch",
         "dev-once": "ts-node scripts/build.ts --dev",
+
+        "dev-lib": "npm run dev -- 0DanhoLibrary",
+        "dev-lib-once": "npm run dev-once -- 0DanhoLibrary",
+
         "check": "tsc --noemit",
         "lint": "eslint . -f node_modules/eslint-friendly-formatter",
         "lint-fix": "eslint . -f node_modules/eslint-friendly-formatter --fix"

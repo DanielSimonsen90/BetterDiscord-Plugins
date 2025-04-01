@@ -1,6 +1,6 @@
 /**
  * @name 0DanhoLibrary
- * @version 2.1.0
+ * @version 2.2.0
  * @author danielsimonsen90
  * @authorLink https://github.com/danielsimonsen90
  * @description Library for Danho's plugins
@@ -54,7 +54,7 @@ let meta = {
   "name": "0danho-library",
   "description": "Library for Danho's plugins",
   "author": "danielsimonsen90",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "development": true,
   "dependencies": {
     "dium": "*",
@@ -633,8 +633,6 @@ const Finder$1 = {
 
 const ApplicationStore = Finder.byName("ApplicationStore");
 
-const SelectedChannelStore = /* @__PURE__ */ byName("SelectedChannelStore");
-
 const Dispatcher$1 = /* @__PURE__ */ byKeys(["dispatch", "subscribe"]);
 
 const { default: Legacy, Dispatcher, Store, BatchedStoreListener, useStateFromStores } = /* @__PURE__ */ demangle({
@@ -645,7 +643,6 @@ const { default: Legacy, Dispatcher, Store, BatchedStoreListener, useStateFromSt
     useStateFromStores: bySource$1("useStateFromStores")
 }, ["Store", "Dispatcher", "useStateFromStores"]);
 
-const GuildMemberStore = /* @__PURE__ */ byName("GuildMemberStore");
 const SortedGuildStore$1 = /* @__PURE__ */ byName("SortedGuildStore");
 const ExpandedGuildFolderStore = /* @__PURE__ */ byName("ExpandedGuildFolderStore");
 
@@ -867,7 +864,11 @@ const QuickSwitcherStore = byName("QuickSwitcherStore");
 
 const ThemeStore = byKeys(["theme"]);
 
+const ChannelListStore = byName('ChannelListStore');
+
 const ChannelMemberStore = byName('ChannelMemberStore');
+
+const ChannelStatusStore = Finder.byName("ChannelStatusStore");
 
 const ChannelStore = byName("ChannelStore");
 
@@ -888,15 +889,23 @@ GuildChannelStore.constructor.prototype.getSortedChannels = function getSortedCh
     ]);
 };
 
+const ReadStateStore = Finder.byName("ReadStateStore");
+
+const SelectedChannelStore = /* @__PURE__ */ byName("SelectedChannelStore");
+
 const GuildEmojiStore = byKeys(["getEmojis"]);
 
 const GuildIdentyStore = byKeys(["saveGuildIdentityChanges"]);
+
+const GuildMemberStore = byName("GuildMemberStore");
 
 const GuildStore = byName("GuildStore");
 
 const SelectedGuildStore = byKeys(["getLastSelectedGuildId"]);
 
 const SortedGuildStore = SortedGuildStore$1;
+
+const UserGuildSettingsStore = byName("UserGuildSettingsStore");
 
 const MessageStore = byName("MessageStore");
 
@@ -1002,6 +1011,10 @@ var SupportedFeatures;
 const RTCConnectionStore = byName("RTCConnectionStore");
 
 const VoiceStore = byKeys(["getVoiceStateForUser"]);
+VoiceStore.getVoiceStateArrayForChannel = (function (channelId) {
+    const voiceStates = this.getVoiceStatesForChannel(channelId);
+    return Object.values(voiceStates);
+}).bind(VoiceStore);
 
 class DiumStore {
     constructor(defaults, dataKey, onLoad) {
@@ -1113,6 +1126,11 @@ function findStore(storeName, allowMultiple = false) {
                 getName() { return store.name; }
             })[0];
 }
+const DanhoStores = new class DanhoStores {
+    register(store) {
+        this[store.dataKey] = store;
+    }
+};
 
 const Stores = {
     __proto__: null,
@@ -1120,9 +1138,12 @@ const Stores = {
     get AudioSubSystems () { return AudioSubSystems; },
     BetterProfileSettings,
     CameraComponent,
+    ChannelListStore,
     ChannelMemberStore,
+    ChannelStatusStore,
     ChannelStore,
     ContentInventoryStore,
+    DanhoStores,
     DiscordStores,
     DiumStore,
     EmojiStore,
@@ -1141,6 +1162,7 @@ const Stores = {
     PresenceStore,
     QuickSwitcherStore,
     RTCConnectionStore,
+    ReadStateStore,
     RelationshipStore,
     SelectedChannelStore,
     SelectedGuildStore,
@@ -1149,6 +1171,7 @@ const Stores = {
     get SupportedFeatures () { return SupportedFeatures; },
     ThemeStore,
     UserActivityStore,
+    UserGuildSettingsStore,
     UserMentionStore,
     UserNoteStore,
     UserProfileSettingsStore,
@@ -1172,6 +1195,14 @@ const wait = (callback, time) => new Promise((resolve, reject) => {
     }
 });
 
+function pick(from, ...properties) {
+    if (!from)
+        throw new Error("Cannot pick from undefined!");
+    return properties.reduce((acc, prop) => {
+        acc[prop] = from[prop];
+        return acc;
+    }, {});
+}
 function exclude(from, ...properties) {
     if (!from)
         throw new Error("Cannot exclude from undefined!");
@@ -1181,6 +1212,60 @@ function exclude(from, ...properties) {
         return acc;
     }, {});
 }
+function difference(source, target, exclude) {
+    const diffKeys = new Set([...Object.keys(source), ...Object.keys(target)]);
+    exclude?.forEach(key => diffKeys.delete(key));
+    return [...diffKeys.values()].reduce((acc, key, i, arr) => {
+        const sourceValue = JSON.stringify(source[key]);
+        const targetValue = JSON.stringify(target[key]);
+        if (sourceValue !== targetValue)
+            acc[key] = target[key];
+        return acc;
+    }, {});
+}
+function combine(...objects) {
+    return objects.reduce((acc, obj) => {
+        if (!obj)
+            return acc;
+        for (const key in obj) {
+            if (typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+                acc[key] = combine(acc[key], obj[key]);
+            }
+            else if (obj[key] !== undefined && obj[key] !== null && obj[key] !== '') {
+                acc[key] = obj[key];
+            }
+        }
+        return acc;
+    }, {});
+}
+function combineModules$1(...modules) {
+    return modules.reduce((combined, sourceStrings) => {
+        const module = Finder.byKeys(sourceStrings);
+        if (!module) {
+            Logger.warn(`[ObjectUtils.combineModules] Module not found for source strings: ${sourceStrings.join(', ')}`);
+            return combined;
+        }
+        for (const key in module) {
+            let prop = key;
+            if (key in combined) {
+                const duplicateIndex = Object.keys(combined).filter(k => k.startsWith(`${key}--`)).length;
+                prop = `${key}--${duplicateIndex}`;
+            }
+            const element = module[key];
+            if (typeof element === 'object' && !Array.isArray(element)) {
+                combined[prop] = combine(combined[prop], element);
+            }
+            else if (element !== undefined && element !== null && element !== '') {
+                combined[prop] = element;
+            }
+        }
+        return combined;
+    }, {});
+}
+const ObjectUtils = {
+    pick, exclude,
+    difference, combine, combineModules: combineModules$1,
+};
 
 function join(args, separator = ',', includeAnd = true) {
     const validArgs = args?.filter(arg => arg !== undefined && arg !== null && arg !== '');
@@ -1192,34 +1277,112 @@ function join(args, separator = ',', includeAnd = true) {
     const combinedArgs = validArgs.join(separator);
     return `${combinedArgs}${includeAnd ? ' & ' : ''}${lastArg}`;
 }
+function kebabCaseFromCamelCase(str) {
+    return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+}
 const StringUtils = {
-    join,
+    join, kebabCaseFromCamelCase
 };
 
-const UserNoteActions = byKeys(["updateNote"]);
-
-const UserUtils = {
-    ...UserStore,
-    ...PresenceStore,
-    ...RelationshipStore,
-    ...UserActivityStore,
-    ...UserNoteStore,
-    ...UserTypingStore,
-    ...UserMentionStore,
-    ...UserNoteActions,
-    get me() {
-        const user = UserStore.getCurrentUser();
-        return Object.assign(user, {
-            get status() {
-                return PresenceStore.getStatus(user.id);
-            }
-        });
+const ChannelUtils = {
+    ...ChannelStore,
+    ...GuildChannelStore,
+    ...SelectedChannelStore,
+    get current() {
+        return ChannelStore.getChannel(SelectedChannelStore.getChannelId());
     },
-    getPresenceState: () => PresenceStore.getState(),
+    get currentChannelId() {
+        return SelectedChannelStore.getChannelId();
+    },
+    getUrl(channelResolve, guildId) {
+        const channel = typeof channelResolve === 'string' ? ChannelStore.getChannel(channelResolve) : channelResolve;
+        if (!channel)
+            return '';
+        guildId ??= channel.getGuildId() ?? '@me';
+        return `https://discord.com/channels/${guildId}/${channel.id}`;
+    },
+    getMessageUrl(channelId, messageId, guildId = '@me') {
+        return `https://discord.com/channels/${guildId}/${channelId}/${messageId}`;
+    }
+};
+
+const indexDuplicate = (key, index) => `${key}--${index}`;
+function combineModuleByKeys(...modules) {
+    return modules.reduce((combined, sourceStrings) => {
+        const module = Finder.byKeys(sourceStrings);
+        return combineModules(combined, module);
+    }, {});
+}
+function combineModules(...modules) {
+    const record = modules.reduce((combined, module, index) => {
+        if (!module) {
+            warn(`[ObjectUtils.combineModules] Module not found for index: ${index}`, modules);
+            return combined;
+        }
+        for (const key in module) {
+            let prop = key;
+            if (key in combined) {
+                const duplicateIndex = Object.keys(combined).filter(k => k.startsWith(`${key}--`)).length;
+                prop = indexDuplicate(key, duplicateIndex);
+            }
+            const element = module[key];
+            if (typeof element === 'object' && !Array.isArray(element)) {
+                combined[prop] = combine(combined[prop], element);
+            }
+            else if (element !== undefined && element !== null && element !== '') {
+                combined[prop] = element;
+            }
+        }
+        return combined;
+    }, {});
+    const combined = Object.assign({
+        getDuplicateKeys: function () {
+            return Object.keys(this).filter(key => key.includes('--')).map(key => key.split('--')[0]);
+        },
+        containsClassName: function (className) {
+            return containsClassInModule(className, this);
+        },
+        getClassNameKey: function (className) {
+            return Object.entries(this).find(([key, value]) => value === className)?.[0];
+        }
+    }, record);
+    return combined;
+}
+function containsClassInModule(className, module) {
+    return Object.values(module).some((value) => value === className);
+}
+function findModuleWithMinimalKeys(className) {
+    const module = Finder.findBySourceStrings(className, { defaultExport: false });
+    if (!module) {
+        warn(`Module not found for className: ${className}`);
+        return null;
+    }
+    const keys = Object.keys(module);
+    if (keys.length === 0) {
+        warn(`No keys found in the module for className: ${className}`);
+        return null;
+    }
+    let minimalKeys = [...keys];
+    for (const key of keys) {
+        const testKeys = minimalKeys.filter(k => k !== key);
+        const foundModule = Finder.byKeys(testKeys);
+        if (foundModule === module) {
+            minimalKeys = testKeys;
+        }
+    }
+    return { module, keys: minimalKeys };
+}
+const ClassNamesUtils = {
+    combineModuleByKeys,
+    combineModules,
+    containsClassInModule,
+    indexDuplicate,
+    findModuleWithMinimalKeys
 };
 
 const GuildActions = byKeys(["requestMembers"]);
 
+const useGuildFeatures = Finder.findBySourceStrings("hasFeature", "GUILD_SCHEDULED_EVENTS");
 const GuildUtils = {
     ...GuildStore,
     ...GuildMemberStore,
@@ -1228,8 +1391,14 @@ const GuildUtils = {
     ...SelectedGuildStore,
     ...VoiceStore,
     ...GuildActions,
+    useGuildFeatures(guild) {
+        return useGuildFeatures(guild) || [];
+    },
     get current() {
         return GuildStore.getGuild(SelectedGuildStore.getGuildId());
+    },
+    get currentId() {
+        return SelectedGuildStore.getGuildId();
     },
     get me() {
         return GuildMemberStore.getMember(SelectedGuildStore.getGuildId(), UserStore.getCurrentUser().id);
@@ -1261,6 +1430,34 @@ const GuildUtils = {
         }
         return null;
     },
+    getMemberAvatar(memberId, guildId, size) {
+        const avatar = GuildMemberStore.getMember(guildId, memberId).avatar;
+        if (avatar)
+            return `https://cdn.discordapp.com/guilds/${guildId}/users/${memberId}/avatars/${avatar}.webp?size=${size}`;
+        return;
+    },
+};
+
+const UserNoteActions = byKeys(["updateNote"]);
+
+const UserUtils = {
+    ...UserStore,
+    ...PresenceStore,
+    ...RelationshipStore,
+    ...UserActivityStore,
+    ...UserNoteStore,
+    ...UserTypingStore,
+    ...UserMentionStore,
+    ...UserNoteActions,
+    get me() {
+        const user = UserStore.getCurrentUser();
+        return Object.assign(user, {
+            get status() {
+                return PresenceStore.getStatus(user.id);
+            }
+        });
+    },
+    getPresenceState: () => PresenceStore.getState(),
 };
 
 function findNodeByIncludingClassName(className, node = document.body) {
@@ -1297,7 +1494,9 @@ const Utils = {
     get currentGuild() { return currentGuild(); },
     get currentChannel() { return currentChannel(); },
     get currentGuildMembers() { return currentGuildMembers(); },
-    get currentUser() { return currentUser(); }
+    get currentUser() { return currentUser(); },
+    StringUtils, ObjectUtils, ClassNamesUtils,
+    ChannelUtils, GuildUtils, UserUtils,
 };
 
 const createActionCallback = (action, callback) => {
@@ -1326,7 +1525,9 @@ const UserStatusActions = {
 
 const InternalVoiceActions = Finder.findBySourceStrings("setVideoEnabled", "setVideoDevice");
 const handleVoiceConnect = Finder.findBySourceStrings("handleVoiceConnect");
-const VoiceActions = Object.assign({}, InternalVoiceActions, {
+const ChannelSettingsActions = Finder.byKeys(["open", "saveChannel", "updateVoiceChannelStatus"]);
+const StageChannelActions = Finder.byKeys(["updateChatOpen"]);
+const VoiceActions = Object.assign({}, InternalVoiceActions, ChannelSettingsActions, StageChannelActions, {
     handleVoiceConnect
 });
 
@@ -1602,7 +1803,7 @@ class DQuery {
         }
     }
     setStyleProperty(key, value) {
-        key = key.toString();
+        key = StringUtils.kebabCaseFromCamelCase(key.toString());
         const style = this.attr('style') ?? '';
         if (!style.includes(key))
             return this.attr('style', `${this.attr('style') ?? ''}${key}: ${value};`, false);
@@ -1992,7 +2193,7 @@ const DOM = {
     removeAllInjections
 };
 
-const styles$2 = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible__content.hidden {\n  display: none;\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.custom-message {\n  display: grid;\n  grid-template-columns: auto 1fr;\n  gap: 0.5ch;\n}\n.custom-message__avatar {\n  --size: 2.5rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  object-fit: cover;\n}\n.custom-message__main {\n  display: flex;\n  flex-direction: column;\n  gap: 0.5ch;\n}\n.custom-message__main header {\n  display: flex;\n  align-items: center;\n  gap: 0.5ch;\n}\n.custom-message .user-mention, .custom-message .role-mention {\n  color: var(--mention-foreground);\n  background-color: var(--mention-background);\n}\n.custom-message .user-mention::before, .custom-message .role-mention::before {\n  content: \"@\";\n}\n.custom-message .channel-mention::before {\n  content: \"#\";\n}\n.custom-message .custom-message__attachments img {\n  max-height: 100%;\n  max-width: 100%;\n}\n\n.progress-bar {\n  width: 100%;\n  height: 0.5rem;\n  border-radius: 0.5rem;\n  overflow: hidden;\n}\n.progress-bar__fill {\n  height: 100%;\n  background-color: var(--primary-600);\n  transition: width 0.3s;\n}\n\n.tab-bar {\n  max-width: 100%;\n}\n.tab-bar * {\n  color: var(--text-primary);\n  box-sizing: border-box;\n}\n\n.tab-bar__tabs {\n  display: grid;\n  grid-auto-flow: column;\n  max-width: 100%;\n  overflow-x: auto;\n}\n.tab-bar__tabs--no-color .tab-bar__tab {\n  background-color: transparent;\n  border: none;\n}\n\n.tab-bar__tab {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  border: none;\n  background-color: var(--primary-630);\n  color: var(--text-muted);\n  border: 1px solid var(--border-faint);\n  padding: 0.3rem 1rem;\n}\n.tab-bar__tab:hover {\n  background-color: var(--primary-600);\n  color: var(--text-primary);\n}\n.tab-bar__tab--active {\n  border: 1px solid var(--border-faint);\n  border-bottom: 1px solid var(--text-primary) !important;\n  color: var(--text-primary);\n}\n\n.tab-bar__content {\n  padding: 1em;\n  background-color: var(--primary-630);\n  border: 1px solid var(--border-faint);\n}\n.tab-bar__content--no-color {\n  background-color: transparent;\n  border: none;\n}\n.tab-bar__content-page:not(.tab-bar__content-page--active) {\n  opacity: 0;\n  z-index: -1;\n  pointer-events: none;\n  height: 0;\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-form-select, .setting-group {\n  display: flex;\n  flex-direction: column-reverse;\n  gap: 0.5rem;\n  margin-top: 1rem;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
+const styles$3 = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible__content.hidden {\n  display: none;\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.custom-message {\n  display: grid;\n  grid-template-columns: auto 1fr;\n  gap: 0.5ch;\n}\n.custom-message__avatar {\n  --size: 2.5rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  object-fit: cover;\n}\n.custom-message__main {\n  display: flex;\n  flex-direction: column;\n  gap: 0.5ch;\n}\n.custom-message__main header {\n  display: flex;\n  align-items: center;\n  gap: 0.5ch;\n}\n.custom-message .user-mention, .custom-message .role-mention {\n  color: var(--mention-foreground);\n  background-color: var(--mention-background);\n}\n.custom-message .user-mention::before, .custom-message .role-mention::before {\n  content: \"@\";\n}\n.custom-message .channel-mention::before {\n  content: \"#\";\n}\n.custom-message .custom-message__attachments img {\n  max-height: 100%;\n  max-width: 100%;\n}\n\n.progress-bar {\n  width: 100%;\n  height: 0.5rem;\n  border-radius: 0.5rem;\n  overflow: hidden;\n}\n.progress-bar__fill {\n  height: 100%;\n  background-color: var(--primary-600);\n  transition: width 0.3s;\n}\n\n.tab-bar {\n  max-width: 100%;\n}\n.tab-bar * {\n  color: var(--text-primary);\n  box-sizing: border-box;\n}\n\n.tab-bar__tabs {\n  display: grid;\n  grid-auto-flow: column;\n  max-width: 100%;\n  overflow-x: auto;\n}\n.tab-bar__tabs--no-color .tab-bar__tab {\n  background-color: transparent;\n  border: none;\n}\n\n.tab-bar__tab {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  border: none;\n  background-color: var(--primary-630);\n  color: var(--text-muted);\n  border: 1px solid var(--border-faint);\n  padding: 0.3rem 1rem;\n}\n.tab-bar__tab:hover {\n  background-color: var(--primary-600);\n  color: var(--text-primary);\n}\n.tab-bar__tab--active {\n  border: 1px solid var(--border-faint);\n  border-bottom: 1px solid var(--text-primary) !important;\n  color: var(--text-primary);\n}\n\n.tab-bar__content {\n  padding: 1em;\n  background-color: var(--primary-630);\n  border: 1px solid var(--border-faint);\n}\n.tab-bar__content--no-color {\n  background-color: transparent;\n  border: none;\n}\n.tab-bar__content-page:not(.tab-bar__content-page--active) {\n  opacity: 0;\n  z-index: -1;\n  pointer-events: none;\n  height: 0;\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-form-select, .setting-group {\n  display: flex;\n  flex-direction: column-reverse;\n  gap: 0.5rem;\n  margin-top: 1rem;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
 
 class DanhoLibrary {
     constructor() {
@@ -2004,7 +2205,7 @@ class DanhoLibrary {
         this.Actions = Actions;
         this.Finder = Finder$1;
         this.Filters = Filters;
-        this.styles = styles$2;
+        this.styles = styles$3;
     }
 }
 const LibraryPlugin = new DanhoLibrary();
@@ -2056,6 +2257,8 @@ const DiscordEnhancements$1 = {
     showBirthdayOnNameTag: true,
     betterQuickSwitcher: true,
     expandActivityStatus: true,
+    hideChannelUntilActivity: true,
+    keepChannelVisibleAfterActivityTimeoutMin: 5,
 };
 const DanhoEnhancements$1 = {
     danhoEnhancements: true,
@@ -2105,6 +2308,8 @@ const DiscordEnhancementsTitles = {
     showBirthdayOnNameTag: `Show birthday on name tag`,
     betterQuickSwitcher: `Better quickswitcher prioritizing friends and top guilds`,
     expandActivityStatus: `Expand activity status to show more information i.e. what a user is listening to`,
+    hideChannelUntilActivity: `Hide channels from your channel list until they have activity`,
+    keepChannelVisibleAfterActivityTimeoutMin: `Keep recently active hidden channel visible for x minutes`,
 };
 const DanhoEnhancementsTitles = {
     danhoEnhancements: `Danho enhancements`,
@@ -2125,6 +2330,10 @@ const titles = {
 };
 
 const { useCallback, useContext, useDebugValue, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useReducer, useRef, useState, useId, useDeferredValue, useInsertionEffect, useSyncExternalStore, useTransition, createRef, createContext, createElement, createFactory, forwardRef, cloneElement, lazy, memo, isValidElement, Component, PureComponent, Fragment, Suspense, } = React;
+
+const ScrollerLooks = Finder.byKeys(['thin', 'fade']);
+const ScrollerWrapper = Finder.findBySourceStrings("paddingFix", "getScrollerState");
+ScrollerWrapper();
 
 var Colors;
 (function (Colors) {
@@ -2506,7 +2715,7 @@ const WEEK = DAY * 7;
 const MONTH = DAY * 30;
 const YEAR = DAY * 365;
 
-function Feature$8() {
+function Feature$9() {
     const relativeTimeModule = Finder.findBySourceStrings('"R"!==e.format', { defaultExport: false });
     if (!relativeTimeModule)
         return false;
@@ -2534,7 +2743,344 @@ function Feature$8() {
 
 const FixRelativeTimestamps = {
     __proto__: null,
-    default: Feature$8
+    default: Feature$9
+};
+
+const DEFAULT_STATE = {
+    channels: {},
+    guilds: {},
+};
+const HiddenChannelStore = new class HiddenChannelStore extends DiumStore {
+    constructor() {
+        super(DEFAULT_STATE, 'HiddenChannelStore', () => {
+            ActionsEmitter.on('CHANNEL_SELECT', this.onChannelSelect.bind(this));
+        });
+        this.onChannelSelect = createActionCallback('CHANNEL_SELECT', ({ channelId }) => {
+            const previousChannelId = SelectedChannelStore.getLastSelectedChannelId();
+            const isHidden = this.isHidden(previousChannelId);
+            if (!isHidden)
+                return;
+            if (this.hasActiveTimer(previousChannelId)) {
+                this.restartVisibilityTimer(previousChannelId);
+            }
+            if (this.hasActiveTimer(channelId)) {
+                this.clearVisibilityTimer(channelId);
+            }
+        });
+    }
+    updateChannelState(channelId, state) {
+        const channelState = this.current.channels[channelId] || {};
+        const updatedState = {
+            ...channelState,
+            ...state,
+        };
+        this.update(current => ({
+            ...current,
+            channels: {
+                ...current.channels,
+                [channelId]: state ? updatedState : state
+            }
+        }));
+    }
+    updateGuildState(guildId, state) {
+        const guildState = this.current.guilds[guildId] || {};
+        const updatedState = {
+            ...guildState,
+            ...state,
+        };
+        this.update(current => ({
+            ...current,
+            guilds: {
+                ...current.guilds,
+                [guildId]: state ? updatedState : state
+            }
+        }));
+    }
+    isHidden(channelId) {
+        return this.current.channels[channelId]?.hidden || false;
+    }
+    hideChannel(channelId) {
+        const hiddenChannel = this.current.channels[channelId];
+        if (hiddenChannel?.stayVisibleTimeout)
+            clearTimeout(hiddenChannel.stayVisibleTimeout);
+        this.updateChannelState(channelId, {
+            hidden: true,
+        });
+    }
+    showChannel(channelId) {
+        this.updateChannelState(channelId, undefined);
+    }
+    showsHiddenChannels(guildId) {
+        return this.current.guilds[guildId]?.showHiddenChannels;
+    }
+    showHiddenChannels(guildId) {
+        this.updateGuildState(guildId, {
+            showHiddenChannels: true,
+        });
+    }
+    hideHiddenChannels(guildId) {
+        this.updateGuildState(guildId, {
+            showHiddenChannels: false,
+        });
+    }
+    shouldRenderChannel(channelId) {
+        if (this.showsHiddenChannels(GuildUtils.currentId))
+            return true;
+        if (this.isCategoryChannel(channelId))
+            return this.shouldRenderCategory(channelId);
+        const { guildChannels } = ChannelListStore.getGuild(GuildUtils.currentId) ?? {};
+        const channel = ChannelStore.getChannel(channelId);
+        const isHidden = this.isHidden(channelId);
+        const isUnread = ReadStateStore.hasUnread(channelId);
+        const hasVoiceActivity = !!VoiceStore.getVoiceStateForChannel(channelId);
+        const optInEnabled = guildChannels?.optInEnabled ?? false;
+        const isOptedIn = optInEnabled
+            && ((guildChannels?.optedInChannels.has(channelId) ?? false)
+                || (guildChannels?.optedInChannels.has(channel.parent_id) ?? false));
+        const isMutedAndHidden = (guildChannels.mutedChannelIds.has(channelId)
+            && guildChannels.hideMutedChannels);
+        this.stayVisisbleTimeout(channelId, isUnread);
+        const shouldRender = isHidden
+            ? isUnread || hasVoiceActivity
+            : optInEnabled
+                ? isOptedIn && !isMutedAndHidden
+                : !isMutedAndHidden;
+        return shouldRender;
+    }
+    isCategoryChannel(channelId) {
+        return ChannelStore.getChannel(channelId)?.type === 4 ;
+    }
+    shouldRenderCategory(channelId) {
+        const categoryChannels = ChannelListStore.getGuild(GuildUtils.currentId)?.guildChannels.categories[channelId]?.channels ?? {};
+        for (const channelId of Object.keys(categoryChannels)) {
+            const shouldRender = this.shouldRenderChannel(channelId);
+            if (shouldRender) {
+                return true;
+            }
+        }
+        console.log('Category does not render');
+        return false;
+    }
+    getAllHiddenChannels() {
+        return Object.keys(this.current.channels).reduce((acc, channelId) => {
+            const channel = ChannelStore.getChannel(channelId);
+            if (!channel)
+                return acc;
+            acc[channelId] = channel;
+            return acc;
+        }, {});
+    }
+    getHiddenChannels(guildId) {
+        const channels = GuildChannelStore
+            .getChannels(guildId)
+            .SELECTABLE
+            .map(stored => stored.channel);
+        return {
+            channels: channels
+                .filter(channel => this.isHidden(channel.id))
+                .reduce((acc, channel) => {
+                acc[channel.id] = channel;
+                return acc;
+            }, {}),
+            guilds: {
+                [guildId]: this.current.guilds[guildId]
+            }
+        };
+    }
+    getHiddenChannelsArray(guildId) {
+        return Object
+            .keys(this.getHiddenChannels(guildId).channels)
+            .map(channelId => ChannelStore.getChannel(channelId)?.name)
+            .sort();
+    }
+    restartVisibilityTimer(channelId) {
+        const hiddenChannel = this.current.channels[channelId];
+        if (!hiddenChannel)
+            return;
+        if (hiddenChannel.stayVisibleTimeout)
+            clearTimeout(hiddenChannel.stayVisibleTimeout);
+        hiddenChannel.stayVisibleTimeout = setTimeout(() => {
+            this.update({
+                [channelId]: {
+                    hidden: true,
+                    hadActivity: false,
+                }
+            });
+        }, Settings.current.keepChannelVisibleAfterActivityTimeoutMin * 60 * 1000);
+    }
+    hasActiveTimer(channelId) {
+        const hiddenChannel = this.current.channels[channelId];
+        return !!(hiddenChannel?.stayVisibleTimeout || hiddenChannel?.hadActivity);
+    }
+    clearVisibilityTimer(channelId) {
+        const hiddenChannel = this.current[channelId];
+        if (!hiddenChannel)
+            return;
+        if (hiddenChannel.stayVisibleTimeout)
+            clearTimeout(hiddenChannel.stayVisibleTimeout);
+        this.updateChannelState(channelId, {
+            stayVisibleTimeout: undefined,
+            hadActivity: false,
+        });
+    }
+    stayVisisbleTimeout(channelId, isUnread) {
+        const hiddenChannel = this.current[channelId];
+        if (!hiddenChannel)
+            return;
+        const { hidden, hadActivity, stayVisibleTimeout } = hiddenChannel;
+        if (isUnread && hidden) {
+            clearTimeout(stayVisibleTimeout);
+            this.updateChannelState(channelId, {
+                hadActivity: true,
+                hidden: false,
+            });
+        }
+        else if (!isUnread && hadActivity) {
+            this.restartVisibilityTimer(channelId);
+        }
+    }
+};
+DanhoStores.register(HiddenChannelStore);
+
+const ScrollerStore = new class GuildChannelListScrollerStore extends DiumStore {
+    constructor() {
+        super({}, 'GuildChannelListScrollerStore');
+    }
+    getInstance() {
+        const currentGuildId = GuildUtils.currentId;
+        return {
+            update: (scrollTop) => currentGuildId ? this.update({ [currentGuildId]: scrollTop }) : null,
+            getScrollState: () => this.current[currentGuildId] ?? 0,
+        };
+    }
+};
+DanhoStores.register(ScrollerStore);
+
+const DISCORD_HEADER_CHANNEL_NAV_SECTION_ID = 1;
+function GuildList(ListClass) {
+    const guild = GuildUtils.current;
+    const guildFeatures = GuildUtils.useGuildFeatures(guild);
+    return class DanhoGuildChannelList extends ListClass {
+        componentDidMount() {
+            this.updateScroll();
+            super.componentDidMount();
+            this.timeout = setTimeout(() => {
+                this.updateHeight();
+            });
+        }
+        componentDidUpdate(prevProps, prevState, snapshot) {
+            this.updateScroll();
+            super.componentDidUpdate(prevProps, prevState, snapshot);
+        }
+        componentWillUnmount() {
+            super.componentWillUnmount();
+            if (this.timeout)
+                clearTimeout(this.timeout);
+        }
+        constructor(props) {
+            super(props);
+            this.instanceRef = React.createRef();
+            this.timeout = null;
+            this._scrollState = ScrollerStore.getInstance();
+            this.__originalRenderRow = 'renderRow' in this ? this.renderRow : undefined;
+            this.renderRow = this.patchedRenderRow.bind(this);
+            this.__originalGetRowHeight = 'getRowHeight' in this ? this.getRowHeight : undefined;
+            this.getRowHeight = this.patchedGetRowHeight.bind(this);
+            this.__originalRenderSection = 'renderSection' in this ? this.renderSection : undefined;
+            this.renderSection = this.patchedRenderSection.bind(this);
+            this.handleListScroll = this.onScroll.bind(this);
+        }
+        render() {
+            return (React.createElement("div", { className: ScrollerLooks.thin, style: {
+                    overflow: 'hidden scroll',
+                    maxHeight: '100%',
+                }, onScroll: this.onScroll.bind(this), ref: this.instanceRef }, super.render()));
+        }
+        onScroll(e) {
+            if (!e)
+                return;
+            this._scrollState.update(e.currentTarget.scrollTop);
+        }
+        updateScroll() {
+            if (this.instanceRef.current) {
+                this.instanceRef.current.scrollTop = this._scrollState.getScrollState();
+            }
+        }
+        updateHeight() {
+            const channelsList = $(s => s.ariaLabel('Channels', 'ul'));
+            channelsList.setStyleProperty('height', 'auto');
+            const userArea = $(s => s.ariaLabel('User area', 'section').and.className('panels'));
+            const userAreaHeight = userArea?.element.clientHeight ? `${userArea.element.clientHeight}px` : '1rem';
+            channelsList.setStyleProperty('paddingBottom', `calc(${userAreaHeight} + 0px)`);
+        }
+        patchedRenderRow(rowData) {
+            const { section, row } = rowData;
+            const channelResult = this.runOriginalChecks(section, row, () => this.__originalRenderRow(rowData), true);
+            if (!this.isChannelResult(channelResult))
+                return channelResult;
+            const { channel } = channelResult;
+            return HiddenChannelStore.shouldRenderChannel(channel.id)
+                ? this.__originalRenderRow(rowData)
+                : null;
+        }
+        patchedRenderSection(data) {
+            const rendered = this.__originalRenderSection(data);
+            if (!rendered.key.includes('category'))
+                return rendered;
+            const categoryChannelId = rendered.key.split('-').pop();
+            return HiddenChannelStore.shouldRenderChannel(categoryChannelId) ? rendered : null;
+        }
+        patchedGetRowHeight(section, row) {
+            const channelResult = this.runOriginalChecks(section, row, () => this.__originalGetRowHeight(section, row));
+            if (!this.isChannelResult(channelResult))
+                return channelResult;
+            const { channel } = channelResult;
+            return HiddenChannelStore.shouldRenderChannel(channel.id)
+                ? this.__originalGetRowHeight(section, row)
+                : 0;
+        }
+        runOriginalChecks(section, row, original, runPlaceholderCheck = false) {
+            const { guild } = this.props;
+            const channelList = ChannelListStore.getGuild(guild.id, guildFeatures);
+            if (section === DISCORD_HEADER_CHANNEL_NAV_SECTION_ID)
+                return original();
+            else if (runPlaceholderCheck && channelList.guildChannels.isPlaceholderRow(section, row))
+                return original();
+            const channelResult = channelList.guildChannels.getChannelFromSectionRow(section, row);
+            if (!channelResult)
+                return original();
+            return channelResult;
+        }
+        isChannelResult(result) {
+            return typeof result === 'object' && result !== null && 'channel' in result;
+        }
+    };
+}
+
+const styles$2 = ".danho-guild-channels-list {\n  max-height: calc(100vh - 10rem);\n  overflow-y: auto;\n}";
+
+function Feature$8() {
+    if (!Settings.current.hideChannelUntilActivity)
+        return;
+    HiddenChannelStore.load();
+    ScrollerStore.load();
+    const module = Finder.findBySourceStrings("GuildChannelList", { defaultExport: false });
+    after(module, 'E', ({ result, args: [props] }) => {
+        after(result, 'type', ({ result, args: [props] }) => {
+            const efParent = result.props.children.props.children;
+            const efChild = result.props.children.props.children.props.children;
+            const ef = efChild.type;
+            const DanhoGuildList = GuildList(ef);
+            efParent.props.children = React.createElement(DanhoGuildList, { ...efChild.props });
+        }, { silent: true });
+        return result;
+    }, { name: 'GuildChannelList' });
+}
+
+const HideInactiveChannels = {
+    __proto__: null,
+    default: Feature$8,
+    styles: styles$2
 };
 
 const GuildHeader = Finder.findBySourceStrings("hasCommunityInfoSubheader()", "ANIMATED_BANNER", "header");
@@ -2660,6 +3206,7 @@ const BirthdayStore = new class BirthdayStore extends DiumStore {
         return sameDay && sameMonth;
     }
 };
+DanhoStores.register(BirthdayStore);
 
 const style$3 = "span[class*=timestamp] {\n  color: var(--text-primary);\n}\n\nli.danho-birthday-calendar {\n  display: flex;\n  align-items: center;\n  margin-left: 8px;\n  border-radius: 4px;\n}\nli.danho-birthday-calendar > * {\n  padding: 8px;\n}\nli.danho-birthday-calendar svg {\n  margin-left: 4px;\n  margin-right: 12px;\n}\n\ndiv:has(> .birthday-child-icon) {\n  position: relative;\n}\n\n.birthday-child-icon {\n  z-index: 1;\n  position: absolute;\n  top: -0.3ch;\n  right: -0.5ch;\n  font-size: 1.4ch;\n}";
 
@@ -2684,6 +3231,7 @@ const DiscordEnhancements = [
     FixRelativeTimestamps,
     UserBirthday,
     { style: UserTimezoneStyle, default: () => { } },
+    HideInactiveChannels,
 ];
 
 const CustomBadgesStore = createDiumStore({
@@ -2714,8 +3262,9 @@ const CustomBadgesStore = createDiumStore({
         position: 1
     }
 }, 'CustomBadges');
+DanhoStores.register(CustomBadgesStore);
 
-const DiscordBadgeStore = new class DiscordBadgeStore extends DiumStore {
+const DiscordBadgesStore = new class DiscordBadgeStore extends DiumStore {
     constructor() {
         super({}, 'DiscordBadgeStore', () => {
             ActionsEmitter.on('USER_PROFILE_FETCH_SUCCESS', this.onUserProfileFetchSuccess.bind(this));
@@ -2735,11 +3284,12 @@ const DiscordBadgeStore = new class DiscordBadgeStore extends DiumStore {
         });
     }
 };
+DanhoStores.register(DiscordBadgesStore);
 
 function Feature$4() {
     if (!Settings.current.badges)
         return;
-    DiscordBadgeStore.load();
+    DiscordBadgesStore.load();
     CustomBadgesStore.load();
 }
 
@@ -2839,7 +3389,7 @@ const PrettyRoles = {
 
 const PrivateChannelSidebarList = Finder.findBySourceStrings("PrivateChannels", "storeLink", { defaultExport: false });
 
-const styles$1 = ".danho-ui-rework-fix div[class*=channelBottomBarArea] {\n  margin-top: 0.5rem;\n}\n.danho-ui-rework-fix div[class*=channelTextArea] {\n  --custom-chat-input-margin-bottom: 24px;\n}\n.danho-ui-rework-fix [data-list-id=guildsnav] *[class*=icon] {\n  border-radius: 50% !important;\n}\n.danho-ui-rework-fix [data-list-id=guildsnav] div[class*=selected] *[class*=icon] {\n  border-radius: 25% !important;\n  transition: border-radius 300ms;\n  transition-delay: 100ms;\n}\n.danho-ui-rework-fix .danho-nav-group {\n  display: grid;\n  grid-auto-flow: column;\n}\n.danho-ui-rework-fix .danho-nav-group:has([class*=interactive]:hover) > * {\n  margin-right: 1ch;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=interactive]:hover div[class*=content] {\n  display: block;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=interactive] a[class*=link]:not([class*=interactive]:hover a[class*=link]) {\n  padding-inline: 0;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] {\n  justify-content: center;\n  gap: 1ch;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] div[class*=avatar] {\n  margin-right: 0;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] div[class*=content] {\n  display: none;\n}\n\nhtml[class*=visual-refresh]:has(.danho-ui-rework-fix) {\n  --custom-channel-textarea-text-area-height: 2.75rem;\n  --custom-rtc-account-height: 2.5rem;\n}\nhtml[class*=visual-refresh]:has(.danho-ui-rework-fix) section[class*=panels] {\n  bottom: calc(var(--space-xs) * 1.5);\n}";
+const styles$1 = ".danho-ui-rework-fix div[class*=channelBottomBarArea] {\n  margin-top: 0.5rem;\n}\n.danho-ui-rework-fix div[class*=channelTextArea] {\n  --custom-chat-input-margin-bottom: 24px;\n}\n.danho-ui-rework-fix [data-list-id=guildsnav] *[class*=icon] {\n  border-radius: 50% !important;\n}\n.danho-ui-rework-fix [data-list-id=guildsnav] div[class*=selected] *[class*=icon] {\n  border-radius: 25% !important;\n  transition: border-radius 300ms;\n  transition-delay: 100ms;\n}\n.danho-ui-rework-fix .danho-nav-group {\n  display: grid;\n  grid-auto-flow: column;\n}\n.danho-ui-rework-fix .danho-nav-group:has([class*=interactive]:hover) > * {\n  margin-right: 1ch;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=interactive]:hover div[class*=content] {\n  display: block;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=interactive] a[class*=link]:not([class*=interactive]:hover a[class*=link]) {\n  padding-inline: 0;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] {\n  justify-content: center;\n  gap: 1ch;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] div[class*=avatar] {\n  margin-right: 0;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] div[class*=content] {\n  display: none;\n}\n.danho-ui-rework-fix div[class*=button] {\n  border-radius: 3px;\n}\n\nhtml[class*=visual-refresh]:has(.danho-ui-rework-fix) {\n  --custom-channel-textarea-text-area-height: 2.75rem;\n  --custom-rtc-account-height: 2.5rem;\n}\nhtml[class*=visual-refresh]:has(.danho-ui-rework-fix) section[class*=panels] {\n  bottom: calc(var(--space-xs) * 1.5);\n}";
 
 function Feature() {
     const { uiReworkFix, removePrivateSearchButton, groupPrivateChannelNavOptions } = Settings.current;
@@ -3602,7 +4152,7 @@ function afterTextModule() {
     }, { name: 'TextModule--Pronouns' });
 }
 
-const UserActivityStatus = Finder.findBySourceStrings("activity:", ".LISTENING", "textVariant", { defaultExport: false });
+const UserActivityStatus = Finder.findBySourceStrings("PresenceActivityStatus", "textVariant", { defaultExport: false });
 
 var ActivityIndexes;
 (function (ActivityIndexes) {
@@ -3618,9 +4168,13 @@ const expandActivityStatusString = createPatcherAfterCallback(({ result, args: [
     if (props.activity.type !== ActivityIndexes.LISTENING)
         return;
     const { details: title, state: artistsString, } = props.activity;
+    if (!title || !artistsString)
+        return;
     const artists = StringUtils.join(artistsString.split(";"));
     try {
-        const children = result.props.children[1].props.children;
+        const children = result.props.children[1]
+            ? result.props.children[1].props.children
+            : result.props.children;
         children[1] = typeof children[1] !== 'object' ? children[1] : (React.createElement("span", null,
             React.createElement("strong", null, title),
             " by ",
@@ -3679,7 +4233,7 @@ const appendUserBirthday = createPatcherAfterCallback(({ result, args: [props] }
         return result;
     const [birthdate] = match;
     if (BirthdayStore.current[props.user.id]?.toString() !== getBirthdate(birthdate).toString()) {
-        BirthdayStore.update({ [props.user.id]: getBirthdate(birthdate) });
+        BirthdayStore.update({ [props.user.id]: getBirthdate(birthdate).toString() });
         log(`[BirthdayStore (appendUserBirthday)] Added birthday for ${props.user.id}`);
     }
     const children = result.props.children[1].props.children;
@@ -3791,23 +4345,73 @@ function buildSubMenuElement(id, label, items, props = {}) {
 function buildTextItemElement(id, label, action, props = {}) {
     return BdApi.ContextMenu.buildItem(buildTextItem(id, label, action, props));
 }
+function buildCheckboxItemElement(id, label, checked, action, props = {}) {
+    return BdApi.ContextMenu.buildItem({
+        type: 'toggle',
+        id,
+        label,
+        checked,
+        action: () => action(!checked),
+        onClose: props.onClose ?? (() => { }),
+        ...props
+    });
+}
 
-const patched$3 = function (menu, props) {
+const patched$5 = function (menu, props) {
     const options = menu.props.children;
     const voiceOptions = options.find(option => (option.key
         && option.key.toLowerCase().includes('voice')
         && option.key.toLowerCase().includes('actions')));
     if (!voiceOptions)
         return;
-    voiceOptions.unshift(buildTextItemElement("join-with-camera", "Join with Camera", () => joinWithCamera(props.channel.id)));
+    voiceOptions.props.children.unshift(buildTextItemElement("join-with-camera", "Join with Camera", () => joinWithCamera(props.channel.id)));
+};
+
+function getGroupContaining(itemId, menu) {
+    const findItem = (menu) => {
+        if (!menu.props || !menu.props.children)
+            return null;
+        else if (!Array.isArray(menu.props.children))
+            return findItem(menu.props.children);
+        for (const child of menu.props.children.filter(child => child?.props)) {
+            if ('id' in child.props && child.props.id === itemId) {
+                return menu.props.children;
+            }
+            else if ('key' in child && child.key === itemId) {
+                return menu.props.children;
+            }
+            const found = findItem(child);
+            if (found)
+                return found;
+        }
+        return null;
+    };
+    return findItem(menu);
+}
+
+const menuItemIds = [
+    'opt-into-channel',
+    'opt-out-category',
+];
+const patched$4 = (menu, props) => {
+    const visibilityOptions = menuItemIds.map(id => getGroupContaining(id, menu)).find(Boolean);
+    if (!visibilityOptions)
+        return;
+    const optIndex = visibilityOptions.findIndex(item => menuItemIds.includes(item.props.id));
+    const hideElement = buildTextItemElement('hide-until-active', 'Hide until active', () => HiddenChannelStore.hideChannel(props.channel.id));
+    const unhideElement = buildTextItemElement('unhide-until-active', 'Unhide until active', () => HiddenChannelStore.showChannel(props.channel.id));
+    visibilityOptions.splice(optIndex + 1, 0, HiddenChannelStore.isHidden(props.channel.id) ? unhideElement : hideElement);
 };
 
 function PatchChannelContextMenu() {
-    if (!Settings.current.joinVoiceWithCamera)
+    const { joinVoiceWithCamera, hideChannelUntilActivity } = Settings.current;
+    if (!joinVoiceWithCamera || !hideChannelUntilActivity)
         return;
     PatchChannelContextMenu$1((menu, props) => {
-        if (Settings.current.joinVoiceWithCamera)
-            patched$3(menu, props);
+        if (joinVoiceWithCamera)
+            patched$5(menu, props);
+        if (hideChannelUntilActivity)
+            patched$4(menu, props);
     });
 }
 
@@ -3815,8 +4419,8 @@ function PatchGuildContextMenu$1(callback) {
     return BdApi.ContextMenu.patch('guild-context', callback);
 }
 
-const patched$2 = function (menu, props) {
-    if (!props.folderName)
+const patched$3 = function (menu, props) {
+    if (!('folderName' in props))
         return;
     const isInBlockedFolder = Settings.current.folderNames.includes(props.folderName);
     menu.props.children.push(buildTextItemElement('danho-block-friend-requests', isInBlockedFolder ? 'Unblock friend requests' : 'Block friend requests', () => {
@@ -3828,11 +4432,25 @@ const patched$2 = function (menu, props) {
     }, { color: 'danger' }));
 };
 
+const patched$2 = (menu, props) => {
+    if (!('guild' in props))
+        return;
+    const visibilityOptions = getGroupContaining('hide-muted-channels', menu);
+    if (!visibilityOptions)
+        return;
+    visibilityOptions.push(buildCheckboxItemElement('show-hidden-channels', 'Show Hidden Channels', HiddenChannelStore.showsHiddenChannels(props.guild.id), () => HiddenChannelStore.showsHiddenChannels(props.guild.id)
+        ? HiddenChannelStore.hideHiddenChannels(props.guild.id)
+        : HiddenChannelStore.showHiddenChannels(props.guild.id)));
+};
+
 function PatchGuildContextMenu() {
-    if (!Settings.current.autoCancelFriendRequests)
+    const { autoCancelFriendRequests, hideChannelUntilActivity } = Settings.current;
+    if (!autoCancelFriendRequests && !hideChannelUntilActivity)
         return;
     PatchGuildContextMenu$1((menu, props) => {
-        if (Settings.current.autoCancelFriendRequests)
+        if (autoCancelFriendRequests)
+            patched$3(menu, props);
+        if (hideChannelUntilActivity)
             patched$2(menu, props);
     });
 }
@@ -3868,25 +4486,6 @@ function PatchUserContextMenu$1(callback) {
     return BdApi.ContextMenu.patch('user-context', callback);
 }
 
-function getGroupContaining(itemId, menu) {
-    const findItem = (menu) => {
-        if (!menu.props || !menu.props.children)
-            return null;
-        else if (!Array.isArray(menu.props.children))
-            return findItem(menu.props.children);
-        for (const child of menu.props.children.filter(child => child?.props)) {
-            if ('id' in child.props && child.props.id === itemId) {
-                return menu.props.children;
-            }
-            const found = findItem(child);
-            if (found)
-                return found;
-        }
-        return null;
-    };
-    return findItem(menu);
-}
-
 const patched$1 = (menu, props) => {
     const profile = UserProfileStore.getUserProfile(props.user.id);
     if (!profile)
@@ -3894,7 +4493,9 @@ const patched$1 = (menu, props) => {
     const modifyBadges = getGroupContaining('modify-badges', menu);
     if (modifyBadges)
         return;
-    const userActions = getGroupContaining('note', menu);
+    const userActions = getGroupContaining('user-profile', menu);
+    if (!userActions)
+        return;
     userActions.push(buildSubMenuElement('modify-badges', 'Modify Badges', profile.badges.map((badge, id) => {
         return buildTextItem(badge.id, formatBadgeId(badge.id), () => {
             Logger.log('Badge', badge);
@@ -4050,7 +4651,7 @@ const index = buildPlugin({
         createSlashCommand({
             name: 'show-discord-badges',
             execute: () => ({
-                content: JSON.stringify(DiscordBadgeStore.current, null, 2)
+                content: JSON.stringify(DiscordBadgesStore.current, null, 2)
             })
         });
     },

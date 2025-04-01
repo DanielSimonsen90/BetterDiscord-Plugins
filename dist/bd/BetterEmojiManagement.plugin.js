@@ -521,6 +521,23 @@ function getElementFromReactInstance(instance, allowMultiple = false) {
         document.querySelector(selector.toString());
 }
 
+function join(args, separator = ',', includeAnd = true) {
+    const validArgs = args?.filter(arg => arg !== undefined && arg !== null && arg !== '');
+    if (!validArgs || validArgs.length === 0)
+        return '';
+    if (validArgs.length === 1)
+        return validArgs.shift();
+    const lastArg = validArgs.pop();
+    const combinedArgs = validArgs.join(separator);
+    return `${combinedArgs}${includeAnd ? ' & ' : ''}${lastArg}`;
+}
+function kebabCaseFromCamelCase(str) {
+    return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+}
+const StringUtils = {
+    join, kebabCaseFromCamelCase
+};
+
 function $(selector, single = true) {
     if (single) {
         const dq = new DQuery(selector);
@@ -585,7 +602,7 @@ class DQuery {
         }
     }
     setStyleProperty(key, value) {
-        key = key.toString();
+        key = StringUtils.kebabCaseFromCamelCase(key.toString());
         const style = this.attr('style') ?? '';
         if (!style.includes(key))
             return this.attr('style', `${this.attr('style') ?? ''}${key}: ${value};`, false);

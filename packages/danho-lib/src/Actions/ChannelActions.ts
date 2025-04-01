@@ -3,7 +3,14 @@ import { Finder } from "@dium/api";
 
 type ChannelActions = {
   disconnect(): void;
-  selectChannel(channelId: Snowflake): void;
+  selectChannel(props: {
+    guildId: Snowflake;
+    channelId: Snowflake;
+    messageId?: Snowflake;
+    jumpType?: any;
+    preserveDrawerState?: boolean;
+    source: string;
+  }): void;
   selectPrivateChannel(userId: Snowflake): void;
   selectVoiceChannel(channelId: Snowflake): void;
 }

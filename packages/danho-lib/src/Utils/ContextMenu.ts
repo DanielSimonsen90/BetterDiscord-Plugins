@@ -14,6 +14,8 @@ export function getGroupContaining(itemId: string, menu: any): Array<RenderedMen
     for (const child of menu.props.children.filter(child => child?.props)) {
       if ('id' in child.props && child.props.id === itemId) {
         return menu.props.children as Array<RenderedMenuItem<any, any>>;
+      } else if ('key' in child && child.key === itemId) {
+        return menu.props.children as Array<RenderedMenuItem<any, any>>;
       }
       
       const found = findItem(child as BaseMenu);

@@ -3,6 +3,7 @@ import { Utils } from '@dium/index';
 import ElementSelector from './ElementSelector';
 import { If, PromisedReturn } from '../Utils/types';
 import { getFiber } from '@dium/utils';
+import { StringUtils } from '@danho-lib/Utils';
 
 type Fiber = any;
 
@@ -111,13 +112,13 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
   public get style() {
     return this.element.style;
   }
-  public set style(value: CSSStyleDeclaration) {
+  public set style(value: Partial<CSSStyleDeclaration>) {
     for (const key in value) {
       this.element.style[key] = value[key];
     }
   }
   public setStyleProperty(key: keyof CSSStyleDeclaration | string, value: string) {
-    key = key.toString();
+    key = StringUtils.kebabCaseFromCamelCase(key.toString());
     const style = this.attr('style') ?? '';
     if (!style.includes(key)) return this.attr('style', `${this.attr('style') ?? ''}${key as string}: ${value};`, false);
 
