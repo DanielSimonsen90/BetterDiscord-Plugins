@@ -1,5 +1,5 @@
+import Finder from '@danho-lib/dium/api/finder';
 import { React } from '@dium/modules';
-import { Finder } from "@dium/api";
 
 enum ButtonLooks { BLANK, FILLED, INVERTED, LINK, OUTLINED }
 enum ButtonSizes { ICON, LARGE, MAX, MEDIUM, MIN, NONE, SMALL, TINY, XLARGE }
@@ -59,7 +59,7 @@ export interface ButtonComponent extends React.FunctionComponent<ButtonProps> {
 }
 
 // export const Button: ButtonComponent = Finder.byKeys(["Button"]).Button;
-export const Button: ButtonComponent = Finder.bySource([".Size", ".Looks", ".Colors"]);
+export const Button: ButtonComponent = Finder.findBySourceStrings("FILLED", "BRAND", "MEDIUM", "button", "buttonRef");
 export default Button;
 
 export const SuccessButton = (props: ButtonProps) => <Button {...props} color={Button.Colors.GREEN} look={Button.Looks.FILLED} data-type="success" />;

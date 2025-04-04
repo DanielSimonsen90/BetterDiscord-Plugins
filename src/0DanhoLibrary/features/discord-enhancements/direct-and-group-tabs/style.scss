@@ -1,0 +1,69 @@
+@use '../../../../../packages/danho-lib/src/styles/utils.scss' as *;
+
+.tab-bar--private-channels {
+  --padding: 0ch;
+  padding-right: var(--padding);
+  padding-left: calc(var(--padding) + 5px);
+  padding-bottom: 1ch;
+
+  .tab-bar__tabs {
+    .tab-button {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:last-child::before {
+        content: '';
+        width: 1px;
+        height: 100%;
+        background-color: var(--background-primary);
+        position: absolute;
+        left: 0;
+      }
+    }
+
+    button {
+      padding-inline: 0;
+      position: relative;
+
+      &[data-selected=true] {
+        font-weight: bold;
+
+        * {
+          position: relative;
+          margin: 0;
+
+          &::after {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 1px;
+            background-color: var(--interactive-normal);
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translate(-50%, 0);
+          }
+        }
+      }
+
+      &[data-selected=false] * {
+        color: var(--text-muted);
+
+        &:hover {
+          color: var(--interactive-hover);
+        }
+      }
+    }
+  }
+}
+
+@include className('privateChannels', nav) {
+  &:has(.danho-private-channel-list__space-enabler) {
+    @include className('scroller') {
+      --margin-addition: 1em;
+      margin-bottom: calc(var(--custom-app-panels-height, 0) + 8px + var(--margin-addition));
+    }
+  }
+}

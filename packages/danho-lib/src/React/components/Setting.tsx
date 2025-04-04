@@ -12,7 +12,7 @@ type SettingProps<Settings extends Record<string, any>, SettingsKey extends keyo
   onChange?: (value: Settings[SettingsKey]) => void,
   formatValue?: (value: Settings[SettingsKey]) => Settings[SettingsKey],
   type?: 'switch' | 'text' | 'number' | React.HTMLInputTypeAttribute | 'select';
-  selectValues?: string[];
+  options?: string[];
   multipleSelect?: boolean;
 };
 export function Setting<
@@ -73,7 +73,7 @@ export function Setting<
   if (type === 'select') return (
     <div className="danho-form-select" key={setting.toString()}>
       <Select 
-        options={props.selectValues.map(value => ({ label: value, value }))} 
+        options={props.options.map(value => ({ label: value, value }))} 
         isSelected={value => Array.isArray(settings[setting]) ? (v as Array<any>).includes(value) : value === settings[setting]} 
         serialize={value => JSON.stringify(value)}
         select={Array.isArray(settings[setting]) ? (value) => {

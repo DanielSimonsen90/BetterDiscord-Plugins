@@ -48,6 +48,9 @@ export const DiscordEnhancements = {
 
   hideChannelUntilActivity: true,
   keepChannelVisibleAfterActivityTimeoutMin: 5,
+
+  directAndGroupTabs: true,
+  defaultDirectAndGroupTab: 'direct',
 }
 
 export const DanhoEnhancements = {
@@ -120,6 +123,9 @@ export const DiscordEnhancementsTitles: Record<keyof typeof DiscordEnhancements,
 
   hideChannelUntilActivity: `Hide channels from your channel list until they have activity`,
   keepChannelVisibleAfterActivityTimeoutMin: `Keep recently active hidden channel visible for x minutes`,
+
+  directAndGroupTabs: `Add a tab bar to distinguish between direct messages and group chats`,
+  defaultDirectAndGroupTab: `Default tab to open`,
 };
 
 export const DanhoEnhancementsTitles: Record<keyof typeof DanhoEnhancements, string> = {

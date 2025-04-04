@@ -12,7 +12,7 @@
   display: grid;
   grid-auto-flow: column;
   max-width: 100%;
-  overflow-x: auto;
+  overflow: auto hidden;
 
   &--no-color .tab-bar__tab {
     background-color: transparent;

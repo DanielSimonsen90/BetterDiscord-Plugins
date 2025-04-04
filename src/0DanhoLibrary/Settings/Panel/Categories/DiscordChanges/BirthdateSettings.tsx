@@ -11,7 +11,7 @@ export default CreateSettingsGroup((React, props, Setting) => {
   return (<>
     <Setting setting="hideBirthdateIcon" {...props} />
     <Setting setting="hideBirthdateTimestamp" {...props} />
-    <Setting setting="birthdateTimestampStyle" {...props} type="select" selectValues={[
+    <Setting setting="birthdateTimestampStyle" {...props} type="select" options={[
       "D", "d",
       "T", "t",
       "F", "f",

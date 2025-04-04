@@ -1,4 +1,5 @@
 // import * as AutoCancelFriendRequests from './auto-cancel-friend-requests';
+import * as DirectAndGroupTabs  from './direct-and-group-tabs';
 import * as FixRelativeTimestamps from './fix-relative-timestamps';
 import * as HideInactiveChannels from './hide-inactive-channels';
 // import * as JoinVoiceWithCamera from './join-voice-with-camera';
@@ -17,4 +18,5 @@ export default [
   UserBirthday,
   { style: UserTimezoneStyle, default: () => { } },
   HideInactiveChannels,
+  DirectAndGroupTabs,
 ];

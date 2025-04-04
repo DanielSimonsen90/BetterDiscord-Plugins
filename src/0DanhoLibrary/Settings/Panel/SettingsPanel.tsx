@@ -5,7 +5,6 @@ import { Settings, titles } from "../Settings";
 
 import { SettingProps } from "./_CreateSettingsGroup";
 import { StyleSettings, DiscordChangesSettings, DanhoChangesSettings } from "./Categories";
-import { getMeta } from "@dium";
 
 export default function SettingsPanel() {
   const [settings, set] = Settings.useState();

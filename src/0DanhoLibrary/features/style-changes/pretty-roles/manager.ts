@@ -1,13 +1,8 @@
-import { ActionsEmitter } from '@danho-lib/Actions';
 import RolesListModule from '@danho-lib/Patcher/RolesList';
 import { GuildUtils } from '@danho-lib/Utils';
 import type { Snowflake, Role } from '@discord/types';
 
 export const PrettyRolesManager = new class PrettyRolesManager {
-  constructor() {
-    ActionsEmitter.on('GUILD_ROLE_UPDATE', console.log);
-  }
-
   context: ReturnType<RolesListModule['RolesList']>['props'] | undefined;
   role: Role;
 

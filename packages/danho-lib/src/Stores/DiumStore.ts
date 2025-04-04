@@ -17,7 +17,13 @@ export class DiumStore<T extends Record<string, any>> implements Flux.StoreLike 
    * @param defaults Default item to use initially & revert to on reset.
    * @param onLoad Optional callback for when the item are loaded.
    */
-  constructor(public defaults: T, public dataKey: string, public onLoad?: () => void) {}
+  constructor(
+    public defaults: T, 
+    public dataKey: string, 
+    public onLoad?: () => void
+  ) {
+    if (!dataKey.endsWith('Store')) this.dataKey = formatStoreName(dataKey);
+  }
 
   /** Loads item. */
   load(): void {
@@ -184,3 +190,10 @@ export const createDiumStore = <T extends Record<string, any>>(
   dataKey: string,
   onLoad?: () => void
 ): DiumStore<T> => new DiumStore(defaults, dataKey, onLoad);
+
+function formatStoreName(name: string): string {
+  const pascal = name.charAt(0).toUpperCase() + name.slice(1);
+  return name.endsWith('Store')
+    ? pascal
+    : `${pascal}Store`;
+}

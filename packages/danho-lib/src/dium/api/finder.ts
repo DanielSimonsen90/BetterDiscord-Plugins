@@ -216,10 +216,27 @@ export const findComponentBySourceStrings = async <TResult = JSX.BD.FC>(...keywo
   return component;
 };
 
+export const findModuleById = (id: string | number, options?: SearchOptions<boolean>) => {
+  return BdApi.Webpack.getModule((_, __, _id) => _id === id.toString(), options)
+}
+export function findUnpatchedModuleBySourceStrings(...keywords: string[]) {
+  const module = findBySourceStrings(...keywords);  
+  if (!module) {
+    Logger.log(`[findUnpatchedModuleBySourceStrings] Module not found for keywords: [${keywords.join(',')}]`);
+    return undefined;
+  }
+
+  if (typeof module === 'function') return module['__originalFunction'];
+
+  return module;
+}
+
 export const Finder = {
   ...DiumFinder,
   ...BDFDB_Finder,
   findBySourceStrings,
-  findComponentBySourceStrings
+  findComponentBySourceStrings,
+  findModuleById,
+  findUnpatchedModuleBySourceStrings,
 };
 export default Finder;

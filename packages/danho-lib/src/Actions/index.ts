@@ -83,7 +83,8 @@ export const ActionsEmitter = new class ActionsEmitter extends EventEmitter<Acti
   }
   off<K>(eventName: keyof Actions | K, listener: K extends keyof Actions ? Actions[K] extends unknown[] ? (...args: Actions[K]) => void : never : never): this {
     Dispatcher.unsubscribe(eventName as string, listener as any);
-    this._events.set(eventName as string, this._events.get(eventName as string)!.filter(([l]) => l !== listener));
+    const existing = this._events.get(eventName as string) ?? [];
+    this._events.set(eventName as string, existing.filter(([l]) => l !== listener));
 
     Logger.log(`[ActionsEmitter] Unsubscribed from ${eventName}`);
     return super.off(eventName, listener as any);

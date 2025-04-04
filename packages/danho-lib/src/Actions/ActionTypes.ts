@@ -25,6 +25,14 @@ type ActionProps = {
       };
     };
   };
+  MESSAGE_ACK: {
+    channelId: Snowflake;
+    manual: undefined | boolean;
+    messageId: Snowflake;
+    newMentionCount: undefined | number;
+    version: number;
+  },
+  MESSAGE_ACKED: {},
   MESSAGE_CREATE: {
     channelId: Snowflake;
     guildId?: Snowflake;
