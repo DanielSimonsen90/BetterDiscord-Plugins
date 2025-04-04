@@ -6,7 +6,6 @@ export default function onRelationshipAdd() {
   if (!Settings.current.prettyRoles) return;
 
   ActionsEmitter.on('USER_PROFILE_MODAL_OPEN', ({ guildId }) => {
-    console.log('USER_PROFILE_MODAL_OPEN', guildId, Settings.current.prettyRoles);
     if (Settings.current.prettyRoles && guildId) prettifyRoles();
   });
 }

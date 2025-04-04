@@ -22,10 +22,10 @@ export type BadgeId = (
 type State = Partial<Record<BadgeId | (string & {}), UserProfileBadge>>;
 
 export const BadgeGroups = {
-  discord: ['staff', 'certified_moderator', 'partner', 'automod'],
-  programming: ['active_developer', 'verified_developer', 'bot_commands'],
-  bug_hunter: ['bug_hunter_level_1', 'bug_hunter_level_2'],
+  discord: ['staff', 'partner', 'certified_moderator', 'automod'],
+  bug_hunter: ['bug_hunter_level_2', 'bug_hunter_level_1'],
   hypesquad: ['hypesquad', 'hypesquad_house_1', 'hypesquad_house_2', 'hypesquad_house_3'],
+  programming: ['verified_developer', 'active_developer', 'bot_commands'],
   nitro: ['premium', 'premium_tenure_1_month_v2', 'premium_tenure_3_month_v2', 'premium_tenure_6_month_v2', 'premium_tenure_12_month_v2', 'premium_tenure_24_month_v2', 'premium_tenure_36_month_v2', 'premium_tenure_60_month_v2', 'premium_tenure_72_month_v2', 'early_supporter'],
   server_boost: ['guild_booster_lvl1', 'guild_booster_lvl2', 'guild_booster_lvl3', 'guild_booster_lvl4', 'guild_booster_lvl5', 'guild_booster_lvl6', 'guild_booster_lvl7', 'guild_booster_lvl8', 'guild_booster_lvl9'],
   other: ['legacy_username', 'quest_completed'],

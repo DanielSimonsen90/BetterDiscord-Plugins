@@ -102,6 +102,12 @@ export const ActionsEmitter = new class ActionsEmitter extends EventEmitter<Acti
 
   emit<K>(eventName: keyof Actions | K, ...args: K extends keyof Actions ? Actions[K] extends unknown[] ? Actions[K] : never : never): boolean {
     Logger.log(`[ActionsEmitter] Emitting ${eventName}`, { args });
+    const action: any = args.shift();
+    if (args.length) Logger.warn(`The following arguments were not used:`, { args });
+    
+    const payload = Object.assign({ type: eventName }, action);
+    Logger.log(`[ActionsEmitter] Dispatching ${eventName}`, { payload });
+    Dispatcher.dispatch(payload);
     return super.emit(eventName, ...args as any);
   }
 };

@@ -1,7 +1,21 @@
-import { BadgeIconIds } from "@discord/components";
+import { Settings } from "src/0DanhoLibrary/Settings";
 import { BadgeId } from "../stores/DiscordBadgeStore";
 
-export default [
+const NitroBadges = [
+  'premium_tenure_72_month_v2',
+  'premium_tenure_60_month_v2',
+  'premium_tenure_48_month_v2',
+  'premium_tenure_36_month_v2',
+  'premium_tenure_24_month_v2',
+  'premium_tenure_12_month_v2',
+  'premium_tenure_6_month_v2',
+  'premium_tenure_3_month_v2',
+  'premium_tenure_1_month_v2',
+  'premium',
+] as Array<BadgeId>;
+
+export default () => [
+  ...(Settings.current.movePremiumBadge ? [] : NitroBadges),
   'staff',
   'partner',
   'certified_moderator',
@@ -15,17 +29,8 @@ export default [
   'verified_developer',
   'active_developer',
   'bot_commands',
+  ...(Settings.current.movePremiumBadge ? NitroBadges : []),
   'early_supporter',
-  'premium_tenure_72_month_v2',
-  'premium_tenure_60_month_v2',
-  'premium_tenure_48_month_v2',
-  'premium_tenure_36_month_v2',
-  'premium_tenure_24_month_v2',
-  'premium_tenure_12_month_v2',
-  'premium_tenure_6_month_v2',
-  'premium_tenure_3_month_v2',
-  'premium_tenure_1_month_v2',
-  'premium',
   'guild_booster_lvl9',
   'guild_booster_lvl8',
   'guild_booster_lvl7',
@@ -37,4 +42,4 @@ export default [
   'guild_booster_lvl1',
   'legacy_username',
   'quest_completed',
-] as Array<BadgeId | BadgeIconIds>
+] as Array<BadgeId>

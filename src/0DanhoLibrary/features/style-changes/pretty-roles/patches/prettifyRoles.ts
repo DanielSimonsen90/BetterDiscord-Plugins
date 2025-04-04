@@ -5,6 +5,7 @@ import { DEFAULT_DISCORD_ROLE_COLOR } from "src/0DanhoLibrary/constants";
 import { Settings } from "src/0DanhoLibrary/Settings";
 import { PrettyRolesManager } from "../manager";
 import { sleep } from "@dium/utils";
+import { Logger } from "@danho-lib/dium/api/logger";
 
 export default async function prettyRoles() {
   await sleep(100); // Wait for the roles to load
@@ -14,7 +15,7 @@ export default async function prettyRoles() {
     if (!roleId) return;
 
     const role = PrettyRolesManager.getRole(roleId);
-    if (!role) return console.log('Role not found', roleId);
+    if (!role) return Logger.warn('Role not found', roleId);
 
     el.setStyleProperty('--role-color',
       hexToRgb(role.colorString 

@@ -6,7 +6,8 @@ import {
   SelectedGuildStore,
   VoiceStore,
   
-  UserStore
+  UserStore,
+  MessageStore
 } from '@stores';
 
 import GuildActions from "@actions/GuildActions";
@@ -16,6 +17,9 @@ import { GuildMember } from "@discord/types/guild/member";
 import { BetterOmit, FilterStore } from "./types";
 import { Snowflake } from "@discord/types/base";
 import Finder from '@danho-lib/dium/api/finder';
+import { User } from '@discord/types';
+import { ActionsEmitter } from '@actions';
+import { ChannelUtils } from './Channels';
 
 const useGuildFeatures = Finder.findBySourceStrings("hasFeature", "GUILD_SCHEDULED_EVENTS") as (guild: Guild) => Array<string>;
 
@@ -42,6 +46,7 @@ type CompiledGuildUtils = BetterOmit<
     getGuildRoleWithoutGuildId(roleId: Snowflake): Role | null;
     getEmojiIcon(emojiId: Snowflake, size?: number): string;
     getMemberAvatar(memberId: Snowflake, guildId: Snowflake, size?: number): string;
+    getOwner(guildId?: Snowflake): User | null;
   };
 
 export const GuildUtils: CompiledGuildUtils = {
@@ -96,4 +101,25 @@ export const GuildUtils: CompiledGuildUtils = {
     if (avatar) return `https://cdn.discordapp.com/guilds/${guildId}/users/${memberId}/avatars/${avatar}.webp?size=${size}`;
     return 
   },
+  getOwner(guildId?: Snowflake, openModal = false, showGuildProfile = true) {
+    const guild = guildId ? GuildStore.getGuild(guildId) : GuildUtils.current;
+    if (!guild) return null;
+
+    const owner = UserStore.getUser(guild.ownerId);
+    if (owner && openModal) ActionsEmitter.emit('USER_PROFILE_MODAL_OPEN', {
+      type: 'USER_PROFILE_MODAL_OPEN',
+      userId: owner.id,
+      channelId: GuildChannelStore.getDefaultChannel(guild.id).id,
+      guildId: guild.id,
+      messageId: MessageStore.getLastMessage(GuildChannelStore.getDefaultChannel(guild.id).id)?.id,
+      sessionId: undefined,
+      showGuildProfile,
+      sourceAnalyticsLocations: [
+        "username",
+        "bite size profile popout",
+        "avatar"
+      ]
+    });
+    return owner;
+  }
 };

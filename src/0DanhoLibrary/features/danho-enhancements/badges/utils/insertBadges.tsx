@@ -38,7 +38,7 @@ export function insertBadges(props: PropsFromFC<BadgeList>, result: ReturnType<B
   }).filter(Boolean);
   const realAndPreferred = badgeWithIds.concat(userPreferredBadges.map(badgeId => ({ id: badgeId, instance: undefined })));
   const realAndPreferredWithPosition = realAndPreferred
-    .map(badge => ({ ...badge, position: badgePositions.indexOf(badge.id) }))
+    .map(badge => ({ ...badge, position: badgePositions().indexOf(badge.id) }))
     .sort((a, b) => a.position - b.position);
 
   const compiledInstances = realAndPreferredWithPosition.map(badge => {
