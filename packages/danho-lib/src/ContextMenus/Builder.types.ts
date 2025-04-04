@@ -3,7 +3,7 @@ import type React from "react";
 
 export type ContextMenuItemProps = BaseContextMenuItemProps & {
   color?: string | 'default' | 'danger' | 'brand' | 'primary' | 'secondary' | 'success' | 'warning';
-  label: string;
+  label: React.ReactNode;
 
   icon?: React.FC<{ color?: string | 'currentColor' }>
   iconLeft?: boolean;

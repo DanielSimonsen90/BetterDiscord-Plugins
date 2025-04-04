@@ -33,8 +33,8 @@ export function buildTextItemElement(id: string, label: string, action: () => vo
   return BdApi.ContextMenu.buildItem(buildTextItem(id, label, action, props));
 }
 
-export function buildCheckboxItemElement(id: string, label: string, checked: boolean, action: (checked: boolean) => void, props: Partial<ContextMenuItemProps> = {}): JSX.Element {
-  return BdApi.ContextMenu.buildItem({
+export function buildCheckboxItem(id: string, label: React.ReactNode, checked: boolean, action: (checked: boolean) => void, props: Partial<ContextMenuItemProps> = {}): ContextMenuItemProps {
+  return {
     type: 'toggle',
     id,
     label,
@@ -42,5 +42,8 @@ export function buildCheckboxItemElement(id: string, label: string, checked: boo
     action: () => action(!checked),
     onClose: props.onClose ?? (() => { }),
     ...props
-  });
+  };
+}
+export function buildCheckboxItemElement(id: string, label: React.ReactNode, checked: boolean, action: (checked: boolean) => void, props: Partial<ContextMenuItemProps> = {}): JSX.Element {
+  return BdApi.ContextMenu.buildItem(buildCheckboxItem(id, label, checked, action, props));
 }

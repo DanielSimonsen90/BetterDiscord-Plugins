@@ -8,9 +8,6 @@
     "baseUrl": "./",
     "paths": {
       "@discord/*": ["./packages/discord/*"],
-      "@dium": ["./packages/dium/src/index.js"],
-      "@dium/*": ["./packages/dium/src/*"],
-      "@danho-lib/*": ["./packages/danho-lib/src/*"],
 
       "@actions": ["./packages/danho-lib/src/Actions/index.js"],
       "@actions/*": ["./packages/danho-lib/src/Actions/*"],
@@ -23,6 +20,10 @@
 
       "@stores": ["./packages/danho-lib/src/Stores/index.js"],
       "@stores/*": ["./packages/danho-lib/src/Stores/*"],
+
+      "@dium": ["./packages/dium/src/index.js"],
+      "@dium/*": ["./packages/dium/src/*"],
+      "@danho-lib/*": ["./packages/danho-lib/src/*"],
     },
   }
 }

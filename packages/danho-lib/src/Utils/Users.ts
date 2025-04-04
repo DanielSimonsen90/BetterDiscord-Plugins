@@ -30,6 +30,7 @@ type CompiledUserUtils = BetterOmit<
 > & {
   get me(): MyUser;
   getPresenceState: typeof PresenceStore["getState"];
+  getUserByUsername(tag: string): User | undefined;
 };
 
 export const UserUtils: CompiledUserUtils = {
@@ -53,5 +54,8 @@ export const UserUtils: CompiledUserUtils = {
   },
 
   getPresenceState: () => PresenceStore.getState(),
+  getUserByUsername(username) {
+    return Object.values(UserStore.getUsers()).find(user => user.username === username);
+  },
 };
 export default UserUtils;

@@ -2,17 +2,21 @@ import { Finder } from "@dium/api";
 import { SelectedGuildStore, SelectedChannelStore, ChannelStore, GuildStore, GuildMemberStore, UserStore } from '@stores';
 import { Arrayable } from "./types";
 
+export * from './ContextMenu';
 export * from './Functions';
 export * from './Net';
 export * from './Object';
 export * from './String';
+export * from './Url';
 
 import { ChannelUtils } from './Channels';
 import { ClassNamesUtils } from "./ClassNames";
+import { ContextMenuUtils } from "./ContextMenu";
 import { GuildUtils } from './Guilds';
 import { UserUtils } from './Users'
 import { StringUtils } from './String';
 import { ObjectUtils } from './Object';
+import { UrlUtils } from './Url';
 
 export function findNodeByIncludingClassName<NodeType = Element>(className: string, node = document.body): NodeType | null {
   return node.querySelector(`[class*="${className}"]`) as any;
@@ -53,7 +57,8 @@ export const Utils = {
   get currentGuildMembers() { return currentGuildMembers(); },
   get currentUser() { return currentUser(); },
 
-  StringUtils, ObjectUtils, ClassNamesUtils,
+  StringUtils, ObjectUtils, UrlUtils,
+  ClassNamesUtils, ContextMenuUtils,
   ChannelUtils, GuildUtils, UserUtils,
 };
 

@@ -11,9 +11,13 @@ export function join(args?: Array<string | undefined>, separator = ',', includeA
 export function kebabCaseFromCamelCase(str: string): string {
   return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 }
+export function pascalCaseFromSnakeCase(str: string): string {
+  const replaced = str.replace(/_./g, match => ` ${match.charAt(1).toUpperCase()}`);
+  return replaced.charAt(0).toUpperCase() + replaced.slice(1);
+}
 
 export const StringUtils = {
-  join, kebabCaseFromCamelCase
+  join, kebabCaseFromCamelCase, pascalCaseFromSnakeCase,
 }
 
 export default StringUtils;

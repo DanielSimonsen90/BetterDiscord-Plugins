@@ -3,7 +3,8 @@ export const USER_TAGS = {
   THEGUNASS: 'thegunass',
   BEAUTYKILLER: 'thebeautykiller',
   EMILIE: 'emi.2008',
-  CARL: 'carlbradsted'
+  CARL: 'carlbradsted',
+  MIZBATT: 'mizbatt',
 }
 
 export const DEFAULT_DISCORD_ROLE_COLOR = `153, 170, 181`;

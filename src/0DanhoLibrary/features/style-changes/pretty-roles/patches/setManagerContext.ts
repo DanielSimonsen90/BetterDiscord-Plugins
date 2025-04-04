@@ -5,6 +5,6 @@ import { PrettyRolesManager } from "../manager";
 
 export default createPatcherCallback<RolesListModule['RolesList']>(({ args, original }) => { 
   const result = (original as any).__originalFunction(...args) as ReturnType<typeof original>;
-  PrettyRolesManager.context = result.props;
+  if (result) PrettyRolesManager.context = result.props;
   return result;
 });

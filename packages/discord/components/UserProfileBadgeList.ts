@@ -1,5 +1,6 @@
 import Finder from "@danho-lib/dium/api/finder";
 import { DisplayProfile } from "@discord/types";
+import { BadgeId } from "src/0DanhoLibrary/features/danho-enhancements/badges/stores/DiscordBadgeStore";
 
 export type BadgeList = JSX.BD.FC<{
   badges: Array<UserProfileBadge>;
@@ -23,7 +24,15 @@ export type BadgeList = JSX.BD.FC<{
     delay: 300;
     onTooltipHide: () => void;
     onTooltipShow: () => void;
-    text: string | JSX.BD.Rendered<any>;
+    text: string | JSX.BD.Rendered<{
+      profileBadge: UserProfileBadge;
+      tenureBadge: {
+        id: BadgeId;
+        tenureReqNumMonths: number;
+        hasWideArt: boolean;
+        nameUnformatted(n: any): string;
+      }
+    }>;
     tooltipClassName: undefined;
   }, true>>;
   className: 'container_...';
@@ -49,7 +58,7 @@ export enum BadgeTypes {
   NITRO_DIAMOND = 'premium_tenure_24_month',
   NITRO_EMERALD = 'premium_tenure_36_month',
   NITRO_RUBY = 'premium_tenure_60_month',
-  NITRO_FIRE = 'premium_tenure_72_month',
+  NITRO_OPAL = 'premium_tenure_72_month',
 
   GUILD_BOOST_ANY = 'booster',
   GUILD_BOOST_1 = 'guild_booster_lvl1',

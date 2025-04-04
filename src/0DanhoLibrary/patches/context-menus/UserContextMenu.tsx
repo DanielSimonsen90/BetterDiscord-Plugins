@@ -1,6 +1,6 @@
 import UserContextMenu from '@danho-lib/ContextMenus/UserContextMenu'
 import { Settings } from 'src/0DanhoLibrary/Settings';
-import addModifyBadgesToUserContextMenu from 'src/0DanhoLibrary/features/danho-enhancements/badges/addModifyBadgesToUserContextMenu';
+import addModifyBadgesToUserContextMenu from 'src/0DanhoLibrary/features/danho-enhancements/badges/patches/addModifyBadgesToUserContextMenu';
 import AddMemberToDungeon from 'src/0DanhoLibrary/features/danho-enhancements/quick-add-member-to-dungeon/AddMemberToDungeonToUserContextMenu';
 
 export default function PatchUserContextMenu() {

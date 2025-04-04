@@ -53,7 +53,7 @@ export type ExpressionPickerContextMenuTargetProps = {
 };
 
 
-type Callback = (menu: ExpressionPickerContextMenuFiber, targetProps: ExpressionPickerContextMenuTargetProps) => void;
+export type Callback = (menu: ExpressionPickerContextMenuFiber, targetProps: ExpressionPickerContextMenuTargetProps) => void;
 
 export function PatchExpressionPicker(callback: Callback) {
   return BdApi.ContextMenu.patch('expression-picker', callback);

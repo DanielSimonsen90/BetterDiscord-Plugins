@@ -6,7 +6,7 @@ export const getNode = Finder.findBySourceStrings("timestamp", "format", "parsed
   unix: number,
   format: DiscordTimeFormat,
 ) => object;
-export const Timestamp = Finder.findBySourceStrings("timestampTooltip", { defaultExport: false, }).Z as React.FC<{
+export const Timestamp = Finder.findBySourceStrings(".timestampTooltip", { defaultExport: false, }).Z as React.FC<{
   node: ReturnType<typeof getNode>;
 }>;
 
@@ -26,12 +26,12 @@ type Props = {
 }
 export default function TimestampComponent({ unix, format }: Props) {
   const node = getNode(unix, format);
+  const BadTimestamp = <p>{new Date(unix * 1000).toLocaleString()}</p>;
+
   try {
-    return <Timestamp node={node} />;
+    return typeof Timestamp === 'function' ? <Timestamp node={node} /> : BadTimestamp
   } catch (e) {
     console.error(e);
-    return <p>{
-      new Date(unix * 1000).toLocaleString()
-    }</p>;
+    return BadTimestamp;
   }
 }

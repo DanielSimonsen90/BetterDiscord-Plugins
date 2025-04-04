@@ -27,3 +27,9 @@ export function getGroupContaining(itemId: string, menu: any): Array<RenderedMen
 
   return findItem(menu);
 }
+
+export const ContextMenuUtils = {
+  getGroupContaining,
+}
+
+export default ContextMenuUtils;
