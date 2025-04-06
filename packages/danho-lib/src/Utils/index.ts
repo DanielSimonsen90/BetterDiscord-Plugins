@@ -8,6 +8,7 @@ export * from './Net';
 export * from './Object';
 export * from './String';
 export * from './Url';
+export * from './Time';
 
 import { ChannelUtils } from './Channels';
 import { ClassNamesUtils } from "./ClassNames";
@@ -17,6 +18,7 @@ import { UserUtils } from './Users'
 import { StringUtils } from './String';
 import { ObjectUtils } from './Object';
 import { UrlUtils } from './Url';
+import { TimeUtils } from './Time';
 
 export function findNodeByIncludingClassName<NodeType = Element>(className: string, node = document.body): NodeType | null {
   return node.querySelector(`[class*="${className}"]`) as any;
@@ -57,7 +59,7 @@ export const Utils = {
   get currentGuildMembers() { return currentGuildMembers(); },
   get currentUser() { return currentUser(); },
 
-  StringUtils, ObjectUtils, UrlUtils,
+  StringUtils, ObjectUtils, UrlUtils, TimeUtils,
   ClassNamesUtils, ContextMenuUtils,
   ChannelUtils, GuildUtils, UserUtils,
 };

@@ -28,7 +28,7 @@ export function getPosition(position: CustomBadgeData['position'], badges: Array
   if (typeof position === 'number') return position;
 
   const [startIndex, endIndex] = [position.before, position.after].map((badgeType, i) => badgeType
-    ? badges.findIndex(badge => badge.toLowerCase().includes(badgeType.toLowerCase())) + (i === 0 ? -1 : 1)
+    ? badges.findIndex(badge => badge.toLowerCase().includes(badgeType.toLowerCase())) + (i === 0 ? 0 : 1)
     : -1
   );
 

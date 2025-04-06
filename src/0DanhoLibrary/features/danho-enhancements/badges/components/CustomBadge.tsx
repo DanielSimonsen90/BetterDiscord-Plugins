@@ -12,6 +12,9 @@ export type CustomBadgeProps = {
   iconUrl: string;
   style?: React.CSSProperties;
   href?: string;
+
+  /** @default 20px */
+  size?: `${number}px`;
 };
 
 export type CustomBadgeData = Omit<CustomBadgeProps, 'key' | 'onContextMenu'> & {
@@ -22,21 +25,24 @@ export type CustomBadgeData = Omit<CustomBadgeProps, 'key' | 'onContextMenu'> & 
     after?: BadgeTypes | string;
     default?: number;
   };
-  /** @default 20px */
-  size?: `${number}px`;
 }
 
 const ClassModule = ClassNamesUtils.combineModuleByKeys<('container' | 'badge')>(['container', 'badge'])
 
-export const CustomBadge: React.FC<CustomBadgeProps> = ({ name, iconUrl, style, href, onContextMenu }) => {
+export const CustomBadge: React.FC<CustomBadgeProps> = ({ name, iconUrl, style, href, onContextMenu, size }) => {
   if (!name || !iconUrl) return null;
+
+  const compiledStyle = Object.assign({}, style, {
+    width: style?.width ?? size,
+    height: style?.height ?? size,
+  })
 
   const InnerBadge = ({ href, onContextMenu, ...props }: { href?: string, onContextMenu?: CustomBadgeProps['onContextMenu']; }) => href ? (
     <a href={href} target="_blank" rel="noreferrer noopener" onContextMenu={onContextMenu} {...props}>
       <InnerBadge />
     </a>
   ) : (
-    <img onContextMenu={onContextMenu} src={iconUrl} alt={name} className={ClassModule.badge} style={style} {...props} />
+    <img onContextMenu={onContextMenu} src={iconUrl} alt={name} className={ClassModule.badge} style={compiledStyle} {...props} />
   );
 
   return (

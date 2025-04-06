@@ -41,3 +41,19 @@ export function timeSpan(startTime: number, endTime: number, format: 'full' | 's
     time, min, max,
   }
 }
+
+export function throttle<T>(callback: (...args: T[]) => void, delay: number) {
+  let lastTime = 0;
+  return function (...args: T[]) {
+    const now = Date.now();
+    if (now - lastTime >= delay) {
+      lastTime = now;
+      callback(...args);
+    }
+  };
+}
+
+export const TimeUtils = {
+  timeSpan,
+  throttle,
+}
