@@ -11,6 +11,9 @@ export interface TextProps {
     color?: string;
     style?: React.CSSProperties;
     children?: React.ReactNode;
+
+    // TODO: Test
+    onClick?: (e: React.MouseEvent) => void;
 }
 
 type TextVariants =

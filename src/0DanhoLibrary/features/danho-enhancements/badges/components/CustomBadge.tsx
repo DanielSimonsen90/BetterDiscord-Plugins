@@ -1,60 +1,51 @@
 import { React } from "@react";
 import { BadgeTypes, BadgeList } from "@discord/components/UserProfileBadgeList";
 import { Snowflake } from "@discord/types/base";
+import { Tooltip } from "@discord/components";
+import { ClassNamesUtils } from "@danho-lib/Utils/ClassNames";
 
 export type CustomBadgeProps = {
+  key: string;
+  onContextMenu?: (e: React.MouseEvent) => void;
+  
   name: string;
   iconUrl: string;
   style?: React.CSSProperties;
   href?: string;
 };
 
-export type CustomBadgeData = CustomBadgeProps & {
+export type CustomBadgeData = Omit<CustomBadgeProps, 'key' | 'onContextMenu'> & {
+  id: string;
   userTags?: Snowflake[];
   position?: number | 'start' | 'end' | {
-    before?: BadgeTypes;
-    after?: BadgeTypes;
+    before?: BadgeTypes | string;
+    after?: BadgeTypes | string;
     default?: number;
   };
   /** @default 20px */
   size?: `${number}px`;
 }
 
-export let CustomBadge: JSX.BD.FC<CustomBadgeProps> & React.FC<CustomBadgeProps> = null;
-export function patchBadgeComponent(result: ReturnType<BadgeList>) {
-  if (!result.props.children[0]) return;
-  const TooltipWrapper = result.props.children[0].type as React.FC<
-    Partial<{
-      delay: 300;
-      onTooltipHide: () => void;
-      onTooltipShow: () => void;
-      tooltipClassName: string;
-    }> & {
-      children: ReturnType<typeof CustomBadge>;
-      text: string;
-    }
-  >;
-  const TooltipContent = result.props.children[0].props.children.type as React.FC<{
-    children: JSX.IntrinsicElements['img' | 'a'],
-  }>;
+const ClassModule = ClassNamesUtils.combineModuleByKeys<('container' | 'badge')>(['container', 'badge'])
 
-  CustomBadge = ({ name, iconUrl, style, href }: CustomBadgeProps) => {
-    if (!name || !iconUrl) return null;
+export const CustomBadge: React.FC<CustomBadgeProps> = ({ name, iconUrl, style, href, onContextMenu }) => {
+  if (!name || !iconUrl) return null;
 
-    const InnerBadge = ({ href }: { href?: string }) => href ? (
-      <a href={href} target="_blank" rel="noreferrer noopener">
-        <InnerBadge />
-      </a>
-    ) : (
-      <img src={iconUrl} alt={name} className={result.props.children[0].props.children.props.children.props.className} style={style} />
-    )
+  const InnerBadge = ({ href, onContextMenu, ...props }: { href?: string, onContextMenu?: CustomBadgeProps['onContextMenu']; }) => href ? (
+    <a href={href} target="_blank" rel="noreferrer noopener" onContextMenu={onContextMenu} {...props}>
+      <InnerBadge />
+    </a>
+  ) : (
+    <img onContextMenu={onContextMenu} src={iconUrl} alt={name} className={ClassModule.badge} style={style} {...props} />
+  );
 
-    return (
-      <TooltipWrapper text={name}>
-        <TooltipContent>
-          <InnerBadge href={href} />
-        </TooltipContent>
-      </TooltipWrapper>
-    ) as any;
-  }
+  return (
+    <Tooltip text={name}>
+      {props => (
+        <div {...props}>
+          <InnerBadge href={href} onContextMenu={onContextMenu} />
+        </div>
+      )}
+    </Tooltip>
+  );
 }

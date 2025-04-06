@@ -1,9 +1,11 @@
-@import './components/index.scss';
-@import './Form.scss';
-@import './PluginSettings.scss';
+@forward './components/index.scss';
+@forward './Form.scss';
+@forward './PluginSettings.scss';
 
 .hidden {
-  display: none;
+  opacity: 0;
+  height: 0;
+  width: 0;
 }
 
 *[data-error]::after {
@@ -22,4 +24,8 @@
   .text-input-container input {
     padding: 7px;
   }
+}
+
+.clickable {
+  cursor: pointer;
 }

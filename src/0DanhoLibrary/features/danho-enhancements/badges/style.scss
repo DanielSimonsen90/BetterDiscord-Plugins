@@ -1,5 +1,85 @@
+@use '../../../../../packages/danho-lib/src/styles/utils.scss' as *;
+
 .badge-context-option-container {
   display: flex;
   place-items: center;
   gap: .5ch;
+}
+
+.custom-badge-container {
+  @extend .badge-context-option-container;
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  gap: 1em;
+  padding: .5em;
+  margin: .5em 0;
+  border-radius: .25em;
+
+  &--alternate {
+    background-color: var(--primary-600);
+  }
+
+  @include className('badge', img) {
+    --size: 4rem;
+    width: var(--size);
+    height: var(--size);
+  }
+
+  .custom-badge-info {
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 1ch;
+  }
+
+  .users {
+    @extend %scrollbar;
+    overflow: auto hidden;
+
+    display: flex;
+    gap: 1ch;
+  }
+
+  .potential-users {
+    @extend %scrollbar;
+    overflow: hidden auto;
+    max-height: 10rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+  }
+}
+
+.danho-discord-user:has(.danho-user-badge-list) {
+  .danho-discord-user__avatar {
+    --size: 3rem;
+  }
+}
+
+.danho-user-badge-list {
+  display: flex;
+  flex-direction: row;
+  gap: .25ch;
+
+  @include className('badge', img) {
+    --size: 20px;
+    width: var(--size);
+    height: var(--size);
+  }
+}
+
+.position-input-container .input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: .5ch;
+
+  .position-input-tag {
+    background-color: var(--primary-800);
+    padding: .5ch;
+    border-radius: .25em;
+    color: var(--interactive-normal);
+    cursor: pointer;
+  }
 }

@@ -20,6 +20,7 @@ import Finder from '@danho-lib/dium/api/finder';
 import { User } from '@discord/types';
 import { ActionsEmitter } from '@actions';
 import { ChannelUtils } from './Channels';
+import UserUtils from './Users';
 
 const useGuildFeatures = Finder.findBySourceStrings("hasFeature", "GUILD_SCHEDULED_EVENTS") as (guild: Guild) => Array<string>;
 
@@ -106,20 +107,7 @@ export const GuildUtils: CompiledGuildUtils = {
     if (!guild) return null;
 
     const owner = UserStore.getUser(guild.ownerId);
-    if (owner && openModal) ActionsEmitter.emit('USER_PROFILE_MODAL_OPEN', {
-      type: 'USER_PROFILE_MODAL_OPEN',
-      userId: owner.id,
-      channelId: GuildChannelStore.getDefaultChannel(guild.id).id,
-      guildId: guild.id,
-      messageId: MessageStore.getLastMessage(GuildChannelStore.getDefaultChannel(guild.id).id)?.id,
-      sessionId: undefined,
-      showGuildProfile,
-      sourceAnalyticsLocations: [
-        "username",
-        "bite size profile popout",
-        "avatar"
-      ]
-    });
+    if (owner && openModal) UserUtils.openModal(owner.id, showGuildProfile);
     return owner;
   }
 };

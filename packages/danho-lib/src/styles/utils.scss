@@ -3,3 +3,8 @@
     @content;
   }
 }
+
+%scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-500) var(--primary-560);
+}

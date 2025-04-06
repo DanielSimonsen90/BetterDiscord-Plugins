@@ -16,8 +16,17 @@ export function pascalCaseFromSnakeCase(str: string): string {
   return replaced.charAt(0).toUpperCase() + replaced.slice(1);
 }
 
+export function pascalCaseFromCamelCase(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1).replace(/([A-Z])/g, ' $1');
+}
+
+export function generateRandomId() {
+  return Math.random().toString(36).substring(2, 9);
+}
+
 export const StringUtils = {
-  join, kebabCaseFromCamelCase, pascalCaseFromSnakeCase,
+  join, kebabCaseFromCamelCase, pascalCaseFromSnakeCase, pascalCaseFromCamelCase,
+  generateRandomId,
 }
 
 export default StringUtils;

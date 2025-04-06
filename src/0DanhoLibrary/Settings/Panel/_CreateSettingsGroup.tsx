@@ -1,4 +1,4 @@
-import { React, Setting } from "@react";
+import { ErrorBoundary, React, Setting } from "@react";
 import { Settings, titles } from "../Settings";
 import { Setter } from "@dium/settings";
 import * as FormElements from "@dium/components/form";
@@ -16,6 +16,11 @@ export default function CreateSettingsGroup(callback: (
   formElements: typeof FormElements
 ) => JSX.Element) {
   return function SettingsGroup(props: SettingProps) {
-    return callback(React, props, Setting, FormElements);
+    const element = callback(React, props, Setting, FormElements);
+    return (
+      <ErrorBoundary>
+        {element}
+      </ErrorBoundary>
+    )
   }
 }

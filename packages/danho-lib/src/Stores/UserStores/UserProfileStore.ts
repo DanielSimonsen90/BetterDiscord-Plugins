@@ -15,7 +15,7 @@ export type UserProfileStore = Store & {
     nick: string | null;
     guild: Guild;
   }>;
-  getUserProfile(userId: Snowflake): DisplayProfile & { badges: Array<UserProfileBadge> };
+  getUserProfile(userId: Snowflake): (DisplayProfile & { badges: Array<UserProfileBadge> }) | undefined;
   isFetchingFriends(userId: Snowflake): boolean;
   isFetchingProfile(userId: Snowflake): boolean;
   get isSubmitting(): boolean;

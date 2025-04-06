@@ -41,7 +41,9 @@ export {
   DependencyList,
   Dispatch,
   SetStateAction,
-  ReactNode
+  ReactNode,
+  HTMLInputTypeAttribute,
+  ErrorInfo
 } from 'react';
 
 export { React };

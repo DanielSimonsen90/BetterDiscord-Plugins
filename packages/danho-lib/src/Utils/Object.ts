@@ -13,7 +13,7 @@ export function pick<From, Properties extends keyof From>(from: From, ...propert
 }
 
 export function exclude<From, Properties extends keyof From>(from: From, ...properties: Properties[]): Omit<From, Properties> {
-  if (!from) throw new Error("Cannot exclude from undefined!");
+  if (!from) return from;
 
   return Object.keys(from).reduce((acc, key) => {
     if (!properties.includes(key as Properties)) (acc as any)[key] = from[key];
@@ -79,8 +79,12 @@ export function combineModules<T extends Record<string, any | undefined>>(...mod
   }, {}) as T;
 }
 
+export function isEqual<T>(a: T, b: T): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
 export const ObjectUtils = {
-  pick, exclude,
+  pick, exclude, isEqual,
   difference, combine, combineModules,
 }
 

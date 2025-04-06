@@ -8,12 +8,52 @@
   @include className('note') {
     margin-top: unset;
     width: 100%;
-  }  
+  }
 }
 
-.danho-form-select, .setting-group {
+.danho-form-select,
+.setting-group {
   display: flex;
   flex-direction: column-reverse;
   gap: .5rem;
   margin-top: 1rem;
+}
+
+.danho-form-group {
+  display: grid;
+  gap: .5ch;
+  margin-bottom: 1em;
+
+  &:has(&__checkbox) {
+    grid-template-columns: auto 1fr;
+    align-items: center;
+
+    @include className('divider') {
+      display: none;
+    }
+  }
+
+  &__checkbox {
+    margin: 0;
+  }
+
+  input,
+  select,
+  textarea {
+    background-color: var(--input-background);
+    border-color: var(--input-border);
+    border-radius: .25rem;
+
+    &::placeholder {
+      color: var(--input-placeholder-text);
+    }
+
+    &:focus-visible {
+      color: var(--interactive-active);
+    }
+
+    &:hover {
+      color: var(--interactive-hover);
+    }
+  }
 }
