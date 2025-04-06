@@ -23,6 +23,7 @@ export class DiumStore<T extends Record<string, any>> implements Flux.StoreLike 
     public onLoad?: () => void
   ) {
     if (!dataKey.endsWith('Store')) this.dataKey = formatStoreName(dataKey);
+    this.current = { ...defaults };
   }
 
   /** Loads item. */

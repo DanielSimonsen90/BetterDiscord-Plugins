@@ -43,7 +43,8 @@ export {
   SetStateAction,
   ReactNode,
   HTMLInputTypeAttribute,
-  ErrorInfo
+  ErrorInfo,
+  CSSProperties
 } from 'react';
 
 export { React };

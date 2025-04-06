@@ -1,4 +1,5 @@
 import { Settings } from "../../../Settings"
+import BadgePositionsStore from "./stores/BadgePositionsStore";
 import CustomBadgesStore from "./stores/CustomBadgesStore";
 import DiscordBadgeStore from "./stores/DiscordBadgeStore";
 
@@ -9,4 +10,5 @@ export default function Feature() {
   if (Settings.current.useClientCustomBadges) CustomBadgesStore.load();
   
   DiscordBadgeStore.load();
+  BadgePositionsStore.load();
  }

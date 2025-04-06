@@ -20,11 +20,6 @@ export type CustomBadgeProps = {
 export type CustomBadgeData = Omit<CustomBadgeProps, 'key' | 'onContextMenu'> & {
   id: string;
   userTags?: Snowflake[];
-  position?: number | 'start' | 'end' | {
-    before?: BadgeTypes | string;
-    after?: BadgeTypes | string;
-    default?: number;
-  };
 }
 
 const ClassModule = ClassNamesUtils.combineModuleByKeys<('container' | 'badge')>(['container', 'badge'])
@@ -37,19 +32,18 @@ export const CustomBadge: React.FC<CustomBadgeProps> = ({ name, iconUrl, style, 
     height: style?.height ?? size,
   })
 
-  const InnerBadge = ({ href, onContextMenu, ...props }: { href?: string, onContextMenu?: CustomBadgeProps['onContextMenu']; }) => href ? (
-    <a href={href} target="_blank" rel="noreferrer noopener" onContextMenu={onContextMenu} {...props}>
-      <InnerBadge />
+  const BadgeIcon = () => <img src={iconUrl} alt={name} className={ClassModule.badge} style={compiledStyle} />
+  const AnchorBadge = () => (
+    <a href={href} target="_blank" rel="noreferrer noopener">
+      <BadgeIcon />
     </a>
-  ) : (
-    <img onContextMenu={onContextMenu} src={iconUrl} alt={name} className={ClassModule.badge} style={compiledStyle} {...props} />
   );
 
   return (
     <Tooltip text={name}>
       {props => (
-        <div {...props}>
-          <InnerBadge href={href} onContextMenu={onContextMenu} />
+        <div {...props} onContextMenu={onContextMenu}>
+          {href ? <AnchorBadge /> : <BadgeIcon />}
         </div>
       )}
     </Tooltip>

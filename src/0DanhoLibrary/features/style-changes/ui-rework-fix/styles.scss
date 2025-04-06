@@ -59,7 +59,7 @@
     }
   }
 
-  @include className('button') {
+  @include className('button', button) {
     border-radius: 3px;
   }
 }

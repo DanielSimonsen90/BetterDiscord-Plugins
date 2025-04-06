@@ -11,9 +11,8 @@ import { CustomBadge } from "../components/CustomBadge";
 import CustomBadgesStore from "../stores/CustomBadgesStore";
 import DiscordBadgeStore, { BadgeId } from '../stores/DiscordBadgeStore';
 
-import { getBadgeName } from './getBadgeName';
-import sortBadges from './sortBadges';
 import { User } from '@discord/types';
+import BadgePositionsStore from '../stores/BadgePositionsStore';
 
 export function insertBadges(props: PropsFromFC<BadgeList>, result: ReturnType<BadgeList>) {
   if (!result || result.props.children.some(badge => badge.type === CustomBadge)) return;
@@ -39,7 +38,7 @@ export function insertBadges(props: PropsFromFC<BadgeList>, result: ReturnType<B
       : true)
     .map(([badgeId]) => badgeId);
   const userPreferredBadges = (user.id in users ? users[user.id] : []) as BadgeId[];
-  const compiledBadges = sortBadges([
+  const compiledBadges = BadgePositionsStore.sort([
     ...badgeWithIds.map(badge => badge.id),
     ...userPreferredBadges,
     ...userCustomBadgeIds,
@@ -50,7 +49,7 @@ export function insertBadges(props: PropsFromFC<BadgeList>, result: ReturnType<B
     const discordBadge = badgeId in DiscordBadgeStore.current ? DiscordBadgeStore.current[badgeId] : null;
     if (discordBadge) return <CustomBadge key={badgeId}
       iconUrl={UrlUtils.badgeIcon(discordBadge.icon)}
-      name={getBadgeName(badgeId as BadgeId)}
+      name={DiscordBadgeStore.getBadgeName(badgeId as BadgeId)}
       href={discordBadge.link}
     />;
 

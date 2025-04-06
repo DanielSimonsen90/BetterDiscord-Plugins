@@ -11,7 +11,6 @@ import { ContextMenuUtils, StringUtils, UrlUtils } from '@danho-lib/Utils';
 
 import DiscordBadgeStore, { BadgeGroups, BadgeId } from '../stores/DiscordBadgeStore';
 import CustomBadgesStore from '../stores/CustomBadgesStore';
-import { getBadgeName } from '../utils/getBadgeName';
 import { CustomBadge } from '../components/CustomBadge';
 
 export default createContextMenuCallback('user', (menu, props) => {
@@ -38,7 +37,7 @@ export default createContextMenuCallback('user', (menu, props) => {
             StringUtils.pascalCaseFromSnakeCase(group),
             badges.map((badgeId: BadgeId) => {
               const badge = DiscordBadges[badgeId];
-              const name = `${getBadgeName(badgeId)} ${badgeId.includes('boost') ? `level ${badgeId.split('').pop()}` : ''}`;
+              const name = `${DiscordBadgeStore.getBadgeName(badgeId)} ${badgeId.includes('boost') ? `level ${badgeId.split('').pop()}` : ''}`;
 
               return buildCheckboxItem(
                 badgeId,

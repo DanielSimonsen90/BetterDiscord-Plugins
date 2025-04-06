@@ -1,8 +1,6 @@
 import {
   // React
-  React, memo, forwardRef,
-  useState, useEffect, useMemo,
-  useCallback, useRef, useImperativeHandle,
+  React, useState, 
 
   // React utils
   classNames,
@@ -12,25 +10,24 @@ import {
   FormItem, FormItemFromModel, EmptyFormGroup,
   ErrorBoundary,
 
-  // Custom hooks
-  useClickOutside, useForceUpdate,
+  useForceUpdate,
 } from "@react";
 
 import { Button, Tooltip, UserProfileBadge } from "@discord/components";
-import { Switch, Text } from "@dium/components";
+import { User } from "@discord/types";
+import { Text } from "@dium/components";
 import { UserProfileStore } from "@stores";
 
 import { buildContextMenu, buildTextItem } from '@danho-lib/ContextMenus';
-import { ObjectUtils, TimeUtils, UrlUtils, UserUtils } from "@danho-lib/Utils";
+import { ObjectUtils, UrlUtils, UserUtils } from "@danho-lib/Utils";
 import { Logger } from "@danho-lib/dium/api/logger";
 
-import CustomBadgesStore from "src/0DanhoLibrary/features/danho-enhancements/badges/stores/CustomBadgesStore";
 import { CustomBadge, CustomBadgeData } from "src/0DanhoLibrary/features/danho-enhancements/badges/components/CustomBadge";
-import sortBadges, { getPosition } from "src/0DanhoLibrary/features/danho-enhancements/badges/utils/sortBadges";
+import CustomBadgesStore from "src/0DanhoLibrary/features/danho-enhancements/badges/stores/CustomBadgesStore";
 import DiscordBadgeStore from "src/0DanhoLibrary/features/danho-enhancements/badges/stores/DiscordBadgeStore";
+import BadgePositionsStore, { BadgePositionsStoreEditor } from "src/0DanhoLibrary/features/danho-enhancements/badges/stores/BadgePositionsStore";
 
 import CreateSettingsGroup from "../../_CreateSettingsGroup";
-import { User } from "@discord/types";
 
 export default CreateSettingsGroup((React, props, Setting, { FormSection }) => {
   return (<>
@@ -39,16 +36,18 @@ export default CreateSettingsGroup((React, props, Setting, { FormSection }) => {
   </>);
 });
 
-type ModifyBadgeData = Pick<CustomBadgeData, 'id' | 'name' | 'iconUrl' | 'href' | 'userTags' | 'position' | 'size'>;
+type ModifyBadgeData = Pick<CustomBadgeData, 'id' | 'name' | 'iconUrl' | 'href' | 'userTags' | 'size'>;
 
 const CustomBadgesSettingsGroup = CreateSettingsGroup((React, props, Setting, { FormSection }) => {
   const [modifyBadge, setModifyBadge] = useState<ModifyBadgeData | null>(null);
   const [selectedBadge, setSelectedBadge] = useState<ModifyBadgeData | null>(null);
   const [badgeIdsInTooltip, setBadgeIdsInTooltip] = useState<boolean>(false);
+
   const forceUpdate = useForceUpdate();
   const modifyUserToBadge = useModifyUserToBadge(forceUpdate);
+  const badgePositionsStoreEditor = BadgePositionsStore.useEditorStore();
 
-  const formItemModel = ObjectUtils.exclude(modifyBadge, 'userTags', 'position');
+  const formItemModel = ObjectUtils.exclude(modifyBadge, 'userTags');
   const hasChanges = !ObjectUtils.isEqual(modifyBadge, selectedBadge);
   const isNewBadge = (
     modifyBadge &&
@@ -56,7 +55,7 @@ const CustomBadgesSettingsGroup = CreateSettingsGroup((React, props, Setting, { 
     !(selectedBadge.id in CustomBadgesStore.customBadges)
   );
 
-  const PotentialUser = ({ user, modifyBadge }: { user: User, modifyBadge: ModifyBadgeData }) => {
+  const PotentialUser = ({ user, modifyBadge }: { user: User, modifyBadge: ModifyBadgeData; }) => {
     const displayProfile = UserProfileStore.getUserProfile(user.id);
     const badges: Array<UserProfileBadge> = (
       displayProfile?.badges ??
@@ -73,12 +72,9 @@ const CustomBadgesSettingsGroup = CreateSettingsGroup((React, props, Setting, { 
       ...customBadges.map(badge => badge.id),
     ];
 
-    if (badgeIds.includes(selectedBadge.id)) badgeIds.splice(badgeIds.findIndex(badgeId => badgeId === selectedBadge.id), 1);
+    if (!badgeIds.includes(selectedBadge.id)) badgeIds.push(modifyBadge.id);
 
-    badgeIds.splice(getPosition(modifyBadge.position, badgeIds), 0, modifyBadge.id);
-    const sortedBadges = sortBadges(badgeIds);
-
-    const compiledBadges = sortedBadges.map<CustomBadgeData>(badgeId => {
+    const compiledBadges = badgePositionsStoreEditor.sort(badgeIds).map<CustomBadgeData>(badgeId => {
       const badge = (
         badges.find(badge => badge.id === badgeId)
           || badgeId in DiscordBadgeStore.current ? DiscordBadgeStore.current[badgeId] : null
@@ -120,7 +116,7 @@ const CustomBadgesSettingsGroup = CreateSettingsGroup((React, props, Setting, { 
         )}
       </Tooltip>
     );
-  }
+  };
 
   function selectBadge(badge: CustomBadgeData) {
     setModifyBadge(badge);
@@ -143,7 +139,7 @@ const CustomBadgesSettingsGroup = CreateSettingsGroup((React, props, Setting, { 
           />
 
           <EmptyFormGroup label="Badge position" name="position">
-            {ref => <PositionInput ref={ref} value={modifyBadge.position} onChange={position => setModifyBadge(current => ({ ...current, position }))} />}
+            {() => <PositionInput modifyBadge={modifyBadge} badgePositionsStoreEditor={badgePositionsStoreEditor} />}
           </EmptyFormGroup>
           <FormItemFromModel model={formItemModel} property='size' defaultValue='20px' onChange={size => setModifyBadge(current => ({ ...current, size: size as any }))} />
 
@@ -224,80 +220,36 @@ const CustomBadgesSettingsGroup = CreateSettingsGroup((React, props, Setting, { 
 });
 
 type PositionInputProps = {
-  value: CustomBadgeData['position'];
-  onChange: (value: CustomBadgeData['position']) => void;
+  modifyBadge: ModifyBadgeData;
+  badgePositionsStoreEditor: BadgePositionsStoreEditor;
 };
 
-const PositionInput = forwardRef<HTMLInputElement, PositionInputProps>(({ value, onChange }, ref) => {
-  const [rawValue, setRawValue] = useState(() => {
-    if (typeof value === 'number') return value.toString();
-    if (value === 'start' || value === 'end') return value;
-
-    return Object.entries(value).reduce((acc, [key, value]) => acc += `${key}:${value} `, '').trim();
-  });
-  const position = useMemo<CustomBadgeData['position']>(() => {
-    if (typeof value === 'number') return value;
-    if (value === 'start' || value === 'end') return value;
-
-    return Object.fromEntries(
-      rawValue.split(' ').map(entry => {
-        const [key, value] = entry.split(':');
-        return value ? [key, value] : [undefined, undefined];
-      })
-    ) as CustomBadgeData['position'];
-  }, [rawValue]);
-
-  const inputRef = useRef<HTMLInputElement>(null);
-  const clickId = useClickOutside(() => onChange(position));
-
-  // Combine ref and inputRef
-  useImperativeHandle(ref, () => Object.assign(inputRef.current, {
-    blur: () => {
-      if (inputRef.current) inputRef.current.blur();
-      onChange(position);
-    },
-  }));
+function PositionInput({ modifyBadge, badgePositionsStoreEditor }: PositionInputProps) {
+  const forceUpdate = useForceUpdate();
+  const badges = badgePositionsStoreEditor.getSortedBadges();
 
   return (
-    <div className="position-input-container" data-click-id={clickId}>
-      <div className={classNames('input-wrapper')}>
-        {rawValue.split(' ').map((entry, index, arr) => {
-          const [key, value] = entry.split(':');
-          return value ? <PositionInputTag key={index} v={value} k={key} onClick={() => {
-            setRawValue(raw => raw.split(' ').filter((_, i) => i !== index).join(' '));
-          }} /> : <span {...{ 'data-add-space': !entry }}>{entry}{index === arr.length - 1 ? '' : <span data-add-space />}</span>;
-        })}
-      </div>
-      <input ref={inputRef}
-        // className='hidden'
-        style={{ width: '100%' }}
-        tabIndex={-1}
-        type="text"
-        value={rawValue}
-        onChange={e => setRawValue(e.target.value)}
-        onKeyDown={e => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            onChange(position);
-          }
-        }}
-      />
+    <div className="position-input" role="list">
+      {badges.map((badge, position) => badge.id === modifyBadge.id ? (
+        <CustomBadge key={modifyBadge.id} {...modifyBadge} href={modifyBadge.href ? '#' : undefined} />
+      ) : (
+        <CustomBadge key={badge.id} name={badge.name} style={badge.style} iconUrl={badge.iconUrl} href={badge.url ? '#' : undefined}
+          onContextMenu={e => {
+            BdApi.ContextMenu.open(e as any, buildContextMenu(
+              buildTextItem('badge-move-before', `Move ${modifyBadge.name} before ${badge.name} (left)`, () => {
+                badgePositionsStoreEditor.setBadgePosition(modifyBadge.id, position);
+                forceUpdate();
+              }),
+              buildTextItem('badge-move-after', `Move ${modifyBadge.name} after ${badge.name} (right)`, () => {
+                badgePositionsStoreEditor.setBadgePosition(modifyBadge.id, position + 1);
+                forceUpdate();
+              }),
+            ));
+          }} />
+      ))}
     </div>
   );
-});
-
-type PositionInputTagProps = {
-  k: string;
-  v: string;
-  onClick?: () => void;
 };
-const PositionInputTag = memo(({ k: key, v: value, onClick }: PositionInputTagProps) => (
-  <div className="position-input-tag" onClick={onClick}>
-    <span className='position-input-tag__key'>{key}</span>
-    <span className="position-input-tag__seperator">:</span>
-    <span className='position-input-tag__value'>{value}</span>
-  </div>
-));
 
 function createCustomBadgeContextMenu({ onEdit }: { onEdit: () => void; }) {
   return buildContextMenu(
