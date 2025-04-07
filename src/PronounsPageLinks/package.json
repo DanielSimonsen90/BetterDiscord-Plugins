@@ -1,0 +1,6 @@
+{
+  "name": "pronouns-page-links",
+  "version": "1.0.0",
+  "author": "danhosaur",
+  "description": "Converts pronouns.page \"links\" in UserPronouns to actual clickable links."
+}

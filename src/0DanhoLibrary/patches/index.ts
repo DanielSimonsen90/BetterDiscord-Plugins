@@ -5,7 +5,6 @@ import afterMemberListItem from "./after/MemberListItem";
 import afterNameTag from "./after/NameTag";
 import afterQuickSwitcherStore_getProps from "./after/QuickSwitcherStore-getProps";
 import afterRolesList from "./after/RolesList";
-import afterTextModule from "./after/TextModule";
 import afterUserActivityStatus from "./after/UserActivityStatus";
 import afterUserHeaderUsername from './after/UserHeaderUsername'
 
@@ -33,7 +32,6 @@ export default function Patch() {
   afterNameTag();
   afterQuickSwitcherStore_getProps();
   afterRolesList();
-  afterTextModule();
   afterUserActivityStatus();
   afterUserHeaderUsername();
   
