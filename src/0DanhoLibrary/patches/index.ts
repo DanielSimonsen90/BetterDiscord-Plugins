@@ -8,7 +8,6 @@ import afterUserHeaderUsername from './after/UserHeaderUsername'
 
 import PatchChannelContextMenu from "./context-menus/ChannelContextMenu";
 import PatchGuildContextMenu from "./context-menus/GuildContextMenu";
-import PatchUserContextMenu from "./context-menus/UserContextMenu";
 
 import Extensions from './extensions';
 
@@ -17,7 +16,6 @@ export default function Patch() {
   
   PatchChannelContextMenu();
   PatchGuildContextMenu();
-  PatchUserContextMenu();
 
   afterChannelItem();
   afterGlobalNavigation();

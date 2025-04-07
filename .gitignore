@@ -1,3 +1,7 @@
 node_modules/
+
 src/FriendTracker
 dist/bd/FriendTracker.plugin.js
+
+src/QuickAddMemberToDungeon
+dist/bd/QuickAddMemberToDungeon.plugin.js
