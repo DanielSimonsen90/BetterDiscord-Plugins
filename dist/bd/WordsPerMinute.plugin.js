@@ -510,6 +510,9 @@ class DiumStore {
         };
         this.addReactChangeListener = this.addListener;
         this.removeReactChangeListener = this.removeListener;
+        if (!dataKey.endsWith('Store'))
+            this.dataKey = formatStoreName(dataKey);
+        this.current = { ...defaults };
     }
     load() {
         this.current = { ...this.defaults, ...load(this.dataKey) };
@@ -571,6 +574,12 @@ class DiumStore {
     }
 }
 const createDiumStore = (defaults, dataKey, onLoad) => new DiumStore(defaults, dataKey, onLoad);
+function formatStoreName(name) {
+    const pascal = name.charAt(0).toUpperCase() + name.slice(1);
+    return name.endsWith('Store')
+        ? pascal
+        : `${pascal}Store`;
+}
 
 function createProperty(options) {
     const optionsCompiled = typeof options === 'object' ? options : { defaultValue: options };
@@ -610,8 +619,19 @@ function join(args, separator = ',', includeAnd = true) {
 function kebabCaseFromCamelCase(str) {
     return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 }
+function pascalCaseFromSnakeCase(str) {
+    const replaced = str.replace(/_./g, match => ` ${match.charAt(1).toUpperCase()}`);
+    return replaced.charAt(0).toUpperCase() + replaced.slice(1);
+}
+function pascalCaseFromCamelCase(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1).replace(/([A-Z])/g, ' $1');
+}
+function generateRandomId() {
+    return Math.random().toString(36).substring(2, 9);
+}
 const StringUtils = {
-    join, kebabCaseFromCamelCase
+    join, kebabCaseFromCamelCase, pascalCaseFromSnakeCase, pascalCaseFromCamelCase,
+    generateRandomId,
 };
 
 function $(selector, single = true) {

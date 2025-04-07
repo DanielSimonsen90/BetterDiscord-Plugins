@@ -1,6 +1,6 @@
 /**
  * @name 0DanhoLibrary
- * @version 2.2.0
+ * @version 2.3.0
  * @author danielsimonsen90
  * @authorLink https://github.com/danielsimonsen90
  * @description Library for Danho's plugins
@@ -54,7 +54,7 @@ let meta = {
   "name": "0danho-library",
   "description": "Library for Danho's plugins",
   "author": "danielsimonsen90",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "development": true,
   "dependencies": {
     "dium": "*",
@@ -255,7 +255,7 @@ const diumLogger = {
     warn
 };
 
-const patch = (type, object, method, callback, options) => {
+const patch$1 = (type, object, method, callback, options) => {
     const original = object?.[method];
     if (!(original instanceof Function)) {
         error(`Patch target ${original} is not a function`, object, method, options.name);
@@ -272,8 +272,8 @@ const patch = (type, object, method, callback, options) => {
     }
     return cancel;
 };
-const instead = (object, method, callback, options = {}) => patch("instead", object, method, (cancel, original, context, args) => callback({ cancel, original, context, args }), options);
-const after = (object, method, callback, options = {}) => patch("after", object, method, (cancel, original, context, args, result) => callback({ cancel, original, context, args, result }), options);
+const instead = (object, method, callback, options = {}) => patch$1("instead", object, method, (cancel, original, context, args) => callback({ cancel, original, context, args }), options);
+const after = (object, method, callback, options = {}) => patch$1("after", object, method, (cancel, original, context, args, result) => callback({ cancel, original, context, args, result }), options);
 let menuPatches = [];
 const contextMenu = (navId, callback, options = {}) => {
     const cancel = BdApi.ContextMenu.patch(navId, options.once ? (tree) => {
@@ -601,11 +601,26 @@ const findComponentBySourceStrings = async (...keywords) => {
     }
     return component;
 };
+const findModuleById = (id, options) => {
+    return BdApi.Webpack.getModule((_, __, _id) => _id === id.toString(), options);
+};
+function findUnpatchedModuleBySourceStrings(...keywords) {
+    const module = findBySourceStrings(...keywords);
+    if (!module) {
+        log(`[findUnpatchedModuleBySourceStrings] Module not found for keywords: [${keywords.join(',')}]`);
+        return undefined;
+    }
+    if (typeof module === 'function')
+        return module['__originalFunction'];
+    return module;
+}
 const Finder = {
     ...DiumFinder,
     ...BDFDB_Finder,
     findBySourceStrings,
-    findComponentBySourceStrings
+    findComponentBySourceStrings,
+    findModuleById,
+    findUnpatchedModuleBySourceStrings,
 };
 
 const Finder$1 = {
@@ -625,6 +640,8 @@ const Finder$1 = {
     find: find$2,
     findBySourceStrings,
     findComponentBySourceStrings,
+    findModuleById,
+    findUnpatchedModuleBySourceStrings,
     findWithKey,
     query,
     resolveKey,
@@ -648,19 +665,19 @@ const ExpandedGuildFolderStore = /* @__PURE__ */ byName("ExpandedGuildFolderStor
 
 const { React } = BdApi;
 const { ReactDOM } = BdApi;
-const classNames = /* @__PURE__ */ find$2((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
+const classNames$1 = /* @__PURE__ */ find$2((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
 const EventEmitter = /* @__PURE__ */ find$2((exports) => exports.prototype instanceof Object && Object.prototype.hasOwnProperty.call(exports.prototype, "prependOnceListener"));
 
 const UserStore$1 = /* @__PURE__ */ byName("UserStore");
 const RelationshipStore = /* @__PURE__ */ byName("RelationshipStore");
 
-const Button = /* @__PURE__ */ byKeys(["Colors", "Link"], { entries: true });
+const Button$1 = /* @__PURE__ */ byKeys(["Colors", "Link"], { entries: true });
 
 const Clickable = /* @__PURE__ */ bySource(["ignoreKeyPress:"], { entries: true });
 
 const Flex = /* @__PURE__ */ byKeys(["Child", "Justify", "Align"], { entries: true });
 
-const { FormSection, FormItem, FormTitle, FormText,
+const { FormSection, FormItem: FormItem$1, FormTitle, FormText,
 FormDivider, FormSwitch, FormNotice } = /* @__PURE__ */ demangle({
     FormSection: bySource$1("titleClassName:", ".sectionTitle"),
     FormItem: bySource$1("titleClassName:", "required:"),
@@ -674,7 +691,7 @@ FormDivider, FormSwitch, FormNotice } = /* @__PURE__ */ demangle({
 const FormElements = {
     __proto__: null,
     FormDivider,
-    FormItem,
+    FormItem: FormItem$1,
     FormNotice,
     FormSection,
     FormSwitch,
@@ -688,7 +705,7 @@ const { Menu, Group: MenuGroup, Item: MenuItem, Separator: MenuSeparator, Checkb
 
 const { Select, SingleSelect } =  demangle({
     Select: bySource$1("renderOptionLabel:", "renderOptionValue:", "popoutWidth:"),
-    SingleSelect: bySource$1((source) => /{value:[a-zA-Z_$],onChange:[a-zA-Z_$],...[a-zA-Z_$]}/.test(source))
+    SingleSelect: bySource$1((source) => /{value:[a-zA-Z_$],onChange:[a-zA-Z_$]}/.test(source))
 }, ["Select"]);
 
 const { TextInput, InputError } = /* @__PURE__ */ demangle({
@@ -757,9 +774,9 @@ const forceFullRerender = (fiber) => new Promise((resolve) => {
 const SettingsContainer = ({ name, children, onReset }) => (React.createElement(FormSection, null,
     children,
     onReset ? (React.createElement(React.Fragment, null,
-        React.createElement(FormDivider, { className: classNames(margins.marginTop20, margins.marginBottom20) }),
+        React.createElement(FormDivider, { className: classNames$1(margins.marginTop20, margins.marginBottom20) }),
         React.createElement(Flex, { justify: Flex.Justify.END },
-            React.createElement(Button, { size: Button.Sizes.SMALL, onClick: () => confirm(name, "Reset all settings?", {
+            React.createElement(Button$1, { size: Button$1.Sizes.SMALL, onClick: () => confirm(name, "Reset all settings?", {
                     onConfirm: () => onReset()
                 }) }, "Reset")))) : null));
 
@@ -895,8 +912,6 @@ const SelectedChannelStore = /* @__PURE__ */ byName("SelectedChannelStore");
 
 const GuildEmojiStore = byKeys(["getEmojis"]);
 
-const GuildIdentyStore = byKeys(["saveGuildIdentityChanges"]);
-
 const GuildMemberStore = byName("GuildMemberStore");
 
 const GuildStore = byName("GuildStore");
@@ -1031,6 +1046,9 @@ class DiumStore {
         };
         this.addReactChangeListener = this.addListener;
         this.removeReactChangeListener = this.removeListener;
+        if (!dataKey.endsWith('Store'))
+            this.dataKey = formatStoreName(dataKey);
+        this.current = { ...defaults };
     }
     load() {
         this.current = { ...this.defaults, ...load(this.dataKey) };
@@ -1092,6 +1110,12 @@ class DiumStore {
     }
 }
 const createDiumStore = (defaults, dataKey, onLoad) => new DiumStore(defaults, dataKey, onLoad);
+function formatStoreName(name) {
+    const pascal = name.charAt(0).toUpperCase() + name.slice(1);
+    return name.endsWith('Store')
+        ? pascal
+        : `${pascal}Store`;
+}
 
 const DiscordStores = (() => (Array.from(BdApi.Webpack
     .getModules(m => m?._dispatchToken && m?.getName)
@@ -1129,6 +1153,12 @@ function findStore(storeName, allowMultiple = false) {
 const DanhoStores = new class DanhoStores {
     register(store) {
         this[store.dataKey] = store;
+        if (window.DL?.Stores.DanhoStores) {
+            const instance = window.DL.Stores.DanhoStores;
+            if (store.dataKey in instance)
+                return;
+            instance.register(store);
+        }
     }
 };
 
@@ -1150,7 +1180,6 @@ const Stores = {
     ExpandedGuildFolderStore,
     GuildChannelStore,
     GuildEmojiStore,
-    GuildIdentyStore,
     GuildMemberStore,
     GuildStore,
     MediaEngine,
@@ -1186,6 +1215,31 @@ const Stores = {
     getEmojiUrl
 };
 
+function getGroupContaining(itemId, menu) {
+    const findItem = (menu) => {
+        if (!menu.props || !menu.props.children)
+            return null;
+        else if (!Array.isArray(menu.props.children))
+            return findItem(menu.props.children);
+        for (const child of menu.props.children.filter(child => child?.props)) {
+            if ('id' in child.props && child.props.id === itemId) {
+                return menu.props.children;
+            }
+            else if ('key' in child && child.key === itemId) {
+                return menu.props.children;
+            }
+            const found = findItem(child);
+            if (found)
+                return found;
+        }
+        return null;
+    };
+    return findItem(menu);
+}
+const ContextMenuUtils = {
+    getGroupContaining,
+};
+
 const wait = (callback, time) => new Promise((resolve, reject) => {
     try {
         setTimeout(() => resolve(callback()), time);
@@ -1205,7 +1259,7 @@ function pick(from, ...properties) {
 }
 function exclude(from, ...properties) {
     if (!from)
-        throw new Error("Cannot exclude from undefined!");
+        return from;
     return Object.keys(from).reduce((acc, key) => {
         if (!properties.includes(key))
             acc[key] = from[key];
@@ -1262,8 +1316,11 @@ function combineModules$1(...modules) {
         return combined;
     }, {});
 }
+function isEqual(a, b) {
+    return JSON.stringify(a) === JSON.stringify(b);
+}
 const ObjectUtils = {
-    pick, exclude,
+    pick, exclude, isEqual,
     difference, combine, combineModules: combineModules$1,
 };
 
@@ -1280,8 +1337,77 @@ function join(args, separator = ',', includeAnd = true) {
 function kebabCaseFromCamelCase(str) {
     return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 }
+function pascalCaseFromSnakeCase(str) {
+    const replaced = str.replace(/_./g, match => ` ${match.charAt(1).toUpperCase()}`);
+    return replaced.charAt(0).toUpperCase() + replaced.slice(1);
+}
+function pascalCaseFromCamelCase(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1).replace(/([A-Z])/g, ' $1');
+}
+function generateRandomId() {
+    return Math.random().toString(36).substring(2, 9);
+}
 const StringUtils = {
-    join, kebabCaseFromCamelCase
+    join, kebabCaseFromCamelCase, pascalCaseFromSnakeCase, pascalCaseFromCamelCase,
+    generateRandomId,
+};
+
+const UrlUtils = {
+    badgeIcon(icon) {
+        return `https://cdn.discordapp.com/badge-icons/${icon}.png`;
+    }
+};
+
+const SECOND = 1000;
+const MINUTE = SECOND * 60;
+const HOUR = MINUTE * 60;
+const DAY = HOUR * 24;
+const WEEK = DAY * 7;
+const MONTH = DAY * 30;
+const YEAR = DAY * 365;
+function timeSpan(startTime, endTime, format = 'full') {
+    const min = Math.min(startTime, endTime);
+    const max = Math.max(startTime, endTime);
+    const time = max - min;
+    const seconds = Math.floor(time / SECOND);
+    const minutes = Math.floor(time / MINUTE);
+    const hours = Math.floor(time / HOUR);
+    const days = Math.floor(time / DAY);
+    const weeks = Math.floor(time / WEEK);
+    const months = Math.floor(time / MONTH);
+    const years = Math.floor(time / YEAR);
+    const stringify = (value, unit) => `${format === 'full' ? value : value.toString().padStart(2, '0')}${unit}${value === 1 || format !== 'full' ? '' : 's'}`;
+    const toString = () => [
+        years ? stringify(years, format === 'full' ? ' year' : format === 'short' ? 'y' : '') : null,
+        months ? stringify(months % 12, format === 'full' ? ' month' : format === 'short' ? 'M' : '') : null,
+        weeks ? stringify(weeks % 4, format === 'full' ? ' week' : format === 'short' ? 'w' : '') : null,
+        days ? stringify(days % 7, format === 'full' ? ' day' : format === 'short' ? 'd' : '') : null,
+        hours ? stringify(hours % 24, format === 'full' ? ' hour' : format === 'short' ? 'h' : '') : null,
+        minutes ? stringify(minutes % 60, format === 'full' ? ' minute' : format === 'short' ? 'm' : '') : null,
+        seconds ? stringify(seconds % 60, format === 'full' ? ' second' : format === 'short' ? 's' : '') : null,
+    ].filter(Boolean).join(format === 'full' ? ', ' : format === 'short' ? ' ' : ':');
+    return {
+        toString, stringify,
+        years,
+        months: months,
+        weeks: weeks,
+        days, hours, minutes, seconds,
+        time, min, max,
+    };
+}
+function throttle(callback, delay) {
+    let lastTime = 0;
+    return function (...args) {
+        const now = Date.now();
+        if (now - lastTime >= delay) {
+            lastTime = now;
+            callback(...args);
+        }
+    };
+}
+const TimeUtils = {
+    timeSpan,
+    throttle,
 };
 
 const ChannelUtils = {
@@ -1372,132 +1498,19 @@ function findModuleWithMinimalKeys(className) {
     }
     return { module, keys: minimalKeys };
 }
+const ColorClassNames = Finder.byKeys(["colorDefault", "radioIcon"]);
 const ClassNamesUtils = {
     combineModuleByKeys,
     combineModules,
     containsClassInModule,
     indexDuplicate,
-    findModuleWithMinimalKeys
+    findModuleWithMinimalKeys,
+    ColorClassNames,
 };
 
 const GuildActions = byKeys(["requestMembers"]);
 
-const useGuildFeatures = Finder.findBySourceStrings("hasFeature", "GUILD_SCHEDULED_EVENTS");
-const GuildUtils = {
-    ...GuildStore,
-    ...GuildMemberStore,
-    ...GuildChannelStore,
-    ...GuildEmojiStore,
-    ...SelectedGuildStore,
-    ...VoiceStore,
-    ...GuildActions,
-    useGuildFeatures(guild) {
-        return useGuildFeatures(guild) || [];
-    },
-    get current() {
-        return GuildStore.getGuild(SelectedGuildStore.getGuildId());
-    },
-    get currentId() {
-        return SelectedGuildStore.getGuildId();
-    },
-    get me() {
-        return GuildMemberStore.getMember(SelectedGuildStore.getGuildId(), UserStore.getCurrentUser().id);
-    },
-    meFor(guildId) {
-        return GuildMemberStore.getMember(guildId, UserStore.getCurrentUser().id);
-    },
-    getSelectedGuildTimestamps() {
-        return SelectedGuildStore.getState().selectedGuildTimestampMillis;
-    },
-    getIconUrl(guild) {
-        return guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp` : 'https://cdn.discordapp.com/embed/avatars/0.png';
-    },
-    getEmojiIcon(emojiId, size = 128) {
-        return `https://cdn.discordapp.com/emojis/${emojiId}.webp?size=${size}&quality=lossless`;
-    },
-    getMembers(guild) {
-        return GuildMemberStore.getMembers(guild);
-    },
-    getGuildByName(name) {
-        return Object.values(GuildStore.getGuilds()).find(guild => guild.name === name) || null;
-    },
-    getGuildRoleWithoutGuildId(roleId) {
-        const allGuildsRoles = GuildStore.getAllGuildsRoles();
-        for (const guildId in allGuildsRoles) {
-            if (allGuildsRoles[guildId][roleId]) {
-                return allGuildsRoles[guildId][roleId];
-            }
-        }
-        return null;
-    },
-    getMemberAvatar(memberId, guildId, size) {
-        const avatar = GuildMemberStore.getMember(guildId, memberId).avatar;
-        if (avatar)
-            return `https://cdn.discordapp.com/guilds/${guildId}/users/${memberId}/avatars/${avatar}.webp?size=${size}`;
-        return;
-    },
-};
-
 const UserNoteActions = byKeys(["updateNote"]);
-
-const UserUtils = {
-    ...UserStore,
-    ...PresenceStore,
-    ...RelationshipStore,
-    ...UserActivityStore,
-    ...UserNoteStore,
-    ...UserTypingStore,
-    ...UserMentionStore,
-    ...UserNoteActions,
-    get me() {
-        const user = UserStore.getCurrentUser();
-        return Object.assign(user, {
-            get status() {
-                return PresenceStore.getStatus(user.id);
-            }
-        });
-    },
-    getPresenceState: () => PresenceStore.getState(),
-};
-
-function findNodeByIncludingClassName(className, node = document.body) {
-    return node.querySelector(`[class*="${className}"]`);
-}
-function findModule(args, returnDisplayNamesOnly = false) {
-    const module = typeof args === 'string' ? query({ name: args }) : query({ keys: args });
-    if (!module)
-        return module;
-    return returnDisplayNamesOnly ?
-        Array.isArray(module) ?
-            module.map(m => m.default?.displayName || m.displayName) :
-            module.default?.displayName || module.displayName
-        : module;
-}
-function currentUser() {
-    return UserStore.getCurrentUser();
-}
-function currentGuild() {
-    const guildId = SelectedGuildStore.getGuildId();
-    return guildId ? GuildStore.getGuild(guildId) : null;
-}
-function currentChannel() {
-    const channelId = SelectedChannelStore.getChannelId();
-    return channelId ? ChannelStore.getChannel(channelId) : null;
-}
-function currentGuildMembers() {
-    const guildId = currentGuild()?.id;
-    return guildId ? GuildMemberStore.getMembers(guildId) : null;
-}
-const Utils = {
-    findNodeByIncludingClassName,
-    findModule,
-    get currentGuild() { return currentGuild(); },
-    get currentChannel() { return currentChannel(); },
-    get currentGuildMembers() { return currentGuildMembers(); },
-    get currentUser() { return currentUser(); },
-    StringUtils, ObjectUtils, ClassNamesUtils,
-    ChannelUtils, GuildUtils, UserUtils,
-};
 
 const createActionCallback = (action, callback) => {
     return callback;
@@ -1584,7 +1597,8 @@ const ActionsEmitter = new class ActionsEmitter extends EventEmitter {
     }
     off(eventName, listener) {
         Dispatcher$1.unsubscribe(eventName, listener);
-        this._events.set(eventName, this._events.get(eventName).filter(([l]) => l !== listener));
+        const existing = this._events.get(eventName) ?? [];
+        this._events.set(eventName, existing.filter(([l]) => l !== listener));
         Logger.log(`[ActionsEmitter] Unsubscribed from ${eventName}`);
         return super.off(eventName, listener);
     }
@@ -1598,6 +1612,12 @@ const ActionsEmitter = new class ActionsEmitter extends EventEmitter {
     }
     emit(eventName, ...args) {
         Logger.log(`[ActionsEmitter] Emitting ${eventName}`, { args });
+        const action = args.shift();
+        if (args.length)
+            Logger.warn(`The following arguments were not used:`, { args });
+        const payload = Object.assign({ type: eventName }, action);
+        Logger.log(`[ActionsEmitter] Dispatching ${eventName}`, { payload });
+        Dispatcher$1.dispatch(payload);
         return super.emit(eventName, ...args);
     }
 };
@@ -1618,6 +1638,170 @@ const Actions = {
     createActionCallback,
     dispatch,
     find
+};
+
+const UserUtils = {
+    ...UserStore,
+    ...PresenceStore,
+    ...RelationshipStore,
+    ...UserActivityStore,
+    ...UserNoteStore,
+    ...UserTypingStore,
+    ...UserMentionStore,
+    ...UserNoteActions,
+    get me() {
+        const user = UserStore.getCurrentUser();
+        return Object.assign(user, {
+            get status() {
+                return PresenceStore.getStatus(user.id);
+            }
+        });
+    },
+    getPresenceState: () => PresenceStore.getState(),
+    getUserByUsername(username) {
+        return Object.values(UserStore.getUsers()).find(user => user.username === username);
+    },
+    getUsersPrioritizingFriends(byName) {
+        const getUsername = (user) => this.getUsernames(user, true).shift();
+        const sort = (a, b) => getUsername(a).localeCompare(getUsername(b));
+        const friends = RelationshipStore
+            .getFriendIDs()
+            .map(UserStore.getUser)
+            .sort(sort);
+        const users = Object
+            .values(UserStore.getUsers())
+            .sort(sort);
+        const result = [...friends, ...users].filter((user, index, self) => (index === self.findIndex(u => u.id === user.id)));
+        return byName
+            ? result.filter(user => getUsername(user).includes(byName.toLowerCase()))
+            : result;
+    },
+    openModal(userId, showGuildProfile = false) {
+        const currentGuildId = SelectedGuildStore.getGuildId();
+        const currentChannelId = SelectedChannelStore.getChannelId();
+        ActionsEmitter.emit('USER_PROFILE_MODAL_OPEN', {
+            type: 'USER_PROFILE_MODAL_OPEN',
+            userId,
+            channelId: currentChannelId,
+            guildId: currentGuildId,
+            messageId: MessageStore.getLastMessage(currentChannelId)?.id,
+            sessionId: undefined,
+            showGuildProfile,
+            sourceAnalyticsLocations: [
+                "username",
+                "bite size profile popout",
+                "avatar"
+            ]
+        });
+    },
+    getUsernames(user, lowered = false) {
+        return [
+            user.globalName,
+            user.username,
+            user.tag
+        ]
+            .filter(Boolean)
+            .map(name => lowered ? name.toLowerCase() : name);
+    },
+};
+
+const useGuildFeatures = Finder.findBySourceStrings("hasFeature", "GUILD_SCHEDULED_EVENTS");
+const GuildUtils = {
+    ...GuildStore,
+    ...GuildMemberStore,
+    ...GuildChannelStore,
+    ...GuildEmojiStore,
+    ...SelectedGuildStore,
+    ...VoiceStore,
+    ...GuildActions,
+    useGuildFeatures(guild) {
+        return useGuildFeatures(guild) || [];
+    },
+    get current() {
+        return GuildStore.getGuild(SelectedGuildStore.getGuildId());
+    },
+    get currentId() {
+        return SelectedGuildStore.getGuildId();
+    },
+    get me() {
+        return GuildMemberStore.getMember(SelectedGuildStore.getGuildId(), UserStore.getCurrentUser().id);
+    },
+    meFor(guildId) {
+        return GuildMemberStore.getMember(guildId, UserStore.getCurrentUser().id);
+    },
+    getSelectedGuildTimestamps() {
+        return SelectedGuildStore.getState().selectedGuildTimestampMillis;
+    },
+    getIconUrl(guild) {
+        return guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp` : 'https://cdn.discordapp.com/embed/avatars/0.png';
+    },
+    getEmojiIcon(emojiId, size = 128) {
+        return `https://cdn.discordapp.com/emojis/${emojiId}.webp?size=${size}&quality=lossless`;
+    },
+    getMembers(guild) {
+        return GuildMemberStore.getMembers(guild);
+    },
+    getGuildByName(name) {
+        return Object.values(GuildStore.getGuilds()).find(guild => guild.name === name) || null;
+    },
+    getGuildRoleWithoutGuildId(roleId) {
+        return GuildStore.getRole(SelectedGuildStore.getGuildId(), roleId);
+    },
+    getMemberAvatar(memberId, guildId, size) {
+        const avatar = GuildMemberStore.getMember(guildId, memberId).avatar;
+        if (avatar)
+            return `https://cdn.discordapp.com/guilds/${guildId}/users/${memberId}/avatars/${avatar}.webp?size=${size}`;
+        return;
+    },
+    getOwner(guildId, openModal = false, showGuildProfile = true) {
+        const guild = guildId ? GuildStore.getGuild(guildId) : GuildUtils.current;
+        if (!guild)
+            return null;
+        const owner = UserStore.getUser(guild.ownerId);
+        if (owner && openModal)
+            UserUtils.openModal(owner.id, showGuildProfile);
+        return owner;
+    }
+};
+
+function findNodeByIncludingClassName(className, node = document.body) {
+    return node.querySelector(`[class*="${className}"]`);
+}
+function findModule(args, returnDisplayNamesOnly = false) {
+    const module = typeof args === 'string' ? query({ name: args }) : query({ keys: args });
+    if (!module)
+        return module;
+    return returnDisplayNamesOnly ?
+        Array.isArray(module) ?
+            module.map(m => m.default?.displayName || m.displayName) :
+            module.default?.displayName || module.displayName
+        : module;
+}
+function currentUser() {
+    return UserStore.getCurrentUser();
+}
+function currentGuild() {
+    const guildId = SelectedGuildStore.getGuildId();
+    return guildId ? GuildStore.getGuild(guildId) : null;
+}
+function currentChannel() {
+    const channelId = SelectedChannelStore.getChannelId();
+    return channelId ? ChannelStore.getChannel(channelId) : null;
+}
+function currentGuildMembers() {
+    const guildId = currentGuild()?.id;
+    return guildId ? GuildMemberStore.getMembers(guildId) : null;
+}
+const Utils = {
+    findNodeByIncludingClassName,
+    findModule,
+    get currentGuild() { return currentGuild(); },
+    get currentChannel() { return currentChannel(); },
+    get currentGuildMembers() { return currentGuildMembers(); },
+    get currentUser() { return currentUser(); },
+    StringUtils, ObjectUtils, UrlUtils, TimeUtils,
+    ClassNamesUtils, ContextMenuUtils,
+    ChannelUtils, GuildUtils, UserUtils,
 };
 
 class ElementSelector {
@@ -2193,7 +2377,7 @@ const DOM = {
     removeAllInjections
 };
 
-const styles$3 = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible__content.hidden {\n  display: none;\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.custom-message {\n  display: grid;\n  grid-template-columns: auto 1fr;\n  gap: 0.5ch;\n}\n.custom-message__avatar {\n  --size: 2.5rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  object-fit: cover;\n}\n.custom-message__main {\n  display: flex;\n  flex-direction: column;\n  gap: 0.5ch;\n}\n.custom-message__main header {\n  display: flex;\n  align-items: center;\n  gap: 0.5ch;\n}\n.custom-message .user-mention, .custom-message .role-mention {\n  color: var(--mention-foreground);\n  background-color: var(--mention-background);\n}\n.custom-message .user-mention::before, .custom-message .role-mention::before {\n  content: \"@\";\n}\n.custom-message .channel-mention::before {\n  content: \"#\";\n}\n.custom-message .custom-message__attachments img {\n  max-height: 100%;\n  max-width: 100%;\n}\n\n.progress-bar {\n  width: 100%;\n  height: 0.5rem;\n  border-radius: 0.5rem;\n  overflow: hidden;\n}\n.progress-bar__fill {\n  height: 100%;\n  background-color: var(--primary-600);\n  transition: width 0.3s;\n}\n\n.tab-bar {\n  max-width: 100%;\n}\n.tab-bar * {\n  color: var(--text-primary);\n  box-sizing: border-box;\n}\n\n.tab-bar__tabs {\n  display: grid;\n  grid-auto-flow: column;\n  max-width: 100%;\n  overflow-x: auto;\n}\n.tab-bar__tabs--no-color .tab-bar__tab {\n  background-color: transparent;\n  border: none;\n}\n\n.tab-bar__tab {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  border: none;\n  background-color: var(--primary-630);\n  color: var(--text-muted);\n  border: 1px solid var(--border-faint);\n  padding: 0.3rem 1rem;\n}\n.tab-bar__tab:hover {\n  background-color: var(--primary-600);\n  color: var(--text-primary);\n}\n.tab-bar__tab--active {\n  border: 1px solid var(--border-faint);\n  border-bottom: 1px solid var(--text-primary) !important;\n  color: var(--text-primary);\n}\n\n.tab-bar__content {\n  padding: 1em;\n  background-color: var(--primary-630);\n  border: 1px solid var(--border-faint);\n}\n.tab-bar__content--no-color {\n  background-color: transparent;\n  border: none;\n}\n.tab-bar__content-page:not(.tab-bar__content-page--active) {\n  opacity: 0;\n  z-index: -1;\n  pointer-events: none;\n  height: 0;\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-form-select, .setting-group {\n  display: flex;\n  flex-direction: column-reverse;\n  gap: 0.5rem;\n  margin-top: 1rem;\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  display: none;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}";
+const styles$3 = ".collapsible {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  border: 1px solid var(--primary-500);\n  border-radius: 4px;\n  overflow: hidden;\n  margin: 1rem 0;\n}\n.collapsible__header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 1rem;\n  color: var(--text-primary);\n  cursor: pointer;\n}\n.collapsible__header > span::after {\n  content: \"\";\n  display: inline-block;\n  width: 0;\n  height: 0;\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  border-top: 5px solid var(--interactive-muted);\n  margin-left: 0.5rem;\n}\n.collapsible__header > span::after:hover {\n  border-top-color: var(--interactive-hover);\n}\n.collapsible__content {\n  padding: 0.5rem 1rem;\n  background-color: var(--background-secondary);\n  border-top: 1px solid var(--primary-500);\n}\n.collapsible__content.hidden {\n  display: none;\n}\n.collapsible[data-open=true] > .collapsible__header > span::after {\n  border-top: 5px solid transparent;\n  border-bottom: 5px solid var(--interactive-normal);\n}\n.collapsible[data-disabled=true] {\n  opacity: 0.5;\n  pointer-events: none;\n}\n\n.guild-list-item {\n  display: flex;\n  flex-direction: row;\n  font-size: 24px;\n  align-items: center;\n}\n.guild-list-item__icon {\n  --size: 2rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  margin-right: 1ch;\n}\n.guild-list-item__content-container {\n  display: flex;\n  flex-direction: column;\n  font-size: 1rem;\n}\n.guild-list-item__name {\n  font-weight: bold;\n  color: var(--text-primary);\n}\n.guild-list-item__content {\n  color: var(--text-tertiary);\n}\n\n.custom-message {\n  display: grid;\n  grid-template-columns: auto 1fr;\n  gap: 0.5ch;\n}\n.custom-message__avatar {\n  --size: 2.5rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  object-fit: cover;\n}\n.custom-message__main {\n  display: flex;\n  flex-direction: column;\n  gap: 0.5ch;\n}\n.custom-message__main header {\n  display: flex;\n  align-items: center;\n  gap: 0.5ch;\n}\n.custom-message .user-mention, .custom-message .role-mention {\n  color: var(--mention-foreground);\n  background-color: var(--mention-background);\n}\n.custom-message .user-mention::before, .custom-message .role-mention::before {\n  content: \"@\";\n}\n.custom-message .channel-mention::before {\n  content: \"#\";\n}\n.custom-message .custom-message__attachments img {\n  max-height: 100%;\n  max-width: 100%;\n}\n\n.progress-bar {\n  width: 100%;\n  height: 0.5rem;\n  border-radius: 0.5rem;\n  overflow: hidden;\n}\n.progress-bar__fill {\n  height: 100%;\n  background-color: var(--primary-600);\n  transition: width 0.3s;\n}\n\n.searchable-list {\n  display: grid;\n}\n.searchable-list__input-container {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 0.5ch;\n  position: sticky;\n  top: 0;\n}\n.searchable-list__input {\n  height: 100%;\n  width: 100%;\n  padding: 0.25rem 0.5rem;\n  border: 1px solid var(--primary-460);\n  background-color: var(--primary-500);\n  color: var(--text-normal);\n  font-size: 1rem;\n  transition: all 0.2s ease-in-out;\n  border-radius: 0.25rem;\n}\n.searchable-list__input:focus {\n  outline: none;\n  border-color: var(--primary-360);\n}\n.searchable-list__items {\n  --min: 10rem;\n  display: grid;\n  grid-template-columns: repeat(auto-fill, minmax(var(--min), 1fr));\n  gap: 1rem;\n}\n.searchable-list__item {\n  overflow: hidden;\n}\n\n.tab-bar {\n  max-width: 100%;\n}\n.tab-bar * {\n  color: var(--text-primary);\n  box-sizing: border-box;\n}\n\n.tab-bar__tabs {\n  display: grid;\n  grid-auto-flow: column;\n  max-width: 100%;\n  overflow: auto hidden;\n}\n.tab-bar__tabs--no-color .tab-bar__tab {\n  background-color: transparent;\n  border: none;\n}\n\n.tab-bar__tab {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  border: none;\n  background-color: var(--primary-630);\n  color: var(--text-muted);\n  border: 1px solid var(--border-faint);\n  padding: 0.3rem 1rem;\n}\n.tab-bar__tab:hover {\n  background-color: var(--primary-600);\n  color: var(--text-primary);\n}\n.tab-bar__tab--active {\n  border: 1px solid var(--border-faint);\n  border-bottom: 1px solid var(--text-primary) !important;\n  color: var(--text-primary);\n}\n\n.tab-bar__content {\n  padding: 1em;\n  background-color: var(--primary-630);\n  border: 1px solid var(--border-faint);\n}\n.tab-bar__content--no-color {\n  background-color: transparent;\n  border: none;\n}\n.tab-bar__content-page:not(.tab-bar__content-page--active) {\n  opacity: 0;\n  z-index: -1;\n  pointer-events: none;\n  height: 0;\n}\n\n.danho-discord-user {\n  display: flex;\n  align-items: center;\n  gap: 1ch;\n  margin: 0.5rem 0;\n}\n.danho-discord-user__avatar {\n  --size: 2.5rem;\n  width: var(--size);\n  height: var(--size);\n  border-radius: 50%;\n  object-fit: cover;\n  aspect-ratio: 1/1;\n}\n.danho-discord-user__user-info {\n  display: grid;\n}\n.danho-discord-user__displayName {\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n.danho-discord-user__username {\n  color: var(--text-normal);\n}\n\n.danho-form-switch {\n  display: flex;\n  flex-direction: row-reverse;\n  align-items: center;\n}\n.danho-form-switch div[class*=note] {\n  margin-top: unset;\n  width: 100%;\n}\n\n.danho-form-select,\n.setting-group {\n  display: flex;\n  flex-direction: column-reverse;\n  gap: 0.5rem;\n  margin-top: 1rem;\n}\n\n.danho-form-group {\n  display: grid;\n  gap: 0.5ch;\n  margin-bottom: 1em;\n}\n.danho-form-group:has(.danho-form-group__checkbox) {\n  grid-template-columns: auto 1fr;\n  align-items: center;\n}\n.danho-form-group:has(.danho-form-group__checkbox) div[class*=divider] {\n  display: none;\n}\n.danho-form-group__checkbox {\n  margin: 0;\n}\n.danho-form-group input,\n.danho-form-group select,\n.danho-form-group textarea {\n  background-color: var(--input-background);\n  border-color: var(--input-border);\n  border-radius: 0.25rem;\n}\n.danho-form-group input::placeholder,\n.danho-form-group select::placeholder,\n.danho-form-group textarea::placeholder {\n  color: var(--input-placeholder-text);\n}\n.danho-form-group input:focus-visible,\n.danho-form-group select:focus-visible,\n.danho-form-group textarea:focus-visible {\n  color: var(--interactive-active);\n}\n.danho-form-group input:hover,\n.danho-form-group select:hover,\n.danho-form-group textarea:hover {\n  color: var(--interactive-hover);\n}\n\n.danho-plugin-settings div[class*=divider] {\n  margin: 1rem 0;\n}\n\n.hidden {\n  opacity: 0;\n  height: 0;\n  width: 0;\n}\n\n*[data-error]::after {\n  content: attr(data-error);\n  color: var(--status-danger);\n  position: absolute;\n  top: -1.1em;\n  z-index: 1010;\n}\n\n.button-container button {\n  margin-inline: 0.25rem;\n}\n.button-container .text-input-container input {\n  padding: 7px;\n}\n\n.clickable {\n  cursor: pointer;\n}\n\n.bd-modal-root {\n  max-height: 90vh !important;\n}\n\n.border-success {\n  border: 1px solid var(--button-positive-background);\n}";
 
 class DanhoLibrary {
     constructor() {
@@ -2222,7 +2406,8 @@ const USER_TAGS = {
     THEGUNASS: 'thegunass',
     BEAUTYKILLER: 'thebeautykiller',
     EMILIE: 'emi.2008',
-    CARL: 'carlbradsted'
+    CARL: 'carlbradsted',
+    MIZBATT: 'mizbatt',
 };
 const DEFAULT_DISCORD_ROLE_COLOR = `153, 170, 181`;
 
@@ -2259,6 +2444,8 @@ const DiscordEnhancements$1 = {
     expandActivityStatus: true,
     hideChannelUntilActivity: true,
     keepChannelVisibleAfterActivityTimeoutMin: 5,
+    directAndGroupTabs: true,
+    defaultDirectAndGroupTab: 'direct',
 };
 const DanhoEnhancements$1 = {
     danhoEnhancements: true,
@@ -2310,6 +2497,8 @@ const DiscordEnhancementsTitles = {
     expandActivityStatus: `Expand activity status to show more information i.e. what a user is listening to`,
     hideChannelUntilActivity: `Hide channels from your channel list until they have activity`,
     keepChannelVisibleAfterActivityTimeoutMin: `Keep recently active hidden channel visible for x minutes`,
+    directAndGroupTabs: `Add a tab bar to distinguish between direct messages and group chats`,
+    defaultDirectAndGroupTab: `Default tab to open`,
 };
 const DanhoEnhancementsTitles = {
     danhoEnhancements: `Danho enhancements`,
@@ -2331,9 +2520,196 @@ const titles = {
 
 const { useCallback, useContext, useDebugValue, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useReducer, useRef, useState, useId, useDeferredValue, useInsertionEffect, useSyncExternalStore, useTransition, createRef, createContext, createElement, createFactory, forwardRef, cloneElement, lazy, memo, isValidElement, Component, PureComponent, Fragment, Suspense, } = React;
 
+class ErrorBoundary extends Component {
+    constructor(props) {
+        super(props);
+        this.state = { error: null };
+    }
+    static getDerivedStateFromError(error) {
+        return { error };
+    }
+    componentDidCatch(error, errorInfo) {
+        Logger.error('ErrorBoundary caught an error', { error, errorInfo });
+    }
+    render() {
+        if (this.state.error) {
+            const { message, stack } = this.state.error;
+            const title = this.props.id ? `Error in ${this.props.id}` : 'Error';
+            return (React.createElement("div", { className: "error-boundary" },
+                React.createElement(Text, { variant: 'heading-lg/bold' }, title),
+                React.createElement(Text, { variant: 'text-md/normal' }, message),
+                React.createElement(Text, { variant: 'text-sm/normal' }, stack)));
+        }
+        return this.props.children;
+    }
+}
+
+const renderChildren = (children, props = {}) => children.map(child => React.createElement(child.tagName, Array.from(child.attributes).reduce((acc, { name, value }) => ({ ...acc, [name]: value }), props), child.outerHTML.match(/</g).length > 2 ? renderChildren(Array.from(child.children)) : child.textContent));
+function classNames(...classNames) {
+    return classNames.filter(Boolean).join(' ');
+}
+
+function useKeybind(keybinds, onKeybind) {
+    const [isCtrl, isShift, isAlt] = ['Control', 'Shift', 'Alt'].map(k => keybinds.includes(k));
+    const _keybinds = keybinds.filter(k => !['Control', 'Shift', 'Alt'].includes(k));
+    useEffect(() => {
+        const onKeyDown = (e) => {
+            if (isCtrl && !e.ctrlKey)
+                return;
+            if (isShift && !e.shiftKey)
+                return;
+            if (isAlt && !e.altKey)
+                return;
+            if (!_keybinds.includes(e.key))
+                return;
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [keybinds, onKeybind]);
+}
+
+function useDebounceCallback(callback, delay) {
+    const callbackRef = useRef(callback);
+    useEffect(() => {
+        callbackRef.current = callback;
+    }, [callback]);
+    return useRef((...args) => {
+        const handler = setTimeout(() => callbackRef.current(...args), delay);
+        return () => clearTimeout(handler);
+    }).current;
+}
+
+function useForceUpdate() {
+    const [, setState] = useState(0);
+    return useCallback(() => setState((prev) => prev + 1), []);
+}
+
+const InputModule = ClassNamesUtils.combineModuleByKeys(['inputWrapper', 'inputDefault'], ['dividerDefault', 'title']);
+function FormItem(props) {
+    const { value, label, type } = props;
+    return React.createElement(FormGroup, { ...props, name: label, inputType: type ?? getInputType(value) });
+}
+function FormItemFromModel(props) {
+    const { model, property } = props;
+    const onModelChange = 'onModelChange' in props ? props.onModelChange : (m, p, v) => { };
+    const onChange = 'onChange' in props ? props.onChange : (v) => { };
+    const { label, value } = props;
+    return React.createElement(FormGroup, { ...props, name: property, label: label ?? StringUtils.pascalCaseFromCamelCase(property), inputType: props.type ?? getInputType(value ?? model[property]), value: value ?? model[property], onChange: (v) => {
+            onModelChange(model, property, v);
+            onChange(v);
+        } });
+}
+function FormGroup(props) {
+    const [internal, setInternal] = useState(props.value);
+    const debounceChange = useDebounceCallback((value) => props.onChange(value), props.debounce);
+    const onChange = useCallback((newValue) => {
+        setInternal(newValue);
+        if (props.debounce)
+            debounceChange(newValue);
+        else
+            props.onChange(newValue);
+    }, [props.debounce, props.onChange, props.inputType, props.value]);
+    const className = classNames("danho-form-group__input", `danho-form-group__${props.inputType}`, props.required && `danho-form-group__${props.inputType}--required`, props.disabled && InputModule.disabled, InputModule.inputDefault);
+    return (React.createElement(EmptyFormGroup, { label: props.label, name: props.name, onClick: () => {
+            if (props.inputType === 'checkbox')
+                return;
+        } }, ref => (props.inputType === 'checkbox' ? (React.createElement(FormSwitch, { className: className, value: typeof internal === 'boolean' ? internal : undefined, disabled: props.disabled, onChange: checked => onChange(checked) })) : (React.createElement("input", { className: className, ref: ref, type: props.inputType, name: props.name, required: props.required, disabled: props.disabled, defaultValue: props.defaultValue, checked: typeof internal === 'boolean' ? internal : undefined, value: typeof internal === 'boolean' ? undefined : internal, onChange: e => {
+            const newValue = props.inputType === 'checkbox'
+                ? e.currentTarget.checked
+                : typeof props.value === 'number' ? Number(e.target.value) : e.currentTarget.value;
+            onChange(newValue);
+        } })))));
+}
+function EmptyFormGroup(props) {
+    const ref = useRef(null);
+    return (React.createElement("div", { className: "danho-form-group", onClick: () => {
+            if (ref.current)
+                ref.current.focus();
+            props.onClick?.();
+        } },
+        React.createElement("label", { className: classNames("danho-form-group__label", InputModule.title), htmlFor: props.name }, props.label),
+        props.children(ref)));
+}
+function getInputType(value) {
+    if (typeof value === 'boolean')
+        return 'checkbox';
+    if (typeof value === 'number')
+        return 'number';
+    if (typeof value === 'string') {
+        if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value))
+            return 'email';
+        if (/^https?:\/\/[^\s/$.?#].[^\s]*$/.test(value))
+            return 'url';
+        if (/^\d{10}$/.test(value))
+            return 'tel';
+        if (/^\d{3}-\d{3}-\d{4}$/.test(value))
+            return 'tel';
+        if (/^#[0-9A-F]{6}$/i.test(value))
+            return 'color';
+        if (/\d{4}-\d{2}-\d{2}/.test(value))
+            return 'date';
+        if (/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value))
+            return 'datetime-local';
+    }
+    return 'text';
+}
+
+var ButtonLooks;
+(function (ButtonLooks) {
+    ButtonLooks[ButtonLooks["BLANK"] = 0] = "BLANK";
+    ButtonLooks[ButtonLooks["FILLED"] = 1] = "FILLED";
+    ButtonLooks[ButtonLooks["INVERTED"] = 2] = "INVERTED";
+    ButtonLooks[ButtonLooks["LINK"] = 3] = "LINK";
+    ButtonLooks[ButtonLooks["OUTLINED"] = 4] = "OUTLINED";
+})(ButtonLooks || (ButtonLooks = {}));
+var ButtonSizes;
+(function (ButtonSizes) {
+    ButtonSizes[ButtonSizes["ICON"] = 0] = "ICON";
+    ButtonSizes[ButtonSizes["LARGE"] = 1] = "LARGE";
+    ButtonSizes[ButtonSizes["MAX"] = 2] = "MAX";
+    ButtonSizes[ButtonSizes["MEDIUM"] = 3] = "MEDIUM";
+    ButtonSizes[ButtonSizes["MIN"] = 4] = "MIN";
+    ButtonSizes[ButtonSizes["NONE"] = 5] = "NONE";
+    ButtonSizes[ButtonSizes["SMALL"] = 6] = "SMALL";
+    ButtonSizes[ButtonSizes["TINY"] = 7] = "TINY";
+    ButtonSizes[ButtonSizes["XLARGE"] = 8] = "XLARGE";
+})(ButtonSizes || (ButtonSizes = {}));
+var Colors$1;
+(function (Colors) {
+    Colors[Colors["BLACK"] = 0] = "BLACK";
+    Colors[Colors["BRAND"] = 1] = "BRAND";
+    Colors[Colors["BRAND_NEW"] = 2] = "BRAND_NEW";
+    Colors[Colors["GREEN"] = 3] = "GREEN";
+    Colors[Colors["LINK"] = 4] = "LINK";
+    Colors[Colors["PRIMARY"] = 5] = "PRIMARY";
+    Colors[Colors["RED"] = 6] = "RED";
+    Colors[Colors["TRANSPARENT"] = 7] = "TRANSPARENT";
+    Colors[Colors["WHITE"] = 8] = "WHITE";
+    Colors[Colors["YELLOW"] = 9] = "YELLOW";
+})(Colors$1 || (Colors$1 = {}));
+const Button = Finder.findBySourceStrings("FILLED", "BRAND", "MEDIUM", "button", "buttonRef");
+
+const GlobalNavigation = Finder.findBySourceStrings("ConnectedPrivateChannelsList", { defualtExport: false });
+
+const NotificationBadge = Finder.findBySourceStrings('STATUS_DANGER', "numberBadge");
+
 const ScrollerLooks = Finder.byKeys(['thin', 'fade']);
 const ScrollerWrapper = Finder.findBySourceStrings("paddingFix", "getScrollerState");
 ScrollerWrapper();
+
+const getNode = Finder.findBySourceStrings("timestamp", "format", "parsed", "full", { searchExports: true });
+const Timestamp = Finder.findBySourceStrings(".timestampTooltip", { defaultExport: false, }).Z;
+function TimestampComponent({ unix, format }) {
+    const node = getNode(unix, format);
+    const BadTimestamp = React.createElement("p", null, new Date(unix * 1000).toLocaleString());
+    try {
+        return typeof Timestamp === 'function' ? React.createElement(Timestamp, { node: node }) : BadTimestamp;
+    }
+    catch (e) {
+        console.error(e);
+        return BadTimestamp;
+    }
+}
 
 var Colors;
 (function (Colors) {
@@ -2368,7 +2744,7 @@ var BadgeTypes;
     BadgeTypes["NITRO_DIAMOND"] = "premium_tenure_24_month";
     BadgeTypes["NITRO_EMERALD"] = "premium_tenure_36_month";
     BadgeTypes["NITRO_RUBY"] = "premium_tenure_60_month";
-    BadgeTypes["NITRO_FIRE"] = "premium_tenure_72_month";
+    BadgeTypes["NITRO_OPAL"] = "premium_tenure_72_month";
     BadgeTypes["GUILD_BOOST_ANY"] = "booster";
     BadgeTypes["GUILD_BOOST_1"] = "guild_booster_lvl1";
     BadgeTypes["GUILD_BOOST_2"] = "guild_booster_lvl2";
@@ -2427,17 +2803,23 @@ var BadgeIconIds;
     BadgeIconIds["verified_developer"] = "6df5892e0f35b051f8b61eace34f4967";
 })(BadgeIconIds || (BadgeIconIds = {}));
 
-const getNode = Finder.findBySourceStrings("timestamp", "format", "parsed", "full", { searchExports: true });
-const Timestamp = Finder.findBySourceStrings("timestampTooltip", { defaultExport: false, }).Z;
-function TimestampComponent({ unix, format }) {
-    const node = getNode(unix, format);
-    try {
-        return React.createElement(Timestamp, { node: node });
-    }
-    catch (e) {
-        console.error(e);
-        return React.createElement("p", null, new Date(unix * 1000).toLocaleString());
-    }
+function SearchableList(props) {
+    const { items, renderItem, onSearch } = props;
+    const { placeholder = 'Search...', className, noResult, take, children } = props;
+    const [search, setSearch] = useState('');
+    const SearchableItem = useCallback(({ item, index }) => renderItem(item, index, items), [renderItem, items]);
+    const Children = useCallback(() => typeof children === 'function' ? children() : children, [children]);
+    const filteredItems = items
+        .filter(item => search ? onSearch(search, item) : true)
+        .slice(0, take ?? 25);
+    return (React.createElement("div", { className: classNames('searchable-list', className) },
+        React.createElement("div", { className: "searchable-list__input-container" },
+            React.createElement("input", { className: "searchable-list__input", type: "text", placeholder: placeholder, value: search, onChange: e => setSearch(e.target.value) }),
+            React.createElement(Children, null)),
+        React.createElement("ul", { className: "searchable-list__items" },
+            filteredItems.map((item, index) => (React.createElement("li", { key: index, className: "searchable-list__item" },
+                React.createElement(SearchableItem, { item: item, index: index })))),
+            filteredItems.length === 0 && noResult && (React.createElement("li", { className: "searchable-list__item--no-result" }, typeof noResult === 'function' ? noResult() : noResult)))));
 }
 
 function Setting({ setting, settings, set, titles, ...props }) {
@@ -2480,7 +2862,7 @@ function Setting({ setting, settings, set, titles, ...props }) {
             React.createElement(FormText, { className: 'note' }, titles[setting])));
     if (type === 'select')
         return (React.createElement("div", { className: "danho-form-select", key: setting.toString() },
-            React.createElement(Select, { options: props.selectValues.map(value => ({ label: value, value })), isSelected: value => Array.isArray(settings[setting]) ? v.includes(value) : value === settings[setting], serialize: value => JSON.stringify(value), select: Array.isArray(settings[setting]) ? (value) => {
+            React.createElement(Select, { options: props.options.map(value => ({ label: value, value })), isSelected: value => Array.isArray(settings[setting]) ? v.includes(value) : value === settings[setting], serialize: value => JSON.stringify(value), select: Array.isArray(settings[setting]) ? (value) => {
                     const selected = [...settings[setting]];
                     if (selected.includes(value))
                         selected.splice(selected.indexOf(value), 1);
@@ -2515,7 +2897,7 @@ function TabBar({ tabs, ...props }) {
         const contentChildren = internalTabs.map(([tab]) => [tab, typeof props[tab] === 'function'
                 ? props[tab]
                 : () => props[tab]]);
-        return (React.createElement(React.Fragment, null, contentChildren.map(([tab, Content], key) => (React.createElement("div", { key: getKeyName(`content-${key}`), className: classNames("tab-bar__content-page", tab === (props.tab ?? activeTab) && 'tab-bar__content-page--active') },
+        return (React.createElement(React.Fragment, null, contentChildren.map(([tab, Content], key) => (React.createElement("div", { key: getKeyName(`content-${key}`), className: classNames$1("tab-bar__content-page", tab === (props.tab ?? activeTab) && 'tab-bar__content-page--active') },
             React.createElement(Content, null))))));
     }, [tabs, activeTab, props.tab]);
     const setActiveTab = useCallback((tab) => {
@@ -2538,20 +2920,35 @@ function TabBar({ tabs, ...props }) {
         if (props.tab)
             setActiveTab(props.tab);
     }, [props.tab]);
-    return (React.createElement("div", { id: props.id, className: classNames("tab-bar", props.className) },
-        React.createElement("header", { className: classNames('tab-bar__tabs') },
+    return (React.createElement("div", { id: props.id, className: classNames$1("tab-bar", props.className) },
+        React.createElement("header", { className: classNames$1('tab-bar__tabs') },
             internalTabs.map(([tab, title]) => title &&
-                React.createElement("button", { key: getKeyName(tab), className: classNames("tab-bar__tab", activeTab === tab && 'tab-bar__tab--active'), onClick: () => setActiveTab(tab) }, title)),
+                React.createElement("button", { key: getKeyName(tab), className: classNames$1("tab-bar__tab", activeTab === tab && 'tab-bar__tab--active'), onClick: () => setActiveTab(tab) }, title)),
             props.children),
-        React.createElement("section", { className: classNames('tab-bar__content') },
+        React.createElement("section", { className: classNames$1('tab-bar__content') },
             React.createElement(TabContent, null))));
 }
 
-const renderChildren = (children, props = {}) => children.map(child => React.createElement(child.tagName, Array.from(child.attributes).reduce((acc, { name, value }) => ({ ...acc, [name]: value }), props), child.outerHTML.match(/</g).length > 2 ? renderChildren(Array.from(child.children)) : child.textContent));
+function User(props) {
+    const { user, children, className, onClick, openModalOnClick } = props;
+    const handleClick = () => {
+        if (onClick)
+            onClick(user);
+        if (openModalOnClick)
+            UserUtils.openModal(user.id);
+    };
+    return (React.createElement("div", { className: classNames("danho-discord-user", onClick && 'clickable', className), onClick: handleClick },
+        React.createElement("img", { src: user.getAvatarURL(), alt: user.username, className: "danho-discord-user__avatar" }),
+        React.createElement("section", { className: "danho-discord-user__info" },
+            React.createElement(Text, { variant: "text-md/bold", className: "danho-discord-user__displayName" }, user.globalName ?? user.username),
+            user.globalName && React.createElement(Text, { variant: "text-sm/normal", className: "danho-discord-user__username" }, user.username),
+            children ? typeof children === "function" ? children(user, Text) : children : null)));
+}
 
 function CreateSettingsGroup(callback) {
     return function SettingsGroup(props) {
-        return callback(React, props, Setting, FormElements);
+        const element = callback(React, props, Setting, FormElements);
+        return (React.createElement(ErrorBoundary, null, element));
     };
 }
 
@@ -2577,6 +2974,7 @@ function hexToRgb(hex) {
     const b = integer & 0xFF;
     return [r, g, b];
 }
+Finder.byKeys(["BRAND", "RED"]);
 
 const PrettifyRoles = CreateSettingsGroup((React, props, Setting) => (React.createElement(React.Fragment, null,
     React.createElement(Setting, { setting: "defaultRoleColor", type: "color", ...props, formatValue: rgbString => "#" + rgbToHex(rgbString.split(',').map(Number)), beforeChange: hex => hexToRgb(hex).join(',') }),
@@ -2609,12 +3007,8 @@ const StyleSettings = CreateSettingsGroup((React, props, Setting, { FormSection,
 
 const AutoCancelFriendRequestSettings = CreateSettingsGroup((React, props, Setting, { FormSection }) => {
     const folderNames = SortedGuildStore.getGuildFolders().map(folder => folder.folderName);
-    return (React.createElement(Setting, { setting: "folderNames", type: 'select', selectValues: folderNames, ...props }));
+    return (React.createElement(Setting, { setting: "folderNames", type: 'select', options: folderNames, ...props }));
 });
-
-const TimezoneSettings = CreateSettingsGroup((React, props, Setting) => (React.createElement(React.Fragment, null,
-    React.createElement(Setting, { setting: "hideTimezoneIcon", ...props }),
-    React.createElement(Setting, { setting: "hideTimezoneTimestamp", ...props }))));
 
 const BirthdateSettings = CreateSettingsGroup((React, props, Setting) => {
     const settings = Settings.useSelector(s => ({
@@ -2623,7 +3017,7 @@ const BirthdateSettings = CreateSettingsGroup((React, props, Setting) => {
     return (React.createElement(React.Fragment, null,
         React.createElement(Setting, { setting: "hideBirthdateIcon", ...props }),
         React.createElement(Setting, { setting: "hideBirthdateTimestamp", ...props }),
-        React.createElement(Setting, { setting: "birthdateTimestampStyle", ...props, type: "select", selectValues: [
+        React.createElement(Setting, { setting: "birthdateTimestampStyle", ...props, type: "select", options: [
                 "D", "d",
                 "T", "t",
                 "F", "f",
@@ -2632,12 +3026,20 @@ const BirthdateSettings = CreateSettingsGroup((React, props, Setting) => {
         React.createElement(TimestampComponent, { format: settings.timestampStyle, unix: Date.now() / 1000 })));
 });
 
+const DirectAndGroupTabSettings = CreateSettingsGroup((React, props, Setting) => (React.createElement(React.Fragment, null,
+    React.createElement(Setting, { setting: "defaultDirectAndGroupTab", ...props, type: "select", options: ['direct', 'group'] }))));
+
+const TimezoneSettings = CreateSettingsGroup((React, props, Setting) => (React.createElement(React.Fragment, null,
+    React.createElement(Setting, { setting: "hideTimezoneIcon", ...props }),
+    React.createElement(Setting, { setting: "hideTimezoneTimestamp", ...props }))));
+
 const DiscordChangesSettings = CreateSettingsGroup((React, props, Setting, { FormSection, FormDivider }) => {
     const AdditionalSettings = ({ setting }) => {
         switch (setting) {
             case 'autoCancelFriendRequests': return props.settings.autoCancelFriendRequests ? React.createElement(AutoCancelFriendRequestSettings, { ...props }) : null;
             case 'showUserTimezone': return props.settings.showUserTimezone ? React.createElement(TimezoneSettings, { ...props }) : null;
             case 'showUserBirthdate': return props.settings.showUserBirthdate ? React.createElement(BirthdateSettings, { ...props }) : null;
+            case 'directAndGroupTabs': return props.settings.directAndGroupTabs ? React.createElement(DirectAndGroupTabSettings, { ...props }) : null;
             default: return null;
         }
     };
@@ -2645,6 +3047,7 @@ const DiscordChangesSettings = CreateSettingsGroup((React, props, Setting, { For
         'folderNames',
         'hideTimezoneIcon', 'hideTimezoneTimestamp',
         'hideBirthdateIcon', 'hideBirthdateTimestamp', 'birthdateTimestampStyle',
+        'defaultDirectAndGroupTab'
     ];
     return (React.createElement(React.Fragment, null, Object.keys(DiscordEnhancements$1)
         .filter(key => !ignoredSettings.includes(key))
@@ -2655,9 +3058,638 @@ const DiscordChangesSettings = CreateSettingsGroup((React, props, Setting, { For
         React.createElement(FormDivider, null))))));
 });
 
+function buildContextMenu(...items) {
+    return BdApi.ContextMenu.buildMenu(items);
+}
+function buildTextItem(id, label, action, props = {}) {
+    return {
+        type: 'text',
+        label,
+        action,
+        id,
+        onClose: props.onClose ?? (() => { }),
+        ...props
+    };
+}
+function buildTextItemElement(id, label, action, props = {}) {
+    return BdApi.ContextMenu.buildItem(buildTextItem(id, label, action, props));
+}
+function buildSubMenu(id, label, items, props = {}) {
+    return {
+        type: 'submenu',
+        label,
+        items,
+        id,
+        action: () => { },
+        onClose: props.onClose ?? (() => { }),
+        ...props
+    };
+}
+function buildSubMenuElement(id, label, items, props = {}) {
+    return BdApi.ContextMenu.buildItem(buildSubMenu(id, label, items, props));
+}
+function buildCheckboxItem(id, label, checked, action, props = {}) {
+    return {
+        type: 'toggle',
+        id,
+        label,
+        checked,
+        action: () => action(!checked),
+        onClose: props.onClose ?? (() => { }),
+        ...props
+    };
+}
+function buildCheckboxItemElement(id, label, checked, action, props = {}) {
+    return BdApi.ContextMenu.buildItem(buildCheckboxItem(id, label, checked, action, props));
+}
+function buildSeparator() {
+    return { type: 'separator' };
+}
+
+function PatchChannelContextMenu$1(callback) {
+    const unpatch = BdApi.ContextMenu.patch('channel-context', (tree, props) => {
+        return callback(tree, props, unpatch);
+    });
+    return unpatch;
+}
+
+function PatchGuildContextMenu$1(callback) {
+    const unpatch = BdApi.ContextMenu.patch('guild-context', (tree, props) => {
+        return callback(tree, props, unpatch);
+    });
+    return unpatch;
+}
+
+function PatchUserContextMenu$1(callback) {
+    const unpatch = BdApi.ContextMenu.patch('user-context', (tree, props) => {
+        return callback(tree, props, unpatch);
+    });
+    return unpatch;
+}
+
+function createContextMenuCallback(menuType, callback) {
+    return callback;
+}
+
+const ClassModule = ClassNamesUtils.combineModuleByKeys(['container', 'badge']);
+const CustomBadge = ({ name, iconUrl, style, href, onContextMenu, size }) => {
+    if (!name || !iconUrl)
+        return null;
+    const compiledStyle = Object.assign({}, style, {
+        width: style?.width ?? size,
+        height: style?.height ?? size,
+    });
+    const BadgeIcon = () => React.createElement("img", { src: iconUrl, alt: name, className: ClassModule.badge, style: compiledStyle });
+    const AnchorBadge = () => (React.createElement("a", { href: href, target: "_blank", rel: "noreferrer noopener", onClick: e => {
+            if (href === '#')
+                e.preventDefault();
+        } },
+        React.createElement(BadgeIcon, null)));
+    return (React.createElement(Tooltip, { text: name }, props => (React.createElement("div", { ...props, onContextMenu: onContextMenu }, href ? React.createElement(AnchorBadge, null) : React.createElement(BadgeIcon, null)))));
+};
+
+const DEFAULT_STATE$1 = {
+    customBadges: {
+        developer: {
+            id: 'developer',
+            name: 'Plugin Developer',
+            iconUrl: 'https://i.imgur.com/f5MDiAd.png',
+            userTags: [USER_TAGS.DANHO],
+            position: {
+                before: BadgeTypes.ACTIVE_DEVELOPER,
+                default: 0
+            },
+            size: '14px',
+            href: 'https://github.com/DanielSimonsen90'
+        },
+        daniel_simonsen: {
+            id: 'daniel_simonsen',
+            name: 'Daniel Simonsen himself',
+            iconUrl: 'https://imgur.com/jva0EMf.png',
+            userTags: [USER_TAGS.DANHO],
+            position: 'start',
+            size: '16px',
+            href: 'https://open.spotify.com/artist/2Ya69OwtcUqvAMPaE8vXdg?si=ELamxrqgR-KLZwTqYA6AXA'
+        },
+        mose_clan: {
+            id: 'mose_clan',
+            name: 'Mose Clan',
+            iconUrl: 'https://imgur.com/Wm1pEfY.png',
+            userTags: [USER_TAGS.DANHO, USER_TAGS.THEGUNASS, USER_TAGS.BEAUTYKILLER, USER_TAGS.EMILIE, USER_TAGS.CARL],
+            size: '24px',
+            position: {
+                after: 'daniel_simonsen',
+            }
+        },
+        silly_goose: {
+            id: 'silly_goose',
+            name: 'Silly Goose',
+            iconUrl: 'https://i.imgur.com/5waDSil.png',
+            userTags: [USER_TAGS.MIZBATT],
+        }
+    },
+    users: {}
+};
+const CustomBadgesStore = new class CustomBadgesStore extends DiumStore {
+    constructor() {
+        super(DEFAULT_STATE$1, 'CustomBadgesStore', () => {
+            this.removeEmptyUsers();
+        });
+    }
+    get customBadges() {
+        return Object.values(this.current.customBadges);
+    }
+    upsetCustomBadge(badge) {
+        this.update(current => ({
+            ...current,
+            customBadges: {
+                ...current.customBadges,
+                [badge.id]: badge
+            }
+        }));
+    }
+    deleteCustomBadge(badgeId) {
+        this.update(current => {
+            const { [badgeId]: _, ...rest } = current.customBadges;
+            return {
+                users: Object.fromEntries(Object.entries(current.users).map(([userId, badges]) => {
+                    return [userId, badges.filter(badge => badge !== badgeId)];
+                })),
+                customBadges: rest
+            };
+        });
+    }
+    updateCustomUser(userId, badgeId) {
+        this.update(current => ({
+            ...current,
+            users: {
+                ...current.users,
+                [userId]: [...(current.users[userId] || []), badgeId]
+            }
+        }));
+    }
+    resetCustomBadges() {
+        this.update(current => ({
+            ...current,
+            customBadges: DEFAULT_STATE$1.customBadges,
+        }));
+    }
+    removeEmptyUsers() {
+        const emptyUsers = Object
+            .entries(this.current.users)
+            .filter(([userId, badges]) => !badges.length)
+            .map(([userId]) => userId);
+        if (emptyUsers.length) {
+            this.update(current => ({
+                ...current,
+                users: Object.fromEntries(Object.entries(current.users).filter(([userId]) => !emptyUsers.includes(userId))),
+            }));
+        }
+    }
+};
+DanhoStores.register(CustomBadgesStore);
+
+const BadgeGroups = {
+    discord: ['staff', 'partner', 'certified_moderator', 'automod'],
+    bug_hunter: ['bug_hunter_level_2', 'bug_hunter_level_1'],
+    hypesquad: ['hypesquad', 'hypesquad_house_1', 'hypesquad_house_2', 'hypesquad_house_3'],
+    programming: ['verified_developer', 'active_developer', 'bot_commands'],
+    nitro: ['premium', 'premium_tenure_1_month_v2', 'premium_tenure_3_month_v2', 'premium_tenure_6_month_v2', 'premium_tenure_12_month_v2', 'premium_tenure_24_month_v2', 'premium_tenure_36_month_v2', 'premium_tenure_60_month_v2', 'premium_tenure_72_month_v2', 'early_supporter'],
+    server_boost: ['guild_booster_lvl1', 'guild_booster_lvl2', 'guild_booster_lvl3', 'guild_booster_lvl4', 'guild_booster_lvl5', 'guild_booster_lvl6', 'guild_booster_lvl7', 'guild_booster_lvl8', 'guild_booster_lvl9'],
+    other: ['legacy_username', 'quest_completed'],
+};
+const DiscordBadgeStore = new class DiscordBadgeStore extends DiumStore {
+    constructor() {
+        super({}, 'DiscordBadgeStore', () => {
+            ActionsEmitter.on('USER_PROFILE_FETCH_SUCCESS', this.onUserProfileFetchSuccess.bind(this));
+        });
+        this.onUserProfileFetchSuccess = createActionCallback('USER_PROFILE_FETCH_SUCCESS', ({ badges }) => {
+            if (!badges?.length)
+                return;
+            const updates = badges.filter(badge => {
+                const stored = this.current[badge.id];
+                return !stored || stored.icon !== badge.icon;
+            });
+            if (updates.length)
+                this.update(current => ({
+                    ...current,
+                    ...updates.reduce((acc, badge) => {
+                        acc[badge.id] = badge;
+                        return acc;
+                    }, {})
+                }));
+        });
+    }
+    findBadgeByUrl(url, instance) {
+        if (!url && !instance)
+            return null;
+        let found = url ? Object.values(this.current).find(badge => url.includes(badge.icon)) : null;
+        found ??= !instance || typeof instance.props.text === 'string' ? null : instance.props.text.props.profileBadge;
+        if (found && !this.current[found.id])
+            this.update(current => ({
+                ...current,
+                [found.id]: found,
+            }));
+        return found;
+    }
+    addBadge(badge) {
+        this.update(current => ({
+            ...current,
+            [badge.id]: badge,
+        }));
+    }
+    getBadgeName(badgeId) {
+        switch (badgeId) {
+            case 'certified_moderator': return 'Moderator Programs Alumni';
+            case 'bug_hunter_level_1': return 'Discord Bug Hunter';
+            case 'bug_hunter_level_2': return 'Discord Bug Hunter';
+            case 'bot_commands': return 'Supports Commands';
+            case 'hypesquad': return 'HypeSquad Events';
+            case 'hypesquad_house_1': return 'HypeSquad Bravery';
+            case 'hypesquad_house_2': return 'HypeSquad Brilliance';
+            case 'hypesquad_house_3': return 'HypeSquad Balance';
+            case 'premium': return 'Discord Nitro';
+            case 'premium_tenure_1_month_v2': return 'Nitro Bronze';
+            case 'premium_tenure_3_month_v2': return 'Nitro Silver';
+            case 'premium_tenure_6_month_v2': return 'Nitro Gold';
+            case 'premium_tenure_12_month_v2': return 'Nitro Platinum';
+            case 'premium_tenure_24_month_v2': return 'Nitro Diamond';
+            case 'premium_tenure_36_month_v2': return 'Nitro Emerald';
+            case 'premium_tenure_48_month_v2': return 'Nitro Sapphire';
+            case 'premium_tenure_60_month_v2': return 'Nitro Ruby';
+            case 'premium_tenure_72_month_v2': return 'Nitro Opal';
+            case 'guild_booster_lvl1': return 'Server Booster';
+            case 'guild_booster_lvl2': return 'Server Booster';
+            case 'guild_booster_lvl3': return 'Server Booster';
+            case 'guild_booster_lvl4': return 'Server Booster';
+            case 'guild_booster_lvl5': return 'Server Booster';
+            case 'guild_booster_lvl6': return 'Server Booster';
+            case 'guild_booster_lvl7': return 'Server Booster';
+            case 'guild_booster_lvl8': return 'Server Booster';
+            case 'guild_booster_lvl9': return 'Server Booster';
+            default: return badgeId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+    }
+};
+DanhoStores.register(DiscordBadgeStore);
+
+const BadgePositionsStore = new class BadgePositionsStore extends DiumStore {
+    constructor(defaultState = {}) {
+        super(defaultState, "BadgePositionsStore");
+        this.getDiscordBadgesPositions = () => [
+            ...(Settings.current.movePremiumBadge ? [] : NitroBadges),
+            'staff',
+            'partner',
+            'certified_moderator',
+            'automod',
+            'hypesquad',
+            'bug_hunter_level_2',
+            'bug_hunter_level_1',
+            'hypesquad_house_3',
+            'hypesquad_house_2',
+            'hypesquad_house_1',
+            'verified_developer',
+            'active_developer',
+            'bot_commands',
+            ...(Settings.current.movePremiumBadge ? NitroBadges : []),
+            'early_supporter',
+            'guild_booster_lvl9',
+            'guild_booster_lvl8',
+            'guild_booster_lvl7',
+            'guild_booster_lvl6',
+            'guild_booster_lvl5',
+            'guild_booster_lvl4',
+            'guild_booster_lvl3',
+            'guild_booster_lvl2',
+            'guild_booster_lvl1',
+            'legacy_username',
+            'quest_completed',
+        ];
+    }
+    getSortedBadgeIds() {
+        return Object.entries(this.current)
+            .sort(([, a], [, b]) => a - b)
+            .map(([badgeId]) => badgeId);
+    }
+    getSortedBadges() {
+        return this.getSortedBadgeIds()
+            .map(badgeId => this.getBadge(badgeId));
+    }
+    getBadgePosition(badgeId) {
+        return this.current[badgeId] ?? -1;
+    }
+    setBadgePosition(badgeId, position) {
+        const ids = this.getSortedBadgeIds();
+        ids.splice(position, 0, badgeId);
+        this.update(ids.reduce((acc, id, index) => {
+            acc[id] = index;
+            return acc;
+        }, {}));
+    }
+    deleteBadgePosition(badgeId) {
+        this.delete(badgeId);
+    }
+    sort(badgeIds) {
+        const sortedBadgeIds = this.getSortedBadgeIds();
+        const positions = this.current;
+        return badgeIds.sort((a, b) => {
+            const aIndex = sortedBadgeIds.indexOf(a);
+            const bIndex = sortedBadgeIds.indexOf(b);
+            if (aIndex === -1 && bIndex === -1)
+                return 0;
+            if (aIndex === -1)
+                return 1;
+            if (bIndex === -1)
+                return -1;
+            return positions[a] - positions[b];
+        });
+    }
+    useEditorStore(selectedBadgeId) {
+        const getDefaultSortedBadgeIdsState = useCallback((sortedIds) => {
+            if (selectedBadgeId && !sortedIds.includes(selectedBadgeId))
+                sortedIds.push(selectedBadgeId);
+            return sortedIds;
+        }, [selectedBadgeId]);
+        const [sortedBadgeIds, setSortedBadgeIds] = useState(() => getDefaultSortedBadgeIdsState(this.getSortedBadgeIds()));
+        const getDefaultStoreState = useCallback(() => {
+            return sortedBadgeIds.reduce((acc, badgeId, index) => {
+                acc[badgeId] = index;
+                return acc;
+            }, {});
+        }, [sortedBadgeIds]);
+        useEffect(() => setSortedBadgeIds(getDefaultSortedBadgeIdsState), [selectedBadgeId]);
+        const editorStore = new BadgePositionsStore(getDefaultStoreState());
+        const ministore = {
+            sort: (badgeIds) => editorStore.sort(badgeIds),
+            getSortedBadges: () => sortedBadgeIds.map(badgeId => editorStore.getBadge(badgeId, true)),
+            getBadgePosition: (badgeId) => editorStore.getBadgePosition(badgeId),
+            setBadgePosition: (badgeId, position) => {
+                const ids = sortedBadgeIds.includes(badgeId) ? sortedBadgeIds.filter(id => id !== badgeId) : sortedBadgeIds;
+                ids.splice(position, 0, badgeId);
+                setSortedBadgeIds(ids);
+            }
+        };
+        return Object.assign(ministore, Object.freeze({
+            selectedBadgeId,
+            sortedBadgeIds,
+            get defaultStoreState() {
+                return getDefaultStoreState();
+            },
+            get current() {
+                return editorStore.current;
+            }
+        }));
+    }
+    getBadge(badgeId, suppressWarning = false) {
+        if (!badgeId)
+            return null;
+        const discordBadge = DiscordBadgeStore.current[badgeId];
+        const customBadge = CustomBadgesStore.current?.customBadges?.[badgeId];
+        if (!discordBadge && !customBadge) {
+            if (!suppressWarning)
+                warn(`Failed to find badge in DiscordBadgesStore`, badgeId);
+            return null;
+        }
+        return {
+            id: badgeId,
+            name: discordBadge?.description ?? customBadge.name,
+            iconUrl: discordBadge?.icon ? UrlUtils.badgeIcon(discordBadge.icon) : customBadge.iconUrl,
+            url: discordBadge?.link ?? customBadge?.href,
+            style: customBadge?.size ? {
+                width: customBadge.size,
+                height: customBadge.size,
+            } : undefined
+        };
+    }
+};
+DanhoStores.register(BadgePositionsStore);
+const NitroBadges = [
+    'premium_tenure_72_month_v2',
+    'premium_tenure_60_month_v2',
+    'premium_tenure_48_month_v2',
+    'premium_tenure_36_month_v2',
+    'premium_tenure_24_month_v2',
+    'premium_tenure_12_month_v2',
+    'premium_tenure_6_month_v2',
+    'premium_tenure_3_month_v2',
+    'premium_tenure_1_month_v2',
+    'premium',
+];
+
+const PotentialUser = (props) => {
+    const { user, modifyBadge, selectedBadge, setModifyBadge, badgePositionsStoreEditor, badgeIdsInTooltip } = props;
+    const [badgeIds, badges, customBadges] = useMemo(() => {
+        const displayProfile = UserProfileStore.getUserProfile(user.id);
+        const badges = (displayProfile?.badges ??
+            displayProfile?.getBadges() ??
+            []);
+        const addedBadges = CustomBadgesStore.current.users[user.id] ?? [];
+        const customBadges = CustomBadgesStore.customBadges
+            .filter(badge => badge.userTags?.includes(user.username));
+        const badgeIds = [
+            ...badges.map(badge => badge.id),
+            ...addedBadges,
+            ...customBadges.map(badge => badge.id),
+        ];
+        return [badgeIds, badges, customBadges];
+    }, [user, modifyBadge, badgePositionsStoreEditor]);
+    const compiledBadges = useMemo(() => {
+        if (!badgeIds.includes(selectedBadge.id) || !badgeIds.includes(modifyBadge.id))
+            badgeIds.push(selectedBadge.id);
+        return badgePositionsStoreEditor.sort(badgeIds).map(badgeId => {
+            const badge = (badges.find(badge => badge.id === badgeId)
+                || badgeId in DiscordBadgeStore.current ? DiscordBadgeStore.current[badgeId] : null);
+            if (badge)
+                return {
+                    id: badge.id,
+                    name: badgeIdsInTooltip ? badge.id : badge.description,
+                    iconUrl: UrlUtils.badgeIcon(badge.icon),
+                    href: badge.link,
+                };
+            if (badgeId === modifyBadge.id || badgeId === selectedBadge.id)
+                return modifyBadge;
+            const customBadge = customBadges.find(badge => badge.id === badgeId);
+            if (customBadge)
+                return {
+                    ...customBadge,
+                    name: badgeIdsInTooltip ? customBadge.id : customBadge.name,
+                };
+            Logger.warn(`Badge ${badgeId} not found in DiscordBadgeStore or CustomBadgesStore`, {
+                badges,
+                modifyBadge,
+            });
+            return null;
+        }).filter(Boolean);
+    }, [badges, modifyBadge, selectedBadge, badgeIds, customBadges, badgePositionsStoreEditor, badgeIdsInTooltip]);
+    return (React.createElement(Tooltip, { text: `Give ${modifyBadge.name} to ${UserUtils.getUsernames(user).shift()}` }, props => (React.createElement("div", { className: 'tooltip-inner', ...props },
+        React.createElement(User, { user: user, className: classNames('potential-user', modifyBadge.userTags?.includes(user.username) && 'border-success'), onClick: () => setModifyBadge(current => ({ ...current, userTags: current.userTags ? [...current.userTags, user.username] : [user.username] })) },
+            React.createElement("div", { className: "danho-user-badge-list" }, compiledBadges.map(badge => React.createElement(CustomBadge, { key: badge.id, ...badge }))))))));
+};
+
+function PositionInput({ selectedBadge, modifyBadge, badgePositionsStoreEditor }) {
+    const forceUpdate = useForceUpdate();
+    const badges = badgePositionsStoreEditor.getSortedBadges();
+    return (React.createElement("div", { className: "position-input", role: "list" }, badges.map((badge, position) => !badge || badge.id === selectedBadge.id ? (React.createElement(CustomBadge, { key: modifyBadge.id, name: "", iconUrl: "", ...modifyBadge, href: modifyBadge.href ? '#' : undefined })) : (React.createElement(CustomBadge, { key: badge.id, name: badge.name, style: badge.style, iconUrl: badge.iconUrl, href: badge.url ? '#' : undefined, onContextMenu: e => {
+            BdApi.ContextMenu.open(e, buildContextMenu(buildTextItem('badge-move-before', `Move ${modifyBadge.name} before ${badge.name} (left)`, () => {
+                badgePositionsStoreEditor.setBadgePosition(selectedBadge.id, position);
+                forceUpdate();
+            }), buildTextItem('badge-move-after', `Move ${modifyBadge.name} after ${badge.name} (right)`, () => {
+                badgePositionsStoreEditor.setBadgePosition(selectedBadge.id, position + 1);
+                forceUpdate();
+            })));
+        } })))));
+}
+
+function useFormTab(refResolve, ...exclude) {
+    const formRef = undefined;
+    useMemo(() => {
+        return [];
+    }, [formRef, exclude]);
+    useKeybind(['Tab'], () => { });
+    return {
+            onKeyDown: (e) => {
+                if (e.key !== 'Tab')
+                    return;
+                e.preventDefault();
+                const forms = document.querySelectorAll('form');
+                const form = Array.from(forms).find(form => form.contains(e.target));
+                if (!form)
+                    return;
+                const inputs = Array.from(form.querySelectorAll('input, select, textarea'));
+                const currentIndex = inputs.indexOf(e.target);
+                const nextIndex = (currentIndex + 1) % inputs.length;
+                inputs[nextIndex].focus();
+            }
+        };
+}
+
+function CustomBadgeModifyForm(props) {
+    const { selectedBadgeId, setSelectedBadgeId } = props;
+    const [badgeIdsInTooltip, setBadgeIdsInTooltip] = useState(false);
+    const selectedBadge = useMemo(() => (CustomBadgesStore.current.customBadges[selectedBadgeId] ?? {
+        id: selectedBadgeId,
+    }), [selectedBadgeId]);
+    const [modifyBadge, setModifyBadge] = useState(() => selectedBadge);
+    const badgePositionsStoreEditor = BadgePositionsStore.useEditorStore(selectedBadgeId);
+    const formTabProps = useFormTab();
+    const formItemModel = ObjectUtils.exclude(modifyBadge, 'userTags');
+    const hasChanges = !ObjectUtils.isEqual(modifyBadge, selectedBadge);
+    const isNewBadge = (!(modifyBadge.id in CustomBadgesStore.current.customBadges) &&
+        !(selectedBadge.id in CustomBadgesStore.current.customBadges));
+    useEffect(() => {
+        setModifyBadge(selectedBadge);
+    }, [selectedBadge]);
+    return (React.createElement("form", { className: "custom-badge-modify-container", ...formTabProps },
+        React.createElement(Text, { variant: 'heading-xl/bold' },
+            isNewBadge ? 'Create' : 'Edit',
+            " ",
+            modifyBadge.name ?? 'your own badge'),
+        React.createElement(FormItemFromModel, { model: formItemModel, property: 'id', onChange: id => setModifyBadge(current => ({ ...current, id })) }),
+        React.createElement(FormItemFromModel, { model: formItemModel, property: 'name', onChange: name => setModifyBadge(current => ({ ...current, name })) }),
+        React.createElement(FormItemFromModel, { model: formItemModel, property: 'iconUrl', onChange: iconUrl => setModifyBadge(current => ({ ...current, iconUrl })), label: "Url to icon" }),
+        React.createElement(FormItemFromModel, { model: formItemModel, property: 'href', onChange: href => setModifyBadge(current => ({ ...current, href })), label: "External URL when clicked" }),
+        React.createElement(FormItem, { label: "Show badge id in tooltip instead of its name", value: badgeIdsInTooltip, onChange: value => setBadgeIdsInTooltip(value) }),
+        React.createElement(SearchableList, { items: UserUtils.getUsersPrioritizingFriends(), take: 4, onSearch: (search, item) => UserUtils.getUsernames(item, true).some(name => name.includes(search.toLowerCase())), renderItem: user => (React.createElement(PotentialUser, { user: user, modifyBadge: modifyBadge, badgePositionsStoreEditor: badgePositionsStoreEditor, selectedBadge: selectedBadge, setModifyBadge: setModifyBadge, badgeIdsInTooltip: badgeIdsInTooltip })) }),
+        React.createElement(EmptyFormGroup, { label: "Badge position", name: "position" }, () => React.createElement(PositionInput, { selectedBadge: selectedBadge, modifyBadge: modifyBadge, badgePositionsStoreEditor: badgePositionsStoreEditor })),
+        React.createElement(FormItemFromModel, { model: formItemModel, property: 'size', defaultValue: '20px', onChange: size => setModifyBadge(current => ({ ...current, size: size })) }),
+        React.createElement("div", { className: "button-panel" },
+            React.createElement(Button, { type: "reset", color: Button.Colors.RED, look: Button.Looks.OUTLINED, onClick: () => setSelectedBadgeId(null) },
+                "Deselect ",
+                modifyBadge.name || selectedBadge.name,
+                " without saving"),
+            React.createElement(Button, { type: "submit", color: isNewBadge ? Button.Colors.GREEN : Button.Colors.YELLOW, look: Button.Looks.FILLED, disabled: !hasChanges, onClick: () => {
+                    if (!modifyBadge.iconUrl || !modifyBadge.name || !modifyBadge.id)
+                        return;
+                    if (badgePositionsStoreEditor.getBadgePosition(selectedBadge.id) !== BadgePositionsStore.getBadgePosition(selectedBadge.id)) {
+                        BadgePositionsStore.setBadgePosition(modifyBadge.id, badgePositionsStoreEditor.getBadgePosition(selectedBadge.id));
+                    }
+                    if (modifyBadge.id !== selectedBadge.id) {
+                        CustomBadgesStore.deleteCustomBadge(selectedBadge.id);
+                        BadgePositionsStore.deleteBadgePosition(selectedBadge.id);
+                    }
+                    CustomBadgesStore.upsetCustomBadge(modifyBadge);
+                    setSelectedBadgeId(null);
+                } },
+                isNewBadge ? 'Create' : 'Save',
+                " ",
+                modifyBadge.name || selectedBadge.name))));
+}
+
 const BadgesSettings = CreateSettingsGroup((React, props, Setting, { FormSection }) => {
-    return (React.createElement(Setting, { setting: "useClientCustomBadges", ...props }));
+    return (React.createElement(React.Fragment, null,
+        React.createElement(Setting, { setting: "useClientCustomBadges", ...props }),
+        props.settings.useClientCustomBadges && React.createElement(CustomBadgesSettingsGroup, { ...props })));
 });
+const CustomBadgesSettingsGroup = CreateSettingsGroup((React, props, Setting, { FormSection }) => {
+    const [selectedBadgeId, setSelectedBadgeId] = useState(null);
+    const forceUpdate = useForceUpdate();
+    const modifyUserToBadge = useModifyUserToBadge(forceUpdate);
+    CustomBadgesStore.useListener(forceUpdate);
+    return (React.createElement(FormSection, { title: "Custom Badges" },
+        selectedBadgeId && React.createElement(CustomBadgeModifyForm, { selectedBadgeId: selectedBadgeId, setSelectedBadgeId: setSelectedBadgeId }),
+        React.createElement(SearchableList, { items: CustomBadgesStore.customBadges, className: "custom-badge-list", onSearch: (search, item) => [item.name, item.id, item.href].some(value => value.toLowerCase().includes(search.toLowerCase())), placeholder: "Search for a badge to modify...", renderItem: (badge, i) => (React.createElement("section", { className: classNames('custom-badge-container', i % 2 === 0 && 'custom-badge-container--alternate'), key: badge.id },
+                React.createElement(CustomBadge, { key: badge.id, ...ObjectUtils.exclude(badge, 'size'), onContextMenu: e => {
+                        BdApi.ContextMenu.open(e, createCustomBadgeContextMenu({
+                            onEdit: () => setSelectedBadgeId(badge.id),
+                            onDelete: () => {
+                                BdApi.UI.showConfirmationModal(`Delete ${badge.name}?`, (React.createElement("div", null,
+                                    React.createElement(Text, { variant: "text-md/normal" },
+                                        "Are you sure you want to delete ",
+                                        badge.name,
+                                        "?"),
+                                    React.createElement(Text, { variant: "text-sm/normal" }, "This action cannot be undone."))), {
+                                    confirmText: `Delete ${badge.name}`,
+                                    onConfirm() {
+                                        BadgePositionsStore.deleteBadgePosition(badge.id);
+                                        CustomBadgesStore.deleteCustomBadge(badge.id);
+                                    }
+                                });
+                            }
+                        }));
+                    } }),
+                React.createElement("aside", { className: "custom-badge-info" },
+                    React.createElement(ErrorBoundary, { id: "users-list" },
+                        React.createElement("div", { role: "list", className: "users" }, badge.userTags
+                            ? badge.userTags.map(userTag => {
+                                const user = UserUtils.getUserByUsername(userTag);
+                                const onClick = () => modifyUserToBadge(badge.id, userTag, 'remove');
+                                const child = user
+                                    ? React.createElement(User, { user: user, onClick: onClick })
+                                    : React.createElement(Text, { variant: "text-md/normal" }, userTag);
+                                return (React.createElement(Tooltip, { text: `Remove ${badge.name} from ${UserUtils.getUsernames(user).shift()}` }, props => (React.createElement("div", { ...props, className: "user-tooltip", onClick: onClick }, child))));
+                            })
+                            : React.createElement(Text, { variant: "text-sm/normal" }, "None"))),
+                    React.createElement(ErrorBoundary, { id: "potential-users" },
+                        React.createElement(SearchableList, { className: "potential-users", items: UserUtils.getUsersPrioritizingFriends().filter(user => badge.userTags ? badge.userTags.includes(user.username) === false : true), onSearch: (search, item) => UserUtils.getUsernames(item, true).some(name => name.includes(search.toLowerCase())), placeholder: 'Give this badge to...', renderItem: user => (React.createElement(Tooltip, { text: `Give ${badge.name} to ${UserUtils.getUsernames(user).shift()}` }, props => {
+                                const onClick = () => modifyUserToBadge(badge.id, user.username, 'add');
+                                return (React.createElement("div", { ...props, className: "user-tooltip", onClick: onClick },
+                                    React.createElement(User, { user: user, onClick: onClick })));
+                            })) }))))) },
+            React.createElement(Button, { type: "button", className: "create-new-badge-button", look: Button.Looks.FILLED, color: Button.Colors.GREEN, size: Button.Sizes.SMALL, onClick: () => setSelectedBadgeId(`custom-badge__${StringUtils.generateRandomId()}`) }, "Create new badge"))));
+});
+function createCustomBadgeContextMenu({ onEdit, onDelete }) {
+    return buildContextMenu(buildTextItem('badge-edit', 'Edit', onEdit), buildTextItem('badge-delete', 'Delete', onDelete, {
+        danger: true,
+    }));
+}
+function useModifyUserToBadge(forceUpdate) {
+    return function modifyUserToBadge(badgeId, userTag, state) {
+        const badge = CustomBadgesStore.current.customBadges[badgeId];
+        if (!badge)
+            return;
+        if (badge.userTags && badge.userTags.includes(userTag) && state === 'add')
+            return;
+        if (badge.userTags && !badge.userTags.includes(userTag) && state === 'remove')
+            return;
+        badge.userTags = badge.userTags || [];
+        if (state === 'add')
+            badge.userTags.push(userTag);
+        else
+            badge.userTags = badge.userTags.filter(tag => tag !== userTag);
+        CustomBadgesStore.upsetCustomBadge(badge);
+        forceUpdate();
+    };
+}
 
 const LockSettings = CreateSettingsGroup((React, props, Setting, { FormSection }) => {
     return (React.createElement(React.Fragment, null,
@@ -2707,13 +3739,106 @@ function SettingsPanel() {
         tabs.some(([_, value]) => value) && (React.createElement(TabBar, { tabs: tabs, styleChanges: React.createElement(StyleSettings, { ...settingProps }), discordEnhancements: React.createElement(DiscordChangesSettings, { ...settingProps }), danhoEnhancements: React.createElement(DanhoChangesSettings, { ...settingProps }) }))));
 }
 
-const SECOND = 1000;
-const MINUTE = SECOND * 60;
-const HOUR = MINUTE * 60;
-const DAY = HOUR * 24;
-const WEEK = DAY * 7;
-const MONTH = DAY * 30;
-const YEAR = DAY * 365;
+const classModule = Finder.byKeys(["sectionDivider", "themedSearchBarMobile"]);
+function PrivateChannelList(ListClass) {
+    const defaultTab = Settings.useSelector(s => s.defaultDirectAndGroupTab);
+    const [selectedTab, setSelectedTab] = React.useState(defaultTab);
+    return class DanhoPrivateChannelList extends ListClass {
+        componentDidMount() {
+            super.componentDidMount();
+            ActionsEmitter.on('MESSAGE_CREATE', this.onMessageCreate);
+            ActionsEmitter.on('MESSAGE_ACK', this.onMessageAck);
+        }
+        componentWillUnmount() {
+            ActionsEmitter.off('MESSAGE_CREATE', this.onMessageCreate);
+            ActionsEmitter.off('MESSAGE_ACK', this.onMessageAck);
+        }
+        constructor(props) {
+            super(props);
+            this.onMessageCreate = createActionCallback('MESSAGE_CREATE', ({ channelId }) => this.onNewMessage(channelId)).bind(this);
+            this.onMessageAck = createActionCallback('MESSAGE_ACK', ({ channelId }) => this.onNewMessage(channelId)).bind(this);
+            this.__originalRenderDM = 'renderDM' in this ? this.renderDM : undefined;
+            this.renderDM = this.patchedRenderDM.bind(this);
+            this.__originalRenderSection = 'renderSection' in this ? this.renderSection : undefined;
+            this.renderSection = this.patchedRenderSection.bind(this);
+            this.__originalGetRowHeight = 'getRowHeight' in this ? this.getRowHeight : undefined;
+            this.getRowHeight = this.patchedGetRowHeight.bind(this);
+        }
+        render() {
+            return (React.createElement(React.Fragment, null,
+                React.createElement("div", { className: "danho-private-channel-list__space-enabler" }),
+                super.render()));
+        }
+        patchedRenderDM(section, row) {
+            const { privateChannelIds, channels } = this.props;
+            const channel = channels[privateChannelIds[row]];
+            if (!channel)
+                return null;
+            if (channel.isMultiUserDM() && selectedTab !== 'group')
+                return null;
+            if (channel.isDM() && selectedTab !== 'direct')
+                return null;
+            return this.__originalRenderDM(section, row);
+        }
+        patchedRenderSection(rowData) {
+            const { section } = rowData;
+            const { showDMHeader, channels } = this.props;
+            if (section === 0 || !showDMHeader)
+                return this.__originalRenderSection(rowData);
+            const TabButton = this.renderTabButton.bind(this);
+            const getNotificationCount = (state) => Object
+                .values(channels)
+                .filter(channel => state === 'group'
+                ? channel.isMultiUserDM()
+                : state === 'direct' && channel.isDM())
+                .map(channel => channel.id)
+                .filter(channelId => ReadStateStore.hasUnread(channelId))
+                .reduce((acc, channelId) => acc + ReadStateStore.getUnreadCount(channelId), 0);
+            return (React.createElement("div", { className: 'tab-bar tab-bar--private-channels' },
+                React.createElement("header", { className: 'tab-bar__tabs' },
+                    React.createElement(TabButton, { setState: 'direct', label: 'Direct', notifications: getNotificationCount('direct') }),
+                    React.createElement(TabButton, { setState: 'group', label: 'Group', notifications: getNotificationCount('group') })),
+                React.createElement("div", { className: classModule.sectionDivider })));
+        }
+        patchedGetRowHeight(rowData) {
+            const { section, row } = rowData;
+            return this.renderDM(section, row) ? this.__originalGetRowHeight(rowData) : 0;
+        }
+        renderTabButton(props) {
+            const { setState: state, label, notifications } = props;
+            const look = state === selectedTab ? Button.Looks.LINK : Button.Looks.BLANK;
+            return (React.createElement("div", { className: "tab-button" },
+                notifications > 0 ? React.createElement(NotificationBadge, { count: notifications }) : null,
+                React.createElement(Button, { size: Button.Sizes.TINY, look: look, color: Button.Colors.BLACK, "data-selected": state === selectedTab, onClick: () => setSelectedTab(state) }, label)));
+        }
+        onNewMessage(channelId) {
+            if (this.props.privateChannelIds.includes(channelId)) {
+                this.forceUpdate();
+            }
+        }
+    };
+}
+
+const style$5 = ".tab-bar--private-channels {\n  --padding: 0ch;\n  padding-right: var(--padding);\n  padding-left: calc(var(--padding) + 5px);\n  padding-bottom: 1ch;\n}\n.tab-bar--private-channels .tab-bar__tabs .tab-button {\n  position: relative;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n.tab-bar--private-channels .tab-bar__tabs .tab-button:last-child::before {\n  content: \"\";\n  width: 1px;\n  height: 100%;\n  background-color: var(--background-primary);\n  position: absolute;\n  left: 0;\n}\n.tab-bar--private-channels .tab-bar__tabs button {\n  padding-inline: 0;\n  position: relative;\n}\n.tab-bar--private-channels .tab-bar__tabs button[data-selected=true] {\n  font-weight: bold;\n}\n.tab-bar--private-channels .tab-bar__tabs button[data-selected=true] * {\n  position: relative;\n  margin: 0;\n}\n.tab-bar--private-channels .tab-bar__tabs button[data-selected=false] * {\n  color: var(--text-muted);\n}\n.tab-bar--private-channels .tab-bar__tabs button[data-selected=false] *:hover {\n  color: var(--interactive-hover);\n}\n\nnav[class*=privateChannels]:has(.danho-private-channel-list__space-enabler) div[class*=scroller] {\n  --margin-addition: 1em;\n  margin-bottom: calc(var(--custom-app-panels-height, 0) + 8px + var(--margin-addition));\n}";
+
+function Feature$a() {
+    if (!Settings.current.directAndGroupTabs)
+        return;
+    const module = Finder.findBySourceStrings('ConnectedPrivateChannelsList', { defaultExport: false });
+    if (!module)
+        return;
+    after(module, 'Z', ({ result }) => {
+        const B = result.props.children.type;
+        const DanhoPrivateChannelList = PrivateChannelList(B);
+        result.props.children = React.createElement(DanhoPrivateChannelList, { ...result.props.children.props });
+    });
+}
+
+const DirectAndGroupTabs = {
+    __proto__: null,
+    default: Feature$a,
+    style: style$5
+};
 
 function Feature$9() {
     const relativeTimeModule = Finder.findBySourceStrings('"R"!==e.format', { defaultExport: false });
@@ -2858,7 +3983,6 @@ const HiddenChannelStore = new class HiddenChannelStore extends DiumStore {
                 return true;
             }
         }
-        console.log('Category does not render');
         return false;
     }
     getAllHiddenChannels() {
@@ -2989,6 +4113,11 @@ function GuildList(ListClass) {
             this.__originalRenderSection = 'renderSection' in this ? this.renderSection : undefined;
             this.renderSection = this.patchedRenderSection.bind(this);
             this.handleListScroll = this.onScroll.bind(this);
+            HiddenChannelStore.addListener(state => {
+                const guild = state.guilds[props.guild.id];
+                if (guild)
+                    this.forceUpdate();
+            });
         }
         render() {
             return (React.createElement("div", { className: ScrollerLooks.thin, style: {
@@ -3208,7 +4337,7 @@ const BirthdayStore = new class BirthdayStore extends DiumStore {
 };
 DanhoStores.register(BirthdayStore);
 
-const style$3 = "span[class*=timestamp] {\n  color: var(--text-primary);\n}\n\nli.danho-birthday-calendar {\n  display: flex;\n  align-items: center;\n  margin-left: 8px;\n  border-radius: 4px;\n}\nli.danho-birthday-calendar > * {\n  padding: 8px;\n}\nli.danho-birthday-calendar svg {\n  margin-left: 4px;\n  margin-right: 12px;\n}\n\ndiv:has(> .birthday-child-icon) {\n  position: relative;\n}\n\n.birthday-child-icon {\n  z-index: 1;\n  position: absolute;\n  top: -0.3ch;\n  right: -0.5ch;\n  font-size: 1.4ch;\n}";
+const style$4 = "span[class*=timestamp] {\n  color: var(--text-primary);\n}\n\nli.danho-birthday-calendar {\n  display: flex;\n  align-items: center;\n  margin-left: 8px;\n  border-radius: 4px;\n}\nli.danho-birthday-calendar > * {\n  padding: 8px;\n}\nli.danho-birthday-calendar svg {\n  margin-left: 4px;\n  margin-right: 12px;\n}\n\ndiv:has(> .birthday-child-icon) {\n  position: relative;\n}\n\n.birthday-child-icon {\n  z-index: 1;\n  position: absolute;\n  top: -0.3ch;\n  right: -0.5ch;\n  font-size: 1.4ch;\n}";
 
 function Feature$5() {
     if (!Settings.current.showBirthdayOnNameTag)
@@ -3220,7 +4349,7 @@ function Feature$5() {
 const UserBirthday = {
     __proto__: null,
     default: Feature$5,
-    style: style$3
+    style: style$4
 };
 
 const UserTimezoneStyle = "span[class*=timestamp] {\n  color: var(--text-primary);\n}";
@@ -3232,70 +4361,24 @@ const DiscordEnhancements = [
     UserBirthday,
     { style: UserTimezoneStyle, default: () => { } },
     HideInactiveChannels,
+    DirectAndGroupTabs,
 ];
 
-const CustomBadgesStore = createDiumStore({
-    developer: {
-        name: 'Plugin Developer',
-        iconUrl: 'https://i.imgur.com/f5MDiAd.png',
-        userTags: [USER_TAGS.DANHO],
-        position: {
-            before: BadgeTypes.ACTIVE_DEVELOPER,
-            default: 0
-        },
-        size: '14px',
-        href: 'https://github.com/DanielSimonsen90'
-    },
-    daniel_simonsen: {
-        name: 'Daniel Simonsen himself',
-        iconUrl: 'https://imgur.com/jva0EMf.png',
-        userTags: [USER_TAGS.DANHO],
-        position: 0,
-        size: '16px',
-        href: 'https://open.spotify.com/artist/2Ya69OwtcUqvAMPaE8vXdg?si=ELamxrqgR-KLZwTqYA6AXA'
-    },
-    mose_clan: {
-        name: 'Mose Clan',
-        iconUrl: 'https://imgur.com/Wm1pEfY.png',
-        userTags: [USER_TAGS.DANHO, USER_TAGS.THEGUNASS, USER_TAGS.BEAUTYKILLER, USER_TAGS.EMILIE, USER_TAGS.CARL],
-        size: '24px',
-        position: 1
-    }
-}, 'CustomBadges');
-DanhoStores.register(CustomBadgesStore);
-
-const DiscordBadgesStore = new class DiscordBadgeStore extends DiumStore {
-    constructor() {
-        super({}, 'DiscordBadgeStore', () => {
-            ActionsEmitter.on('USER_PROFILE_FETCH_SUCCESS', this.onUserProfileFetchSuccess.bind(this));
-        });
-        this.onUserProfileFetchSuccess = createActionCallback('USER_PROFILE_FETCH_SUCCESS', ({ badges }) => {
-            if (!badges?.length)
-                return;
-            const updates = badges.filter(badge => {
-                const stored = this.current[badge.id];
-                return !stored || stored.icon !== badge.icon;
-            });
-            if (updates.length)
-                this.update(updates.reduce((acc, badge) => {
-                    acc[badge.id] = badge;
-                    return acc;
-                }, {}));
-        });
-    }
-};
-DanhoStores.register(DiscordBadgesStore);
+const style$3 = ".custom-badge-container .users, .custom-badge-container .potential-users {\n  scrollbar-width: thin;\n  scrollbar-color: var(--primary-500) var(--primary-560);\n}\n\n.badge-context-option-container, .custom-badge-container {\n  display: flex;\n  place-items: center;\n  gap: 0.5ch;\n}\n\n.custom-badge-container {\n  display: grid;\n  grid-template-columns: 5rem 1fr;\n  gap: 1em;\n  padding: 0.5em;\n  margin: 0.5em 0;\n  border-radius: 0.25em;\n}\n.custom-badge-container--alternate {\n  background-color: var(--primary-600);\n}\n.custom-badge-container img[class*=badge] {\n  --size: 4rem;\n  width: var(--size);\n  height: var(--size);\n}\n.custom-badge-container .custom-badge-info {\n  width: 100%;\n  overflow: hidden;\n  display: flex;\n  flex-direction: column;\n  gap: 1ch;\n}\n.custom-badge-container .users {\n  overflow: auto hidden;\n  display: flex;\n  gap: 1ch;\n}\n.custom-badge-container .potential-users {\n  overflow: hidden auto;\n  max-height: 10rem;\n  display: flex;\n  flex-direction: column;\n  gap: 1em;\n}\n.custom-badge-container .potential-users .potential-user {\n  padding: 0.5em;\n  border-radius: 0.25em;\n}\n\n.custom-badge-modify-container {\n  padding: 0.75em 0;\n  margin: 1em 0;\n  border: 1px solid var(--primary-500);\n  border-inline: none;\n}\n.custom-badge-modify-container .searchable-list__items {\n  --min: 12rem;\n}\n.custom-badge-modify-container .button-panel {\n  justify-content: end;\n}\n\n.danho-discord-user:has(.danho-user-badge-list) .danho-discord-user__avatar {\n  --size: 3rem;\n}\n\n.danho-user-badge-list {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  gap: 0.25ch;\n}\n.danho-user-badge-list img[class*=badge] {\n  --size: 20px;\n  width: var(--size);\n  height: var(--size);\n}\n\n.position-input {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 0.5ch;\n  align-items: center;\n}\n\n.custom-badge-list ul {\n  --min: 1fr;\n}\n\n.create-new-badge-button {\n  min-width: max-content;\n}";
 
 function Feature$4() {
     if (!Settings.current.badges)
         return;
-    DiscordBadgesStore.load();
-    CustomBadgesStore.load();
+    if (Settings.current.useClientCustomBadges)
+        CustomBadgesStore.load();
+    DiscordBadgeStore.load();
+    BadgePositionsStore.load();
 }
 
 const Badges = {
     __proto__: null,
-    default: Feature$4
+    default: Feature$4,
+    style: style$3
 };
 
 const style$2 = ".bdd-wrapper:has(#secret-channel-login) {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  position: absolute;\n  inset: 0;\n  background-color: var(--background-primary);\n  height: 100%;\n  width: 100%;\n  z-index: 9999;\n}\n\n#secret-channel-login {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 1rem;\n}\n\ndiv:has(> #secret-channel-login) {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}";
@@ -3389,7 +4472,7 @@ const PrettyRoles = {
 
 const PrivateChannelSidebarList = Finder.findBySourceStrings("PrivateChannels", "storeLink", { defaultExport: false });
 
-const styles$1 = ".danho-ui-rework-fix div[class*=channelBottomBarArea] {\n  margin-top: 0.5rem;\n}\n.danho-ui-rework-fix div[class*=channelTextArea] {\n  --custom-chat-input-margin-bottom: 24px;\n}\n.danho-ui-rework-fix [data-list-id=guildsnav] *[class*=icon] {\n  border-radius: 50% !important;\n}\n.danho-ui-rework-fix [data-list-id=guildsnav] div[class*=selected] *[class*=icon] {\n  border-radius: 25% !important;\n  transition: border-radius 300ms;\n  transition-delay: 100ms;\n}\n.danho-ui-rework-fix .danho-nav-group {\n  display: grid;\n  grid-auto-flow: column;\n}\n.danho-ui-rework-fix .danho-nav-group:has([class*=interactive]:hover) > * {\n  margin-right: 1ch;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=interactive]:hover div[class*=content] {\n  display: block;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=interactive] a[class*=link]:not([class*=interactive]:hover a[class*=link]) {\n  padding-inline: 0;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] {\n  justify-content: center;\n  gap: 1ch;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] div[class*=avatar] {\n  margin-right: 0;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] div[class*=content] {\n  display: none;\n}\n.danho-ui-rework-fix div[class*=button] {\n  border-radius: 3px;\n}\n\nhtml[class*=visual-refresh]:has(.danho-ui-rework-fix) {\n  --custom-channel-textarea-text-area-height: 2.75rem;\n  --custom-rtc-account-height: 2.5rem;\n}\nhtml[class*=visual-refresh]:has(.danho-ui-rework-fix) section[class*=panels] {\n  bottom: calc(var(--space-xs) * 1.5);\n}";
+const styles$1 = ".danho-ui-rework-fix div[class*=channelBottomBarArea] {\n  margin-top: 0.5rem;\n}\n.danho-ui-rework-fix div[class*=channelTextArea] {\n  --custom-chat-input-margin-bottom: 24px;\n}\n.danho-ui-rework-fix [data-list-id=guildsnav] *[class*=icon] {\n  border-radius: 50% !important;\n}\n.danho-ui-rework-fix [data-list-id=guildsnav] div[class*=selected] *[class*=icon] {\n  border-radius: 25% !important;\n  transition: border-radius 300ms;\n  transition-delay: 100ms;\n}\n.danho-ui-rework-fix .danho-nav-group {\n  display: grid;\n  grid-auto-flow: column;\n}\n.danho-ui-rework-fix .danho-nav-group:has([class*=interactive]:hover) > * {\n  margin-right: 1ch;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=interactive]:hover div[class*=content] {\n  display: block;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=interactive] a[class*=link]:not([class*=interactive]:hover a[class*=link]) {\n  padding-inline: 0;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] {\n  justify-content: center;\n  gap: 1ch;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] div[class*=avatar] {\n  margin-right: 0;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] div[class*=content] {\n  display: none;\n}\n.danho-ui-rework-fix button[class*=button] {\n  border-radius: 3px;\n}\n\nhtml[class*=visual-refresh]:has(.danho-ui-rework-fix) {\n  --custom-channel-textarea-text-area-height: 2.75rem;\n  --custom-rtc-account-height: 2.5rem;\n}\nhtml[class*=visual-refresh]:has(.danho-ui-rework-fix) section[class*=panels] {\n  bottom: calc(var(--space-xs) * 1.5);\n}";
 
 function Feature() {
     const { uiReworkFix, removePrivateSearchButton, groupPrivateChannelNavOptions } = Settings.current;
@@ -3452,9 +4535,9 @@ function Login({ onSubmit }) {
     return (React.createElement("form", { id: LOGIN_ID, onSubmit: handleSubmit },
         React.createElement(Text, null, "This channel is locked. Please enter the password to access it."),
         React.createElement("div", { className: 'form-group' },
-            React.createElement(FormItem, { title: 'Password' }),
+            React.createElement(FormItem$1, { title: 'Password' }),
             React.createElement("input", { type: "password", name: "password" })),
-        React.createElement(Button, { type: "submit" }, "Login")));
+        React.createElement(Button$1, { type: "submit" }, "Login")));
 }
 
 class ChannelLock {
@@ -3563,13 +4646,59 @@ const CancelFriendRequest = createActionCallback('RELATIONSHIP_ADD', ({ relation
         return;
 });
 
-function onRelationshipAdd() {
+function onRelationshipAdd$1() {
     if (!Settings.current.autoCancelFriendRequests
         || Settings.current.folderNames.length === 0)
         return;
     ActionsEmitter.on('RELATIONSHIP_ADD', data => {
         if (Settings.current.autoCancelFriendRequests)
             CancelFriendRequest(data);
+    });
+}
+
+const PrettyRolesManager = new class PrettyRolesManager {
+    getRole(roleId) {
+        return this.context?.roles.find(r => r.id === roleId) ?? GuildUtils.getGuildRoleWithoutGuildId(roleId);
+    }
+    removeRole() {
+        if (!this.role)
+            return;
+        this.context?.onRemoveRole(this.role);
+    }
+    canRemoveRole() {
+        if (!this.role)
+            return false;
+        return this.context.guild.ownerId === this.context.currentUser.id
+            || (this.context.canManageRoles && this.context.highestRole.id !== this.role.id);
+    }
+};
+
+async function prettyRoles() {
+    await sleep(100);
+    $(s => s.role('list', 'div').and.ariaLabelContains('Role'))?.children().forEach(el => {
+        const roleId = el.attr('data-list-item-id')?.split('_').pop();
+        if (!roleId)
+            return;
+        const role = PrettyRolesManager.getRole(roleId);
+        if (!role)
+            return Logger.warn('Role not found', roleId);
+        el.setStyleProperty('--role-color', hexToRgb(role.colorString
+            ?? role.colorStrings?.primaryColor
+            ?? rgbToHex(DEFAULT_DISCORD_ROLE_COLOR.split(',').map(Number))).join(','));
+        if (Settings.current.groupRoles) {
+            const isGroupRole = role.name.toLowerCase().includes('roles');
+            if (isGroupRole)
+                el.addClass('danho-library__pretty-roles__group-role');
+        }
+    });
+}
+
+function onRelationshipAdd() {
+    if (!Settings.current.prettyRoles)
+        return;
+    ActionsEmitter.on('USER_PROFILE_MODAL_OPEN', ({ guildId }) => {
+        if (Settings.current.prettyRoles && guildId)
+            prettyRoles();
     });
 }
 
@@ -3634,6 +4763,7 @@ function onVoiceChannelSelect() {
 
 function listenToActions() {
     onChannelSelect();
+    onRelationshipAdd$1();
     onRelationshipAdd();
     onVoiceChannelSelect();
 }
@@ -3641,59 +4771,6 @@ function listenToActions() {
 const createPatcherCallback = (callback) => callback;
 const createPatcherAfterCallback = (callback) => callback;
 const createPatcherCallback$1 = createPatcherCallback;
-
-let CustomBadge = null;
-function patchBadgeComponent(result) {
-    if (!result.props.children[0])
-        return;
-    const TooltipWrapper = result.props.children[0].type;
-    const TooltipContent = result.props.children[0].props.children.type;
-    CustomBadge = ({ name, iconUrl, style, href }) => {
-        if (!name || !iconUrl)
-            return null;
-        const InnerBadge = ({ href }) => href ? (React.createElement("a", { href: href, target: "_blank", rel: "noreferrer noopener" },
-            React.createElement(InnerBadge, null))) : (React.createElement("img", { src: iconUrl, alt: name, className: result.props.children[0].props.children.props.children.props.className, style: style }));
-        return (React.createElement(TooltipWrapper, { text: name },
-            React.createElement(TooltipContent, null,
-                React.createElement(InnerBadge, { href: href }))));
-    };
-}
-function insertBadges(props, result, badgeData) {
-    if (!result || result.props.children.some(badge => badge.type === CustomBadge))
-        return;
-    const badges = result.props.children;
-    const user = props.displayProfile ? UserStore.getUser(props.displayProfile.userId) : undefined;
-    const newBadges = badgeData
-        .filter(({ userTags }) => userTags ? user ? userTags.includes(user.username) : checkUserId(userTags) : true)
-        .sort((a, b) => getPosition(a.position, badges) - getPosition(b.position, badges))
-        .map(({ size, position, ...props }) => [position, React.createElement(CustomBadge, { key: props.name, ...props, style: { width: size, height: size } })]);
-    for (const [position, badge] of newBadges) {
-        badges.splice(getPosition(position, badges), 0, badge);
-    }
-}
-function checkUserId(userTags) {
-    const userTag = $(s => s.role('dialog').className('userTag'))?.value.toString()
-        ?? $(s => s.className('userProfileOuter').className('userTag'))?.value.toString()
-        ?? $(s => s.className('accountProfileCard').className('usernameInnerRow'), false)
-            .map(dq => dq.children(undefined, true).value.toString())[1];
-    return userTags.includes(userTag);
-}
-function getPosition(position, badges) {
-    if (position === undefined || position === 'end')
-        return badges.length;
-    if (position === 'start')
-        return 0;
-    if (typeof position === 'number')
-        return position;
-    const [startIndex, endIndex] = [position.before, position.after].map((badgeType, i) => badgeType
-        ? badges.findIndex(badge => badge.key.includes(badgeType.toLowerCase())) + i
-        : -1);
-    return startIndex === -1 && endIndex === -1 ? badges.length
-        : startIndex === -1 ? endIndex
-            : endIndex === -1 ? startIndex
-                : position.default === undefined ? Math.max(startIndex, endIndex) - Math.min(startIndex, endIndex)
-                    : position.default ?? badges.length;
-}
 
 function movePremiumBeforeBoost(props) {
     const nitroBadge = props.children.find(badge => badge.props.children.props.href?.includes(BadgeTypes.NITRO_ANY));
@@ -3705,12 +4782,61 @@ function movePremiumBeforeBoost(props) {
     return props;
 }
 
+function insertBadges(props, result) {
+    if (!result || result.props.children.some(badge => badge.type === CustomBadge))
+        return;
+    const badges = result.props.children;
+    const { customBadges, users } = CustomBadgesStore.current;
+    const user = props.displayProfile
+        ? UserStore.getUser(props.displayProfile.userId)
+        : UserUtils.getUserByUsername(getUsername());
+    if (!user)
+        return;
+    const badgeWithIds = Array.from(badges).map(instance => {
+        const badge = DiscordBadgeStore.findBadgeByUrl(instance.props.children.props.children.props.src, instance);
+        if (!badge)
+            Logger.warn(`Failed to find badge in DiscordBadgesStore`, instance);
+        return {
+            id: badge?.id,
+            instance: instance,
+        };
+    }).filter(Boolean);
+    const userCustomBadgeIds = Object.entries(customBadges)
+        .filter(([_, { userTags }]) => userTags
+        ? userTags.includes(user.username)
+        : true)
+        .map(([badgeId]) => badgeId);
+    const userPreferredBadges = (user.id in users ? users[user.id] : []);
+    const compiledBadges = BadgePositionsStore.sort([
+        ...badgeWithIds.map(badge => badge.id),
+        ...userPreferredBadges,
+        ...userCustomBadgeIds,
+    ]).map(badgeId => {
+        const realBadge = badgeWithIds.find(badge => badge.id === badgeId);
+        if (realBadge)
+            return realBadge.instance;
+        const discordBadge = badgeId in DiscordBadgeStore.current ? DiscordBadgeStore.current[badgeId] : null;
+        if (discordBadge)
+            return React.createElement(CustomBadge, { key: badgeId, iconUrl: UrlUtils.badgeIcon(discordBadge.icon), name: DiscordBadgeStore.getBadgeName(badgeId), href: discordBadge.link });
+        const customBadge = badgeId in customBadges ? customBadges[badgeId] : null;
+        if (customBadge)
+            return React.createElement(CustomBadge, { key: badgeId, ...customBadge });
+        Logger.warn(`Failed to find badge in CustomBadgesStore`, badgeId);
+        return null;
+    });
+    result.props.children = compiledBadges;
+}
+function getUsername() {
+    return $(s => s.role('dialog').className('userTag'))?.value.toString()
+        ?? $(s => s.className('userProfileOuter').className('userTag'))?.value.toString()
+        ?? $(s => s.className('accountProfileCard').className('usernameInnerRow'), false)
+            .map(dq => dq.children(undefined, true).value.toString())[1];
+}
+
 const modifyBadges = createPatcherAfterCallback(({ args: [props], result }) => {
-    if (!CustomBadge)
-        return patchBadgeComponent(result);
     if (Settings.current.movePremiumBadge)
         movePremiumBeforeBoost(result.props);
-    insertBadges(props, result, Object.values(CustomBadgesStore.current));
+    insertBadges(props, result);
 });
 
 function afterBadgeList() {
@@ -3748,8 +4874,6 @@ function afterChannelItem() {
             addJoinWithCameraDoubleClick(...args);
     }, { name: 'ChannelItem' });
 }
-
-const GlobalNavigation = Finder.findBySourceStrings("ConnectedPrivateChannelsList", { defualtExport: false });
 
 const CalendarIcon = Finder.findBySourceStrings("M7 1a1 1 0 0 1 1 1v.75c0");
 
@@ -4086,41 +5210,6 @@ const RolesListModule = demangle({
     RolesList: bySource$1('onAddRole')
 }, null, true);
 
-const PrettyRolesManager = new class PrettyRolesManager {
-    getRole(roleId) {
-        return this.context?.roles.find(r => r.id === roleId) ?? GuildUtils.getGuildRoleWithoutGuildId(roleId);
-    }
-    removeRole() {
-        if (!this.role)
-            return;
-        this.context?.onRemoveRole(this.role);
-    }
-    canRemoveRole() {
-        if (!this.role)
-            return false;
-        return this.context.guild.ownerId === this.context.currentUser.id
-            || (this.context.canManageRoles && this.context.highestRole.id !== this.role.id);
-    }
-};
-
-function prettyRoles() {
-    $(s => s.role('list', 'div').and.ariaLabelContains('Role'))?.children().forEach(el => {
-        const roleId = el.attr('data-list-item-id')?.split('_').pop();
-        if (!roleId)
-            return;
-        const role = PrettyRolesManager.getRole(roleId);
-        if (!role)
-            return;
-        el.setStyleProperty('--role-color', hexToRgb(role.colorString
-            ?? rgbToHex(DEFAULT_DISCORD_ROLE_COLOR.split(',').map(Number))).join(','));
-        if (Settings.current.groupRoles) {
-            const isGroupRole = role.name.toLowerCase().includes('roles');
-            if (isGroupRole)
-                el.addClass('danho-library__pretty-roles__group-role');
-        }
-    });
-}
-
 function afterRolesList$1() {
     if (!Settings.current.prettyRoles)
         return;
@@ -4299,65 +5388,7 @@ function afterUserHeaderUsername() {
     }, { name: 'UserHeaderUsernameModule' });
 }
 
-const UserProfileModalAboutMe = Finder.findBySourceStrings('look:"profile_modal"', 'lazy=true', { defaultExport: false });
-
-async function afterUserProfileModalAboutMe() {
-    if (!Settings.current.prettyRoles)
-        return;
-    UserProfileModalAboutMe.then(module => {
-        if (!module)
-            return Logger.error('UserProfileModalAboutMe module not found');
-        after(module, 'Z', () => {
-            if (Settings.current.prettyRoles)
-                prettyRoles();
-        }, { name: 'UserProfileModalAboutMe' });
-    });
-}
-
-function PatchChannelContextMenu$1(callback) {
-    return BdApi.ContextMenu.patch('channel-context', callback);
-}
-
-function buildTextItem(id, label, action, props = {}) {
-    return {
-        type: 'text',
-        label,
-        action,
-        id,
-        onClose: props.onClose ?? (() => { }),
-        ...props
-    };
-}
-function buildSubMenu(id, label, items, props = {}) {
-    return {
-        type: 'submenu',
-        label,
-        items,
-        id,
-        action: () => { },
-        onClose: props.onClose ?? (() => { }),
-        ...props
-    };
-}
-function buildSubMenuElement(id, label, items, props = {}) {
-    return BdApi.ContextMenu.buildItem(buildSubMenu(id, label, items, props));
-}
-function buildTextItemElement(id, label, action, props = {}) {
-    return BdApi.ContextMenu.buildItem(buildTextItem(id, label, action, props));
-}
-function buildCheckboxItemElement(id, label, checked, action, props = {}) {
-    return BdApi.ContextMenu.buildItem({
-        type: 'toggle',
-        id,
-        label,
-        checked,
-        action: () => action(!checked),
-        onClose: props.onClose ?? (() => { }),
-        ...props
-    });
-}
-
-const patched$5 = function (menu, props) {
+const patched$4 = function (menu, props) {
     const options = menu.props.children;
     const voiceOptions = options.find(option => (option.key
         && option.key.toLowerCase().includes('voice')
@@ -4367,33 +5398,11 @@ const patched$5 = function (menu, props) {
     voiceOptions.props.children.unshift(buildTextItemElement("join-with-camera", "Join with Camera", () => joinWithCamera(props.channel.id)));
 };
 
-function getGroupContaining(itemId, menu) {
-    const findItem = (menu) => {
-        if (!menu.props || !menu.props.children)
-            return null;
-        else if (!Array.isArray(menu.props.children))
-            return findItem(menu.props.children);
-        for (const child of menu.props.children.filter(child => child?.props)) {
-            if ('id' in child.props && child.props.id === itemId) {
-                return menu.props.children;
-            }
-            else if ('key' in child && child.key === itemId) {
-                return menu.props.children;
-            }
-            const found = findItem(child);
-            if (found)
-                return found;
-        }
-        return null;
-    };
-    return findItem(menu);
-}
-
 const menuItemIds = [
     'opt-into-channel',
     'opt-out-category',
 ];
-const patched$4 = (menu, props) => {
+const patched$3 = (menu, props) => {
     const visibilityOptions = menuItemIds.map(id => getGroupContaining(id, menu)).find(Boolean);
     if (!visibilityOptions)
         return;
@@ -4407,19 +5416,15 @@ function PatchChannelContextMenu() {
     const { joinVoiceWithCamera, hideChannelUntilActivity } = Settings.current;
     if (!joinVoiceWithCamera || !hideChannelUntilActivity)
         return;
-    PatchChannelContextMenu$1((menu, props) => {
+    PatchChannelContextMenu$1((...args) => {
         if (joinVoiceWithCamera)
-            patched$5(menu, props);
+            patched$4(...args);
         if (hideChannelUntilActivity)
-            patched$4(menu, props);
+            patched$3(...args);
     });
 }
 
-function PatchGuildContextMenu$1(callback) {
-    return BdApi.ContextMenu.patch('guild-context', callback);
-}
-
-const patched$3 = function (menu, props) {
+const patched$2 = function (menu, props) {
     if (!('folderName' in props))
         return;
     const isInBlockedFolder = Settings.current.folderNames.includes(props.folderName);
@@ -4432,7 +5437,7 @@ const patched$3 = function (menu, props) {
     }, { color: 'danger' }));
 };
 
-const patched$2 = (menu, props) => {
+const patched$1 = (menu, props) => {
     if (!('guild' in props))
         return;
     const visibilityOptions = getGroupContaining('hide-muted-channels', menu);
@@ -4447,11 +5452,11 @@ function PatchGuildContextMenu() {
     const { autoCancelFriendRequests, hideChannelUntilActivity } = Settings.current;
     if (!autoCancelFriendRequests && !hideChannelUntilActivity)
         return;
-    PatchGuildContextMenu$1((menu, props) => {
+    PatchGuildContextMenu$1((...args) => {
         if (autoCancelFriendRequests)
-            patched$3(menu, props);
+            patched$2(...args);
         if (hideChannelUntilActivity)
-            patched$2(menu, props);
+            patched$1(...args);
     });
 }
 
@@ -4482,29 +5487,78 @@ function afterRoleContextMenu() {
     });
 }
 
-function PatchUserContextMenu$1(callback) {
-    return BdApi.ContextMenu.patch('user-context', callback);
-}
-
-const patched$1 = (menu, props) => {
+let unpatchOverride = () => { };
+const patch = () => createContextMenuCallback('user', (menu, props, unpatch) => {
     const profile = UserProfileStore.getUserProfile(props.user.id);
     if (!profile)
         return;
-    const modifyBadges = getGroupContaining('modify-badges', menu);
+    const modifyBadges = ContextMenuUtils.getGroupContaining('modify-badges', menu);
     if (modifyBadges)
         return;
-    const userActions = getGroupContaining('user-profile', menu);
+    const userActions = ContextMenuUtils.getGroupContaining('user-profile', menu);
     if (!userActions)
         return;
-    userActions.push(buildSubMenuElement('modify-badges', 'Modify Badges', profile.badges.map((badge, id) => {
-        return buildTextItem(badge.id, formatBadgeId(badge.id), () => {
-            Logger.log('Badge', badge);
-        });
-    })));
-};
-function formatBadgeId(id) {
-    return id.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-}
+    const DiscordBadges = DiscordBadgeStore.current;
+    const CustomUser = CustomBadgesStore.current.users[props.user.id] ?? [];
+    userActions.push(buildSubMenuElement('modify-badges', 'Modify Badges', [
+        ...Object.entries(BadgeGroups).map(([group, badges]) => (buildSubMenu(`${group}-badges`, StringUtils.pascalCaseFromSnakeCase(group), badges.map((badgeId) => {
+            const badge = DiscordBadges[badgeId];
+            const name = `${DiscordBadgeStore.getBadgeName(badgeId)} ${badgeId.includes('boost') ? `level ${badgeId.split('').pop()}` : ''}`;
+            return buildCheckboxItem(badgeId, CustomBadge
+                ? React.createElement("div", { className: 'badge-context-option-container' },
+                    React.createElement(CustomBadge, { name: name, iconUrl: UrlUtils.badgeIcon(badge.icon), href: badge.link, key: badgeId }),
+                    name)
+                : name, CustomUser?.includes(badgeId), (checked) => {
+                const badges = CustomUser;
+                if (checked && !badges.includes(badgeId))
+                    badges.push(badgeId);
+                else if (!checked && badges.includes(badgeId))
+                    badges.splice(badges.indexOf(badgeId), 1);
+                else
+                    Logger.warn('Badge already exists or does not exist', { badgeId, current: badges, checked });
+                CustomBadgesStore.update(current => ({
+                    ...current,
+                    users: {
+                        ...current.users,
+                        [props.user.id]: badges,
+                    },
+                }));
+            });
+        })))),
+        buildSeparator(),
+        buildSubMenu("custom-badges", "Custom Badges", Object.entries(CustomBadgesStore.current.customBadges)
+            .sort(([_, a], [__, b]) => a.name.localeCompare(b.name))
+            .map(([id, badge]) => (buildCheckboxItem(id, React.createElement("div", { className: 'badge-context-option-container' },
+            React.createElement(CustomBadge, { name: badge.name, iconUrl: badge.iconUrl, href: badge.href, key: id }),
+            badge.name), badge.userTags?.includes(props.user.username) ?? false, (checked) => {
+            const userTag = props.user.username;
+            const userTags = badge.userTags ?? new Array();
+            if (checked && !userTags.includes(userTag))
+                userTags.push(userTag);
+            else if (!checked && userTags.includes(userTag))
+                userTags.splice(userTags.indexOf(userTag), 1);
+            else
+                Logger.warn('Badge already exists or does not exist', { userTag, current: userTags, checked });
+            CustomBadgesStore.update(current => ({
+                ...current,
+                customBadges: {
+                    ...current.customBadges,
+                    [id]: {
+                        ...badge,
+                        userTags
+                    },
+                },
+            }));
+        }))))
+    ]));
+    unpatchOverride = unpatch;
+});
+CustomBadgesStore.addListener(() => {
+    unpatchOverride();
+    if (Settings.current.useClientCustomBadges)
+        PatchUserContextMenu$1(patch());
+});
+const addModifyBadgesToUserContextMenu = patch();
 
 const DEADLY_NINJA_ID = '405763731079823380';
 const DUNGEON_ID = '760145289956294716';
@@ -4554,12 +5608,13 @@ const patched = function (menu, props) {
 };
 
 function PatchUserContextMenu() {
-    if (!Settings.current.addToDungeon)
+    if (!Settings.current.addToDungeon && !Settings.current.useClientCustomBadges)
         return;
-    PatchUserContextMenu$1((menu, props) => {
+    PatchUserContextMenu$1((...args) => {
         if (Settings.current.addToDungeon)
-            patched(menu, props);
-        patched$1(menu, props);
+            patched(...args);
+        if (Settings.current.useClientCustomBadges)
+            addModifyBadgesToUserContextMenu(...args);
     });
 }
 
@@ -4586,7 +5641,8 @@ function registerExtensions() {
 
 const setManagerContext = createPatcherCallback$1(({ args, original }) => {
     const result = original.__originalFunction(...args);
-    PrettyRolesManager.context = result.props;
+    if (result)
+        PrettyRolesManager.context = result.props;
     return result;
 });
 
@@ -4616,7 +5672,6 @@ function Patch() {
     afterTextModule();
     afterRolesList();
     afterUserHeaderUsername();
-    afterUserProfileModalAboutMe();
     insteadRolesList();
 }
 
@@ -4651,7 +5706,7 @@ const index = buildPlugin({
         createSlashCommand({
             name: 'show-discord-badges',
             execute: () => ({
-                content: JSON.stringify(DiscordBadgesStore.current, null, 2)
+                content: JSON.stringify(DiscordBadgeStore.current, null, 2)
             })
         });
     },
