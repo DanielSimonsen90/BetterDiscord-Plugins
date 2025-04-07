@@ -1,6 +1,9 @@
 @use './utils.scss' as *;
 
 .danho-plugin-settings {
+  display: grid;
+  gap: 1rem;
+
   @include className('divider') {
     margin: 1rem 0;
   }

@@ -1,19 +1,10 @@
 import { createSettings } from "@dium/settings";
-import { DEFAULT_DISCORD_ROLE_COLOR } from "../constants";
 
 export const StyleChanges = {
   styleChanges: true,
 
   movePremiumBadge: true,
 
-  prettyRoles: true,
-  defaultRoleColor: DEFAULT_DISCORD_ROLE_COLOR,
-  groupRoles: true,
-
-  pronounsPageLinks: true,
-  expandBioAgain: true,
-  nonObnoxiousProfileEffects: true,
-  
   uiReworkFix: true,
   removePrivateSearchButton: true,
   groupPrivateChannelNavOptions: true,
@@ -81,14 +72,6 @@ export const StyleChangesTitles: Record<keyof typeof StyleChanges, string> = {
 
   movePremiumBadge: `Move the Nitro badge before the Server Boosting badge again`,
 
-  prettyRoles: `Remove role circle, add more color to the roles`,
-  defaultRoleColor: `Default role color`,
-  groupRoles: `Widen roles that include "roles" in their name to make them stand out as a group`,
-
-  pronounsPageLinks: `Turn pronouns.page links into clickable links`,
-  expandBioAgain: `Expand the bio section again by default`,
-  nonObnoxiousProfileEffects: `Lower the opacity of profile effects (on hover) so they aren't as obnoxious`,
-  
   uiReworkFix: `Fix some of the Discord UI rework discomfort`,
   removePrivateSearchButton: `Remove the search button in the private channel sidebar`,
   groupPrivateChannelNavOptions: `Group navigation options (friends, nitro, shop) in the private channel sidebar`,

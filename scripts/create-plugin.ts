@@ -15,13 +15,17 @@ const killIfTrue = (condition: boolean, msg: string) => {
     process.exit(1);
   }
 };
-const createMinimistBooleanArgs = (key: string) => [
+const createMinimistBooleanArgs = (key: string, keyPlural: string) => [
   `with${key.charAt(0).toUpperCase() + key.slice(1)}`,
   `with-${key}`,
   key
-];
-const hasMinimistBooleanArg = (args: minimist.ParsedArgs, key: string) => {
-  return createMinimistBooleanArgs(key).some(arg => args[arg]);
+].concat([
+  `with${keyPlural.charAt(0).toUpperCase() + keyPlural.slice(1)}`,
+  `with-${keyPlural}`,
+  keyPlural
+])
+const hasMinimistBooleanArg = (args: minimist.ParsedArgs, key: string, keyPlural: string) => {
+  return createMinimistBooleanArgs(key, keyPlural).some(arg => args[arg]);
 };
 
 type ValidFiles = {
@@ -40,6 +44,10 @@ type ValidFiles = {
   patches: () => {
     index: ValidFiles['index'];
   };
+  actions: () => {
+    index: ValidFiles['index'];
+    template: Arrayable<string>;
+  }
 }
 
 function writeFiles(directoryPath: string, files: Partial<ValidFiles>) {
@@ -85,15 +93,17 @@ killIfTrue(fs.existsSync(path.resolve(sourceFolder, pluginName)), `Plugin "${plu
 
 const minimistArgs = minimist(args, {
   boolean: [
-    ...createMinimistBooleanArgs('style'),
-    ...createMinimistBooleanArgs('settings'),
-    ...createMinimistBooleanArgs('patches')
+    ...createMinimistBooleanArgs('style', 'styles'),
+    ...createMinimistBooleanArgs('setting', 'settings'),
+    ...createMinimistBooleanArgs('patch', 'patches'),
+    ...createMinimistBooleanArgs('action', 'actions'),
   ]
 });
 
-const addStyle = hasMinimistBooleanArg(minimistArgs, 'style');
-const addSettings = hasMinimistBooleanArg(minimistArgs, 'settings');
-const addPatches = hasMinimistBooleanArg(minimistArgs, 'patches');
+const addStyle = hasMinimistBooleanArg(minimistArgs, 'style', 'styles');
+const addSettings = hasMinimistBooleanArg(minimistArgs, 'setting', 'settings');
+const addPatches = hasMinimistBooleanArg(minimistArgs, 'patches', 'patches');
+const addActions = hasMinimistBooleanArg(minimistArgs, 'action', 'actions');
 
 const pluginFolder = path.resolve(sourceFolder, pluginName);
 fs.mkdirSync(pluginFolder, { recursive: true });
@@ -102,21 +112,31 @@ try {
   writeFiles(pluginFolder, {
     index: [
       `import { createPlugin } from "@dium";`,
+      addActions ? `import { ActionsEmitter } from '@actions';` : undefined,
+      '',
+      addActions ? `import subscribeToActions from "./actions";` : undefined,
       addPatches ? `import patch from "./patches";` : undefined,
-      addStyle ? `import styles from './style.scss';` : undefined,
       addSettings ? `import { Settings, SettingsPanel } from "./Settings";` : undefined,
+      addStyle ? `import styles from './style.scss';` : undefined,
       ``,
       `export default createPlugin({`,
       `\tstart() {`,
+      addActions ? '\t\tsubscribeToActions();' : undefined,
       addPatches ? '\t\tpatch();' : '\t',
       `\t},`,
-      addStyle || addSettings ? '  ' : undefined,
+      ...(addActions ? [
+        '\t',
+        `\tstop() {`,
+        `\t\tActionsEmitter.removeAllListeners();`, 
+        `\t},`
+      ] : []),
+      addStyle || addSettings || addActions ? '  ' : undefined,
       addStyle ? '\tstyles,' : undefined,
       addSettings ? '\tSettings,' : undefined,
       addSettings ? '\tSettingsPanel,' : undefined,
       `});`
     ],
-    style: addStyle ? '' : undefined,
+    style: addStyle ? `@use '../../packages/danho-lib/src/styles/utils.scss' as *;` : undefined,
     package: {
       name: StringUtils.kebabCaseFromPascalCase(pluginName),
       version: "1.0.0",
@@ -152,14 +172,10 @@ try {
           `\t\tset,`,
           `\t\ttitles,`,
           `\t}`,
-          ``,
-          `\t// TODO`,
           `\t`,
           `\treturn (`,
           `\t\t<div className="danho-plugin-settings">`,
-          `\t\t\t<FormSection title="{getMeta().name}">`,
-          `\t\t\t\t{/* TODO */}`,
-          `\t\t\t</FormSection>`,
+          `\t\t\t{/* TODO */}`,
           `\t\t</div>`,
           `\t);`,
           `}`,
@@ -170,6 +186,22 @@ try {
       index: [
         `export default function patch() {`,
         `\t// TODO`,
+        `}`,
+      ]
+    }) : undefined,
+    actions: addActions ? () => ({
+      index: [
+        `export default function subscribeToActions() {`,
+        `\t// TODO`,
+        `}`,
+      ],
+      template: [
+        `import { ActionsEmitter } from "@actions";`,
+        '',
+        `export default function onTemplate() {`,
+        `\tActionsEmitter.on('template', ({  }) => {`,
+        `\t\t// TODO`,
+        `\t});`,
         `}`,
       ]
     }) : undefined,

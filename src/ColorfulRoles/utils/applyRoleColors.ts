@@ -1,20 +1,21 @@
+import { sleep } from "@dium/utils";
+
+import { Logger } from "@danho-lib/dium/api/logger";
 import { $ } from "@danho-lib/DOM";
 import { hexToRgb, RGB, rgbToHex } from "@danho-lib/Utils/Colors";
 
-import { DEFAULT_DISCORD_ROLE_COLOR } from "src/0DanhoLibrary/constants";
-import { Settings } from "src/0DanhoLibrary/Settings";
-import { PrettyRolesManager } from "../manager";
-import { sleep } from "@dium/utils";
-import { Logger } from "@danho-lib/dium/api/logger";
+import { ColorfulRolesManager } from "./ColorfulRolesManager";
+import { DEFAULT_DISCORD_ROLE_COLOR } from "./constants";
+import { Settings } from "../settings";
 
-export default async function prettyRoles() {
+export default async function applyRoleColors() {
   await sleep(100); // Wait for the roles to load
 
   $(s => s.role('list', 'div').and.ariaLabelContains('Role'))?.children().forEach(el => {
     const roleId = el.attr('data-list-item-id')?.split('_').pop();
     if (!roleId) return;
 
-    const role = PrettyRolesManager.getRole(roleId);
+    const role = ColorfulRolesManager.getRole(roleId);
     if (!role) return Logger.warn('Role not found', roleId);
 
     el.setStyleProperty('--role-color',
@@ -25,7 +26,7 @@ export default async function prettyRoles() {
 
     if (Settings.current.groupRoles) {
       const isGroupRole = role.name.toLowerCase().includes('roles');
-      if (isGroupRole) el.addClass('danho-library__pretty-roles__group-role');
+      if (isGroupRole) el.addClass('danho-colorful-roles__group-role');
     }
   });
 };

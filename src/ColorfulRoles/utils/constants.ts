@@ -1,0 +1,1 @@
+export const DEFAULT_DISCORD_ROLE_COLOR = `153, 170, 181`;

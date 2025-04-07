@@ -1,4 +1,7 @@
-@use '../../../../packages/danho-lib/src/styles/utils.scss' as *;
+@use '../../packages/danho-lib/src/styles/utils.scss' as *;
+
+@forward '../../packages/danho-lib/src/styles/Form.scss';
+@forward '../../packages/danho-lib/src/styles/PluginSettings.scss';
 
 %absolute-wide {
   position: absolute;
@@ -9,7 +12,7 @@
 *[role=list][data-list-id*=roles] {
   padding: 1rem;
 
-  &:has(.danho-library__pretty-roles__group-role) {
+  &:has(.danho-colorful-roles__group-role) {
     div:has([class*=expandButton]) {
       flex: 1 1 50%;
     }
@@ -62,7 +65,7 @@
   }
 }
 
-.danho-library__pretty-roles__group-role {
+.danho-colorful-roles__group-role {
   flex: 1 1 100% !important;
   margin-inline: -1rem;
 }
