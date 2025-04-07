@@ -116,7 +116,7 @@ try {
       '',
       addActions ? `import subscribeToActions from "./actions";` : undefined,
       addPatches ? `import patch from "./patches";` : undefined,
-      addSettings ? `import { Settings, SettingsPanel } from "./Settings";` : undefined,
+      addSettings ? `import { Settings, SettingsPanel } from "./settings";` : undefined,
       addStyle ? `import styles from './style.scss';` : undefined,
       ``,
       `export default createPlugin({`,

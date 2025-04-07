@@ -42,7 +42,6 @@ export const DanhoEnhancements = {
   useClientCustomBadges: true,
 
   wakeUp: true,
-  isHidingOnPurpose: false,
 
   addToDungeon: true,
 
@@ -99,7 +98,6 @@ export const DanhoEnhancementsTitles: Record<keyof typeof DanhoEnhancements, str
   useClientCustomBadges: `Use your own custom badges`,
 
   wakeUp: `Reminds you that you're hiding. Why are you hiding?`,
-  isHidingOnPurpose: `User confirmed that they're hiding on purpose`,
 
   addToDungeon: `"Add to / Remove from Dungeon" context menu on users in the Deadly Ninja server`,
 

@@ -2,7 +2,7 @@ import { UserStatusActions } from "@actions";
 import { UserUtils } from "@danho-lib/Utils";
 
 import { UserStatus } from "@discord/types/user/status";
-import { Settings } from "src/0DanhoLibrary/Settings";
+import { Settings } from "../settings";
 
 export default function handleHiding() {
   const status = UserUtils.me.status;

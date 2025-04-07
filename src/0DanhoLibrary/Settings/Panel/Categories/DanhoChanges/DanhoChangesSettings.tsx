@@ -1,7 +1,6 @@
 import CreateSettingsGroup from "../../_CreateSettingsGroup";
 import BadgesSettings from "./BadgesSettings";
 import LockSettings from "./LockSettings";
-import HidingSettings from "./HidingSettings";
 import { DanhoEnhancements, DanhoEnhancementsTitles } from '../../../Settings';
 
 export default CreateSettingsGroup((React, props, Setting, { FormSection, FormDivider }) => {
@@ -9,7 +8,6 @@ export default CreateSettingsGroup((React, props, Setting, { FormSection, FormDi
     switch (setting) {
       case 'badges': return props.settings.badges ? <BadgesSettings {...props} /> : null;
       case 'lockChannels': return props.settings.lockChannels ? <LockSettings {...props} /> : null;
-      case 'wakeUp': return props.settings.wakeUp ? <HidingSettings {...props} /> : null;
       default: return null;
     }
   };
@@ -17,7 +15,6 @@ export default CreateSettingsGroup((React, props, Setting, { FormSection, FormDi
   const ignoredSettings: Array<keyof typeof DanhoEnhancements> = [
     'useClientCustomBadges', 
     'lockPassword', 'lockUnlockForMinutes', 'initialLockState',
-    'isHidingOnPurpose'
   ];
 
   return (<>
