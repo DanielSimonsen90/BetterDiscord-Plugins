@@ -1,11 +1,9 @@
 import DiscordEnhancements from "./discord-enhancements";
 import DanhoEnhancements from "./danho-enhancements";
-import StyleChanges from './style-changes';
 
 const features = [
   ...DiscordEnhancements,
   ...DanhoEnhancements,
-  ...StyleChanges,
 ];
 
 export const Features = () => features.forEach(feature => 'default' in feature && feature.default());

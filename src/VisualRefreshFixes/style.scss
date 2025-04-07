@@ -1,14 +1,20 @@
-@use '../../../../../packages/danho-lib/src/styles/utils.scss' as *;
+@use '../../packages/danho-lib/src/styles/utils.scss' as *;
+@use '../../packages/danho-lib/src/styles/PluginSettings.scss' as *;
+@use '../../packages/danho-lib/src/styles/Form.scss' as *;
 
-.danho-ui-rework-fix {
+.danho-align-user-area-panels-and-channel-text-area {
+  @include className('channelTextArea') {
+    --custom-chat-input-margin-bottom: 1.25rem;
+  }
+}
+
+.danho-give-last-message-space {
   @include className('channelBottomBarArea') {
     margin-top: .5rem;
   }
+}
 
-  @include className('channelTextArea') {
-    --custom-chat-input-margin-bottom: 24px;
-  }
-
+.danho-round-guild-icons {
   [data-list-id=guildsnav] {
     @include className('icon', '*') {
       border-radius: 50% !important;
@@ -22,7 +28,15 @@
       }
     }
   }
+}
 
+.danho-sharpen-buttons {
+  @include className('button', button) {
+    border-radius: 3px;
+  }
+}
+
+.danho-group-private-channel-nav-options {
   .danho-nav-group {
     display: grid;
     grid-auto-flow: column;
@@ -58,19 +72,20 @@
       }
     }
   }
-
-  @include className('button', button) {
-    border-radius: 3px;
-  }
 }
 
 @include className('visual-refresh', 'html') {
-  &:has(.danho-ui-rework-fix) {
-    --custom-channel-textarea-text-area-height: 2.75rem;
-    --custom-rtc-account-height: 2.5rem;
+  &:has(.danho-align-user-area-panels-and-channel-text-area) {
+    --custom-channel-textarea-text-area-height: 3rem;
+    --custom-rtc-account-height: 3.5rem;
 
     @include className('panels', section) {
       bottom: calc(var(--space-xs) * 1.5);
     }
+  }
+
+  &:has(.danho-group-private-channel-nav-options) {
+    --custom-channel-textarea-text-area-height: 3rem;
+    --custom-rtc-account-height: 3.5rem;
   }
 }

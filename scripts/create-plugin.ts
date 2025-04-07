@@ -102,7 +102,7 @@ const minimistArgs = minimist(args, {
 
 const addStyle = hasMinimistBooleanArg(minimistArgs, 'style', 'styles');
 const addSettings = hasMinimistBooleanArg(minimistArgs, 'setting', 'settings');
-const addPatches = hasMinimistBooleanArg(minimistArgs, 'patches', 'patches');
+const addPatches = hasMinimistBooleanArg(minimistArgs, 'patch', 'patches');
 const addActions = hasMinimistBooleanArg(minimistArgs, 'action', 'actions');
 
 const pluginFolder = path.resolve(sourceFolder, pluginName);
@@ -136,7 +136,13 @@ try {
       addSettings ? '\tSettingsPanel,' : undefined,
       `});`
     ],
-    style: addStyle ? `@use '../../packages/danho-lib/src/styles/utils.scss' as *;` : undefined,
+    style: addStyle ? [
+      `@use '../../packages/danho-lib/src/styles/utils.scss' as *;`,
+      ...(addSettings ? [
+        `@forward '../../packages/danho-lib/src/styles/PluginSettings.scss';`,
+        `@forward '../../packages/danho-lib/src/styles/Form.scss';`
+      ] : []),
+    ] : undefined,
     package: {
       name: StringUtils.kebabCaseFromPascalCase(pluginName),
       version: "1.0.0",

@@ -1,15 +1,5 @@
 import { createSettings } from "@dium/settings";
 
-export const StyleChanges = {
-  styleChanges: true,
-
-  movePremiumBadge: true,
-
-  uiReworkFix: true,
-  removePrivateSearchButton: true,
-  groupPrivateChannelNavOptions: true,
-}
-
 export const DiscordEnhancements = {
   discordEnhancements: true,
 
@@ -48,6 +38,7 @@ export const DanhoEnhancements = {
   danhoEnhancements: true,
 
   badges: true,
+  movePremiumBadge: true,
   useClientCustomBadges: true,
 
   wakeUp: true,
@@ -62,20 +53,9 @@ export const DanhoEnhancements = {
 }
 
 export const Settings = createSettings({
-  ...StyleChanges,
   ...DiscordEnhancements,
   ...DanhoEnhancements,
 });
-
-export const StyleChangesTitles: Record<keyof typeof StyleChanges, string> = {
-  styleChanges: `Style changes`,
-
-  movePremiumBadge: `Move the Nitro badge before the Server Boosting badge again`,
-
-  uiReworkFix: `Fix some of the Discord UI rework discomfort`,
-  removePrivateSearchButton: `Remove the search button in the private channel sidebar`,
-  groupPrivateChannelNavOptions: `Group navigation options (friends, nitro, shop) in the private channel sidebar`,
-};
 
 export const DiscordEnhancementsTitles: Record<keyof typeof DiscordEnhancements, string> = {
   discordEnhancements: `Discord enhancements`,
@@ -115,6 +95,7 @@ export const DanhoEnhancementsTitles: Record<keyof typeof DanhoEnhancements, str
   danhoEnhancements: `Danho enhancements`,
 
   badges: `User badge modifications`,
+  movePremiumBadge: `Move nitro badges next to booster badges again`,
   useClientCustomBadges: `Use your own custom badges`,
 
   wakeUp: `Reminds you that you're hiding. Why are you hiding?`,
@@ -129,7 +110,6 @@ export const DanhoEnhancementsTitles: Record<keyof typeof DanhoEnhancements, str
 }
 
 export const titles: Record<keyof typeof Settings.current, string> = {
-  ...StyleChangesTitles,
   ...DiscordEnhancementsTitles,
   ...DanhoEnhancementsTitles,
 };
