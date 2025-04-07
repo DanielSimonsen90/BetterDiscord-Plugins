@@ -4,7 +4,9 @@ import { UserProfileStore } from '@stores';
 import {
   createContextMenuCallback,
   buildSubMenuElement,
-  buildCheckboxItem, buildSubMenu, buildSeparator
+  buildCheckboxItem, buildSubMenu, buildSeparator,
+  buildTextItem,
+  PatchUserContextMenu
 } from '@danho-lib/ContextMenus';
 import { Logger } from '@danho-lib/dium/api/logger';
 import { ContextMenuUtils, StringUtils, UrlUtils } from '@danho-lib/Utils';
@@ -12,8 +14,12 @@ import { ContextMenuUtils, StringUtils, UrlUtils } from '@danho-lib/Utils';
 import DiscordBadgeStore, { BadgeGroups, BadgeId } from '../stores/DiscordBadgeStore';
 import CustomBadgesStore from '../stores/CustomBadgesStore';
 import { CustomBadge } from '../components/CustomBadge';
+import { Unpatch } from '@danho-lib/ContextMenus/PatchTypes';
+import { Settings } from 'src/0DanhoLibrary/Settings';
 
-export default createContextMenuCallback('user', (menu, props) => {
+let unpatchOverride: Unpatch = () => {};
+
+const patch = () => createContextMenuCallback('user', (menu, props, unpatch) => {
   const profile = UserProfileStore.getUserProfile(props.user.id);
   if (!profile) return;
 
@@ -110,9 +116,18 @@ export default createContextMenuCallback('user', (menu, props) => {
                 }
               )
             )
-          )
+            )
         )
       ]
     ) as any
   );
+
+  unpatchOverride = unpatch;
 });
+
+CustomBadgesStore.addListener(() => {
+  unpatchOverride();
+  if (Settings.current.useClientCustomBadges) PatchUserContextMenu(patch());
+});
+
+export default patch();

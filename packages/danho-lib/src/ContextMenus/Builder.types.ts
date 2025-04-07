@@ -2,8 +2,10 @@ import { ContextMenuItemProps as BaseContextMenuItemProps } from "betterdiscord"
 import type React from "react";
 
 export type ContextMenuItemProps = BaseContextMenuItemProps & {
-  color?: string | 'default' | 'danger' | 'brand' | 'primary' | 'secondary' | 'success' | 'warning';
   label: React.ReactNode;
+  color?: 'default' | 'danger' | 'brand' | 'primary' | 'secondary' | 'success' | 'warning';
+
+  danger?: boolean;
 
   icon?: React.FC<{ color?: string | 'currentColor' }>
   iconLeft?: boolean;

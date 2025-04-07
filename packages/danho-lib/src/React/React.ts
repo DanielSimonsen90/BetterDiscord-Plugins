@@ -44,7 +44,13 @@ export {
   ReactNode,
   HTMLInputTypeAttribute,
   ErrorInfo,
-  CSSProperties
+  CSSProperties,
+  RefObject,
+  MutableRefObject, 
+  ChangeEvent,
+  KeyboardEvent,
+  MouseEvent,
 } from 'react';
 
 export { React };
+export default React;

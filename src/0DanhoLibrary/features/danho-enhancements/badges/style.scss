@@ -49,6 +49,26 @@
     display: flex;
     flex-direction: column;
     gap: 1em;
+
+    .potential-user {
+      padding: .5em;
+      border-radius: .25em;
+    }
+  }
+}
+
+.custom-badge-modify-container {
+  padding: .75em 0;
+  margin: 1em 0;
+  border: 1px solid var(--primary-500);
+  border-inline: none;
+
+  .searchable-list__items {
+    --min: 12rem;
+  }
+
+  .button-panel {
+    justify-content: end;
   }
 }
 
@@ -76,4 +96,12 @@
   flex-wrap: wrap;
   gap: .5ch;
   align-items: center;
+}
+
+.custom-badge-list ul {
+  --min: 1fr;
+}
+
+.create-new-badge-button {
+  min-width: max-content;
 }

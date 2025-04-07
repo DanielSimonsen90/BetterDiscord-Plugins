@@ -7,8 +7,8 @@ export default function PatchChannelContextMenu() {
   const { joinVoiceWithCamera, hideChannelUntilActivity } = Settings.current;
   if (!joinVoiceWithCamera || !hideChannelUntilActivity) return;
 
-  ChannelContextMenu((menu, props) => {
-    if (joinVoiceWithCamera) AddJoinWithCameraChannelContextMenu(menu, props);
-    if (hideChannelUntilActivity) AddHideOptionToContextMenu(menu, props);
+  ChannelContextMenu((...args) => {
+    if (joinVoiceWithCamera) AddJoinWithCameraChannelContextMenu(...args);
+    if (hideChannelUntilActivity) AddHideOptionToContextMenu(...args);
   });
 }

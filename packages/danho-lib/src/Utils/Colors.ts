@@ -1,3 +1,5 @@
+import Finder from "@danho-lib/dium/api/finder";
+
 export type RGB = [number, number, number];
 
 export function rgbToHex(rgb: RGB): string {
@@ -27,4 +29,18 @@ export function hexToRgb(hex: string): RGB {
   const b = integer & 0xFF;
 
   return [r, g, b];
+}
+
+export const DiscordColors: Record<(
+  | `${'BLACK' | 'BLUE' | 'BRAND' | 'GREEN' | 'ORANGE' | 'PRIMARY' | 'RED' | 'TEAL' | 'WHITE' | 'YELLOW'}${'' | `_${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}${0 | 3 | 6}0`}`
+  | `${'BLUE' | 'BLUE__NEW' | 'BLURPLE' | 'GREEN' | 'GREEN_NEW' | 'NEUTRAL' | 'ORANGE_NEW' | 'PINK' | 'RED_NEW' | 'TEAL_NEW' | 'YELLOW_NEW'}_${`${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}${'' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}` | '100'}`
+  | 'BUNGIE' | 'CRUNHYROLL' | 'EBAY' | 'EPIC_GAMES' | 'FACEBOOK' | 'GITHUB' | 'PAYPAL' | 'PLAYSTATION' | 'REDDIT' | 'RIOT_GAMES' | 'SAMSUNG' | 'SKYPE' | 'SPOTIFY' | 'STEAM' | 'TWITCH' | 'TWITCH_SECONDARY' | 'TWITTER' | 'XBOX' | 'YOUTUBE'
+  | 'PARTNER'
+  | `ROLE_${'BLUE' | 'BROWN' | 'BURGUNDY' | 'DARK_BLUE' | 'DARK_GREY' | 'DARK_PURPLE' | 'DARK_TEAL' | 'DEFAULT' | 'GREEN' | 'GREY' | 'LIGHT_BLUE' | 'LIGHT_GREEN' | 'LIGHT_GREY' | 'MAGENTA' | 'ORANGE' | 'PURPPLE' | 'SALMON' | 'SKY_BLUE' | 'TAN' | 'TEAL' | 'TERRACOTTA' | 'YELLOW'}`
+), string> = Finder.byKeys(["BRAND", "RED"]);
+
+export const ColorUtils = {
+  rgbToHex,
+  hexToRgb,
+  DiscordColors,
 }

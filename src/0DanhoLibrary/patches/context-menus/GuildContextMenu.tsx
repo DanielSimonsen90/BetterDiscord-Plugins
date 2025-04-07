@@ -7,8 +7,8 @@ export default function PatchGuildContextMenu() {
   const { autoCancelFriendRequests, hideChannelUntilActivity } = Settings.current;
   if (!autoCancelFriendRequests && !hideChannelUntilActivity) return;
 
-  GuildContextMenu((menu, props) => {
-    if (autoCancelFriendRequests) blockRequestsFromGuildGuildContextMenu(menu, props);
-    if (hideChannelUntilActivity) addShowHiddenChannelsGuildContextMenu(menu, props);
+  GuildContextMenu((...args) => {
+    if (autoCancelFriendRequests) blockRequestsFromGuildGuildContextMenu(...args);
+    if (hideChannelUntilActivity) addShowHiddenChannelsGuildContextMenu(...args);
   });
 }

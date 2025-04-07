@@ -1,9 +1,14 @@
-import { StringUtils } from '@danho-lib/Utils';
-import { React, HTMLInputTypeAttribute, useRef } from '../React';
-import { classNames } from '../utils';
 import { FormSwitch, TextInput, Select, SingleSelect } from '@dium/components';
 import { ClassNamesUtils } from '@danho-lib/Utils/ClassNames';
-import { MutableRefObject } from 'react';
+import { StringUtils } from '@danho-lib/Utils';
+
+import React, { 
+  HTMLInputTypeAttribute, MutableRefObject, ChangeEvent, 
+  useRef, useCallback, 
+  useState
+} from '../React';
+import { classNames } from '../utils';
+import { useDebounce, useDebounceCallback } from '../hooks';
 
 const InputModule = ClassNamesUtils.combineModuleByKeys<(
   | 'disabled'
@@ -31,6 +36,7 @@ type BaseModel = Record<string, InputValueType>;
 type OptionalProps<T extends InputValueType> = Partial<{
   required: boolean;
   disabled: boolean;
+  debounce: number;
   defaultValue: T extends boolean ? never : T;
   type: (
     T extends number ? 'number' :
@@ -119,9 +125,19 @@ type FormGroupProps<T extends string | number | boolean> = {
   required?: boolean;
   disabled?: boolean;
   defaultValue?: T extends boolean ? never : T;
+  debounce?: number;
 };
 
 function FormGroup<T extends string | number | boolean>(props: FormGroupProps<T>) {
+  const [internal, setInternal] = useState<T>(props.value);
+
+  const debounceChange = useDebounceCallback((value: T) => props.onChange(value), props.debounce)
+  const onChange = useCallback((newValue: T) => {
+    setInternal(newValue as T);
+    if (props.debounce) debounceChange(newValue as T);
+    else props.onChange(newValue as T); 
+  }, [props.debounce, props.onChange, props.inputType, props.value]);
+  
   const className = classNames(
     "danho-form-group__input",
     `danho-form-group__${props.inputType}`,
@@ -137,9 +153,9 @@ function FormGroup<T extends string | number | boolean>(props: FormGroupProps<T>
       {ref => (
         props.inputType === 'checkbox' ? (
           <FormSwitch className={className}
-            value={typeof props.value === 'boolean' ? props.value : undefined}
+            value={typeof internal === 'boolean' ? internal : undefined}
             disabled={props.disabled}
-            onChange={checked => props.onChange(checked as T)}
+            onChange={checked => onChange(checked as T)}
           />
         ) : (
           <input className={className} ref={ref}
@@ -148,13 +164,13 @@ function FormGroup<T extends string | number | boolean>(props: FormGroupProps<T>
             required={props.required}
             disabled={props.disabled}
             defaultValue={props.defaultValue}
-            checked={typeof props.value === 'boolean' ? props.value : undefined}
-            value={typeof props.value === 'boolean' ? undefined : props.value}
+            checked={typeof internal === 'boolean' ? internal : undefined}
+            value={typeof internal === 'boolean' ? undefined : internal}
             onChange={e => {
               const newValue = props.inputType === 'checkbox'
                 ? e.currentTarget.checked
                 : typeof props.value === 'number' ? Number(e.target.value) : e.currentTarget.value;
-              props.onChange(newValue as T);
+              onChange(newValue as T);
             }}
           />
         )
@@ -187,13 +203,13 @@ function getInputType(value: InputValueType): HTMLInputTypeAttribute {
   if (typeof value === 'boolean') return 'checkbox';
   if (typeof value === 'number') return 'number';
   if (typeof value === 'string') {
-    if (value.includes('@')) return 'email';
-    if (value.includes('http')) return 'url';
-    if (value.includes('+')) return 'tel';
-    if (value.includes('#')) return 'color';
-    if (value.includes('T')) return 'datetime-local';
-    if (value.includes('-')) return 'date';
-    if (value.includes(':')) return 'time';
+    if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) return 'email';
+    if (/^https?:\/\/[^\s/$.?#].[^\s]*$/.test(value)) return 'url';
+    if (/^\d{10}$/.test(value)) return 'tel';
+    if (/^\d{3}-\d{3}-\d{4}$/.test(value)) return 'tel';
+    if (/^#[0-9A-F]{6}$/i.test(value)) return 'color';
+    if (/\d{4}-\d{2}-\d{2}/.test(value)) return 'date';
+    if (/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)) return 'datetime-local';
   }
   return 'text';
 }

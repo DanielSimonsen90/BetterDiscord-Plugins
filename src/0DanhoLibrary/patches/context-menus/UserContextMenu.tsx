@@ -4,10 +4,10 @@ import addModifyBadgesToUserContextMenu from 'src/0DanhoLibrary/features/danho-e
 import AddMemberToDungeon from 'src/0DanhoLibrary/features/danho-enhancements/quick-add-member-to-dungeon/AddMemberToDungeonToUserContextMenu';
 
 export default function PatchUserContextMenu() {
-  if (!Settings.current.addToDungeon) return;
+  if (!Settings.current.addToDungeon && !Settings.current.useClientCustomBadges) return;
 
-  UserContextMenu((menu, props) => {
-    if (Settings.current.addToDungeon) AddMemberToDungeon(menu, props);
-    addModifyBadgesToUserContextMenu(menu, props);
+  UserContextMenu((...args) => {
+    if (Settings.current.addToDungeon) AddMemberToDungeon(...args);
+    if (Settings.current.useClientCustomBadges) addModifyBadgesToUserContextMenu(...args);
   })
 }

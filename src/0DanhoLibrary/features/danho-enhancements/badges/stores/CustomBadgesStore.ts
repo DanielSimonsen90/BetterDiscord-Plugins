@@ -66,7 +66,7 @@ export const CustomBadgesStore = new class CustomBadgesStore extends DiumStore<S
     return Object.values(this.current.customBadges);
   }
 
-  public updateCustomBadge(badge: CustomBadgeData) {
+  public upsetCustomBadge(badge: CustomBadgeData) {
     this.update(current => ({
       ...current,
       customBadges: {
@@ -79,7 +79,11 @@ export const CustomBadgesStore = new class CustomBadgesStore extends DiumStore<S
     this.update(current => {
       const { [badgeId]: _, ...rest } = current.customBadges;
       return {
-        ...current,
+        users: Object.fromEntries(
+          Object.entries(current.users).map(([userId, badges]) => {
+            return [userId, badges.filter(badge => badge !== badgeId)];
+          }
+        )),
         customBadges: rest
       };
     });

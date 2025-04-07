@@ -1,3 +1,5 @@
+import { Unpatch } from "./PatchTypes";
+
 type MenuItemFiber = {
   props: {
     action: (() => void) | ((e: any) => void),
@@ -53,10 +55,14 @@ export type ExpressionPickerContextMenuTargetProps = {
 };
 
 
-export type Callback = (menu: ExpressionPickerContextMenuFiber, targetProps: ExpressionPickerContextMenuTargetProps) => void;
+export type Callback = (menu: ExpressionPickerContextMenuFiber, targetProps: ExpressionPickerContextMenuTargetProps, unpatch: Unpatch) => void;
 
 export function PatchExpressionPicker(callback: Callback) {
-  return BdApi.ContextMenu.patch('expression-picker', callback);
+  const unpatch = BdApi.ContextMenu.patch('expression-picker', (tree, props) => {
+    return callback(tree, props, unpatch);
+  });
+
+  return unpatch;
 }
 
 export default PatchExpressionPicker;

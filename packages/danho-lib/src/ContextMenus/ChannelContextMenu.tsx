@@ -1,5 +1,6 @@
 import { Channel, Guild, Snowflake } from '@discord/types';
 import { RenderedMenuItem, RenderedMenuItemChildren } from './Builder.types';
+import { Unpatch } from './PatchTypes';
 
 type ChannelContextMenuFiber = {
   props: {
@@ -99,10 +100,14 @@ type ChannelContextMenuTargetProps = {
   theme: string;
 };
 
-export type Callback = (menu: ChannelContextMenuFiber, targetProps?: ChannelContextMenuTargetProps) => void;
+export type Callback = (menu: ChannelContextMenuFiber, targetProps: ChannelContextMenuTargetProps, unpatch: Unpatch) => void;
 
 export function PatchChannelContextMenu(callback: Callback) {
-  return BdApi.ContextMenu.patch('channel-context', callback);
+  const unpatch = BdApi.ContextMenu.patch('channel-context', (tree, props) => {
+    return callback(tree, props, unpatch);
+  });
+
+  return unpatch;
 }
 
 export default PatchChannelContextMenu;

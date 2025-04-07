@@ -1,6 +1,7 @@
 import { User } from "@discord/types/user";
 import { RenderedMenuItem, RenderedMenuItemChildren } from "./Builder.types";
 import { Snowflake } from "@discord/types";
+import { Unpatch } from "./PatchTypes";
 
 type UserContextMenuFiber = {
   props: {
@@ -97,10 +98,14 @@ type UserContextMenuTargetProps = {
   user: User
 };
 
-export type Callback = (menu: UserContextMenuFiber, targetProps: UserContextMenuTargetProps) => void;
+export type Callback = (menu: UserContextMenuFiber, targetProps: UserContextMenuTargetProps, unpatch: Unpatch) => void;
 
 export function PatchUserContextMenu(callback: Callback) {
-  return BdApi.ContextMenu.patch('user-context', callback);
+  const unpatch = BdApi.ContextMenu.patch('user-context', (tree, props) => {
+    return callback(tree, props, unpatch);
+  });
+
+  return unpatch;
 }
 
 export default PatchUserContextMenu;

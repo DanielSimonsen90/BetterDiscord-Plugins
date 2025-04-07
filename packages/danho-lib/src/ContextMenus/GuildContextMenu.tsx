@@ -1,5 +1,6 @@
 import { Guild } from '@discord/types';
 import { RenderedMenuItem, RenderedMenuItemChildren, RenderedMenuItemWithGroup } from './Builder.types';
+import { Unpatch } from './PatchTypes';
 
 type FolderMenuFiber = {
   props: {
@@ -103,21 +104,24 @@ type FolderMenuTargetProps = {
   unread: boolean;
 };
 type GuildMenuTargetProps = {
-  config: { context: 'APP' },
+  config: { context: 'APP'; },
   context: 'APP',
   guild: Guild,
   onheightUpdate(): void,
   position: null;
   target: HTMLDivElement;
   theme: string,
-}
+};
 
 type GuildContextMenuTargetProps = FolderMenuTargetProps | GuildMenuTargetProps;
 
-export type Callback = (menu: GuildContextMenuFiber, targetProps?: GuildContextMenuTargetProps) => void;
+export type Callback = (menu: GuildContextMenuFiber, targetProps: GuildContextMenuTargetProps, unpatch: Unpatch) => void;
 
 export function PatchGuildContextMenu(callback: Callback) {
-  return BdApi.ContextMenu.patch('guild-context', callback);
+  const unpatch = BdApi.ContextMenu.patch('guild-context', (tree, props) => {
+    return callback(tree, props, unpatch)
+  });
+  return unpatch;
 }
 
 export default PatchGuildContextMenu;

@@ -99,10 +99,15 @@ export function findModuleWithMinimalKeys(className: string): { module: Record<s
   return { module, keys: minimalKeys };
 }
 
+export const ColorClassNames: Record<(
+  `color${'Brand' | 'Danger' | 'Default' | 'Premium' | 'PremiumGradient' | 'Success'}`
+), string> = Finder.byKeys(["colorDefault", "radioIcon"])
+
 export const ClassNamesUtils = {
   combineModuleByKeys,
   combineModules,
   containsClassInModule,
   indexDuplicate,
-  findModuleWithMinimalKeys
+  findModuleWithMinimalKeys,
+  ColorClassNames,
 };

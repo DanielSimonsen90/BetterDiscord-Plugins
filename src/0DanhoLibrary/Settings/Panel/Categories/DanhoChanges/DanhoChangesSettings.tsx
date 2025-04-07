@@ -1,8 +1,8 @@
 import CreateSettingsGroup from "../../_CreateSettingsGroup";
 import BadgesSettings from "./BadgesSettings";
 import LockSettings from "./LockSettings";
-import { DanhoEnhancements, DanhoEnhancementsTitles } from '../../../Settings';
 import HidingSettings from "./HidingSettings";
+import { DanhoEnhancements, DanhoEnhancementsTitles } from '../../../Settings';
 
 export default CreateSettingsGroup((React, props, Setting, { FormSection, FormDivider }) => {
   const AdditionalSettings = ({ setting }) => {

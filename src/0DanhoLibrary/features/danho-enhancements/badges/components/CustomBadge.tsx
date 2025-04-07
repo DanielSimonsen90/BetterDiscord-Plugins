@@ -34,7 +34,9 @@ export const CustomBadge: React.FC<CustomBadgeProps> = ({ name, iconUrl, style, 
 
   const BadgeIcon = () => <img src={iconUrl} alt={name} className={ClassModule.badge} style={compiledStyle} />
   const AnchorBadge = () => (
-    <a href={href} target="_blank" rel="noreferrer noopener">
+    <a href={href} target="_blank" rel="noreferrer noopener" onClick={e => {
+      if (href === '#') e.preventDefault();
+    }}>
       <BadgeIcon />
     </a>
   );

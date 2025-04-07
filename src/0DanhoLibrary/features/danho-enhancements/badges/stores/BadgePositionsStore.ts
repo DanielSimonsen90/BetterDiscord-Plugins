@@ -1,4 +1,4 @@
-import { CSSProperties, useState, useCallback } from "@react";
+import { CSSProperties, useState, useCallback, useEffect } from "@react";
 import { Logger } from "@dium";
 import { DanhoStores, DiumStore } from "@stores";
 import { UrlUtils } from "@danho-lib/Utils";
@@ -48,6 +48,9 @@ export const BadgePositionsStore = new class BadgePositionsStore extends DiumSto
       return acc;
     }, {} as Store));
   }
+  public deleteBadgePosition(badgeId: string | BadgeId) {
+    this.delete(badgeId);
+  }
 
   public sort(badgeIds: Array<string | BadgeId>): string[] {
     const sortedBadgeIds = this.getSortedBadgeIds();
@@ -64,34 +67,55 @@ export const BadgePositionsStore = new class BadgePositionsStore extends DiumSto
     });
   }
 
-  public useEditorStore() {
-    const [sortedBadgeIds, setSortedBadgeIds] = useState(this.getSortedBadgeIds());
+  public useEditorStore(selectedBadgeId: null | string | BadgeId) {
+    const getDefaultSortedBadgeIdsState = useCallback((sortedIds: Array<string | BadgeId>) => {
+      // new badge
+      if (selectedBadgeId && !sortedIds.includes(selectedBadgeId)) sortedIds.push(selectedBadgeId as string | BadgeId);
+      return sortedIds;
+    }, [selectedBadgeId]);
+
+    const [sortedBadgeIds, setSortedBadgeIds] = useState(() => getDefaultSortedBadgeIdsState(this.getSortedBadgeIds()));
     const getDefaultStoreState = useCallback(() => {
-      return sortedBadgeIds.reduce((acc, badgeId) => {
-        acc[badgeId] = this.getBadgePosition(badgeId);
+      return sortedBadgeIds.reduce((acc, badgeId, index) => {
+        acc[badgeId] = index;
         return acc;
       }, {} as Store);
     }, [sortedBadgeIds]);
-    const editorStore = new BadgePositionsStore(getDefaultStoreState())
 
-    return {
+    useEffect(() => setSortedBadgeIds(getDefaultSortedBadgeIdsState), [selectedBadgeId])
+
+    const editorStore = new BadgePositionsStore(getDefaultStoreState())
+    const ministore = {
       sort: (badgeIds) => editorStore.sort(badgeIds),
-      getSortedBadges: () => sortedBadgeIds.map(badgeId => editorStore.getBadge(badgeId)),
+      getSortedBadges: () => sortedBadgeIds.map(badgeId => editorStore.getBadge(badgeId, true)),
+      getBadgePosition: (badgeId: string | BadgeId) => editorStore.getBadgePosition(badgeId),
       setBadgePosition: (badgeId: string | BadgeId, position: number) => {
-        const ids = sortedBadgeIds.slice();
+        const ids = sortedBadgeIds.includes(badgeId) ? sortedBadgeIds.filter(id => id !== badgeId) : sortedBadgeIds;
         ids.splice(position, 0, badgeId as string | BadgeId);
         setSortedBadgeIds(ids);
       }
-
     } satisfies Partial<BadgePositionsStore>
+
+    return Object.assign(ministore, Object.freeze({
+      selectedBadgeId,
+      sortedBadgeIds,
+      get defaultStoreState() {
+        return getDefaultStoreState();
+      },
+      get current() {
+        return editorStore.current; 
+      }
+    }));
   }
 
-  private getBadge(badgeId: string | BadgeId): BasicProfileBadge {
+  private getBadge(badgeId: string | BadgeId, suppressWarning = false): BasicProfileBadge {
+    if (!badgeId) return null;
+
     const discordBadge = DiscordBadgeStore.current[badgeId as BadgeId];
     const customBadge = CustomBadgesStore.current?.customBadges?.[badgeId as string];
 
     if (!discordBadge && !customBadge) {
-      Logger.warn(`Failed to find badge in DiscordBadgesStore`, badgeId);
+      if (!suppressWarning) Logger.warn(`Failed to find badge in DiscordBadgesStore`, badgeId);
       return null;
     }
 
