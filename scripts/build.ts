@@ -10,6 +10,7 @@ import bdWScript from "rollup-plugin-bd-wscript";
 import addMetaCode from "rollup-plugin-bd-meta-code";
 import rollupConfig from "../rollup.config";
 import { repository } from "../package.json";
+import buildMd from "./build-md";
 
 const success = (msg: string) => console.log(chalk.green(msg));
 const warn = (msg: string) => console.warn(chalk.yellow(`Warn: ${msg}`));
@@ -82,6 +83,8 @@ async function build(inputPath: string, outputPath: string): Promise<void> {
   // bundle plugin
   const bundle = await rollup.rollup(config);
   await bundle.write(config.output);
+  
+  buildMd(`${inputPath}/${meta.name}`, meta);
   success(`Built ${meta.name} v${meta.version} to "${outputPath}"`);
 
   await bundle.close();

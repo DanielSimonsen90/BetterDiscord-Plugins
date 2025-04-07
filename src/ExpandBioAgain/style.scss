@@ -1,4 +1,4 @@
-@use '../../../../packages/danho-lib/src/styles/utils.scss' as *;
+@use '../../packages/danho-lib/src/styles/utils.scss' as *;
 
 .danho-expand-bio-again {
   @include className('descriptionClamp') {
