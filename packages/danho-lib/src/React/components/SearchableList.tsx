@@ -1,6 +1,7 @@
 import { Functionable } from '@danho-lib/Utils/types';
-import { React, ReactNode, useState, useCallback } from '../React';
+import { React, ReactNode, useState, useCallback, useMemo } from '../React';
 import { classNames } from '../utils';
+import { useDebounceCallback } from '@hooks/useDebounce';
 
 type Props<TItem> = {
   items: TItem[];
@@ -18,12 +19,15 @@ export function SearchableList<TItem>(props: Props<TItem>) {
   const { items, renderItem, onSearch } = props;
   const { placeholder = 'Search...', className, noResult, take, children } = props;
 
-  const [search, setSearch] = useState<string>('');
+  const [search, _setSearch] = useState<string>('');
+  const setSearch = useDebounceCallback((value: string) => _setSearch(value), 300);
   const SearchableItem = useCallback(({ item, index }: { item: TItem, index: number }) => renderItem(item, index, items), [renderItem, items]);
   const Children = useCallback(() => typeof children === 'function' ? children() : children, [children]);
-  const filteredItems = items
-    .filter(item => search ? onSearch(search, item) : true)
-    .slice(0, take ?? 25);
+  const filteredItems = useMemo(() => (
+    items
+      .filter(item => search ? onSearch(search, item) : true)
+      .slice(0, take ?? 25)
+  ), [items, search, onSearch, take]);
 
   return (
     <div className={classNames('searchable-list', className)}>

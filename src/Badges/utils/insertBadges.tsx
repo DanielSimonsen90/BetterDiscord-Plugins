@@ -1,5 +1,6 @@
-import { React } from '@react';
-import { BadgeList } from "@discord/components";
+import React from '@react';
+import { BadgeId, BadgeList } from "@discord/components";
+import { User } from '@discord/types';
 import { UserStore } from '@stores';
 
 import { Logger } from '@danho-lib/dium/api/logger';
@@ -8,13 +9,9 @@ import { UrlUtils, UserUtils } from '@danho-lib/Utils';
 import { PropsFromFC } from "@danho-lib/Utils/types";
 
 import { CustomBadge } from "../components/CustomBadge";
-import CustomBadgesStore from "../stores/CustomBadgesStore";
-import DiscordBadgeStore, { BadgeId } from '../stores/DiscordBadgeStore';
+import { BadgePositionsStore, CustomBadgesStore, DiscordBadgeStore } from "../stores";
 
-import { User } from '@discord/types';
-import BadgePositionsStore from '../stores/BadgePositionsStore';
-
-export function insertBadges(props: PropsFromFC<BadgeList>, result: ReturnType<BadgeList>) {
+export default function insertBadges(props: PropsFromFC<BadgeList>, result: ReturnType<BadgeList>) {
   if (!result || result.props.children.some(badge => badge.type === CustomBadge)) return;
   
   const badges = result.props.children as Array<typeof result.props.children[0]>;

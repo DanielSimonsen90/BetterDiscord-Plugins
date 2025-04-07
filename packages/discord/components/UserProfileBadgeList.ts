@@ -1,6 +1,5 @@
 import Finder from "@danho-lib/dium/api/finder";
 import { DisplayProfile } from "@discord/types";
-import { BadgeId } from "src/0DanhoLibrary/features/danho-enhancements/badges/stores/DiscordBadgeStore";
 
 export type BadgeList = JSX.BD.FC<{
   badges: Array<UserProfileBadge>;
@@ -43,11 +42,28 @@ export const BadgeList: Record<'Z', BadgeList> = Finder.findBySourceStrings("bad
 export default BadgeList;
 
 export type UserProfileBadge = {
-  id: string;
+  id: BadgeId;
   description: string;
   icon: string;
   link: string;
 };
+
+export type BadgeId = (
+  // Discord badges
+  | 'staff' | 'certified_moderator' | 'partner' | 'automod'
+  // Programming badges
+  | 'active_developer' | 'verified_developer' | 'bot_commands'
+  // Bug Hunter badges
+  | 'bug_hunter_level_1' | 'bug_hunter_level_2'
+  // Hypesquad badges
+  | 'hypesquad' | 'hypesquad_house_1' | 'hypesquad_house_2' | 'hypesquad_house_3'
+  // Nitro badges
+  | 'premium' | `premium_tenure_${1 | 3 | 6 | 12 | 24 | 36 | 48 | 60 | 72}_month_v2` | 'early_supporter'
+  // Server Boost badges
+  | `guild_booster_lvl${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`
+  // Other badges
+  | 'legacy_username' | 'quest_completed'
+);
 
 export enum BadgeTypes {
   NITRO_ANY = 'premium',

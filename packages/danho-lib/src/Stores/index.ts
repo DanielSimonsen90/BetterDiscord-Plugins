@@ -62,3 +62,8 @@ export const DanhoStores = new class DanhoStores {
     }
   }
 }
+
+export function loadData(store: DiumStore<any>) {
+  const data = BdApi.Data.load('0DanhoLibrary', store.dataKey);
+  store.update(data, true);
+}

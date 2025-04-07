@@ -1,25 +1,24 @@
 import { React } from '@react';
+import { BadgeId } from '@discord/components';
 import { UserProfileStore } from '@stores';
 
 import {
-  createContextMenuCallback,
   buildSubMenuElement,
   buildCheckboxItem, buildSubMenu, buildSeparator,
-  buildTextItem,
   PatchUserContextMenu
 } from '@danho-lib/ContextMenus';
 import { Logger } from '@danho-lib/dium/api/logger';
 import { ContextMenuUtils, StringUtils, UrlUtils } from '@danho-lib/Utils';
-
-import DiscordBadgeStore, { BadgeGroups, BadgeId } from '../stores/DiscordBadgeStore';
-import CustomBadgesStore from '../stores/CustomBadgesStore';
-import { CustomBadge } from '../components/CustomBadge';
 import { Unpatch } from '@danho-lib/ContextMenus/PatchTypes';
-import { Settings } from 'src/0DanhoLibrary/Settings';
 
-let unpatchOverride: Unpatch = () => {};
 
-const patch = () => createContextMenuCallback('user', (menu, props, unpatch) => {
+import { BadgeGroups, CustomBadgesStore, DiscordBadgeStore } from 'src/Badges/stores';
+import { CustomBadge } from 'src/Badges/components/CustomBadge';
+import { Settings } from 'src/Badges/settings';
+
+let unpatchOverride: Unpatch = () => { };
+
+const patch = () => PatchUserContextMenu((menu, props, unpatch) => {
   const profile = UserProfileStore.getUserProfile(props.user.id);
   if (!profile) return;
 
@@ -47,17 +46,15 @@ const patch = () => createContextMenuCallback('user', (menu, props, unpatch) => 
 
               return buildCheckboxItem(
                 badgeId,
-                CustomBadge
-                  ? <div className='badge-context-option-container'>
-                    <CustomBadge
-                      name={name}
-                      iconUrl={UrlUtils.badgeIcon(badge.icon)}
-                      href={badge.link}
-                      key={badgeId}
-                    />
-                    {name}
-                  </div>
-                  : name,
+                <div className='badge-context-option-container'>
+                  <CustomBadge
+                    name={name}
+                    iconUrl={UrlUtils.badgeIcon(badge.icon)}
+                    href={badge.link}
+                    key={badgeId}
+                  />
+                  {name}
+                </div>,
                 CustomUser?.includes(badgeId),
                 (checked) => {
                   const badges = CustomUser;

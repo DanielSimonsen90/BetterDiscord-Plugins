@@ -47,7 +47,11 @@ type ValidFiles = {
   actions: () => {
     index: ValidFiles['index'];
     template: Arrayable<string>;
-  }
+  },
+  stores: () => {
+    index: ValidFiles['index'];
+    template: Arrayable<string>;
+  };
 }
 
 function writeFiles(directoryPath: string, files: Partial<ValidFiles>) {
@@ -97,6 +101,7 @@ const minimistArgs = minimist(args, {
     ...createMinimistBooleanArgs('setting', 'settings'),
     ...createMinimistBooleanArgs('patch', 'patches'),
     ...createMinimistBooleanArgs('action', 'actions'),
+    ...createMinimistBooleanArgs('store', 'stores')
   ]
 });
 
@@ -104,6 +109,7 @@ const addStyle = hasMinimistBooleanArg(minimistArgs, 'style', 'styles');
 const addSettings = hasMinimistBooleanArg(minimistArgs, 'setting', 'settings');
 const addPatches = hasMinimistBooleanArg(minimistArgs, 'patch', 'patches');
 const addActions = hasMinimistBooleanArg(minimistArgs, 'action', 'actions');
+const addStores = hasMinimistBooleanArg(minimistArgs, 'store', 'stores');
 
 const pluginFolder = path.resolve(sourceFolder, pluginName);
 fs.mkdirSync(pluginFolder, { recursive: true });
@@ -117,12 +123,14 @@ try {
       addActions ? `import subscribeToActions from "./actions";` : undefined,
       addPatches ? `import patch from "./patches";` : undefined,
       addSettings ? `import { Settings, SettingsPanel } from "./settings";` : undefined,
+      addStores ? `import loadStores from "./stores";` : undefined,
       addStyle ? `import styles from './style.scss';` : undefined,
       ``,
       `export default createPlugin({`,
       `\tstart() {`,
       addActions ? '\t\tsubscribeToActions();' : undefined,
       addPatches ? '\t\tpatch();' : '\t',
+      addStores ? '\t\tloadStores();' : undefined,
       `\t},`,
       ...(addActions ? [
         '\t',
@@ -190,15 +198,19 @@ try {
     }) : undefined,
     patches: addPatches ? () => ({
       index: [
+        `import { Logger } from "@danho-lib/dium/api/logger";`,
+        '',
         `export default function patch() {`,
-        `\t// TODO`,
+        `\tLogger.warn('Patches are not being registered yet');`,
         `}`,
-      ]
+      ],
     }) : undefined,
     actions: addActions ? () => ({
       index: [
+        `import { Logger } from "@danho-lib/dium/api/logger";`,
+        '',
         `export default function subscribeToActions() {`,
-        `\t// TODO`,
+        `\tLogger.warn('Actions are not being registered yet');`,
         `}`,
       ],
       template: [
@@ -210,6 +222,39 @@ try {
         `\t});`,
         `}`,
       ]
+    }) : undefined,
+    stores: addStores ? () => ({
+      index: [
+        `export * from './TemplateStore';`,
+        '',
+        `import { Settings } from '../settings/Settings';`,
+        `import TemplateStore from './TemplateStore';`,
+        '',
+        `export default function loadStores() {`,
+        `\tif (!Settings.current) return;`,
+        '\t',
+        `\tTemplateStore.load();`,
+        `}`,
+      ],
+      template: [
+        `import { DanhoStores, DiumStore } from "@stores";`,
+        '',
+        'type State = {',
+        '\t',
+        '};',
+        '',
+        'export const TemplateStore = new class TemplateStore extends DiumStore<State> {',
+        '\tconstructor() {',
+        '\t\tsuper({}, \'TemplateStore\');',
+        '\t}',
+        '\t',
+        '\t',
+        '}',
+        '',
+        'DanhoStores.registerStore(TemplateStore);',
+        '',
+        'export default TemplateStore;',
+      ],
     }) : undefined,
   });
 } catch (err) {

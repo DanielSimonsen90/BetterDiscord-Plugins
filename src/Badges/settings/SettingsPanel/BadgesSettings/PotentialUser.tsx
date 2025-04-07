@@ -13,12 +13,10 @@ import { UserProfileStore } from "@stores";
 import { Logger } from "@danho-lib/dium/api/logger";
 import { UrlUtils, UserUtils } from "@danho-lib/Utils";
 
-import CustomBadgesStore from "src/0DanhoLibrary/features/danho-enhancements/badges/stores/CustomBadgesStore";
-import { CustomBadge, CustomBadgeData } from "src/0DanhoLibrary/features/danho-enhancements/badges/components/CustomBadge";
-import { BadgePositionsStoreEditor } from "src/0DanhoLibrary/features/danho-enhancements/badges/stores/BadgePositionsStore";
-import DiscordBadgeStore from "src/0DanhoLibrary/features/danho-enhancements/badges/stores/DiscordBadgeStore";
+import { CustomBadge, CustomBadgeData } from "src/Badges/components/CustomBadge";
 
 import { ModifyBadgeData } from "./CustomBadgeModifyForm";
+import { BadgePositionsStoreEditor, CustomBadgesStore, DiscordBadgeStore } from "src/Badges/stores";
 
 type Props = {
   user: User;

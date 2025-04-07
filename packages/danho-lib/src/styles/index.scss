@@ -16,7 +16,12 @@
   z-index: 1010;
 }
 
-.button-container {
+.button-container,
+.button-panel {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+
   button {
     margin-inline: .25rem;
   }

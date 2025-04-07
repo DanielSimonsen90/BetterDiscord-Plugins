@@ -1,23 +1,6 @@
 import { ActionsEmitter, createActionCallback } from "@actions";
 import { DanhoStores, DiumStore } from "@stores";
-import { BadgeList, UserProfileBadge } from "@discord/components";
-
-export type BadgeId = (
-  // Discord badges
-  | 'staff' | 'certified_moderator' | 'partner' | 'automod'
-  // Programming badges
-  | 'active_developer' | 'verified_developer' | 'bot_commands'
-  // Bug Hunter badges
-  | 'bug_hunter_level_1' | 'bug_hunter_level_2'
-  // Hypesquad badges
-  | 'hypesquad' | 'hypesquad_house_1' | 'hypesquad_house_2' | 'hypesquad_house_3'
-  // Nitro badges
-  | 'premium' | `premium_tenure_${1 | 3 | 6 | 12 | 24 | 36 | 48 | 60 | 72}_month_v2` | 'early_supporter'
-  // Server Boost badges
-  | `guild_booster_lvl${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`
-  // Other badges
-  | 'legacy_username' | 'quest_completed'
-);
+import { BadgeId, BadgeList, UserProfileBadge } from "@discord/components";
 
 type State = Partial<Record<BadgeId | (string & {}), UserProfileBadge>>;
 

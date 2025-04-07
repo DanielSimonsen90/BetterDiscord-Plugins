@@ -37,12 +37,6 @@ export const DiscordEnhancements = {
 export const DanhoEnhancements = {
   danhoEnhancements: true,
 
-  badges: true,
-  movePremiumBadge: true,
-  useClientCustomBadges: true,
-
-  wakeUp: true,
-
   addToDungeon: true,
 
   lockChannels: true,
@@ -92,12 +86,6 @@ export const DiscordEnhancementsTitles: Record<keyof typeof DiscordEnhancements,
 
 export const DanhoEnhancementsTitles: Record<keyof typeof DanhoEnhancements, string> = {
   danhoEnhancements: `Danho enhancements`,
-
-  badges: `User badge modifications`,
-  movePremiumBadge: `Move nitro badges next to booster badges again`,
-  useClientCustomBadges: `Use your own custom badges`,
-
-  wakeUp: `Reminds you that you're hiding. Why are you hiding?`,
 
   addToDungeon: `"Add to / Remove from Dungeon" context menu on users in the Deadly Ninja server`,
 

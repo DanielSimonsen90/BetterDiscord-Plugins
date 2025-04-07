@@ -1,4 +1,3 @@
-import afterBadgeList from "./after/BadgeList";
 import afterChannelItem from "./after/ChannelItem";
 import afterGlobalNavigation from "./after/GlobalNavigation";
 import afterMemberListItem from "./after/MemberListItem";
@@ -20,7 +19,6 @@ export default function Patch() {
   PatchGuildContextMenu();
   PatchUserContextMenu();
 
-  afterBadgeList();
   afterChannelItem();
   afterGlobalNavigation();
   afterMemberListItem();

@@ -1,11 +1,12 @@
 import { CSSProperties, useState, useCallback, useEffect } from "@react";
 import { Logger } from "@dium";
+import { BadgeId } from "@discord/components";
 import { DanhoStores, DiumStore } from "@stores";
 import { UrlUtils } from "@danho-lib/Utils";
 
-import { Settings } from "src/0DanhoLibrary/Settings";
+import { Settings } from "../settings/Settings";
 
-import DiscordBadgeStore, { BadgeId } from "./DiscordBadgeStore";
+import DiscordBadgeStore from "./DiscordBadgeStore";
 import CustomBadgesStore from "./CustomBadgesStore";
 
 type Store = {

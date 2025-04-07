@@ -1,4 +1,4 @@
-import {
+import React, {
   useState,
 
   // React utils
@@ -12,27 +12,16 @@ import {
 } from "@react";
 
 import { Button, Tooltip } from "@discord/components";
-import { Text } from "@dium/components";
+import { FormSection, Text } from "@dium/components";
 
 import { buildContextMenu, buildTextItem } from '@danho-lib/ContextMenus';
 import { ObjectUtils, StringUtils, UserUtils } from "@danho-lib/Utils";
 
-import { CustomBadge } from "src/0DanhoLibrary/features/danho-enhancements/badges/components/CustomBadge";
-import CustomBadgesStore from "src/0DanhoLibrary/features/danho-enhancements/badges/stores/CustomBadgesStore";
-
-import CreateSettingsGroup from "../../../_CreateSettingsGroup";
+import { CustomBadge } from "../../../components/CustomBadge";
+import { CustomBadgesStore, BadgePositionsStore } from "../../../stores";
 import CustomBadgeModifyForm from "./CustomBadgeModifyForm";
-import BadgePositionsStore from "src/0DanhoLibrary/features/danho-enhancements/badges/stores/BadgePositionsStore";
 
-export default CreateSettingsGroup((React, props, Setting, { FormSection }) => {
-  return (<>
-    <Setting setting="useClientCustomBadges" {...props} />
-    {props.settings.useClientCustomBadges && <CustomBadgesSettingsGroup {...props} />}
-  </>);
-});
-
-
-const CustomBadgesSettingsGroup = CreateSettingsGroup((React, props, Setting, { FormSection }) => {
+export default function CustomBadgesSettingsGroup() {
   const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(null);
 
   const forceUpdate = useForceUpdate();
@@ -41,13 +30,13 @@ const CustomBadgesSettingsGroup = CreateSettingsGroup((React, props, Setting, { 
 
   return (
     <FormSection title="Custom Badges">
-      {selectedBadgeId && <CustomBadgeModifyForm 
+      {selectedBadgeId && <CustomBadgeModifyForm
         selectedBadgeId={selectedBadgeId} 
         setSelectedBadgeId={setSelectedBadgeId} 
       />}
 
       <SearchableList items={CustomBadgesStore.customBadges} className="custom-badge-list"
-        onSearch={(search, item) => [item.name, item.id, item.href].some(value => value.toLowerCase().includes(search.toLowerCase()))}
+        onSearch={(search, item) => [item.name, item.id, item.href].some(value => value?.toLowerCase().includes(search.toLowerCase()))}
         placeholder="Search for a badge to modify..."
         renderItem={(badge, i) => (
           <section className={classNames('custom-badge-container', i % 2 === 0 && 'custom-badge-container--alternate')} key={badge.id}>
@@ -127,7 +116,7 @@ const CustomBadgesSettingsGroup = CreateSettingsGroup((React, props, Setting, { 
       </SearchableList>
     </FormSection>
   );
-});
+};
 
 
 type CustomBadgeContextMenuProps = {
