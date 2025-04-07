@@ -1,0 +1,6 @@
+{
+  "name": "non-obnoxious-profile-effects",
+  "version": "1.0.0",
+  "author": "danhosaur",
+  "description": "Profile effects are cool, but they can be really obnoxious and distracting from the actual profile content. This plugin lowers the opacity of the profile effects (on hover) to make them less distracting."
+}
