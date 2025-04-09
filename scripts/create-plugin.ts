@@ -109,12 +109,13 @@ const minimistArgs = minimist(args, {
   ]
 });
 
-const addStyle = hasMinimistBooleanArg(minimistArgs, 'style', 'styles');
-const addSettings = hasMinimistBooleanArg(minimistArgs, 'setting', 'settings');
-const addPatches = hasMinimistBooleanArg(minimistArgs, 'patch', 'patches');
-const addActions = hasMinimistBooleanArg(minimistArgs, 'action', 'actions');
-const addStores = hasMinimistBooleanArg(minimistArgs, 'store', 'stores');
-const addComponents = hasMinimistBooleanArg(minimistArgs, 'component', 'components');
+const addByDefault = false;
+const addStyle = addByDefault || hasMinimistBooleanArg(minimistArgs, 'style', 'styles');
+const addSettings = addByDefault || hasMinimistBooleanArg(minimistArgs, 'setting', 'settings');
+const addPatches = addByDefault || hasMinimistBooleanArg(minimistArgs, 'patch', 'patches');
+const addActions = addByDefault || hasMinimistBooleanArg(minimistArgs, 'action', 'actions');
+const addStores = addByDefault || hasMinimistBooleanArg(minimistArgs, 'store', 'stores');
+const addComponents = addByDefault || hasMinimistBooleanArg(minimistArgs, 'component', 'components');
 
 const pluginFolder = path.resolve(sourceFolder, pluginName);
 fs.mkdirSync(pluginFolder, { recursive: true });
