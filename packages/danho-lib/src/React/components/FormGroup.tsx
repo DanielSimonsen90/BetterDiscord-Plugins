@@ -1,14 +1,16 @@
-import { FormSwitch, TextInput, Select, SingleSelect } from '@dium/components';
+import { FormSwitch, TextInput, Select, SingleSelect, Text } from '@dium/components';
 import { ClassNamesUtils } from '@danho-lib/Utils/ClassNames';
 import { StringUtils } from '@danho-lib/Utils';
 
-import React, { 
-  HTMLInputTypeAttribute, MutableRefObject, ChangeEvent, 
-  useRef, useCallback, 
-  useState
+import React, {
+  HTMLInputTypeAttribute, MutableRefObject, ChangeEvent,
+  useRef, useCallback,
+  useState,
+  useImperativeHandle
 } from '../React';
 import { classNames } from '../utils';
 import { useDebounce, useDebounceCallback } from '../hooks';
+import { EphemeralEye, EphemeralEyeSize } from './Icons';
 
 const InputModule = ClassNamesUtils.combineModuleByKeys<(
   | 'disabled'
@@ -37,6 +39,9 @@ type OptionalProps<T extends InputValueType> = Partial<{
   required: boolean;
   disabled: boolean;
   debounce: number;
+
+  name: string;
+  errorText: string;
   defaultValue: T extends boolean ? never : T;
   type: (
     T extends number ? 'number' :
@@ -45,7 +50,10 @@ type OptionalProps<T extends InputValueType> = Partial<{
     T extends undefined ? 'text'
     : never
   );
-}>;
+} & ({} | {
+  type: 'password',
+  ephemeralEyeSize?: EphemeralEyeSize;
+})>;
 
 type SpreadProps<T extends InputValueType> = (
   & OptionalProps<T>
@@ -84,7 +92,7 @@ export function FormItem<T extends InputValueType>(props: SpreadProps<T>): JSX.E
   const { value, label, type } = props;
 
   return <FormGroup {...props}
-    name={label}
+    name={props.name ?? label}
     inputType={type ?? getInputType(value)}
   />;
 }
@@ -109,7 +117,7 @@ export function FormItemFromModel<
     inputType={props.type ?? getInputType(value ?? model[property])}
     value={value ?? model[property]}
     onChange={(v: T) => {
-      onModelChange(model, property, v);
+      onModelChange(Object.assign({}, model, { [property]: v }), property, v);
       onChange(v);
     }}
   />;
@@ -124,20 +132,23 @@ type FormGroupProps<T extends string | number | boolean> = {
 
   required?: boolean;
   disabled?: boolean;
+  errorText?: string;
   defaultValue?: T extends boolean ? never : T;
   debounce?: number;
+  ephemeralEyeSize?: EphemeralEyeSize;
 };
 
 function FormGroup<T extends string | number | boolean>(props: FormGroupProps<T>) {
   const [internal, setInternal] = useState<T>(props.value);
+  const [inputType, setInputType] = useState(props.inputType);
 
-  const debounceChange = useDebounceCallback((value: T) => props.onChange(value), props.debounce)
+  const debounceChange = useDebounceCallback((value: T) => props.onChange(value), props.debounce);
   const onChange = useCallback((newValue: T) => {
     setInternal(newValue as T);
     if (props.debounce) debounceChange(newValue as T);
-    else props.onChange(newValue as T); 
+    else props.onChange(newValue as T);
   }, [props.debounce, props.onChange, props.inputType, props.value]);
-  
+
   const className = classNames(
     "danho-form-group__input",
     `danho-form-group__${props.inputType}`,
@@ -146,45 +157,75 @@ function FormGroup<T extends string | number | boolean>(props: FormGroupProps<T>
     InputModule.inputDefault,
   );
 
+  const toggleInputType = (ref: MutableRefObject<HTMLInputElement>) => () => {
+    if (ref.current) {
+      // Save the current cursor position
+      const cursorPosition = ref.current.selectionStart;
+
+      setInputType(current => current === 'text' ? 'password' : 'text');
+
+      // Restore the cursor position after the input type changes
+      setTimeout(() => {
+        if (ref.current && cursorPosition !== null) {
+          ref.current.setSelectionRange(cursorPosition, cursorPosition);
+        }
+      }, 0); // Use a timeout to ensure the DOM updates before restoring the cursor
+    }
+  };
+
   return (
     <EmptyFormGroup label={props.label} name={props.name} onClick={() => {
       if (props.inputType === 'checkbox') return;
     }}>
       {ref => (
-        props.inputType === 'checkbox' ? (
+        <>
+          {props.inputType === 'checkbox' ? (
           <FormSwitch className={className}
             value={typeof internal === 'boolean' ? internal : undefined}
             disabled={props.disabled}
             onChange={checked => onChange(checked as T)}
           />
-        ) : (
-          <input className={className} ref={ref}
-            type={props.inputType}
-            name={props.name}
-            required={props.required}
-            disabled={props.disabled}
-            defaultValue={props.defaultValue}
-            checked={typeof internal === 'boolean' ? internal : undefined}
-            value={typeof internal === 'boolean' ? undefined : internal}
-            onChange={e => {
-              const newValue = props.inputType === 'checkbox'
-                ? e.currentTarget.checked
-                : typeof props.value === 'number' ? Number(e.target.value) : e.currentTarget.value;
-              onChange(newValue as T);
-            }}
-          />
-        )
+          ) : (
+          <div className="input-container">
+            <input className={className} ref={ref}
+              type={inputType}
+              placeholder={props.inputType === 'checkbox' ? undefined : props.label}
+              name={props.name}
+              required={props.required}
+              disabled={props.disabled}
+              defaultValue={props.defaultValue}
+              checked={typeof internal === 'boolean' ? internal : undefined}
+              value={typeof internal === 'boolean' ? undefined : internal}
+              onChange={e => {
+                const newValue = props.inputType === 'checkbox'
+                  ? e.currentTarget.checked
+                  : typeof props.value === 'number' ? Number(e.target.value) : e.currentTarget.value;
+                onChange(newValue as T);
+              }}
+            />
+            {props.inputType === 'password' && (
+              <EphemeralEye size={props.ephemeralEyeSize} line={inputType !== 'password'} onClick={toggleInputType(ref)} />
+            )}
+          </div>
+          )}
+          {props.errorText 
+            ? <Text variant='text-sm/normal' className={ClassNamesUtils.ColorClassNames.colorDanger}>{props.errorText}</Text> 
+            : null
+          }
+        </>
       )}
     </EmptyFormGroup>
   );
 }
 
 type EmptyFormGroupProps = Pick<FormGroupProps<any>, 'name' | 'label'> & {
+  ref?: MutableRefObject<HTMLInputElement>;
   children: (ref: MutableRefObject<HTMLInputElement>) => JSX.Element;
   onClick?: () => void;
-}
+};
 export function EmptyFormGroup(props: EmptyFormGroupProps) {
-  const ref = useRef<HTMLInputElement>(null);
+  const internalRef = useRef<HTMLInputElement>(null);
+  const ref = props.ref ?? internalRef;
 
   return (
     <div className="danho-form-group" onClick={() => {

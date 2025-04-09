@@ -90,7 +90,6 @@ export const UserUtils: CompiledUserUtils = {
     const currentChannelId = SelectedChannelStore.getChannelId();
 
     ActionsEmitter.emit('USER_PROFILE_MODAL_OPEN', {
-      type: 'USER_PROFILE_MODAL_OPEN',
       userId,
       channelId: currentChannelId,
       guildId: currentGuildId,

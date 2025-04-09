@@ -6,7 +6,6 @@ export type BetterOmit<Type, Properties extends keyof Type> = Omit<Type, Propert
 
 export type If<Condition extends boolean, Then, Else> = Condition extends true ? Then : Else;
 export type Arrayable<T> = T | T[];
-export type PartialRecord<Keys extends string, Values> = Partial<Record<Keys, Values>>;
 
 // Make a typescript type that takes in a function as a generic and the function's new return type
 export type NewReturnType<

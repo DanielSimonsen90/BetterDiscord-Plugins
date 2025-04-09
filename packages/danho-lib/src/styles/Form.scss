@@ -40,7 +40,8 @@
   input,
   select,
   textarea {
-    background-color: var(--input-background);
+    // background-color: var(--input-background);
+    background-color: var(--primary-700);
     border-color: var(--input-border);
     border-radius: .25rem;
 
@@ -56,8 +57,11 @@
       color: var(--interactive-hover);
     }
   }
+}
 
-  input, select, textarea {
-    background-color: var(--primary-700);
-  }
+.input-container {
+  display: flex;
+  align-items: center;
+  gap: .5ch;
+  position: relative;
 }

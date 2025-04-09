@@ -1,7 +1,15 @@
-export const wait = <T>(callback: (...args: any[]) => any, time: number) => new Promise<T>((resolve, reject) => {
-  try { setTimeout(() => resolve(callback()), time); }
-  catch (err) { reject(err); }
-});
+
+export function wait<T>(time: number): Promise<never>;
+export function wait<T>(callback: (...args: any[]) => any, time: number): Promise<T>;
+export function wait<T>(callbackOrTime: ((...args: any[]) => any) | number, time?: number) {
+  const callback = typeof callbackOrTime === 'function' ? callbackOrTime : (() => undefined);
+  time ??= callbackOrTime as number;
+
+  return new Promise<T>((resolve, reject) => {
+    try { setTimeout(() => resolve(callback()), time); }
+    catch (err) { reject(err); }
+  });
+}
 
 type PropertyOptions<T> = {
   defaultValue: T;

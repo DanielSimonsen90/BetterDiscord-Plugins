@@ -34,20 +34,8 @@ export const DiscordEnhancements = {
   defaultDirectAndGroupTab: 'direct',
 }
 
-export const DanhoEnhancements = {
-  danhoEnhancements: true,
-
-  addToDungeon: true,
-
-  lockChannels: true,
-  lockPassword: 'hello',
-  lockUnlockForMinutes: 5,
-  initialLockState: true,
-}
-
 export const Settings = createSettings({
   ...DiscordEnhancements,
-  ...DanhoEnhancements,
 });
 
 export const DiscordEnhancementsTitles: Record<keyof typeof DiscordEnhancements, string> = {
@@ -84,18 +72,6 @@ export const DiscordEnhancementsTitles: Record<keyof typeof DiscordEnhancements,
   defaultDirectAndGroupTab: `Default tab to open`,
 };
 
-export const DanhoEnhancementsTitles: Record<keyof typeof DanhoEnhancements, string> = {
-  danhoEnhancements: `Danho enhancements`,
-
-  addToDungeon: `"Add to / Remove from Dungeon" context menu on users in the Deadly Ninja server`,
-
-  lockChannels: `Lock channels with a password`,
-  lockPassword: `Password for locking channels`,
-  lockUnlockForMinutes: `Minutes to lock channels for`,
-  initialLockState: `Initial lock state for channels`,
-}
-
 export const titles: Record<keyof typeof Settings.current, string> = {
   ...DiscordEnhancementsTitles,
-  ...DanhoEnhancementsTitles,
 };

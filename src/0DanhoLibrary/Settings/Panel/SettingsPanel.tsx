@@ -1,16 +1,15 @@
-import { React, Setting, TabBar, useEffect } from "@react";
+import { React, Setting, TabBar } from "@react";
 import { FormSection } from "@dium/components";
 
 import { Settings, titles } from "../Settings";
 
 import { SettingProps } from "./_CreateSettingsGroup";
-import { DiscordChangesSettings, DanhoChangesSettings } from "./Categories";
+import { DiscordChangesSettings } from "./Categories";
 
 export default function SettingsPanel() {
   const [settings, set] = Settings.useState();
-  const tabs = Settings.useSelector(({ discordEnhancements, danhoEnhancements }) => [
+  const tabs = Settings.useSelector(({ discordEnhancements }) => [
     ['discordEnhancements', discordEnhancements ? 'Discord Enhancements' : null],
-    ['danhoEnhancements', danhoEnhancements ? 'Danho Enhancements' : null],
   ] as Array<[string, string]>);
   const settingProps: SettingProps = { settings, set, titles };
 
@@ -18,12 +17,10 @@ export default function SettingsPanel() {
     <div className="danho-plugin-settings">
       <FormSection title="Danho Library Features">
         <Setting setting="discordEnhancements" {...settingProps} />
-        <Setting setting="danhoEnhancements" {...settingProps} />
       </FormSection>
       {tabs.some(([_, value]) => value) && (
         <TabBar tabs={tabs}
           discordEnhancements={<DiscordChangesSettings {...settingProps} />}
-          danhoEnhancements={<DanhoChangesSettings {...settingProps} />}
         />
       )}
     </div>

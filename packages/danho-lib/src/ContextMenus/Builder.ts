@@ -17,7 +17,7 @@ export function buildTextItem(id: string, label: string, action: () => void, pro
     ...props
   };
 }
-export function buildTextItemElement(id: string, label: string, action: () => void, props: Partial<ContextMenuItemProps> = {}): JSX.Element {
+export function buildTextItemElement(id: string, label: string, action: () => void, props: Partial<ContextMenuItemProps> = {}): JSX.Element | any {
   return BdApi.ContextMenu.buildItem(buildTextItem(id, label, action, props));
 }
 

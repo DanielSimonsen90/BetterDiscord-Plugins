@@ -1,4 +1,4 @@
-import { Utils, UserUtils, GuildUtils } from '@danho-lib/Utils/index';
+import { Utils } from '@danho-lib/Utils/index';
 import * as Stores from '@stores';
 import * as Actions from '@actions';
 import * as DOM from '@danho-lib/DOM';
@@ -10,8 +10,6 @@ import styles from './styles/index.scss';
 
 class DanhoLibrary implements Plugin<{}> {
   public Utils = Utils;
-  public Users = UserUtils;
-  public Guilds = GuildUtils;
   public DOM = DOM;
 
   public Stores = Stores;

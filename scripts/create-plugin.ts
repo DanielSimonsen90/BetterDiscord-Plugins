@@ -52,6 +52,9 @@ type ValidFiles = {
     index: ValidFiles['index'];
     template: Arrayable<string>;
   };
+  components: () => {
+    index: ValidFiles['index'];
+  }
 }
 
 function writeFiles(directoryPath: string, files: Partial<ValidFiles>) {
@@ -101,7 +104,8 @@ const minimistArgs = minimist(args, {
     ...createMinimistBooleanArgs('setting', 'settings'),
     ...createMinimistBooleanArgs('patch', 'patches'),
     ...createMinimistBooleanArgs('action', 'actions'),
-    ...createMinimistBooleanArgs('store', 'stores')
+    ...createMinimistBooleanArgs('store', 'stores'),
+    ...createMinimistBooleanArgs('component', 'components'),
   ]
 });
 
@@ -110,6 +114,7 @@ const addSettings = hasMinimistBooleanArg(minimistArgs, 'setting', 'settings');
 const addPatches = hasMinimistBooleanArg(minimistArgs, 'patch', 'patches');
 const addActions = hasMinimistBooleanArg(minimistArgs, 'action', 'actions');
 const addStores = hasMinimistBooleanArg(minimistArgs, 'store', 'stores');
+const addComponents = hasMinimistBooleanArg(minimistArgs, 'component', 'components');
 
 const pluginFolder = path.resolve(sourceFolder, pluginName);
 fs.mkdirSync(pluginFolder, { recursive: true });
@@ -128,8 +133,9 @@ try {
       ``,
       `export default createPlugin({`,
       `\tstart() {`,
+      addActions || addPatches || addStores ? undefined : '\t\t',
       addActions ? '\t\tsubscribeToActions();' : undefined,
-      addPatches ? '\t\tpatch();' : '\t',
+      addPatches ? '\t\tpatch();' : undefined,
       addStores ? '\t\tloadStores();' : undefined,
       `\t},`,
       ...(addActions ? [
@@ -138,7 +144,7 @@ try {
         `\t\tActionsEmitter.removeAllListeners();`, 
         `\t},`
       ] : []),
-      addStyle || addSettings || addActions ? '  ' : undefined,
+      addStyle || addSettings || addActions ? '\t' : undefined,
       addStyle ? '\tstyles,' : undefined,
       addSettings ? '\tSettings,' : undefined,
       addSettings ? '\tSettingsPanel,' : undefined,
@@ -255,6 +261,12 @@ try {
         '',
         'export default TemplateStore;',
       ],
+    }) : undefined,
+    components: addComponents ? () => ({
+      index: [
+        `import { Logger } from "@danho-lib/dium/api/logger";`,
+        `Logger.warn('Components are not being registered yet');`,
+      ]
     }) : undefined,
   });
 } catch (err) {

@@ -1,0 +1,19 @@
+.ephemeral-eye {
+  --size: 16px;
+  color: var(--text-muted);
+  position: absolute;
+  right: calc(var(--size) * -1 - 1ch);
+  top: 60%;
+  transform: translateY(-50%);
+
+  &__line {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: .125rem;
+    height: 1remw;
+    background-color: var(--text-muted);
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+}

@@ -4,22 +4,20 @@ import {
   GuildChannelStore,
   GuildEmojiStore,
   SelectedGuildStore,
+  SortedGuildStore,
   VoiceStore,
   
   UserStore,
-  MessageStore
 } from '@stores';
 
 import GuildActions from "@actions/GuildActions";
+import { User } from '@discord/types';
+import { Snowflake } from "@discord/types/base";
 import { Guild, Role } from "@discord/types/guild";
 import { GuildMember } from "@discord/types/guild/member";
 
 import { BetterOmit, FilterStore } from "./types";
-import { Snowflake } from "@discord/types/base";
 import Finder from '@danho-lib/dium/api/finder';
-import { User } from '@discord/types';
-import { ActionsEmitter } from '@actions';
-import { ChannelUtils } from './Channels';
 import UserUtils from './Users';
 
 const useGuildFeatures = Finder.findBySourceStrings("hasFeature", "GUILD_SCHEDULED_EVENTS") as (guild: Guild) => Array<string>;
@@ -30,6 +28,7 @@ type CompiledGuildUtils = BetterOmit<
   & FilterStore<GuildChannelStore>
   & FilterStore<GuildEmojiStore>
   & FilterStore<SelectedGuildStore>
+  & FilterStore<SortedGuildStore>
   & FilterStore<VoiceStore>
 
   & typeof GuildActions
@@ -48,6 +47,8 @@ type CompiledGuildUtils = BetterOmit<
     getEmojiIcon(emojiId: Snowflake, size?: number): string;
     getMemberAvatar(memberId: Snowflake, guildId: Snowflake, size?: number): string;
     getOwner(guildId?: Snowflake): User | null;
+    
+    getSortedGuilds(): Record<Snowflake, Guild>;
   };
 
 export const GuildUtils: CompiledGuildUtils = {
@@ -55,6 +56,7 @@ export const GuildUtils: CompiledGuildUtils = {
   ...GuildMemberStore,
   ...GuildChannelStore,
   ...GuildEmojiStore,
+  ...SortedGuildStore,
   ...SelectedGuildStore,
   ...VoiceStore,
 
@@ -109,5 +111,14 @@ export const GuildUtils: CompiledGuildUtils = {
     const owner = UserStore.getUser(guild.ownerId);
     if (owner && openModal) UserUtils.openModal(owner.id, showGuildProfile);
     return owner;
-  }
+  },
+  getSortedGuilds() {
+    return SortedGuildStore
+      .getFlattenedGuildIds()
+      .reduce((acc, guildId) => {
+        const guild = GuildStore.getGuild(guildId);
+        if (guild) acc[guildId] = guild;
+        return acc;
+      }, {} as Record<Snowflake, Guild>);
+  },
 };

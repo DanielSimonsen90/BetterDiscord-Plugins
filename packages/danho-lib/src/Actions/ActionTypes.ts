@@ -9,7 +9,7 @@ type ActionProps = {
     guildId: Snowflake;
     jumpType?: undefined;
     messageId?: Snowflake | null;
-    preserveDrawerState: undefined;
+    preserveDrawerState?: undefined;
     source?: undefined;
   };
   GUILD_ROLE_UPDATE: {
@@ -125,6 +125,7 @@ type ActionProps = {
 
 export type Actions = {
   [Key in keyof ActionProps]: [
-    action: ActionProps[Key] & { type: Key; }
+    // action: ActionProps[Key] & { type: Key; }
+    action: ActionProps[Key]
   ]
 };

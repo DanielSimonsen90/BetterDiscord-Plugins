@@ -28,14 +28,16 @@ export function Setting<
   const setV = (value: Settings[SettingsKey]) => _setV(formatValue ? formatValue(value) : value);
 
   if (type === undefined ? typeof v === 'boolean' : type === 'switch') return (
-    <FormSwitch className='danho-form-switch' key={setting.toString()} note={titles[setting.toString()]} value={Boolean(v)} hideBorder
-      onChange={inputValue => {
-        const checked = beforeChange ? beforeChange(inputValue as Settings[SettingsKey]) : inputValue;
-        set({ [setting]: checked } as any);
-        onChange?.(checked as any);
-        setV(checked as any);
-      }}
-    />
+    <div className="setting-group">
+      <FormSwitch className='danho-form-switch' key={setting.toString()} note={titles[setting.toString()]} value={Boolean(v)} hideBorder
+        onChange={inputValue => {
+          const checked = beforeChange ? beforeChange(inputValue as Settings[SettingsKey]) : inputValue;
+          set({ [setting]: checked } as any);
+          onChange?.(checked as any);
+          setV(checked as any);
+        }}
+      />
+    </div>
   );
   if (type === undefined ? typeof v === 'number' : type === 'number') return (
     <div className="setting-group">
