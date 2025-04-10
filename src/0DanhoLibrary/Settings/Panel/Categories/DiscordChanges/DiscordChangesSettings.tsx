@@ -1,7 +1,6 @@
 import CreateSettingsGroup from "../../_CreateSettingsGroup";
 import { DiscordEnhancements, DiscordEnhancementsTitles } from '../../../Settings';
 
-import AutoCancelFriendRequestSettings from "./AutoCancelFriendRequestSettings";
 import BirthdateSettings from "./BirthdateSettings";
 import DirectAndGroupTabSettings from "./DirectAndGroupTabSettings";
 import TimezoneSettings from "./TimezoneSettings";
@@ -9,7 +8,6 @@ import TimezoneSettings from "./TimezoneSettings";
 export default CreateSettingsGroup((React, props, Setting, { FormSection, FormDivider }) => {
   const AdditionalSettings = ({ setting }) => {
     switch (setting) {
-      case 'autoCancelFriendRequests': return props.settings.autoCancelFriendRequests ? <AutoCancelFriendRequestSettings {...props} /> : null;
       case 'showUserTimezone': return props.settings.showUserTimezone ? <TimezoneSettings {...props} /> : null;
       case 'showUserBirthdate': return props.settings.showUserBirthdate ? <BirthdateSettings {...props} /> : null;
       case 'directAndGroupTabs': return props.settings.directAndGroupTabs ? <DirectAndGroupTabSettings {...props} /> : null;
@@ -18,7 +16,6 @@ export default CreateSettingsGroup((React, props, Setting, { FormSection, FormDi
   };
 
   const ignoredSettings: Array<keyof typeof DiscordEnhancements> = [
-    'folderNames',
     'hideTimezoneIcon', 'hideTimezoneTimestamp',
     'hideBirthdateIcon', 'hideBirthdateTimestamp', 'birthdateTimestampStyle',
     'defaultDirectAndGroupTab'

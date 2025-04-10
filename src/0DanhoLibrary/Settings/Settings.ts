@@ -3,9 +3,6 @@ import { createSettings } from "@dium/settings";
 export const DiscordEnhancements = {
   discordEnhancements: true,
 
-  autoCancelFriendRequests: true,
-  folderNames: new Array<string>(),
-
   joinVoiceWithCamera: true,
 
   showGuildMembersInHeader: true,
@@ -40,9 +37,6 @@ export const Settings = createSettings({
 
 export const DiscordEnhancementsTitles: Record<keyof typeof DiscordEnhancements, string> = {
   discordEnhancements: `Discord enhancements`,
-
-  autoCancelFriendRequests: `Auto cancel friend requests on bigger servers`,
-  folderNames: `Folder names that should block all incoming friend requests`,
 
   joinVoiceWithCamera: `Join voice channels with camera on`,
 

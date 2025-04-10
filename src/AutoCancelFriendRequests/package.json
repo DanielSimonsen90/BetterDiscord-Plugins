@@ -1,0 +1,6 @@
+{
+  "name": "auto-cancel-friend-requests",
+  "version": "1.0.0",
+  "author": "danhosaur",
+  "description": "No more getting spam/scam friend requests from big community servers. Add a folder or server to the block list and never recieve friend requests from the servers within it."
+}

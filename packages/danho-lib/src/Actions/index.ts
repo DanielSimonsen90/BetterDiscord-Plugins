@@ -9,6 +9,7 @@ export * from './ChannelActions';
 export * from './GuildActions';
 export * from './MessageActions';
 export * from './PermissionsActions';
+export * from './RelationshipActions';
 export * from './UserNoteActions';
 export * from './UserStatusActions';
 export * from './VoiceActions';
