@@ -1,16 +1,17 @@
-import { createPatcherAfterCallback } from "@danho-lib/Patcher/CreatePatcherCallback";
-import MemberListItem from "@danho-lib/Patcher/MemberListItem";
-import { $ } from "@danho-lib/DOM";
-
-import { React } from '@react';
-import { GuildMemberStore, GuildStore, PresenceStore } from "@stores";
+import { React } from "@dium";
 import { Text } from "@dium/components";
+import { GuildMemberStore, GuildStore, PresenceStore } from "@stores";
 
-export default createPatcherAfterCallback<MemberListItem['Z']>(({ args: [props] }) => {
-  let showGuildMembers = $('.danho-lib__header-members', false);
+import { $ } from "@danho-lib/DOM";
+import { GuildUtils } from "@danho-lib/Utils";
+
+const HEADER_MEMBERS_CLASSNAME = 'danho-lib__header-members';
+
+export default function updateHeader() {
+  let showGuildMembers = $(`.${HEADER_MEMBERS_CLASSNAME}`, false);
   if (showGuildMembers.length >= 1) return;
 
-  const guild = GuildStore.getGuild(props.guildId);
+  const guild = GuildStore.getGuild(GuildUtils.currentId);
   if (!guild) return;
 
   const members = GuildMemberStore.getMembers(guild.id);
@@ -22,14 +23,18 @@ export default createPatcherAfterCallback<MemberListItem['Z']>(({ args: [props] 
 
   header.appendComponent(
     <Text variant="heading-md/normal">{nonOfflineMembers.length}/{members.length}</Text>,
-    { className: 'danho-lib__header-members' }
+    { className: HEADER_MEMBERS_CLASSNAME }
   );
 
   setTimeout(() => {
-    showGuildMembers = $('danho-lib__header-members', false);
+    showGuildMembers = $(`.${HEADER_MEMBERS_CLASSNAME}`, false);
     if (showGuildMembers.length > 1) {
       showGuildMembers.shift();
       showGuildMembers.forEach(e => e.unmount());
     }
   }, 100);
-});
+}
+
+export function unmountMembersCount() {
+  $(`.${HEADER_MEMBERS_CLASSNAME}`, false).forEach(e => e.unmount());
+}

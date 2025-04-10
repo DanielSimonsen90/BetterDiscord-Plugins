@@ -1,0 +1,6 @@
+{
+  "name": "show-guild-members-in-header",
+  "version": "1.0.0",
+  "author": "danhosaur",
+  "description": "Adds server member amount in the server header."
+}
