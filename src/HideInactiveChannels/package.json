@@ -1,0 +1,6 @@
+{
+  "name": "hide-inactive-channels",
+  "version": "1.0.0",
+  "author": "danhosaur",
+  "description": "This plugin gives you the ability to hide inactive channels in the server channel list, but have it reappear when there is activity in the channel. This helps clean up your channel list and makes it easier to find the channels you actually/actively use. This also works for voice channels."
+}

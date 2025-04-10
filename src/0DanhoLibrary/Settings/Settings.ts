@@ -19,9 +19,6 @@ export const DiscordEnhancements = {
   birthdateTimestampStyle: 'd',
   showBirthdayCalendar: true,
   showBirthdayOnNameTag: true,
-
-  hideChannelUntilActivity: true,
-  keepChannelVisibleAfterActivityTimeoutMin: 5,
 }
 
 export const Settings = createSettings({
@@ -47,9 +44,6 @@ export const DiscordEnhancementsTitles: Record<keyof typeof DiscordEnhancements,
   birthdateTimestampStyle: `Birthdate timestamp style`,
   showBirthdayCalendar: `Show birthday calendar in global navigation`,
   showBirthdayOnNameTag: `Show birthday on name tag`,
-
-  hideChannelUntilActivity: `Hide channels from your channel list until they have activity`,
-  keepChannelVisibleAfterActivityTimeoutMin: `Keep recently active hidden channel visible for x minutes`,
 };
 
 export const titles: Record<keyof typeof Settings.current, string> = {

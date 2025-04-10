@@ -25,6 +25,7 @@ export interface TextInputProps extends Omit<React.InputHTMLAttributes<HTMLInput
     focusProps?: any;
     titleId?: any;
     "aria-labelledby"?: any;
+    type?: React.HTMLInputTypeAttribute;
 }
 
 export interface TextInput extends React.ComponentClass<TextInputProps, any> {

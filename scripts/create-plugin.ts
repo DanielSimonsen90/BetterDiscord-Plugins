@@ -100,22 +100,22 @@ killIfTrue(fs.existsSync(path.resolve(sourceFolder, pluginName)), `Plugin "${plu
 
 const minimistArgs = minimist(args, {
   boolean: [
-    ...createMinimistBooleanArgs('style', 'styles'),
-    ...createMinimistBooleanArgs('setting', 'settings'),
-    ...createMinimistBooleanArgs('patch', 'patches'),
     ...createMinimistBooleanArgs('action', 'actions'),
-    ...createMinimistBooleanArgs('store', 'stores'),
     ...createMinimistBooleanArgs('component', 'components'),
+    ...createMinimistBooleanArgs('patch', 'patches'),
+    ...createMinimistBooleanArgs('setting', 'settings'),
+    ...createMinimistBooleanArgs('store', 'stores'),
+    ...createMinimistBooleanArgs('style', 'styles'),
   ]
 });
 
 const addByDefault = false;
-const addStyle = addByDefault || hasMinimistBooleanArg(minimistArgs, 'style', 'styles');
-const addSettings = addByDefault || hasMinimistBooleanArg(minimistArgs, 'setting', 'settings');
-const addPatches = addByDefault || hasMinimistBooleanArg(minimistArgs, 'patch', 'patches');
 const addActions = addByDefault || hasMinimistBooleanArg(minimistArgs, 'action', 'actions');
-const addStores = addByDefault || hasMinimistBooleanArg(minimistArgs, 'store', 'stores');
 const addComponents = addByDefault || hasMinimistBooleanArg(minimistArgs, 'component', 'components');
+const addPatches = addByDefault || hasMinimistBooleanArg(minimistArgs, 'patch', 'patches');
+const addSettings = addByDefault || hasMinimistBooleanArg(minimistArgs, 'setting', 'settings');
+const addStores = addByDefault || hasMinimistBooleanArg(minimistArgs, 'store', 'stores');
+const addStyle = addByDefault || hasMinimistBooleanArg(minimistArgs, 'style', 'styles');
 
 const pluginFolder = path.resolve(sourceFolder, pluginName);
 fs.mkdirSync(pluginFolder, { recursive: true });

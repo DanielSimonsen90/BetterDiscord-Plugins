@@ -1,14 +1,14 @@
+import { Snowflake, ChannelTypes } from "@discord/types";
+import { ActionsEmitter, createActionCallback } from "@actions";
 import { 
   ChannelListStore, ChannelStore, SelectedChannelStore,
   DanhoStores, DiumStore, 
   GuildChannelStore, ReadStateStore, VoiceStore 
 } from "@stores";
-import { Snowflake, ChannelTypes } from "@discord/types";
-import { ActionsEmitter, createActionCallback } from "@actions";
 import { GuildUtils } from "@danho-lib/Utils";
-import { Logger } from "@danho-lib/dium/api/logger";
 
-import { Settings } from "src/0DanhoLibrary/Settings";
+import { Settings } from "../settings/Settings";
+import { $ } from "@danho-lib/DOM";
 
 type ChannelState = {
   hidden: boolean;
@@ -95,9 +95,7 @@ const HiddenChannelStore = new class HiddenChannelStore extends DiumStore<Hidden
     const hiddenChannel = this.current.channels[channelId];
     if (hiddenChannel?.stayVisibleTimeout) clearTimeout(hiddenChannel.stayVisibleTimeout);
 
-    this.updateChannelState(channelId, {
-      hidden: true,
-    });
+    this.updateChannelState(channelId, { hidden: true });
   }
   public showChannel(channelId: Snowflake): void {
     this.updateChannelState(channelId, undefined);
@@ -140,10 +138,6 @@ const HiddenChannelStore = new class HiddenChannelStore extends DiumStore<Hidden
       guildChannels.mutedChannelIds.has(channelId)
       && guildChannels.hideMutedChannels
     );
-    // const isResourceAndHidden = (
-    //   guildChannels.resourceChannelIds.has(channel.id)
-    //   && guildChannels.hideResourceChannels
-    // );
 
     this.stayVisisbleTimeout(channelId, isUnread);
 

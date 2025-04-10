@@ -47,7 +47,7 @@ export function buildCheckboxItem(id: string, label: React.ReactNode, checked: b
     ...props
   };
 }
-export function buildCheckboxItemElement(id: string, label: React.ReactNode, checked: boolean, action: (checked: boolean) => void, props: Partial<ContextMenuItemProps> = {}): JSX.Element {
+export function buildCheckboxItemElement(id: string, label: React.ReactNode, checked: boolean, action: (checked: boolean) => void, props: Partial<ContextMenuItemProps> = {}): any {
   return BdApi.ContextMenu.buildItem(buildCheckboxItem(id, label, checked, action, props));
 }
 

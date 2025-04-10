@@ -45,7 +45,7 @@ export function Setting<
   );
   if (type === undefined ? typeof v === 'number' : type === 'number') return (
     <div className="setting-group">
-      <TextInput key={setting.toString()} value={v as string} onChange={inputValue => {
+      <TextInput key={setting.toString()} value={v as string} type="number" onChange={inputValue => {
         const value = beforeChange ? beforeChange(inputValue as any) : Number(inputValue);
         set({ [setting]: value } as any);
         onChange?.(value as any);

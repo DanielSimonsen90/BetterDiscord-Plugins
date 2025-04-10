@@ -1,13 +1,13 @@
-import { ChannelListStore, createDiumStore, SelectedGuildStore, ChannelStore } from '@stores';
+import React from '@react';
+import { Channel } from '@discord/types';
+import { ScrollerLooks } from '@discord/components';
+import { ChannelListStore } from '@stores';
+
 import { GuildUtils } from '@danho-lib/Utils';
-import { React, classNames } from '@react';
-import HiddenChannelStore from '../stores/HiddenChannelStore';
-import { Channel, Snowflake } from '@discord/types';
-import { Patcher } from '@dium';
-import { Logger } from '@danho-lib/dium/api/logger';
-import { ScrollerAuto, ScrollerLooks } from '@discord/components';
-import ScrollerStore from '../stores/ScrollerStore';
 import { $ } from '@danho-lib/DOM';
+
+import HiddenChannelStore from '../stores/HiddenChannelStore';
+import ScrollerStore from '../stores/ScrollerStore';
 
 type RowData = {
   anchorId: undefined;
@@ -20,7 +20,6 @@ type RowData = {
 };
 
 const DISCORD_HEADER_CHANNEL_NAV_SECTION_ID = 1;
-
 export default function GuildList(ListClass: typeof React.PureComponent<any, any>) {
   const guild = GuildUtils.current;
   const guildFeatures = GuildUtils.useGuildFeatures(guild);

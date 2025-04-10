@@ -1,21 +1,8 @@
-import { Patcher } from "@dium";
-import { React } from '@react';
-
+import { React, Patcher } from "@dium";
 import Finder from "@danho-lib/dium/api/finder";
+import GuildList from "../../components/GuildList";
 
-import { Settings } from "src/0DanhoLibrary/Settings";
-
-import HiddenChannelStore from "./stores/HiddenChannelStore";
-import ScrollerStore from "./stores/ScrollerStore";
-import GuildList from "./components/GuildList";
-export { default as styles } from './styles.scss';
-
-export default function Feature() {
-  if (!Settings.current.hideChannelUntilActivity) return;
-  
-  HiddenChannelStore.load();
-  ScrollerStore.load();
-
+export default function afterGuildChannelList() {
   const module = Finder.findBySourceStrings("GuildChannelList", { defaultExport: false });
   Patcher.after(module, 'E', ({ result, args: [props] }) => {
     Patcher.after(result, 'type', ({ result, args: [props] }) => {
