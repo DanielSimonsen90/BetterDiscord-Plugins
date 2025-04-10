@@ -20,15 +20,10 @@ export const DiscordEnhancements = {
   showBirthdayCalendar: true,
   showBirthdayOnNameTag: true,
 
-  betterQuickSwitcher: true,
-
   expandActivityStatus: true,
 
   hideChannelUntilActivity: true,
   keepChannelVisibleAfterActivityTimeoutMin: 5,
-
-  directAndGroupTabs: true,
-  defaultDirectAndGroupTab: 'direct',
 }
 
 export const Settings = createSettings({
@@ -55,15 +50,10 @@ export const DiscordEnhancementsTitles: Record<keyof typeof DiscordEnhancements,
   showBirthdayCalendar: `Show birthday calendar in global navigation`,
   showBirthdayOnNameTag: `Show birthday on name tag`,
 
-  betterQuickSwitcher: `Better quickswitcher prioritizing friends and top guilds`,
-
   expandActivityStatus: `Expand activity status to show more information i.e. what a user is listening to`,
 
   hideChannelUntilActivity: `Hide channels from your channel list until they have activity`,
   keepChannelVisibleAfterActivityTimeoutMin: `Keep recently active hidden channel visible for x minutes`,
-
-  directAndGroupTabs: `Add a tab bar to distinguish between direct messages and group chats`,
-  defaultDirectAndGroupTab: `Default tab to open`,
 };
 
 export const titles: Record<keyof typeof Settings.current, string> = {

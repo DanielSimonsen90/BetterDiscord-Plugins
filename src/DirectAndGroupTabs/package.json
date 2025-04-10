@@ -1,0 +1,6 @@
+{
+  "name": "direct-and-group-tabs",
+  "version": "1.0.0",
+  "author": "danhosaur",
+  "description": "Split your direct messages into a tab-bar component with tabs for DMs and group messages."
+}

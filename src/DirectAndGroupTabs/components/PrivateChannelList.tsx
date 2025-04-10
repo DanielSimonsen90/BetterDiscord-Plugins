@@ -7,7 +7,7 @@ import { ActionsEmitter, createActionCallback } from '@actions';
 import { ReadStateStore } from '@stores';
 
 import Finder from '@danho-lib/dium/api/finder';
-import { Settings } from 'src/0DanhoLibrary/Settings';
+import { Settings } from '../settings/Settings';
 
 type Props = {
   privateChannelIds: Array<Snowflake>;

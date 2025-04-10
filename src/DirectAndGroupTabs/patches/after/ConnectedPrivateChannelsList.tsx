@@ -1,14 +1,8 @@
+import { React, Patcher } from "@dium";
 import Finder from "@danho-lib/dium/api/finder";
-import { Patcher } from "@dium";
-import { Settings } from "src/0DanhoLibrary/Settings";
-import PrivateChannelList from "./PrivateChannelList";
-import { React } from '@react';
+import PrivateChannelList from "../../components/PrivateChannelList";
 
-export { default as style } from './style.scss';
-
-export default function Feature() {
-  if (!Settings.current.directAndGroupTabs) return;
-
+export default function afterConnectedPrivateChannelsList() {
   const module = Finder.findBySourceStrings('ConnectedPrivateChannelsList', { defaultExport: false });
   if (!module) return;
 
@@ -17,5 +11,5 @@ export default function Feature() {
     const DanhoPrivateChannelList = PrivateChannelList(B);
 
     result.props.children = <DanhoPrivateChannelList {...result.props.children.props} />;
-  })
+  });
 }
