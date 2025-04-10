@@ -1,5 +1,4 @@
 // import * as AutoCancelFriendRequests from './auto-cancel-friend-requests';
-import * as FixRelativeTimestamps from './fix-relative-timestamps';
 import * as HideInactiveChannels from './hide-inactive-channels';
 // import * as JoinVoiceWithCamera from './join-voice-with-camera';
 import * as ShowGuildMembersInHeader from './show-guild-members-in-header';
@@ -13,7 +12,6 @@ export default [
   // JoinVoiceWithCamera,
   ShowGuildMembersInHeader,
   SortForumsByAuthor,
-  FixRelativeTimestamps,
   UserBirthday,
   { style: UserTimezoneStyle, default: () => { } },
   HideInactiveChannels,

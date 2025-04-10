@@ -54,6 +54,7 @@ export function throttle<T>(callback: (...args: T[]) => void, delay: number) {
 }
 
 export const TimeUtils = {
+  SECOND, MINUTE, HOUR, DAY, WEEK, MONTH, YEAR,
   timeSpan,
   throttle,
 }

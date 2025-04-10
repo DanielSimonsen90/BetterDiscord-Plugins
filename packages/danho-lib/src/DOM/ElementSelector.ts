@@ -30,8 +30,8 @@ export class ElementSelector {
         return this;
     }
 
-    public ariaLabel(label: string, tagName?: keyof HTMLElementTagNameMap) {
-        this.result += `${tagName ?? ''}[aria-label="${label}"] `;
+    public ariaLabel(label?: string, tagName?: keyof HTMLElementTagNameMap) {
+        this.result += `${tagName ?? ''}${label ? `[aria-label="${label}"]` : '[aria-label]'} `;
         return this;
     }
     public ariaLabelContains(label: string, tagName?: keyof HTMLElementTagNameMap) {
@@ -75,6 +75,11 @@ export class ElementSelector {
     }
     public nth(index: number) {
         this.result += `:nth-child(${index}) `;
+        return this;
+    }
+
+    public has(callback: (selector: ElementSelector) => ElementSelector) {
+        this.result += `:has(${callback(new ElementSelector()).toString()}) `;
         return this;
     }
 
