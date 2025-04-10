@@ -1504,8 +1504,8 @@ function createElement(html, props = {}, target) {
 const HEADER_MEMBERS_CLASSNAME = 'danho-lib__header-members';
 function updateHeader() {
     let showGuildMembers = $(`.${HEADER_MEMBERS_CLASSNAME}`, false);
-    if (showGuildMembers.length >= 1)
-        return;
+    if (showGuildMembers.length)
+        showGuildMembers.forEach(e => e.unmount());
     const guild = GuildStore.getGuild(GuildUtils.currentId);
     if (!guild)
         return;
