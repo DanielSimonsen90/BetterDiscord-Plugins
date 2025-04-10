@@ -20,8 +20,6 @@ export const DiscordEnhancements = {
   showBirthdayCalendar: true,
   showBirthdayOnNameTag: true,
 
-  expandActivityStatus: true,
-
   hideChannelUntilActivity: true,
   keepChannelVisibleAfterActivityTimeoutMin: 5,
 }
@@ -49,8 +47,6 @@ export const DiscordEnhancementsTitles: Record<keyof typeof DiscordEnhancements,
   birthdateTimestampStyle: `Birthdate timestamp style`,
   showBirthdayCalendar: `Show birthday calendar in global navigation`,
   showBirthdayOnNameTag: `Show birthday on name tag`,
-
-  expandActivityStatus: `Expand activity status to show more information i.e. what a user is listening to`,
 
   hideChannelUntilActivity: `Hide channels from your channel list until they have activity`,
   keepChannelVisibleAfterActivityTimeoutMin: `Keep recently active hidden channel visible for x minutes`,
