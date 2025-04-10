@@ -46,6 +46,7 @@ export default function buildMd(inputPath: string, meta: Meta) {
       `- A detailed description of the bug including reproduction steps`,
       `- Your plugin settings (if any)`,
       `- A screenshot of the bug (if applicable)`,
+      '',
     ] : [] as Array<string>),
 
     `## License & Credits`,
