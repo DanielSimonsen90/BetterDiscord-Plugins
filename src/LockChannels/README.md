@@ -11,6 +11,7 @@ If you found a bug, please report it [here](https://github.com/DanielSimonsen90/
 - A detailed description of the bug including reproduction steps
 - Your plugin settings (if any)
 - A screenshot of the bug (if applicable)
+
 ## License & Credits
 The entire repository is licensed under the [MIT License](https://opensource.org/licenses/MIT), meaning you can do whatever you want with it as long as you include the original license.
 

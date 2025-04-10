@@ -1414,6 +1414,318 @@ const GuildUtils = {
     },
 };
 
+const { useCallback, useContext, useDebugValue, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useReducer, useRef, useState, useId, useDeferredValue, useInsertionEffect, useSyncExternalStore, useTransition, createRef, createContext, createElement: createElement$1, createFactory, forwardRef, cloneElement, lazy, memo, isValidElement, Component, PureComponent, Fragment, Suspense, } = React;
+
+const Collapsible = forwardRef(({ children, ...props }, ref) => {
+    const internalRef = useRef(null);
+    const [isOpen, setIsOpen] = useState(props.defaultOpen ?? false);
+    const disabled = props.disabled ?? false;
+    const toggle = () => {
+        if (disabled)
+            return;
+        setIsOpen(!isOpen);
+        props.onToggle?.(!isOpen);
+        if (isOpen)
+            props.onClose?.();
+        else
+            props.onOpen?.();
+    };
+    useEffect(() => {
+        if (props.forceState !== undefined) {
+            setIsOpen(props.forceState);
+            if (props.forceState)
+                props.onOpen?.();
+            else
+                props.onClose?.();
+        }
+    }, [props.forceState]);
+    useImperativeHandle(ref, () => ({
+        ...internalRef.current,
+        isOpen,
+        isDisabled: disabled,
+        toggle,
+        open: () => {
+            setIsOpen(true);
+            props.onOpen?.();
+        },
+        close: () => {
+            setIsOpen(false);
+            props.onClose?.();
+        },
+    }));
+    const Title = typeof props.title === "string" ? React.createElement("h3", null, props.title) : props.title;
+    const TitleOpen = typeof props.titleOpen === "string" ? React.createElement("h3", null, props.titleOpen) : props.titleOpen;
+    return (React.createElement("div", { ref: internalRef, className: classNames$1("collapsible", props.className), "data-open": isOpen, "data-disabled": disabled },
+        React.createElement("div", { className: "collapsible__header", onClick: toggle },
+            isOpen ? TitleOpen ?? Title : Title,
+            React.createElement("span", { style: { display: "flex" } })),
+        React.createElement("div", { className: classNames$1("collapsible__content", isOpen ? "visible" : "hidden") }, children)));
+});
+
+function classNames(...classNames) {
+    return classNames.filter(Boolean).join(' ');
+}
+
+function useKeybind(keybinds, onKeybind) {
+    const [isCtrl, isShift, isAlt] = ['Control', 'Shift', 'Alt'].map(k => keybinds.includes(k));
+    const _keybinds = keybinds.filter(k => !['Control', 'Shift', 'Alt'].includes(k));
+    useEffect(() => {
+        const onKeyDown = (e) => {
+            if (isCtrl && !e.ctrlKey)
+                return;
+            if (isShift && !e.shiftKey)
+                return;
+            if (isAlt && !e.altKey)
+                return;
+            if (!_keybinds.includes(e.key))
+                return;
+            onKeybind(e);
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [keybinds, onKeybind]);
+}
+
+function useDebounceCallback(callback, delay) {
+    const callbackRef = useRef(callback);
+    useEffect(() => {
+        callbackRef.current = callback;
+    }, [callback]);
+    return useRef((...args) => {
+        const handler = setTimeout(() => callbackRef.current(...args), delay);
+        return () => clearTimeout(handler);
+    }).current;
+}
+
+function EphemeralEye(props) {
+    const size = props.size || 16;
+    const viewBox = 32;
+    const className = classNames('ephemeral-eye', props.line && 'ephemeral-eye--line', props.className);
+    return (React.createElement("svg", { ...props, className: className, "aria-hidden": false, width: size, height: size, viewBox: `0 0 ${viewBox} ${viewBox}`, style: { '--size': `${size}px` } },
+        React.createElement("path", { fill: "currentColor", d: "M12 5C5.648 5 1 12 1 12C1 12 5.648 19 12 19C18.352 19 23 12 23 12C23 12 18.352 5 12 5ZM12 16C9.791 16 8 14.21 8 12C8 9.79 9.791 8 12 8C14.209 8 16 9.79 16 12C16 14.21 14.209 16 12 16Z" }),
+        React.createElement("path", { fill: "currentColor", d: "M12 14C13.1046 14 14 13.1046 14 12C14 10.8954 13.1046 10 12 10C10.8954 10 10 10.8954 10 12C10 13.1046 10.8954 14 12 14Z" }),
+        props.line
+            ? React.createElement("path", { fill: "currentColor", d: "M20.7071,20 L3,2 L2,3 L20,20 L20,20 Z" })
+            : null));
+}
+
+const InputModule = ClassNamesUtils.combineModuleByKeys(['inputWrapper', 'inputDefault'], ['dividerDefault', 'title']);
+function FormItem(props) {
+    const { value, label, type } = props;
+    return React.createElement(FormGroup, { ...props, name: props.name ?? label, inputType: type ?? getInputType(value) });
+}
+function FormItemFromModel(props) {
+    const { model, property } = props;
+    const onModelChange = 'onModelChange' in props ? props.onModelChange : (m, p, v) => { };
+    const onChange = 'onChange' in props ? props.onChange : (v) => { };
+    const { label, value } = props;
+    return React.createElement(FormGroup, { ...props, name: property, label: label ?? StringUtils.pascalCaseFromCamelCase(property), inputType: props.type ?? getInputType(value ?? model[property]), value: value ?? model[property], onChange: (v) => {
+            onModelChange(Object.assign({}, model, { [property]: v }), property, v);
+            onChange(v);
+        } });
+}
+function FormGroup(props) {
+    const [internal, setInternal] = useState(props.value);
+    const [inputType, setInputType] = useState(props.inputType);
+    const debounceChange = useDebounceCallback((value) => props.onChange(value), props.debounce);
+    const onChange = useCallback((newValue) => {
+        setInternal(newValue);
+        if (props.debounce)
+            debounceChange(newValue);
+        else
+            props.onChange(newValue);
+    }, [props.debounce, props.onChange, props.inputType, props.value]);
+    const className = classNames("danho-form-group__input", `danho-form-group__${props.inputType}`, props.required && `danho-form-group__${props.inputType}--required`, props.disabled && InputModule.disabled, InputModule.inputDefault);
+    const toggleInputType = (ref) => () => {
+        if (ref.current) {
+            const cursorPosition = ref.current.selectionStart;
+            setInputType(current => current === 'text' ? 'password' : 'text');
+            setTimeout(() => {
+                if (ref.current && cursorPosition !== null) {
+                    ref.current.setSelectionRange(cursorPosition, cursorPosition);
+                }
+            }, 0);
+        }
+    };
+    return (React.createElement(EmptyFormGroup, { label: props.label, name: props.name, onClick: () => {
+            if (props.inputType === 'checkbox')
+                return;
+        } }, ref => (React.createElement(React.Fragment, null,
+        props.inputType === 'checkbox' ? (React.createElement(FormSwitch, { className: className, value: typeof internal === 'boolean' ? internal : undefined, disabled: props.disabled, onChange: checked => onChange(checked) })) : (React.createElement("div", { className: "input-container" },
+            React.createElement("input", { className: className, ref: ref, type: inputType, placeholder: props.inputType === 'checkbox' ? undefined : props.label, name: props.name, required: props.required, disabled: props.disabled, defaultValue: props.defaultValue, checked: typeof internal === 'boolean' ? internal : undefined, value: typeof internal === 'boolean' ? undefined : internal, onChange: e => {
+                    const newValue = props.inputType === 'checkbox'
+                        ? e.currentTarget.checked
+                        : typeof props.value === 'number' ? Number(e.target.value) : e.currentTarget.value;
+                    onChange(newValue);
+                } }),
+            props.inputType === 'password' && (React.createElement(EphemeralEye, { size: props.ephemeralEyeSize, line: inputType !== 'password', onClick: toggleInputType(ref) })))),
+        props.errorText
+            ? React.createElement(Text, { variant: 'text-sm/normal', className: ClassNamesUtils.ColorClassNames.colorDanger }, props.errorText)
+            : null))));
+}
+function EmptyFormGroup(props) {
+    const internalRef = useRef(null);
+    const ref = props.ref ?? internalRef;
+    return (React.createElement("div", { className: "danho-form-group", onClick: () => {
+            if (ref.current)
+                ref.current.focus();
+            props.onClick?.();
+        } },
+        React.createElement("label", { className: classNames("danho-form-group__label", InputModule.title), htmlFor: props.name }, props.label),
+        props.children(ref)));
+}
+function getInputType(value) {
+    if (typeof value === 'boolean')
+        return 'checkbox';
+    if (typeof value === 'number')
+        return 'number';
+    if (typeof value === 'string') {
+        if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value))
+            return 'email';
+        if (/^https?:\/\/[^\s/$.?#].[^\s]*$/.test(value))
+            return 'url';
+        if (/^\d{10}$/.test(value))
+            return 'tel';
+        if (/^\d{3}-\d{3}-\d{4}$/.test(value))
+            return 'tel';
+        if (/^#[0-9A-F]{6}$/i.test(value))
+            return 'color';
+        if (/\d{4}-\d{2}-\d{2}/.test(value))
+            return 'date';
+        if (/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value))
+            return 'datetime-local';
+    }
+    return 'text';
+}
+
+function GuildListItem(props) {
+    const guildId = React.useMemo(() => 'guildId' in props ? props.guildId : props.guild.id, [props]);
+    const guild = React.useMemo(() => 'guild' in props ? props.guild : GuildStore.getGuild(guildId), [guildId]);
+    const { children } = props;
+    return (React.createElement("div", { className: "guild-list-item" },
+        React.createElement("img", { className: "guild-list-item__icon", src: window.DL.Utils.GuildUtils.getIconUrl(guild), alt: guild.name }),
+        React.createElement("div", { className: "guild-list-item__content-container" },
+            React.createElement("span", { className: "guild-list-item__name" }, guild.name),
+            React.createElement("span", { className: "guild-list-item__content" }, children))));
+}
+
+var ButtonLooks;
+(function (ButtonLooks) {
+    ButtonLooks[ButtonLooks["BLANK"] = 0] = "BLANK";
+    ButtonLooks[ButtonLooks["FILLED"] = 1] = "FILLED";
+    ButtonLooks[ButtonLooks["INVERTED"] = 2] = "INVERTED";
+    ButtonLooks[ButtonLooks["LINK"] = 3] = "LINK";
+    ButtonLooks[ButtonLooks["OUTLINED"] = 4] = "OUTLINED";
+})(ButtonLooks || (ButtonLooks = {}));
+var ButtonSizes;
+(function (ButtonSizes) {
+    ButtonSizes[ButtonSizes["ICON"] = 0] = "ICON";
+    ButtonSizes[ButtonSizes["LARGE"] = 1] = "LARGE";
+    ButtonSizes[ButtonSizes["MAX"] = 2] = "MAX";
+    ButtonSizes[ButtonSizes["MEDIUM"] = 3] = "MEDIUM";
+    ButtonSizes[ButtonSizes["MIN"] = 4] = "MIN";
+    ButtonSizes[ButtonSizes["NONE"] = 5] = "NONE";
+    ButtonSizes[ButtonSizes["SMALL"] = 6] = "SMALL";
+    ButtonSizes[ButtonSizes["TINY"] = 7] = "TINY";
+    ButtonSizes[ButtonSizes["XLARGE"] = 8] = "XLARGE";
+})(ButtonSizes || (ButtonSizes = {}));
+var Colors;
+(function (Colors) {
+    Colors[Colors["BLACK"] = 0] = "BLACK";
+    Colors[Colors["BRAND"] = 1] = "BRAND";
+    Colors[Colors["BRAND_NEW"] = 2] = "BRAND_NEW";
+    Colors[Colors["GREEN"] = 3] = "GREEN";
+    Colors[Colors["LINK"] = 4] = "LINK";
+    Colors[Colors["PRIMARY"] = 5] = "PRIMARY";
+    Colors[Colors["RED"] = 6] = "RED";
+    Colors[Colors["TRANSPARENT"] = 7] = "TRANSPARENT";
+    Colors[Colors["WHITE"] = 8] = "WHITE";
+    Colors[Colors["YELLOW"] = 9] = "YELLOW";
+})(Colors || (Colors = {}));
+const Button = Finder.findBySourceStrings("FILLED", "BRAND", "MEDIUM", "button", "buttonRef");
+
+function SearchableList(props) {
+    const { items, renderItem, onSearch } = props;
+    const { placeholder = 'Search...', className, noResult, take, children } = props;
+    const [search, _setSearch] = useState('');
+    const setSearch = useDebounceCallback((value) => _setSearch(value), 300);
+    const SearchableItem = useCallback(({ item, index }) => renderItem(item, index, items), [renderItem, items]);
+    const Children = useCallback(() => typeof children === 'function' ? children() : children, [children]);
+    const filteredItems = useMemo(() => (items
+        .filter(item => search ? onSearch(search, item) : true)
+        .slice(0, take ?? 25)), [items, search, onSearch, take]);
+    return (React.createElement("div", { className: classNames('searchable-list', className) },
+        React.createElement("div", { className: "searchable-list__input-container" },
+            React.createElement("input", { className: "searchable-list__input", type: "text", placeholder: placeholder, value: search, onChange: e => setSearch(e.target.value) }),
+            React.createElement(Children, null)),
+        React.createElement("ul", { className: "searchable-list__items" },
+            filteredItems.map((item, index) => (React.createElement("li", { key: index, className: "searchable-list__item" },
+                React.createElement(SearchableItem, { item: item, index: index })))),
+            filteredItems.length === 0 && noResult && (React.createElement("li", { className: "searchable-list__item--no-result" }, typeof noResult === 'function' ? noResult() : noResult)))));
+}
+
+function Setting({ setting, settings, set, titles, ...props }) {
+    const { beforeChange, onChange, formatValue, type } = props;
+    const [v, _setV] = useState(formatValue ? formatValue(settings[setting]) : settings[setting]);
+    const setV = (value) => _setV(formatValue ? formatValue(value) : value);
+    if (type === undefined ? typeof v === 'boolean' : type === 'switch')
+        return (React.createElement("div", { className: "setting-group" },
+            React.createElement(FormSwitch, { className: 'danho-form-switch', key: setting.toString(), note: titles[setting.toString()], value: Boolean(v), hideBorder: true, onChange: inputValue => {
+                    const checked = beforeChange ? beforeChange(inputValue) : inputValue;
+                    set({ [setting]: checked });
+                    onChange?.(checked);
+                    setV(checked);
+                } })));
+    if (type === undefined ? typeof v === 'number' : type === 'number')
+        return (React.createElement("div", { className: "setting-group" },
+            React.createElement(TextInput, { key: setting.toString(), value: v, onChange: inputValue => {
+                    const value = beforeChange ? beforeChange(inputValue) : Number(inputValue);
+                    set({ [setting]: value });
+                    onChange?.(value);
+                    setV(value);
+                } }),
+            React.createElement(FormText, { className: 'note' }, titles[setting])));
+    if (type === undefined ? typeof v === 'string' : type === 'text')
+        return (React.createElement("div", { className: "setting-group" },
+            React.createElement(TextInput, { key: setting.toString(), value: v, onChange: inputValue => {
+                    const value = beforeChange ? beforeChange(inputValue) : inputValue;
+                    set({ [setting]: value });
+                    onChange?.(value);
+                    setV(value);
+                } }),
+            React.createElement(FormText, { className: 'note' }, titles[setting])));
+    if (type && type !== 'select')
+        return (React.createElement("div", { className: "danho-form-switch", key: setting.toString() },
+            React.createElement("input", { type: type, key: setting.toString(), value: v, onChange: e => {
+                    const value = beforeChange ? beforeChange(e.target.value) : e.target.value;
+                    set({ [setting]: value });
+                    onChange?.(value);
+                    setV(value);
+                } }),
+            React.createElement(FormText, { className: 'note' }, titles[setting])));
+    if (type === 'select')
+        return (React.createElement("div", { className: "danho-form-select", key: setting.toString() },
+            React.createElement(Select, { ...props, options: 'options' in props ? props.options.map(value => ({ label: value, value })) : undefined, isSelected: value => Array.isArray(settings[setting]) ? v.includes(value) : value === settings[setting], serialize: value => JSON.stringify(value), select: Array.isArray(settings[setting]) ? (value) => {
+                    const selected = [...settings[setting]];
+                    if (selected.includes(value))
+                        selected.splice(selected.indexOf(value), 1);
+                    else
+                        selected.push(value);
+                    set({ [setting]: selected });
+                    setV(selected);
+                } : (value) => {
+                    set({ [setting]: value });
+                    setV(value);
+                } }),
+            React.createElement(FormText, { className: 'note' }, titles[setting])));
+    return (React.createElement("div", { className: 'settings-error' },
+        React.createElement("h1", null, "Unknown value type"),
+        React.createElement("h3", null,
+            "Recieved ",
+            typeof v),
+        React.createElement("h5", null, JSON.stringify(v))));
+}
+
 class ElementSelector {
     constructor() {
         this.result = "";
@@ -1844,7 +2156,7 @@ class DQuery {
         this.element.style.display = '';
     }
     appendHtml(html) {
-        this.element.appendChild(createElement$1(html));
+        this.element.appendChild(createElement(html));
         return this;
     }
     appendElements(elements) {
@@ -1854,7 +2166,7 @@ class DQuery {
         return this;
     }
     appendComponent(component, wrapperProps) {
-        const wrapper = this.element.appendChild(createElement$1("<></>", wrapperProps));
+        const wrapper = this.element.appendChild(createElement("<></>", wrapperProps));
         BdApi.ReactDOM.render(component, wrapper);
         return this;
     }
@@ -1863,7 +2175,7 @@ class DQuery {
         return this;
     }
     insertComponent(position, component) {
-        this.element.insertAdjacentElement(position, createElement$1("<></>"));
+        this.element.insertAdjacentElement(position, createElement("<></>"));
         const wrapper = this.parent.children(".bdd-wrapper", true).element;
         BdApi.ReactDOM.render(component, wrapper);
         return this;
@@ -1873,7 +2185,7 @@ class DQuery {
         return this;
     }
     prependComponent(component) {
-        this.element.insertAdjacentElement('afterbegin', createElement$1("<></>"));
+        this.element.insertAdjacentElement('afterbegin', createElement("<></>"));
         const wrapper = this.element.firstChild;
         BdApi.ReactDOM.render(component, wrapper);
         return this;
@@ -1890,7 +2202,7 @@ class DQuery {
         return forceFullRerender(getFiber(this.element));
     }
 }
-function createElement$1(html, props = {}, target) {
+function createElement(html, props = {}, target) {
     if (html === "<></>" || html.toLowerCase() === "fragment") {
         if ('className' in props)
             props.class = `bdd-wrapper ${props.className}`;
@@ -1910,318 +2222,6 @@ function createElement$1(html, props = {}, target) {
         return Object.assign(document.createElement(html), props);
     })();
     return element;
-}
-
-const { useCallback, useContext, useDebugValue, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useReducer, useRef, useState, useId, useDeferredValue, useInsertionEffect, useSyncExternalStore, useTransition, createRef, createContext, createElement, createFactory, forwardRef, cloneElement, lazy, memo, isValidElement, Component, PureComponent, Fragment, Suspense, } = React;
-
-const Collapsible = forwardRef(({ children, ...props }, ref) => {
-    const internalRef = useRef(null);
-    const [isOpen, setIsOpen] = useState(props.defaultOpen ?? false);
-    const disabled = props.disabled ?? false;
-    const toggle = () => {
-        if (disabled)
-            return;
-        setIsOpen(!isOpen);
-        props.onToggle?.(!isOpen);
-        if (isOpen)
-            props.onClose?.();
-        else
-            props.onOpen?.();
-    };
-    useEffect(() => {
-        if (props.forceState !== undefined) {
-            setIsOpen(props.forceState);
-            if (props.forceState)
-                props.onOpen?.();
-            else
-                props.onClose?.();
-        }
-    }, [props.forceState]);
-    useImperativeHandle(ref, () => ({
-        ...internalRef.current,
-        isOpen,
-        isDisabled: disabled,
-        toggle,
-        open: () => {
-            setIsOpen(true);
-            props.onOpen?.();
-        },
-        close: () => {
-            setIsOpen(false);
-            props.onClose?.();
-        },
-    }));
-    const Title = typeof props.title === "string" ? React.createElement("h3", null, props.title) : props.title;
-    const TitleOpen = typeof props.titleOpen === "string" ? React.createElement("h3", null, props.titleOpen) : props.titleOpen;
-    return (React.createElement("div", { ref: internalRef, className: classNames$1("collapsible", props.className), "data-open": isOpen, "data-disabled": disabled },
-        React.createElement("div", { className: "collapsible__header", onClick: toggle },
-            isOpen ? TitleOpen ?? Title : Title,
-            React.createElement("span", { style: { display: "flex" } })),
-        React.createElement("div", { className: classNames$1("collapsible__content", isOpen ? "visible" : "hidden") }, children)));
-});
-
-function classNames(...classNames) {
-    return classNames.filter(Boolean).join(' ');
-}
-
-function useKeybind(keybinds, onKeybind) {
-    const [isCtrl, isShift, isAlt] = ['Control', 'Shift', 'Alt'].map(k => keybinds.includes(k));
-    const _keybinds = keybinds.filter(k => !['Control', 'Shift', 'Alt'].includes(k));
-    useEffect(() => {
-        const onKeyDown = (e) => {
-            if (isCtrl && !e.ctrlKey)
-                return;
-            if (isShift && !e.shiftKey)
-                return;
-            if (isAlt && !e.altKey)
-                return;
-            if (!_keybinds.includes(e.key))
-                return;
-            onKeybind(e);
-        };
-        window.addEventListener('keydown', onKeyDown);
-        return () => window.removeEventListener('keydown', onKeyDown);
-    }, [keybinds, onKeybind]);
-}
-
-function useDebounceCallback(callback, delay) {
-    const callbackRef = useRef(callback);
-    useEffect(() => {
-        callbackRef.current = callback;
-    }, [callback]);
-    return useRef((...args) => {
-        const handler = setTimeout(() => callbackRef.current(...args), delay);
-        return () => clearTimeout(handler);
-    }).current;
-}
-
-function EphemeralEye(props) {
-    const size = props.size || 16;
-    const viewBox = 32;
-    const className = classNames('ephemeral-eye', props.line && 'ephemeral-eye--line', props.className);
-    return (React.createElement("svg", { ...props, className: className, "aria-hidden": false, width: size, height: size, viewBox: `0 0 ${viewBox} ${viewBox}`, style: { '--size': `${size}px` } },
-        React.createElement("path", { fill: "currentColor", d: "M12 5C5.648 5 1 12 1 12C1 12 5.648 19 12 19C18.352 19 23 12 23 12C23 12 18.352 5 12 5ZM12 16C9.791 16 8 14.21 8 12C8 9.79 9.791 8 12 8C14.209 8 16 9.79 16 12C16 14.21 14.209 16 12 16Z" }),
-        React.createElement("path", { fill: "currentColor", d: "M12 14C13.1046 14 14 13.1046 14 12C14 10.8954 13.1046 10 12 10C10.8954 10 10 10.8954 10 12C10 13.1046 10.8954 14 12 14Z" }),
-        props.line
-            ? React.createElement("path", { fill: "currentColor", d: "M20.7071,20 L3,2 L2,3 L20,20 L20,20 Z" })
-            : null));
-}
-
-const InputModule = ClassNamesUtils.combineModuleByKeys(['inputWrapper', 'inputDefault'], ['dividerDefault', 'title']);
-function FormItem(props) {
-    const { value, label, type } = props;
-    return React.createElement(FormGroup, { ...props, name: props.name ?? label, inputType: type ?? getInputType(value) });
-}
-function FormItemFromModel(props) {
-    const { model, property } = props;
-    const onModelChange = 'onModelChange' in props ? props.onModelChange : (m, p, v) => { };
-    const onChange = 'onChange' in props ? props.onChange : (v) => { };
-    const { label, value } = props;
-    return React.createElement(FormGroup, { ...props, name: property, label: label ?? StringUtils.pascalCaseFromCamelCase(property), inputType: props.type ?? getInputType(value ?? model[property]), value: value ?? model[property], onChange: (v) => {
-            onModelChange(Object.assign({}, model, { [property]: v }), property, v);
-            onChange(v);
-        } });
-}
-function FormGroup(props) {
-    const [internal, setInternal] = useState(props.value);
-    const [inputType, setInputType] = useState(props.inputType);
-    const debounceChange = useDebounceCallback((value) => props.onChange(value), props.debounce);
-    const onChange = useCallback((newValue) => {
-        setInternal(newValue);
-        if (props.debounce)
-            debounceChange(newValue);
-        else
-            props.onChange(newValue);
-    }, [props.debounce, props.onChange, props.inputType, props.value]);
-    const className = classNames("danho-form-group__input", `danho-form-group__${props.inputType}`, props.required && `danho-form-group__${props.inputType}--required`, props.disabled && InputModule.disabled, InputModule.inputDefault);
-    const toggleInputType = (ref) => () => {
-        if (ref.current) {
-            const cursorPosition = ref.current.selectionStart;
-            setInputType(current => current === 'text' ? 'password' : 'text');
-            setTimeout(() => {
-                if (ref.current && cursorPosition !== null) {
-                    ref.current.setSelectionRange(cursorPosition, cursorPosition);
-                }
-            }, 0);
-        }
-    };
-    return (React.createElement(EmptyFormGroup, { label: props.label, name: props.name, onClick: () => {
-            if (props.inputType === 'checkbox')
-                return;
-        } }, ref => (React.createElement(React.Fragment, null,
-        props.inputType === 'checkbox' ? (React.createElement(FormSwitch, { className: className, value: typeof internal === 'boolean' ? internal : undefined, disabled: props.disabled, onChange: checked => onChange(checked) })) : (React.createElement("div", { className: "input-container" },
-            React.createElement("input", { className: className, ref: ref, type: inputType, placeholder: props.inputType === 'checkbox' ? undefined : props.label, name: props.name, required: props.required, disabled: props.disabled, defaultValue: props.defaultValue, checked: typeof internal === 'boolean' ? internal : undefined, value: typeof internal === 'boolean' ? undefined : internal, onChange: e => {
-                    const newValue = props.inputType === 'checkbox'
-                        ? e.currentTarget.checked
-                        : typeof props.value === 'number' ? Number(e.target.value) : e.currentTarget.value;
-                    onChange(newValue);
-                } }),
-            props.inputType === 'password' && (React.createElement(EphemeralEye, { size: props.ephemeralEyeSize, line: inputType !== 'password', onClick: toggleInputType(ref) })))),
-        props.errorText
-            ? React.createElement(Text, { variant: 'text-sm/normal', className: ClassNamesUtils.ColorClassNames.colorDanger }, props.errorText)
-            : null))));
-}
-function EmptyFormGroup(props) {
-    const internalRef = useRef(null);
-    const ref = props.ref ?? internalRef;
-    return (React.createElement("div", { className: "danho-form-group", onClick: () => {
-            if (ref.current)
-                ref.current.focus();
-            props.onClick?.();
-        } },
-        React.createElement("label", { className: classNames("danho-form-group__label", InputModule.title), htmlFor: props.name }, props.label),
-        props.children(ref)));
-}
-function getInputType(value) {
-    if (typeof value === 'boolean')
-        return 'checkbox';
-    if (typeof value === 'number')
-        return 'number';
-    if (typeof value === 'string') {
-        if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value))
-            return 'email';
-        if (/^https?:\/\/[^\s/$.?#].[^\s]*$/.test(value))
-            return 'url';
-        if (/^\d{10}$/.test(value))
-            return 'tel';
-        if (/^\d{3}-\d{3}-\d{4}$/.test(value))
-            return 'tel';
-        if (/^#[0-9A-F]{6}$/i.test(value))
-            return 'color';
-        if (/\d{4}-\d{2}-\d{2}/.test(value))
-            return 'date';
-        if (/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value))
-            return 'datetime-local';
-    }
-    return 'text';
-}
-
-function GuildListItem(props) {
-    const guildId = React.useMemo(() => 'guildId' in props ? props.guildId : props.guild.id, [props]);
-    const guild = React.useMemo(() => 'guild' in props ? props.guild : GuildStore.getGuild(guildId), [guildId]);
-    const { children } = props;
-    return (React.createElement("div", { className: "guild-list-item" },
-        React.createElement("img", { className: "guild-list-item__icon", src: window.DL.Utils.GuildUtils.getIconUrl(guild), alt: guild.name }),
-        React.createElement("div", { className: "guild-list-item__content-container" },
-            React.createElement("span", { className: "guild-list-item__name" }, guild.name),
-            React.createElement("span", { className: "guild-list-item__content" }, children))));
-}
-
-var ButtonLooks;
-(function (ButtonLooks) {
-    ButtonLooks[ButtonLooks["BLANK"] = 0] = "BLANK";
-    ButtonLooks[ButtonLooks["FILLED"] = 1] = "FILLED";
-    ButtonLooks[ButtonLooks["INVERTED"] = 2] = "INVERTED";
-    ButtonLooks[ButtonLooks["LINK"] = 3] = "LINK";
-    ButtonLooks[ButtonLooks["OUTLINED"] = 4] = "OUTLINED";
-})(ButtonLooks || (ButtonLooks = {}));
-var ButtonSizes;
-(function (ButtonSizes) {
-    ButtonSizes[ButtonSizes["ICON"] = 0] = "ICON";
-    ButtonSizes[ButtonSizes["LARGE"] = 1] = "LARGE";
-    ButtonSizes[ButtonSizes["MAX"] = 2] = "MAX";
-    ButtonSizes[ButtonSizes["MEDIUM"] = 3] = "MEDIUM";
-    ButtonSizes[ButtonSizes["MIN"] = 4] = "MIN";
-    ButtonSizes[ButtonSizes["NONE"] = 5] = "NONE";
-    ButtonSizes[ButtonSizes["SMALL"] = 6] = "SMALL";
-    ButtonSizes[ButtonSizes["TINY"] = 7] = "TINY";
-    ButtonSizes[ButtonSizes["XLARGE"] = 8] = "XLARGE";
-})(ButtonSizes || (ButtonSizes = {}));
-var Colors;
-(function (Colors) {
-    Colors[Colors["BLACK"] = 0] = "BLACK";
-    Colors[Colors["BRAND"] = 1] = "BRAND";
-    Colors[Colors["BRAND_NEW"] = 2] = "BRAND_NEW";
-    Colors[Colors["GREEN"] = 3] = "GREEN";
-    Colors[Colors["LINK"] = 4] = "LINK";
-    Colors[Colors["PRIMARY"] = 5] = "PRIMARY";
-    Colors[Colors["RED"] = 6] = "RED";
-    Colors[Colors["TRANSPARENT"] = 7] = "TRANSPARENT";
-    Colors[Colors["WHITE"] = 8] = "WHITE";
-    Colors[Colors["YELLOW"] = 9] = "YELLOW";
-})(Colors || (Colors = {}));
-const Button = Finder.findBySourceStrings("FILLED", "BRAND", "MEDIUM", "button", "buttonRef");
-
-function SearchableList(props) {
-    const { items, renderItem, onSearch } = props;
-    const { placeholder = 'Search...', className, noResult, take, children } = props;
-    const [search, _setSearch] = useState('');
-    const setSearch = useDebounceCallback((value) => _setSearch(value), 300);
-    const SearchableItem = useCallback(({ item, index }) => renderItem(item, index, items), [renderItem, items]);
-    const Children = useCallback(() => typeof children === 'function' ? children() : children, [children]);
-    const filteredItems = useMemo(() => (items
-        .filter(item => search ? onSearch(search, item) : true)
-        .slice(0, take ?? 25)), [items, search, onSearch, take]);
-    return (React.createElement("div", { className: classNames('searchable-list', className) },
-        React.createElement("div", { className: "searchable-list__input-container" },
-            React.createElement("input", { className: "searchable-list__input", type: "text", placeholder: placeholder, value: search, onChange: e => setSearch(e.target.value) }),
-            React.createElement(Children, null)),
-        React.createElement("ul", { className: "searchable-list__items" },
-            filteredItems.map((item, index) => (React.createElement("li", { key: index, className: "searchable-list__item" },
-                React.createElement(SearchableItem, { item: item, index: index })))),
-            filteredItems.length === 0 && noResult && (React.createElement("li", { className: "searchable-list__item--no-result" }, typeof noResult === 'function' ? noResult() : noResult)))));
-}
-
-function Setting({ setting, settings, set, titles, ...props }) {
-    const { beforeChange, onChange, formatValue, type } = props;
-    const [v, _setV] = useState(formatValue ? formatValue(settings[setting]) : settings[setting]);
-    const setV = (value) => _setV(formatValue ? formatValue(value) : value);
-    if (type === undefined ? typeof v === 'boolean' : type === 'switch')
-        return (React.createElement("div", { className: "setting-group" },
-            React.createElement(FormSwitch, { className: 'danho-form-switch', key: setting.toString(), note: titles[setting.toString()], value: Boolean(v), hideBorder: true, onChange: inputValue => {
-                    const checked = beforeChange ? beforeChange(inputValue) : inputValue;
-                    set({ [setting]: checked });
-                    onChange?.(checked);
-                    setV(checked);
-                } })));
-    if (type === undefined ? typeof v === 'number' : type === 'number')
-        return (React.createElement("div", { className: "setting-group" },
-            React.createElement(TextInput, { key: setting.toString(), value: v, onChange: inputValue => {
-                    const value = beforeChange ? beforeChange(Number(inputValue)) : Number(inputValue);
-                    set({ [setting]: value });
-                    onChange?.(value);
-                    setV(value);
-                } }),
-            React.createElement(FormText, { className: 'note' }, titles[setting])));
-    if (type === undefined ? typeof v === 'string' : type === 'text')
-        return (React.createElement("div", { className: "setting-group" },
-            React.createElement(TextInput, { key: setting.toString(), value: v, onChange: inputValue => {
-                    const value = beforeChange ? beforeChange(inputValue) : inputValue;
-                    set({ [setting]: value });
-                    onChange?.(value);
-                    setV(value);
-                } }),
-            React.createElement(FormText, { className: 'note' }, titles[setting])));
-    if (type && type !== 'select')
-        return (React.createElement("div", { className: "danho-form-switch", key: setting.toString() },
-            React.createElement("input", { type: type, key: setting.toString(), value: v, onChange: e => {
-                    const value = beforeChange ? beforeChange(e.target.value) : e.target.value;
-                    set({ [setting]: value });
-                    onChange?.(value);
-                    setV(value);
-                } }),
-            React.createElement(FormText, { className: 'note' }, titles[setting])));
-    if (type === 'select')
-        return (React.createElement("div", { className: "danho-form-select", key: setting.toString() },
-            React.createElement(Select, { options: props.options.map(value => ({ label: value, value })), isSelected: value => Array.isArray(settings[setting]) ? v.includes(value) : value === settings[setting], serialize: value => JSON.stringify(value), select: Array.isArray(settings[setting]) ? (value) => {
-                    const selected = [...settings[setting]];
-                    if (selected.includes(value))
-                        selected.splice(selected.indexOf(value), 1);
-                    else
-                        selected.push(value);
-                    set({ [setting]: selected });
-                    setV(selected);
-                } : (value) => {
-                    set({ [setting]: value });
-                    setV(value);
-                } }),
-            React.createElement(FormText, { className: 'note' }, titles[setting])));
-    return (React.createElement("div", { className: 'settings-error' },
-        React.createElement("h1", null, "Unknown value type"),
-        React.createElement("h3", null,
-            "Recieved ",
-            typeof v),
-        React.createElement("h5", null, JSON.stringify(v))));
 }
 
 const LockedChannelsStore = new class LockedChannelsStore extends DiumStore {
@@ -2404,7 +2404,7 @@ function ChannelLockModalContent({ channel }) {
         React.createElement(ChannelLockEditForm, { onSubmit: onSubmit, channel: channel })));
 }
 
-const LOGIN_ID = 'secret-channel-login';
+const LOGIN_ID = 'locked-channel-login';
 function Login({ onSubmit }) {
     const [password, setPassword] = useState('');
     const [error, setError] = useState(undefined);
@@ -2435,29 +2435,17 @@ function Login({ onSubmit }) {
 
 let debouncedLoginRemover;
 async function lockChannel(channelId) {
-    log('Channel selected', {
-        channelId,
-        state: LockedChannelsStore.getChannelState(channelId),
-        timeout: LockedChannelsStore.getChannelTimeout(channelId),
-    });
     if (!channelId || LockedChannelsStore.isUnlocked(channelId)) {
         if (debouncedLoginRemover)
             clearTimeout(debouncedLoginRemover);
         if (document.getElementById(LOGIN_ID))
             debouncedLoginRemover = setTimeout(() => document.getElementById(LOGIN_ID)?.parentElement.remove(), 100);
-        log('Nothing to see here...', {
-            channel: ChannelStore.getChannel(channelId).name,
-            state: LockedChannelsStore.getChannelState(channelId),
-            isLocked: LockedChannelsStore.isLocked(channelId),
-            isUnlocked: LockedChannelsStore.isUnlocked(channelId),
-        });
         return;
     }
     await wait(1);
-    log('After that wait');
     const contentContainer = $(s => s.className('content').directChild().and.className('page'));
     if (!contentContainer)
-        return log(`Could not find content container`, {
+        return error(`Could not find content container`, {
             get contentContainer() {
                 return $(s => s.className('content').directChild().and.className('page'));
             }
@@ -2506,10 +2494,8 @@ function PatchChannelContextMenu(callback) {
 function patchChannelContextMenu() {
     PatchChannelContextMenu((menu, { channel }) => {
         const channelManagement = ContextMenuUtils.getGroupContaining('delete-channel', menu);
-        if (!channelManagement) {
-            Logger.warn('Could not find channel management group in context menu (looked for "delete-channel")', { menu });
-            return;
-        }
+        if (!channelManagement)
+            return warn('Could not find channel management group in context menu (looked for "delete-channel")', { menu });
         const { name: channelName, id: channelId } = channel;
         const lockingOption = LockedChannelsStore.isLocked(channelId) ? undefined : buildTextItemElement('danho-lock-channel', 'Lock Channel', () => BdApi.UI.showConfirmationModal(`Locking #${channelName}`, React.createElement(ChannelLockModalContent, { channel: channel }), {
             confirmText: `Lock #${channelName}`,
