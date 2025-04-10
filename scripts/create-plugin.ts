@@ -145,7 +145,7 @@ try {
         `\t\tActionsEmitter.removeAllListeners();`, 
         `\t},`
       ] : []),
-      addStyle || addSettings || addActions ? '\t' : undefined,
+      addStyle || addSettings ? '\t' : undefined,
       addStyle ? '\tstyles,' : undefined,
       addSettings ? '\tSettings,' : undefined,
       addSettings ? '\tSettingsPanel,' : undefined,

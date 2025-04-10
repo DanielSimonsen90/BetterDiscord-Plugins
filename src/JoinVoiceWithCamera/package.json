@@ -1,0 +1,6 @@
+{
+  "name": "join-voice-with-camera",
+  "version": "1.0.0",
+  "author": "danhosaur",
+  "description": "It does exactly what you think it would do. Give you the ability to join a voice channel with your camera on. You can achieve this by right-clicking the voice channel and find the option \"Join with Camera\" or you can simply double click on the voice channel."
+}

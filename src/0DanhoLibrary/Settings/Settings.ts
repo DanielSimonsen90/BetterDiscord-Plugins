@@ -3,8 +3,6 @@ import { createSettings } from "@dium/settings";
 export const DiscordEnhancements = {
   discordEnhancements: true,
 
-  joinVoiceWithCamera: true,
-
   showGuildMembersInHeader: true,
 
   allowForumSortByAuthor: true,
@@ -27,8 +25,6 @@ export const Settings = createSettings({
 
 export const DiscordEnhancementsTitles: Record<keyof typeof DiscordEnhancements, string> = {
   discordEnhancements: `Discord enhancements`,
-
-  joinVoiceWithCamera: `Join voice channels with camera on`,
 
   showGuildMembersInHeader: `Show guild members in the header`,
 
