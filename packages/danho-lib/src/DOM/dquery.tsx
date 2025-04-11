@@ -182,8 +182,8 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     const children = this.children();
     return children[children.length - 1];
   }
-  public hasChildren() {
-    return this.element.children.length > 0;
+  public hasChildren<El extends HTMLElement = HTMLElement>(selector?: Selector<El>) {
+    return this.children(selector).length > 0
   }
 
   public grandChildren<

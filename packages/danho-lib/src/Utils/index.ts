@@ -3,6 +3,7 @@ import { SelectedGuildStore, SelectedChannelStore, ChannelStore, GuildStore, Gui
 import { Arrayable } from "./types";
 
 export * from './ContextMenu';
+export { ClassNamesUtils } from './ClassNames';
 export * from './Functions';
 export * from './Net';
 export * from './Object';

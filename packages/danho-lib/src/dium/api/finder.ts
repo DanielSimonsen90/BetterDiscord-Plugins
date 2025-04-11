@@ -16,9 +16,9 @@ type FindBySourceStringsArgs<CustomArg extends CustomArgs | CustomArgs[] | undef
   : [...string[], SearchOptions<boolean>] | [...string[]];
 
 export function findBySourceStrings<TResult = any>(
-  ...keywords: FindBySourceStringsArgs<["lazy=true", "showMultiple=true"]> 
+  ...keywords: FindBySourceStringsArgs<["lazy=true", "showMultiple=true"]>
     | FindBySourceStringsArgs<["showMultiple=true", "lazy=true"]>
-  ): Promise<TResult[]>;
+): Promise<TResult[]>;
 export function findBySourceStrings<TResult = any>(
   ...keywords: FindBySourceStringsArgs<`lazy=true`>
 ): Promise<TResult>;
@@ -49,7 +49,7 @@ export function findBySourceStrings<TResult = any>(...keywords: FindBySourceStri
   if (lazy) Logger.debugLog(`[findBySourceStrings] Using lazy search - [${keywords.join(',')}]`, keywords);
 
   const _keywords = keywords as string[];
-  const moduleCallback = (exports, _, id) => {
+  const moduleCallback = (exports: any, _: any, id: string) => {
     if (!exports || exports === window) return false;
 
     const eIsFunctionAndHasKeywords = typeof exports === 'function'
@@ -100,7 +100,7 @@ export function findBySourceStrings<TResult = any>(...keywords: FindBySourceStri
       || eIsObjectWithKeywords
     ) : eIsFunctionAndHasKeywords;
 
-    if ((filter && backupId && id !== backupId) || !filter && id === backupId) Logger.debugWarn(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`,
+    if ((filter && backupId && id.toString() !== backupId) || !filter && id.toString() === backupId) Logger.debugWarn(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`,
       {
         exports,
         internal: {
@@ -119,12 +119,12 @@ export function findBySourceStrings<TResult = any>(...keywords: FindBySourceStri
       }
     );
 
-    if (backupId && backupId === id) Logger.debugLog('Found by id', { exports, id });
+    if (backupId && backupId === id.toString()) Logger.debugLog('Found by id', { exports, id });
     return filter;
   };
-  const moduleCallbackBoundary = (exports, _, id) => {
+  const moduleCallbackBoundary = (exports: any, _: any, id: string) => {
     try {
-      return moduleCallback(exports, _, id);
+      return moduleCallback(exports, _, id.toString());
     } catch (err) {
       const expectedErrorMessages = [
         `TypedArray`,
@@ -137,6 +137,13 @@ export function findBySourceStrings<TResult = any>(...keywords: FindBySourceStri
     }
   };
 
+
+  const moduleSearchOptions = searchOptions ?? { searchExports: true };
+  const module = showMultiple
+    ? BdApi.Webpack.getModules(moduleCallbackBoundary, moduleSearchOptions)
+    : BdApi.Webpack.getModule(moduleCallbackBoundary, moduleSearchOptions);
+  if (module) return module;
+
   if (lazy) return BdApi.Webpack.waitForModule(moduleCallbackBoundary, {
     signal: DiumFinder.controller.signal,
     ...searchOptions
@@ -147,11 +154,6 @@ export function findBySourceStrings<TResult = any>(...keywords: FindBySourceStri
     Logger.error(`[findBySourceStrings] Error in lazy search`, err);
     return undefined;
   });
-
-  const moduleSearchOptions = searchOptions ?? { searchExports: true };
-  return showMultiple
-    ? BdApi.Webpack.getModules(moduleCallbackBoundary, moduleSearchOptions)
-    : BdApi.Webpack.getModule(moduleCallbackBoundary, moduleSearchOptions);
 };
 
 // type ModuleTest = { hello: 'world', age: 21; };
@@ -217,10 +219,10 @@ export const findComponentBySourceStrings = async <TResult = JSX.BD.FC>(...keywo
 };
 
 export const findModuleById = (id: string | number, options?: SearchOptions<boolean>) => {
-  return BdApi.Webpack.getModule((_, __, _id) => _id === id.toString(), options)
-}
+  return BdApi.Webpack.getModule((_, __, _id) => _id === id.toString(), options);
+};
 export function findUnpatchedModuleBySourceStrings(...keywords: string[]) {
-  const module = findBySourceStrings(...keywords);  
+  const module = findBySourceStrings(...keywords);
   if (!module) {
     Logger.log(`[findUnpatchedModuleBySourceStrings] Module not found for keywords: [${keywords.join(',')}]`);
     return undefined;
