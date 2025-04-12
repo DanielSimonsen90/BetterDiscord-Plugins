@@ -1,7 +1,7 @@
 import { React, useEffect, useMemo } from "@react";
 import { Timestamp, Tooltip } from "@discord/components";
 import { DiscordTimeFormat } from "@discord/types";
-import { getBirthdate } from "../constants";
+import { getBirthdate } from "../utils/constants";
 
 type Props = {
   birthdate: string;
@@ -13,7 +13,7 @@ type Props = {
   timestampStyle?: DiscordTimeFormat;
 };
 
-export default function Birthday(props: Props) {
+export function Birthday(props: Props) {
   const { birthdate } = props;
   const { hideTimestamp = false, hideIcon = false, timestampStyle = 'T' } = props;
 
@@ -21,7 +21,8 @@ export default function Birthday(props: Props) {
 
   const BirthdateContent = () => (
     <span className="birthdate">
-      <Timestamp format={timestampStyle} unix={birthdateDate.getTime() / 1000} />,
+      <Timestamp format={timestampStyle} unix={birthdateDate.getTime() / 1000} />
+      <span className="space">,</span>
       <Timestamp format="R" unix={birthdateDate.getTime() / 1000} />
     </span>
   )
@@ -38,3 +39,5 @@ export default function Birthday(props: Props) {
       : <BirthdateComponent />
   );
 }
+
+export default Birthday;

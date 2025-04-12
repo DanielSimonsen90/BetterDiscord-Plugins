@@ -1,13 +1,13 @@
 import { React } from '@react';
-import { Settings } from 'src/0DanhoLibrary/Settings';
 import Birthday from './Birthday';
 import { DiscordTimeFormat } from '@discord/types';
+import { Settings } from '../settings/Settings';
 
 type Props = {
   birthdate: string;
 }
 
-export default function BirthdayContainer({ birthdate }: Props) {
+export function BirthdayContainer({ birthdate }: Props) {
   const settings = Settings.useSelector(state => ({
     hideIcon: state.hideBirthdateIcon,
     hideTimestamp: state.hideBirthdateTimestamp,

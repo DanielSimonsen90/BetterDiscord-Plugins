@@ -1,21 +1,18 @@
 import CreateSettingsGroup from "../../_CreateSettingsGroup";
 import { DiscordEnhancements, DiscordEnhancementsTitles } from '../../../Settings';
 
-import BirthdateSettings from "./BirthdateSettings";
 import TimezoneSettings from "./TimezoneSettings";
 
 export default CreateSettingsGroup((React, props, Setting, { FormSection, FormDivider }) => {
   const AdditionalSettings = ({ setting }) => {
     switch (setting) {
       case 'showUserTimezone': return props.settings.showUserTimezone ? <TimezoneSettings {...props} /> : null;
-      case 'showUserBirthdate': return props.settings.showUserBirthdate ? <BirthdateSettings {...props} /> : null;
       default: return null;
     }
   };
 
   const ignoredSettings: Array<keyof typeof DiscordEnhancements> = [
     'hideTimezoneIcon', 'hideTimezoneTimestamp',
-    'hideBirthdateIcon', 'hideBirthdateTimestamp', 'birthdateTimestampStyle',
   ];
 
   return (<>

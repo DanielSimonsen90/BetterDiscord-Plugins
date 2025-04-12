@@ -1,4 +1,7 @@
-@use '../../../../../packages/danho-lib/src/styles/utils.scss' as *;
+@use '../../packages/danho-lib/src/styles/utils.scss' as *;
+@forward '../../packages/danho-lib/src/styles/PluginSettings.scss';
+@forward '../../packages/danho-lib/src/styles/Form.scss';
+@forward '../../packages/danho-lib/src/styles/components/User.scss';
 
 @include className('timestamp', 'span') {
   color: var(--text-primary);
@@ -30,4 +33,8 @@ div:has(>.birthday-child-icon) {
   top: -.3ch;
   right: -.5ch;
   font-size: 1.4ch;
+}
+
+.space {
+  margin-right: .5ch;
 }

@@ -114,6 +114,7 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
   }
   public set style(value: Partial<CSSStyleDeclaration>) {
     for (const key in value) {
+      if (!isNaN(Number(key))) continue; // skip numeric keys if any
       this.element.style[key] = value[key];
     }
   }
