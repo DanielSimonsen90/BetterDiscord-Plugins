@@ -1,11 +1,9 @@
 import * as DiumFinder from '@dium/api/finder';
-import * as BDFDB_Finder from './bdfdb';
 import * as Logger from './logger';
 import { Patcher } from '@dium/api';
 import { SearchOptions } from 'betterdiscord';
 
 export * from '@dium/api/finder';
-export * from './bdfdb';
 
 type CustomArgs = `backupId={number}` | `lazy=true` | `showMultiple=true`;
 type FindBySourceStringsArgs<CustomArg extends CustomArgs | CustomArgs[] | undefined> =
@@ -235,7 +233,6 @@ export function findUnpatchedModuleBySourceStrings(...keywords: string[]) {
 
 export const Finder = {
   ...DiumFinder,
-  ...BDFDB_Finder,
   findBySourceStrings,
   findComponentBySourceStrings,
   findModuleById,
