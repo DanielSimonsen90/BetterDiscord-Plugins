@@ -6,7 +6,7 @@ import subscribeToActions from "./actions";
 import patch from "./patches";
 import { Settings, SettingsPanel } from './settings';
 import loadStores, { LockedChannelsStore } from "./stores";
-import styles from './style.scss';
+import styles from './styles/index.scss';
 
 export default createPlugin({
 	start() {

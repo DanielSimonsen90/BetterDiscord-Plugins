@@ -1,0 +1,14 @@
+*[role=list][data-list-id*=roles] {
+  padding: 1rem;
+
+  &:has(.danho-colorful-roles__group-role) {
+    div:has([class*=expandButton]) {
+      flex: 1 1 50%;
+    }
+  }
+}
+
+.danho-colorful-roles__group-role {
+  flex: 1 1 100% !important;
+  margin-inline: -1rem;
+}

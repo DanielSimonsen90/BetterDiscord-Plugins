@@ -1,0 +1,25 @@
+.bdd-wrapper:has(#locked-channel-login) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  position: absolute;
+  inset: 0;
+  background-color: var(--primary-900);
+  height: 100%;
+  width: 100%;
+  z-index: 10;
+}
+
+#locked-channel-login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+div:has(> #locked-channel-login) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

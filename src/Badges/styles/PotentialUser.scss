@@ -1,0 +1,20 @@
+@use '../../../packages/danho-lib/src/styles/utils.scss' as *;
+
+.danho-user-badge-list {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: .25ch;
+
+  @include className('badge', img) {
+    --size: 20px;
+    width: var(--size);
+    height: var(--size);
+  }
+}
+
+.danho-discord-user:has(.danho-user-badge-list) {
+  .danho-discord-user__avatar {
+    --size: 3rem;
+  }
+}
