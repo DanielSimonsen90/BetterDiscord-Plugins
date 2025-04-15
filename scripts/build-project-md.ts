@@ -3,15 +3,17 @@ import fs from 'fs';
 import { Logger, ProjectInfo } from '../packages/danho-lib/src/Utils/Script';
 import { DanhoMeta } from '../packages/danho-lib/src/Injections/meta';
 
-const packagePath = path.resolve(__dirname, "../package.json");
+const rootPath = path.resolve(__dirname, "../");
+
+const packagePath = path.resolve(rootPath, "package.json");
 const projectPackage = JSON.parse(fs.readFileSync(packagePath, 'utf-8')) as ProjectInfo;
 
-const sourceFolder = path.resolve(__dirname, "../src");
-const readmePath = path.resolve(sourceFolder, "README.md");
+const sourceFolder = path.resolve(rootPath, "src");
+const readmePath = path.resolve(rootPath, "README.md");
 
 // Find .gitignore
-const gitignorePath = path.resolve(__dirname, "../.gitignore");
-const gitignore = fs.existsSync(gitignorePath) ? fs.readFileSync(gitignorePath, 'utf-8') : "";
+const gitignorePath = path.resolve(rootPath, ".gitignore");
+const gitignore = fs.existsSync(rootPath) ? fs.readFileSync(gitignorePath, 'utf-8') : "";
 
 // Collect those plugins ignored in .gitignore
 const ignoredPlugins = gitignore.replaceAll('\r', '')
