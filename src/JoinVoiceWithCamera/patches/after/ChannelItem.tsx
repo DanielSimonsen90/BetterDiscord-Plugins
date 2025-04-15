@@ -17,5 +17,5 @@ export default function afterChannelItem() {
       e.preventDefault();
       joinWithCamera(channel.id);
     });
-  })
+  }, { name: 'ChannelItem' })
 }

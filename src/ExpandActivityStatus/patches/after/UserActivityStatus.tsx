@@ -27,5 +27,5 @@ export default function afterUserActivityStatus() {
     } catch (err) {
       Logger.error(err, { result, props, title, artists });
     }
-  })
+  }, { name: 'UserAtivityStatus' })
 }

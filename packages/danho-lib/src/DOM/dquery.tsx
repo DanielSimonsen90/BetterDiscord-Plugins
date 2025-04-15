@@ -412,13 +412,15 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
   }
 
   public replaceWithComponent(component: JSX.Element): DQuery<El> {
-    BdApi.ReactDOM.render(component, this.element);
+    try {
+      BdApi.ReactDOM.render(component, this.element);
+    } catch {}
     return this;
   }
 
   public insertComponent(position: InsertPosition, component: JSX.Element): DQuery<El> {
     this.element.insertAdjacentElement(position, createElement("<></>"));
-    const wrapper = this.parent.children(".bdd-wrapper", true).element as HTMLElement;
+    const wrapper = this.parent.children("> .bdd-wrapper", true).element as HTMLElement;
 
     BdApi.ReactDOM.render(component, wrapper);
     return this;

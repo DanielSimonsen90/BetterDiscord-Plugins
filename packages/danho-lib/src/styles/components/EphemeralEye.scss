@@ -1,3 +1,7 @@
+*:has(> .ephemeral-eye) {
+  color: var(--interactive-normal);
+}
+
 .ephemeral-eye {
   --size: 16px;
   color: var(--text-muted);

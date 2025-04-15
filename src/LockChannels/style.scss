@@ -1,26 +1,27 @@
 @forward '../../packages/danho-lib/src/styles/index.scss';
+@forward '../../packages/danho-lib/src/styles/components/EphemeralEye.scss';
 
-.bdd-wrapper:has(#secret-channel-login) {
+.bdd-wrapper:has(#locked-channel-login) {
   display: flex;
   flex-direction: column;
   align-items: center;
   
   position: absolute;
   inset: 0;
-  background-color: var(--background-secondary);
+  background-color: var(--primary-900);
   height: 100%;
   width: 100%;
   z-index: 10;
 }
 
-#secret-channel-login {
+#locked-channel-login {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
 }
 
-div:has(> #secret-channel-login) {
+div:has(> #locked-channel-login) {
   display: flex;
   justify-content: center;
   align-items: center;

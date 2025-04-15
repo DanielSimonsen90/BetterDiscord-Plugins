@@ -1,6 +1,11 @@
 @use '../../packages/danho-lib/src/styles/utils.scss' as *;
 
 @forward '../../packages/danho-lib/src/styles/index.scss';
+@forward '../../packages/danho-lib/src/styles/PluginSettings.scss';
+@forward '../../packages/danho-lib/src/styles/Form.scss';
+
+@forward '../../packages/danho-lib/src/styles/components/SearchableList.scss';
+@forward '../../packages/danho-lib/src/styles/components/User.scss';
 
 .badge-context-option-container {
   display: flex;

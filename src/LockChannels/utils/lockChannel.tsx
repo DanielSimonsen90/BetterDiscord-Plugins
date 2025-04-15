@@ -19,21 +19,19 @@ export default async function lockChannel(channelId: Snowflake) {
 
   await wait(1);
 
-  const contentContainer = $(s => s.className('content').directChild().and.className('page'))
+  const contentContainer = $(s => s.className('content').directChild().and.className('page'));
   if (!contentContainer) return Logger.error(`Could not find content container`, {
     get contentContainer() {
-      return $(s => s.className('content').directChild().and.className('page'))
+      return $(s => s.className('content').directChild().and.className('page'));
     }
   });
 
   if (LockedChannelsStore.isLocked(channelId) && !document.getElementById(LOGIN_ID)) {
-    contentContainer.insertComponent('afterbegin', (
-      <Login onSubmit={password => {
-        const correct = LockedChannelsStore.login(channelId, password);
-        if (!correct) return false;
-        $(`#${LOGIN_ID}`).parent.unmount();
-        return true;
-      }} />
-    ))
+    contentContainer.prependComponent(<Login onSubmit={password => {
+      const correct = LockedChannelsStore.login(channelId, password);
+      if (!correct) return false;
+      $(`#${LOGIN_ID}`).parent.unmount();
+      return true;
+    }} />);
   }
 }

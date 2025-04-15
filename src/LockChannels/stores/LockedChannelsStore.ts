@@ -28,7 +28,7 @@ export type LockedChannelInfo = {
   channel: ReturnType<typeof ChannelStore.getChannel>;
 };
 
-export const LockedChannelsStore = new class LockedChannelsStore extends DiumStore<LockedChannelsState> {
+const LockedChannelsStore = new class LockedChannelsStore extends DiumStore<LockedChannelsState> {
   constructor() {
     super({
       channels: {},
@@ -181,4 +181,5 @@ export const LockedChannelsStore = new class LockedChannelsStore extends DiumSto
 
 DanhoStores.register(LockedChannelsStore);
 
+export { LockedChannelsStore };
 export default LockedChannelsStore;
