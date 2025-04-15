@@ -1,9 +1,9 @@
-import Finder from '@danho-lib/dium/api/finder';
-import { React } from '@dium/modules';
+import React, { CSSProperties, FunctionComponent, ReactNode, MouseEvent, KeyboardEvent, Ref } from '@react';
+import { Finder } from '@injections';
 
-enum ButtonLooks { BLANK, FILLED, INVERTED, LINK, OUTLINED }
-enum ButtonSizes { ICON, LARGE, MAX, MEDIUM, MIN, NONE, SMALL, TINY, XLARGE }
-enum Colors { BLACK, BRAND, BRAND_NEW, GREEN, LINK, PRIMARY, RED, TRANSPARENT, WHITE, YELLOW }
+enum ButtonLooks { BLANK, FILLED, LINK, OUTLINED }
+enum ButtonSizes { ICON, LARGE, MAX, MEDIUM, MIN, NONE, SMALL, TINY }
+enum Colors { BRAND, BRAND_INVERTED, CUSTOM, GREEN, LINK, PRIMARY, RED, TRANSPARENT, WHITE }
 
 type ButtonProps = {
     look?: ButtonLooks;
@@ -16,28 +16,28 @@ type ButtonProps = {
     disabled?: boolean;
     submitting?: boolean;
     type?: string;
-    style?: React.CSSProperties;
+    style?: CSSProperties;
     wrapperClassName?: string;
     className?: string;
     innerClassName?: string;
-    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-    onDoubleClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-    onMouseDown?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-    onMouseUp?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-    onMouseEnter?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-    onKeyDown?: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
-    children?: React.ReactNode;
+    onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
+    onDoubleClick?: (e: MouseEvent<HTMLButtonElement>) => void;
+    onMouseDown?: (e: MouseEvent<HTMLButtonElement>) => void;
+    onMouseUp?: (e: MouseEvent<HTMLButtonElement>) => void;
+    onMouseEnter?: (e: MouseEvent<HTMLButtonElement>) => void;
+    onKeyDown?: (e: KeyboardEvent<HTMLButtonElement>) => void;
+    children?: ReactNode;
     rel?: string;
-    buttonRef?: React.Ref<HTMLButtonElement>;
+    buttonRef?: Ref<HTMLButtonElement>;
     focusProps?: any;
     "aria-label"?: string;
-}
+};
 
-export interface ButtonComponent extends React.FunctionComponent<ButtonProps> {
-    BorderColors: Record<keyof typeof Colors, Colors>
+export interface ButtonComponent extends FunctionComponent<ButtonProps> {
+    BorderColors: Record<keyof typeof Colors, Colors>;
     Colors: Record<keyof typeof Colors, Colors>;
     Hovers: Record<keyof typeof ButtonLooks, ButtonLooks>;
-    Link: React.FunctionComponent<{
+    Link: FunctionComponent<{
         look?: ButtonLooks;
         color?: Colors;
         borderColor?: Colors;
@@ -45,13 +45,13 @@ export interface ButtonComponent extends React.FunctionComponent<ButtonProps> {
         size?: ButtonSizes;
         fullWidth?: boolean;
         grow?: boolean;
-        style?: React.CSSProperties;
+        style?: CSSProperties;
         className?: string;
         innerClassName?: string;
-        onClick?: (e: React.MouseEvent) => void;
-        onMouseDown?: (e: React.MouseEvent) => void;
-        onMouseUp?: (e: React.MouseEvent) => void;
-        children?: React.ReactNode;
+        onClick?: (e: MouseEvent) => void;
+        onMouseDown?: (e: MouseEvent) => void;
+        onMouseUp?: (e: MouseEvent) => void;
+        children?: ReactNode;
         rel?: string;
     }>;
     Looks: Record<keyof typeof ButtonLooks, ButtonLooks>;
@@ -59,7 +59,7 @@ export interface ButtonComponent extends React.FunctionComponent<ButtonProps> {
 }
 
 // export const Button: ButtonComponent = Finder.byKeys(["Button"]).Button;
-export const Button: ButtonComponent = Finder.findBySourceStrings("FILLED", "BRAND", "MEDIUM", "button", "buttonRef");
+export const Button: ButtonComponent = Finder.bySourceStrings("FILLED", "BRAND", "MEDIUM", "button", "buttonRef");
 export default Button;
 
 export const SuccessButton = (props: ButtonProps) => <Button {...props} color={Button.Colors.GREEN} look={Button.Looks.FILLED} data-type="success" />;

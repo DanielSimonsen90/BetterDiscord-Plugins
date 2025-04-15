@@ -1,18 +1,19 @@
-import Finder from "@danho-lib/dium/api/finder";
-import { Logger } from "@danho-lib/dium/api/logger";
+import { Finder } from '@dium/api'; // This finder because of circular dependencies
+import { createLogger } from '../Injections/logger'
 
-export function pick<From, Properties extends keyof From>(from: From, ...properties: Properties[]): Pick<From, Properties> {
+function pick<From, Properties extends keyof From>(from: From, ...properties: Properties[]): Pick<From, Properties> {
   if (!from) throw new Error("Cannot pick from undefined!");
 
   return properties.reduce((acc, prop) => {
     // if (!from.hasOwnProperty(prop)) throw new Error(`Cannot pick property ${prop} from ${from}!`);
 
     acc[prop] = from[prop];
+    if (acc[prop] === undefined) delete acc[prop];
     return acc;
   }, {} as Pick<From, Properties>);
 }
 
-export function exclude<From, Properties extends keyof From>(from: From, ...properties: Properties[]): Omit<From, Properties> {
+function exclude<From, Properties extends keyof From>(from: From, ...properties: Properties[]): Omit<From, Properties> {
   if (!from) return from;
 
   return Object.keys(from).reduce((acc, key) => {
@@ -21,7 +22,7 @@ export function exclude<From, Properties extends keyof From>(from: From, ...prop
   }, {} as Omit<From, Properties>);
 }
 
-export function difference<T extends object>(source: T, target: T, exclude?: Array<keyof T>): Partial<T> {
+function difference<T extends object>(source: T, target: T, exclude?: Array<keyof T>): Partial<T> {
   const diffKeys = new Set([...Object.keys(source), ...Object.keys(target)]);
   exclude?.forEach(key => diffKeys.delete(key as any));
 
@@ -37,7 +38,7 @@ type Combinable<T extends Record<string, any>> = {
   [key in keyof T]?: T[key] extends Record<string, any> ? Combinable<T[key]> : T[key];
 };
 
-export function combine<T extends Record<string, any | undefined>>(...objects: Array<Combinable<T> | undefined>): T {
+function combine<T extends Record<string, any | undefined>>(...objects: Array<Combinable<T> | undefined>): T {
   return objects.reduce((acc: T, obj) => {
     if (!obj) return acc;
 
@@ -52,14 +53,17 @@ export function combine<T extends Record<string, any | undefined>>(...objects: A
   }, {} as T) as T;
 }
 
-export function combineModules<T extends Record<string, any | undefined>>(...modules: Array<Array<string>>): T {
+function combineModules<T extends Record<string, any | undefined>>(...modules: Array<Array<string>>): T {
+  const Logger = createLogger('ObjectUtils.combineModules');
   return modules.reduce((combined, sourceStrings) => {
     const module = Finder.byKeys(sourceStrings);
     if (!module) {
-      Logger.warn(`[ObjectUtils.combineModules] Module not found for source strings: ${sourceStrings.join(', ')}`);
+      Logger.warn(`Module not found for source strings: ${sourceStrings.join(', ')}`);
       return combined;
     }
 
+    if (typeof module !== 'object') throw new Error(`Module is not an object: ${module}`);
+    
     for (const key in module) {
       let prop = key;
       if (key in combined) {
@@ -79,7 +83,7 @@ export function combineModules<T extends Record<string, any | undefined>>(...mod
   }, {}) as T;
 }
 
-export function isEqual<T>(a: T, b: T): boolean {
+function isEqual<T>(a: T, b: T): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 

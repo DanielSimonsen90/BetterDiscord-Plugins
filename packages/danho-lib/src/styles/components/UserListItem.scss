@@ -1,0 +1,33 @@
+@use '../partials.scss';
+
+.danho-discord-user {
+  display: flex;
+  align-items: center;
+  gap: 1ch;
+  margin: .5rem 0;
+
+  &__avatar {
+    --size: 2.5rem;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    // overflow: hidden;
+    object-fit: cover;
+    aspect-ratio: 1/1;
+  }
+
+  &__user-info {
+    display: grid;
+  }
+
+  &__displayName {
+    @extend %text-ellipsis;
+    text-align: left;
+  }
+
+  &__username {
+    @extend %text-ellipsis;
+    text-align: left;
+    color: var(--text-normal);
+  }
+}

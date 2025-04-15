@@ -1,4 +1,4 @@
-import Finder from "@danho-lib/dium/api/finder";
+import { Finder } from '@injections';
 
 export const NotificationBadge: React.FC<{
   count: number;
@@ -7,5 +7,5 @@ export const NotificationBadge: React.FC<{
   shape?: string;
   className?: string;
   style?: React.CSSProperties;
-}> = Finder.findBySourceStrings('STATUS_DANGER', "numberBadge");
+}> = Finder.bySourceStrings('STATUS_DANGER', "numberBadge");
 export default NotificationBadge;

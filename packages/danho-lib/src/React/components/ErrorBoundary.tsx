@@ -1,6 +1,5 @@
-// ErrorBoundary
-import { Logger } from '@danho-lib/dium/api/logger';
-import { React, Component, ErrorInfo } from '../React';
+import { createLogger } from '../../Injections/logger';
+import React, { Component, ErrorInfo } from '../React';
 import { Text } from '@dium/components';
 
 type ErrorBoundaryProps = {
@@ -10,6 +9,8 @@ type ErrorBoundaryProps = {
 type ErrorBoundaryState = {
   error: Error | null;
 };
+
+const Logger = createLogger('ErrorBoundary');
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
@@ -22,7 +23,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    Logger.error('ErrorBoundary caught an error', { error, errorInfo });
+    Logger.error({ error, errorInfo });
   }
 
   render() {

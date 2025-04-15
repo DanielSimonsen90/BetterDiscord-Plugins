@@ -3,15 +3,14 @@ import {
   createElement, 
   addEventListener, removeAllEventListeners, 
   injectElement, removeAllInjections 
-} from "@danho-lib/DOM";
+} from "@dom";
 
-import { WPMCountId, ChatFormSelector, ChatSubmitButton } from "./Selectors";
-import { activelyTyping, didSubmit, resetProperties, typingEndTime, typingStartTime, wpm } from "./properties";
-import { getOnKeyDown, getOnKeyUp, getOnSubmitButtonClicked } from "./events";
+import { WPMCountId, ChatFormSelector, ChatSubmitButton } from "./utils/Selectors";
+import { activelyTyping, didSubmit, resetProperties, typingEndTime, typingStartTime, wpm } from "./utils/properties";
+import { getOnKeyDown, getOnKeyUp, getOnSubmitButtonClicked } from "./utils/events";
 
-import { Settings } from './settings';
+import { Settings, SettingsPanel } from './settings';
 import styles from './styles/index.scss';
-import SettingsPanel from "./SettingsPanel";
 
 async function initChatForm(chatForm: HTMLElement) {
   if (!chatForm) return;

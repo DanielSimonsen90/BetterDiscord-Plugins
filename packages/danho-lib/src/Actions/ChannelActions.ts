@@ -1,5 +1,5 @@
 import { Snowflake } from "@discord/types/base";
-import { Finder } from "@dium/api";
+import Finder from "../Injections/finder";
 
 type ChannelActions = {
   disconnect(): void;
@@ -15,5 +15,5 @@ type ChannelActions = {
   selectVoiceChannel(channelId: Snowflake): void;
 }
 
-export const ChannelActions: ChannelActions = Finder.byKeys(["selectChannel"]);
+export const ChannelActions = Finder.byKeys<ChannelActions>(["selectChannel"]);
 export default ChannelActions;

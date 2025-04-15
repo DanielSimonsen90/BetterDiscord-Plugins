@@ -1,0 +1,6 @@
+{
+  "name": "visual-refresh-fixes",
+  "version": "1.0.0",
+  "author": "danhosaur",
+  "description": "Fix some of the visual-refresh issues like:\n- Uneven channelTextArea with UserArea panel\n- Guild icons not being completely round\n- Discord navigations like friends, nitro and store taking up unnecessary amount of space compared to direct messages\n- Buttons being too rounded\n\nAll of these \"issues\" can be managed by the plugin settings."
+}

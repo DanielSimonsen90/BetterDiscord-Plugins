@@ -455,7 +455,7 @@ const Logger = {
     debugLog,
 };
 
-function findBySourceStrings(...keywords) {
+function bySourceStrings(...keywords) {
     const searchOptions = keywords.find(k => typeof k === 'object');
     if (searchOptions)
         keywords.splice(keywords.indexOf(searchOptions), 1);
@@ -465,19 +465,19 @@ function findBySourceStrings(...keywords) {
     if (backupIdKeywordIndex > -1)
         keywords.splice(backupIdKeywordIndex, 1);
     if (backupId)
-        debugLog(`[findBySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
+        debugLog(`[bySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
     const showMultiple = keywords.find(k => k === 'showMultiple=true');
     const showMultipleIndex = keywords.indexOf(showMultiple);
     if (showMultipleIndex > -1)
         keywords.splice(showMultipleIndex, 1);
     if (showMultiple)
-        debugLog(`[findBySourceStrings] Showing multiple results - [${keywords.join(',')}]`, keywords);
+        debugLog(`[bySourceStrings] Showing multiple results - [${keywords.join(',')}]`, keywords);
     const lazy = keywords.find(k => k === 'lazy=true');
     const lazyIndex = keywords.indexOf(lazy);
     if (lazyIndex > -1)
         keywords.splice(lazyIndex, 1);
     if (lazy)
-        debugLog(`[findBySourceStrings] Using lazy search - [${keywords.join(',')}]`, keywords);
+        debugLog(`[bySourceStrings] Using lazy search - [${keywords.join(',')}]`, keywords);
     const _keywords = keywords;
     const moduleCallback = (exports, _, id) => {
         if (!exports || exports === window)
@@ -513,7 +513,7 @@ function findBySourceStrings(...keywords) {
             || eIsClassAsE
             || eIsObjectWithKeywords) : eIsFunctionAndHasKeywords;
         if ((filter && backupId && id !== backupId) || !filter && id === backupId)
-            debugWarn(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, {
+            debugWarn(`[bySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, {
                 exports,
                 internal: {
                     eIsFunctionAndHasKeywords,
@@ -546,7 +546,7 @@ function findBySourceStrings(...keywords) {
             ];
             if (err instanceof Error && expectedErrorMessages.some(message => err.message.includes(message)))
                 return undefined;
-            error(`[findBySourceStrings] Error in moduleCallback`, err);
+            error(`[bySourceStrings] Error in moduleCallback`, err);
         }
     };
     if (lazy)
@@ -554,10 +554,10 @@ function findBySourceStrings(...keywords) {
             signal: controller.signal,
             ...searchOptions
         }).then(module => {
-            debugLog(`[findBySourceStrings] Found lazy module for [${keywords.join(',')}]`, module);
+            debugLog(`[bySourceStrings] Found lazy module for [${keywords.join(',')}]`, module);
             return module;
         }).catch(err => {
-            error(`[findBySourceStrings] Error in lazy search`, err);
+            error(`[bySourceStrings] Error in lazy search`, err);
             return undefined;
         });
     const moduleSearchOptions = searchOptions ?? { searchExports: true };
@@ -605,7 +605,7 @@ const findModuleById = (id, options) => {
     return BdApi.Webpack.getModule((_, __, _id) => _id === id.toString(), options);
 };
 function findUnpatchedModuleBySourceStrings(...keywords) {
-    const module = findBySourceStrings(...keywords);
+    const module = bySourceStrings(...keywords);
     if (!module) {
         log(`[findUnpatchedModuleBySourceStrings] Module not found for keywords: [${keywords.join(',')}]`);
         return undefined;
@@ -617,7 +617,7 @@ function findUnpatchedModuleBySourceStrings(...keywords) {
 const Finder = {
     ...DiumFinder,
     ...BDFDB_Finder,
-    findBySourceStrings,
+    bySourceStrings,
     findComponentBySourceStrings,
     findModuleById,
     findUnpatchedModuleBySourceStrings,
@@ -638,7 +638,7 @@ const Finder$1 = {
     default: Finder,
     demangle,
     find: find$2,
-    findBySourceStrings,
+    bySourceStrings,
     findComponentBySourceStrings,
     findModuleById,
     findUnpatchedModuleBySourceStrings,
@@ -1478,7 +1478,7 @@ function containsClassInModule(className, module) {
     return Object.values(module).some((value) => value === className);
 }
 function findModuleWithMinimalKeys(className) {
-    const module = Finder.findBySourceStrings(className, { defaultExport: false });
+    const module = Finder.bySourceStrings(className, { defaultExport: false });
     if (!module) {
         warn(`Module not found for className: ${className}`);
         return null;
@@ -1516,28 +1516,28 @@ const createActionCallback = (action, callback) => {
     return callback;
 };
 
-const navigate = Finder.findBySourceStrings("transitionTo -", { defaultExport: false, searchExports: true });
-const navigateToGuild = Finder.findBySourceStrings("transitionToGuild -", { defaultExport: false, searchExports: true });
+const navigate = Finder.bySourceStrings("transitionTo -", { defaultExport: false, searchExports: true });
+const navigateToGuild = Finder.bySourceStrings("transitionToGuild -", { defaultExport: false, searchExports: true });
 const AppActions = {
     navigate,
     navigateToGuild,
 };
 
-const ApplicationActions = Finder.findBySourceStrings("fetchApplications", "createApplication");
+const ApplicationActions = Finder.bySourceStrings("fetchApplications", "createApplication");
 
 const ChannelActions = byKeys(["selectChannel"]);
 
 const MessageActions = byKeys(["sendMessage"]);
 
-const PermissionActions = Finder.findBySourceStrings("addRecipient", "clearPermissionOverwrite", "updatePermissionOverwrite", "backupId=493683");
+const PermissionActions = Finder.bySourceStrings("addRecipient", "clearPermissionOverwrite", "updatePermissionOverwrite", "backupId=493683");
 
-const dispatch = Finder.findBySourceStrings('getStatus()', 'updateAsync("status",');
+const dispatch = Finder.bySourceStrings('getStatus()', 'updateAsync("status",');
 const UserStatusActions = {
     dispatch,
 };
 
-const InternalVoiceActions = Finder.findBySourceStrings("setVideoEnabled", "setVideoDevice");
-const handleVoiceConnect = Finder.findBySourceStrings("handleVoiceConnect");
+const InternalVoiceActions = Finder.bySourceStrings("setVideoEnabled", "setVideoDevice");
+const handleVoiceConnect = Finder.bySourceStrings("handleVoiceConnect");
 const ChannelSettingsActions = Finder.byKeys(["open", "saveChannel", "updateVoiceChannelStatus"]);
 const StageChannelActions = Finder.byKeys(["updateChatOpen"]);
 const VoiceActions = Object.assign({}, InternalVoiceActions, ChannelSettingsActions, StageChannelActions, {
@@ -1705,7 +1705,7 @@ const UserUtils = {
     },
 };
 
-const useGuildFeatures = Finder.findBySourceStrings("hasFeature", "GUILD_SCHEDULED_EVENTS");
+const useGuildFeatures = Finder.bySourceStrings("hasFeature", "GUILD_SCHEDULED_EVENTS");
 const GuildUtils = {
     ...GuildStore,
     ...GuildMemberStore,
@@ -2687,18 +2687,18 @@ var Colors$1;
     Colors[Colors["WHITE"] = 8] = "WHITE";
     Colors[Colors["YELLOW"] = 9] = "YELLOW";
 })(Colors$1 || (Colors$1 = {}));
-const Button = Finder.findBySourceStrings("FILLED", "BRAND", "MEDIUM", "button", "buttonRef");
+const Button = Finder.bySourceStrings("FILLED", "BRAND", "MEDIUM", "button", "buttonRef");
 
-const GlobalNavigation = Finder.findBySourceStrings("ConnectedPrivateChannelsList", { defualtExport: false });
+const GlobalNavigation = Finder.bySourceStrings("ConnectedPrivateChannelsList", { defualtExport: false });
 
-const NotificationBadge = Finder.findBySourceStrings('STATUS_DANGER', "numberBadge");
+const NotificationBadge = Finder.bySourceStrings('STATUS_DANGER', "numberBadge");
 
 const ScrollerLooks = Finder.byKeys(['thin', 'fade']);
-const ScrollerWrapper = Finder.findBySourceStrings("paddingFix", "getScrollerState");
+const ScrollerWrapper = Finder.bySourceStrings("paddingFix", "getScrollerState");
 ScrollerWrapper();
 
-const getNode = Finder.findBySourceStrings("timestamp", "format", "parsed", "full", { searchExports: true });
-const Timestamp = Finder.findBySourceStrings(".timestampTooltip", { defaultExport: false, }).Z;
+const getNode = Finder.bySourceStrings("timestamp", "format", "parsed", "full", { searchExports: true });
+const Timestamp = Finder.bySourceStrings(".timestampTooltip", { defaultExport: false, }).Z;
 function TimestampComponent({ unix, format }) {
     const node = getNode(unix, format);
     const BadTimestamp = React.createElement("p", null, new Date(unix * 1000).toLocaleString());
@@ -2733,7 +2733,7 @@ var Positions;
 const TooltipModule = BdApi.Components.Tooltip;
 const Tooltip = TooltipModule;
 
-const BadgeList = Finder.findBySourceStrings("badges", "badgeClassName", "displayProfile", "QUEST_CONTENT_VIEWED", { defaultExport: false });
+const BadgeList = Finder.bySourceStrings("badges", "badgeClassName", "displayProfile", "QUEST_CONTENT_VIEWED", { defaultExport: false });
 var BadgeTypes;
 (function (BadgeTypes) {
     BadgeTypes["NITRO_ANY"] = "premium";
@@ -3824,7 +3824,7 @@ const style$5 = ".tab-bar--private-channels {\n  --padding: 0ch;\n  padding-righ
 function Feature$a() {
     if (!Settings.current.directAndGroupTabs)
         return;
-    const module = Finder.findBySourceStrings('ConnectedPrivateChannelsList', { defaultExport: false });
+    const module = Finder.bySourceStrings('ConnectedPrivateChannelsList', { defaultExport: false });
     if (!module)
         return;
     after(module, 'Z', ({ result }) => {
@@ -3841,7 +3841,7 @@ const DirectAndGroupTabs = {
 };
 
 function Feature$9() {
-    const relativeTimeModule = Finder.findBySourceStrings('"R"!==e.format', { defaultExport: false });
+    const relativeTimeModule = Finder.bySourceStrings('"R"!==e.format', { defaultExport: false });
     if (!relativeTimeModule)
         return false;
     after(relativeTimeModule, 'Z', ({ result, args: [args] }) => {
@@ -4193,7 +4193,7 @@ function Feature$8() {
         return;
     HiddenChannelStore.load();
     ScrollerStore.load();
-    const module = Finder.findBySourceStrings("GuildChannelList", { defaultExport: false });
+    const module = Finder.bySourceStrings("GuildChannelList", { defaultExport: false });
     after(module, 'E', ({ result, args: [props] }) => {
         after(result, 'type', ({ result, args: [props] }) => {
             const efParent = result.props.children.props.children;
@@ -4212,9 +4212,9 @@ const HideInactiveChannels = {
     styles: styles$2
 };
 
-const GuildHeader = Finder.findBySourceStrings("hasCommunityInfoSubheader()", "ANIMATED_BANNER", "header");
+const GuildHeader = Finder.bySourceStrings("hasCommunityInfoSubheader()", "ANIMATED_BANNER", "header");
 
-const MemberListItem = Finder.findBySourceStrings("ownerTooltipText", "onClickPremiumGuildIcon:", { defaultExport: false });
+const MemberListItem = Finder.bySourceStrings("ownerTooltipText", "onClickPremiumGuildIcon:", { defaultExport: false });
 
 function Feature$7() {
     if (!Settings.current.showGuildMembersInHeader)
@@ -4463,14 +4463,14 @@ const NonObnoxiousProfileEffects = {
     styles: style
 };
 
-const prettyRoles$1 = "*[role=list][data-list-id*=roles] > div div:has([class*=roleRemoveButton][role=button]),\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveButton][role=button],\n*[role=list][data-list-id*=roles] > div [class*=roleFlowerStar],\n*[role=list][data-list-id*=roles] > div [class*=roleCircle] {\n  position: absolute;\n  inset: 0;\n  z-index: 1;\n}\n\n*[role=list][data-list-id*=roles] {\n  padding: 1rem;\n}\n*[role=list][data-list-id*=roles]:has(.danho-library__pretty-roles__group-role) div:has([class*=expandButton]) {\n  flex: 1 1 50%;\n}\n\n*[role=list][data-list-id*=roles] > div {\n  --role-color--default: rgb(86, 105, 118);\n  --role-color: var(--role-color--default);\n  --role-color-alpha: .125;\n  position: relative;\n  border: 1px solid rgb(var(--role-color, --role-color--default));\n  background-color: rgba(var(--role-color, --role-color--default), var(--role-color-alpha));\n  border-radius: 0.25rem;\n  height: 25px;\n  box-sizing: border-box;\n  justify-content: center;\n}\n*[role=list][data-list-id*=roles] > div [class*=roleCircle],\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveIcon] {\n  height: 100%;\n  width: 100%;\n}\n*[role=list][data-list-id*=roles] > div span[class*=roleCircle] {\n  background-color: unset !important;\n}\n*[role=list][data-list-id*=roles] > div svg[class*=roleRemoveIcon] {\n  display: none;\n}\n*[role=list][data-list-id*=roles] > div div:has(svg[class*=linkIcon]) {\n  position: absolute;\n  top: -0.5rem;\n  left: -0.75rem;\n}\n*[role=list][data-list-id*=roles] > div:hover svg[class*=linkIcon] {\n  display: inline-block !important;\n}\n\n.danho-library__pretty-roles__group-role {\n  flex: 1 1 100% !important;\n  margin-inline: -1rem;\n}";
+const prettyRoles$1 = "*[role=list][data-list-id*=roles] > div div:has([class*=roleRemoveButton][role=button]),\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveButton][role=button],\n*[role=list][data-list-id*=roles] > div [class*=roleFlowerStar],\n*[role=list][data-list-id*=roles] > div [class*=roleCircle] {\n  position: absolute;\n  inset: 0;\n  z-index: 1;\n}\n\n*[role=list][data-list-id*=roles] {\n  padding: 1rem;\n}\n*[role=list][data-list-id*=roles]:has(.danho-colorful-roles__group-role) div:has([class*=expandButton]) {\n  flex: 1 1 50%;\n}\n\n*[role=list][data-list-id*=roles] > div {\n  --role-color--default: rgb(86, 105, 118);\n  --role-color: var(--role-color--default);\n  --role-color-alpha: .125;\n  position: relative;\n  border: 1px solid rgb(var(--role-color, --role-color--default));\n  background-color: rgba(var(--role-color, --role-color--default), var(--role-color-alpha));\n  border-radius: 0.25rem;\n  height: 25px;\n  box-sizing: border-box;\n  justify-content: center;\n}\n*[role=list][data-list-id*=roles] > div [class*=roleCircle],\n*[role=list][data-list-id*=roles] > div [class*=roleRemoveIcon] {\n  height: 100%;\n  width: 100%;\n}\n*[role=list][data-list-id*=roles] > div span[class*=roleCircle] {\n  background-color: unset !important;\n}\n*[role=list][data-list-id*=roles] > div svg[class*=roleRemoveIcon] {\n  display: none;\n}\n*[role=list][data-list-id*=roles] > div div:has(svg[class*=linkIcon]) {\n  position: absolute;\n  top: -0.5rem;\n  left: -0.75rem;\n}\n*[role=list][data-list-id*=roles] > div:hover svg[class*=linkIcon] {\n  display: inline-block !important;\n}\n\n.danho-colorful-roles__group-role {\n  flex: 1 1 100% !important;\n  margin-inline: -1rem;\n}";
 
 const PrettyRoles = {
     __proto__: null,
     styles: prettyRoles$1
 };
 
-const PrivateChannelSidebarList = Finder.findBySourceStrings("PrivateChannels", "storeLink", { defaultExport: false });
+const PrivateChannelSidebarList = Finder.bySourceStrings("PrivateChannels", "storeLink", { defaultExport: false });
 
 const styles$1 = ".danho-ui-rework-fix div[class*=channelBottomBarArea] {\n  margin-top: 0.5rem;\n}\n.danho-ui-rework-fix div[class*=channelTextArea] {\n  --custom-chat-input-margin-bottom: 24px;\n}\n.danho-ui-rework-fix [data-list-id=guildsnav] *[class*=icon] {\n  border-radius: 50% !important;\n}\n.danho-ui-rework-fix [data-list-id=guildsnav] div[class*=selected] *[class*=icon] {\n  border-radius: 25% !important;\n  transition: border-radius 300ms;\n  transition-delay: 100ms;\n}\n.danho-ui-rework-fix .danho-nav-group {\n  display: grid;\n  grid-auto-flow: column;\n}\n.danho-ui-rework-fix .danho-nav-group:has([class*=interactive]:hover) > * {\n  margin-right: 1ch;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=interactive]:hover div[class*=content] {\n  display: block;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=interactive] a[class*=link]:not([class*=interactive]:hover a[class*=link]) {\n  padding-inline: 0;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] {\n  justify-content: center;\n  gap: 1ch;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] div[class*=avatar] {\n  margin-right: 0;\n}\n.danho-ui-rework-fix .danho-nav-group div[class*=avatarWithText] div[class*=content] {\n  display: none;\n}\n.danho-ui-rework-fix button[class*=button] {\n  border-radius: 3px;\n}\n\nhtml[class*=visual-refresh]:has(.danho-ui-rework-fix) {\n  --custom-channel-textarea-text-area-height: 2.75rem;\n  --custom-rtc-account-height: 2.5rem;\n}\nhtml[class*=visual-refresh]:has(.danho-ui-rework-fix) section[class*=panels] {\n  bottom: calc(var(--space-xs) * 1.5);\n}";
 
@@ -4617,7 +4617,7 @@ function onChannelSelect() {
     });
 }
 
-const RelationshipActions = Finder.findBySourceStrings("cancelFriendRequest", "addRelationship", "removeRelationship");
+const RelationshipActions = Finder.bySourceStrings("cancelFriendRequest", "addRelationship", "removeRelationship");
 
 const CancelFriendRequest = createActionCallback('RELATIONSHIP_ADD', ({ relationship }) => {
     const blockFolderNames = Settings.current.folderNames;
@@ -4688,7 +4688,7 @@ async function prettyRoles() {
         if (Settings.current.groupRoles) {
             const isGroupRole = role.name.toLowerCase().includes('roles');
             if (isGroupRole)
-                el.addClass('danho-library__pretty-roles__group-role');
+                el.addClass('danho-colorful-roles__group-role');
         }
     });
 }
@@ -4848,7 +4848,7 @@ function afterBadgeList() {
     }, { name: 'BadgeList' });
 }
 
-const ChannelItem = Finder.findBySourceStrings("tutorialId", "visible", "shouldShow", { defaultExport: false });
+const ChannelItem = Finder.bySourceStrings("tutorialId", "visible", "shouldShow", { defaultExport: false });
 
 const HOME_CHANNEL_ID = '1266581800428245094';
 
@@ -4875,7 +4875,7 @@ function afterChannelItem() {
     }, { name: 'ChannelItem' });
 }
 
-const CalendarIcon = Finder.findBySourceStrings("M7 1a1 1 0 0 1 1 1v.75c0");
+const CalendarIcon = Finder.bySourceStrings("M7 1a1 1 0 0 1 1 1v.75c0");
 
 const DanhoBirthdayCalendarKey = "danho-birthday-calendar";
 const BIRTHDAY_REGEX = /\d{1,2}\/\d{1,2}(\/(\d{4}|\d{2}))?/;
@@ -5040,7 +5040,7 @@ function afterMemberListItem() {
     }, { name: 'MemberListItem' });
 }
 
-const NameTag = Finder.findBySourceStrings(`nameAndDecorators`, `AvatarWithText`);
+const NameTag = Finder.bySourceStrings(`nameAndDecorators`, `AvatarWithText`);
 
 const applyBirthdayIconOnNameTag = createPatcherAfterCallback(({ result, args: [props] }) => {
     if (!props.avatar.props.src)
@@ -5219,7 +5219,7 @@ function afterRolesList$1() {
     });
 }
 
-const TextModule = Finder.findBySourceStrings('lineClamp', 'tabularNumbers', 'scaleFontToUserSetting');
+const TextModule = Finder.bySourceStrings('lineClamp', 'tabularNumbers', 'scaleFontToUserSetting');
 
 const transformTextIntoLinks = createPatcherAfterCallback(({ args: [props], result }) => {
     const { className, children: text } = props;
@@ -5241,7 +5241,7 @@ function afterTextModule() {
     }, { name: 'TextModule--Pronouns' });
 }
 
-const UserActivityStatus = Finder.findBySourceStrings("PresenceActivityStatus", "textVariant", { defaultExport: false });
+const UserActivityStatus = Finder.bySourceStrings("PresenceActivityStatus", "textVariant", { defaultExport: false });
 
 var ActivityIndexes;
 (function (ActivityIndexes) {

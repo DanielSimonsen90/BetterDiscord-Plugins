@@ -1,0 +1,6 @@
+{
+  "name": "expand-activity-status",
+  "version": "1.0.0",
+  "author": "danhosaur",
+  "description": "Expand \"Listening to Spotify\" statuses into the details of the song being listened to."
+}

@@ -1,7 +1,11 @@
-import { StringUtils } from '@danho-lib/Utils';
+import { ClassNamesUtils, StringUtils } from '@utils';
 import { useEffect } from '../React'
 
 type Callback = (event: MouseEvent) => void;
+
+const AppClassNames = ClassNamesUtils.combineModuleByKeys<(
+  'app'
+)>(['app', 'mobileApp'])
 
 export function useClickOutside(callback: Callback): string;
 export function useClickOutside(selector: string, callback: Callback): void;
@@ -13,7 +17,7 @@ export function useClickOutside(
   const clickId = StringUtils.generateRandomId();
   callback = callback || arg as Callback;
 
-  const handleClickOutside = (event: MouseEvent) => {
+  const onClickOutside = (event: MouseEvent) => {
     const selectedNode = (
       typeof arg === 'string' ? document.querySelector(arg) 
       : 'current' in arg ? arg.current
@@ -21,16 +25,20 @@ export function useClickOutside(
     );
     const target = event.target as Node;
 
-    if (selectedNode && !selectedNode.contains(target)) callback(event);
+    // Check appContainer incase context menu was used on element.
+    // If context menu was used, don't trigger callback.
+    const [appContainer] = document.getElementsByClassName(AppClassNames.app);
+
+    if (selectedNode && appContainer.contains(target) && !selectedNode.contains(target)) callback(event);
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside);
+    document.addEventListener('mousedown', onClickOutside);
+    document.addEventListener('touchstart', onClickOutside);
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('mousedown', onClickOutside);
+      document.removeEventListener('touchstart', onClickOutside);
     };
   }, [arg, callback]);
 

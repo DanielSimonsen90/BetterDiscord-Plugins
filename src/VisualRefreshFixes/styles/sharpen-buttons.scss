@@ -1,0 +1,9 @@
+@use '../../../packages/danho-lib/src/styles/utils.scss' as *;
+
+.danho-sharpen-buttons {
+  @include className('message') {
+    @include className('button', button) {
+      border-radius: 3px;
+    }
+  }
+}

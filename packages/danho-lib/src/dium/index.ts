@@ -1,1 +1,0 @@
-export * as dium from '@dium/index';

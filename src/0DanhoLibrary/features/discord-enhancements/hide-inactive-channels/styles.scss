@@ -1,6 +1,0 @@
-@use '../../../../../packages/danho-lib/src/styles/utils.scss' as *;
-
-.danho-guild-channels-list {
-  max-height: calc(100vh - 10rem);
-  overflow-y: auto;
-}

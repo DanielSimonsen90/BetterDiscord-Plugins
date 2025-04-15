@@ -1,5 +1,10 @@
 .searchable-list {
   display: grid;
+  gap: 1ch;
+
+  * {
+    box-sizing: border-box;
+  }
 
   &__input-container {
     display: flex;
@@ -15,8 +20,8 @@
     width: 100%;
     padding: .25rem .5rem;
 
-    border: 1px solid var(--primary-460);
-    background-color: var(--primary-500);
+    border: 1px solid var(--primary-660);
+    background-color: var(--primary-700);
     color: var(--text-normal);
     
     font-size: 1rem;
@@ -25,7 +30,7 @@
 
     &:focus {
       outline: none;
-      border-color: var(--primary-360);
+      border-color: var(--primary-560);
     }
   }
 
@@ -35,6 +40,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(var(--min), 1fr));
     gap: 1rem;
+    max-height: 20rem;
   }
 
   &__item {

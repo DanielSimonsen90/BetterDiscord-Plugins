@@ -1,12 +1,18 @@
-import { useEffect } from "../React";
+import { MutableRefObject, useEffect } from "../React";
 
-type Keys = 'Control' | 'Shift' | 'Alt' | string;
+type Keys = 'Control' | 'Shift' | 'Alt' | (string & {});
 
 type onKeybind = (e: KeyboardEvent) => void;
 
-export function useKeybind(keybinds: Array<Keys>, onKeybind: onKeybind) {
-  const [isCtrl, isShift, isAlt] = ['Control', 'Shift', 'Alt'].map(k => keybinds.includes(k));
-  const _keybinds = keybinds.filter(k => !['Control', 'Shift', 'Alt'].includes(k));
+export function useKeybind(keybinds: Array<Keys>, onKeybind: onKeybind): void;
+export function useKeybind(ref: MutableRefObject<HTMLElement>, keybinds: Array<Keys>, onKeybind: onKeybind): void;
+export function useKeybind() {
+  const ref: MutableRefObject<HTMLElement> = Array.isArray(arguments[0]) ? { current: window as any } : arguments[0];
+  const kebyinds : Array<Keys>= Array.isArray(arguments[0]) ? arguments[0] : arguments[1];
+  const onKeybind: onKeybind = Array.isArray(arguments[0]) ? arguments[1] : arguments[2];
+
+  const [isCtrl, isShift, isAlt] = ['Control', 'Shift', 'Alt'].map(k => kebyinds.includes(k));
+  const _keybinds = kebyinds.filter(k => !['Control', 'Shift', 'Alt'].includes(k));
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -18,7 +24,10 @@ export function useKeybind(keybinds: Array<Keys>, onKeybind: onKeybind) {
       onKeybind(e);
     };
 
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [keybinds, onKeybind]);
+    const target = ref?.current;
+    if (!target) return;
+
+    target.addEventListener('keydown', onKeyDown);
+    return () => target.removeEventListener('keydown', onKeyDown);
+  }, [ref, kebyinds, onKeybind]);
 }

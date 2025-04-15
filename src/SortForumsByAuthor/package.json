@@ -1,0 +1,6 @@
+{
+  "name": "sort-forums-by-author",
+  "version": "1.0.0",
+  "author": "danhosaur",
+  "description": "Adds option to sort Forum posts by author... because for some reason this isn't a standard option."
+}

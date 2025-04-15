@@ -1,0 +1,7 @@
+@use '../../../packages/danho-lib/src/styles/utils.scss' as *;
+
+.danho-give-last-message-space {
+  @include className('channelBottomBarArea') {
+    margin-top: .5rem;
+  }
+}

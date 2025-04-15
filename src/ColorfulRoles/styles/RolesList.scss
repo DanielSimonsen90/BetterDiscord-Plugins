@@ -1,0 +1,53 @@
+@use '../../../packages/danho-lib/src/styles/utils.scss' as *;
+
+%absolute-wide {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+*[role=list][data-list-id*=roles]>div {
+  // Assumed to be role
+  --role-color--default: rgb(86, 105, 118);
+  --role-color: var(--role-color--default); // This is replaced in "after RolesList" patch
+  --role-color-alpha: .125;
+
+  position: relative;
+  border: 1px solid rgb(var(--role-color, --role-color--default));
+  background-color: rgba(var(--role-color, --role-color--default), var(--role-color-alpha));
+  border-radius: .25rem;
+  height: 25px;
+  box-sizing: border-box;
+  justify-content: center;
+
+  div:has([class*=roleRemoveButton][role=button]),
+  [class*=roleRemoveButton][role=button],
+  [class*=roleFlowerStar],
+  [class*=roleCircle] {
+    @extend %absolute-wide;
+  }
+
+  [class*=roleCircle],
+  [class*=roleRemoveIcon] {
+    height: 100%;
+    width: 100%;
+  }
+
+  @include className('roleCircle', span) {
+    background-color: unset !important;
+  }
+
+  @include className('roleRemoveIcon', svg) {
+    display: none;
+  }
+
+  div:has(svg[class*=linkIcon]) {
+    position: absolute;
+    top: -.5rem;
+    left: -.75rem;
+  }
+
+  &:hover svg[class*=linkIcon] {
+    display: inline-block !important;
+  }
+}

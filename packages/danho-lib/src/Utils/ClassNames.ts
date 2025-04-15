@@ -1,6 +1,8 @@
-import { Logger } from "@dium";
-import { Finder } from '../dium/api/finder';
-import { combine } from "./Object";
+import { createLogger } from '../Injections/logger';
+import { Finder } from '../Injections/finder';
+import { ObjectUtils } from "./Object";
+
+const Logger = createLogger("ClassNamesUtils");
 
 type CombinedClassNamesModule<TKeys extends string> = Record<TKeys, string> & {
   getDuplicateKeys(): string[];
@@ -10,17 +12,17 @@ type CombinedClassNamesModule<TKeys extends string> = Record<TKeys, string> & {
 
 const indexDuplicate = (key: string, index: number) => `${key}--${index}` as const;
 
-export function combineModuleByKeys<TKeys extends string>(...modules: Array<Array<string>>): CombinedClassNamesModule<TKeys> {
+function combineModuleByKeys<TKeys extends string>(...modules: Array<Array<string>>): CombinedClassNamesModule<TKeys> {
   return modules.reduce((combined, sourceStrings) => {
-    const module = Finder.byKeys(sourceStrings);
+    const module = Finder.byKeys<Record<string, string>>(sourceStrings);
     return combineModules(combined, module);
   }, {}) as CombinedClassNamesModule<TKeys>;
 }
 
-export function combineModules<TKeys extends string>(...modules: Array<Record<string, string>>): CombinedClassNamesModule<TKeys> {
+function combineModules<TKeys extends string>(...modules: Array<Record<string, string>>): CombinedClassNamesModule<TKeys> {
   const record = modules.reduce((combined, module, index) => {
     if (!module) {
-      Logger.warn(`[ObjectUtils.combineModules] Module not found for index: ${index}`, modules);
+      Logger.warn(`[combineModules] Module not found for index: ${index}`, modules);
       return combined;
     }
 
@@ -33,7 +35,7 @@ export function combineModules<TKeys extends string>(...modules: Array<Record<st
       
       const element = module[key];
       if (typeof element === 'object' && !Array.isArray(element)) {
-        combined[prop] = combine(combined[prop], element) as any;
+        combined[prop] = ObjectUtils.combine(combined[prop], element) as any;
       } else if (element !== undefined && element !== null && element !== '') {
         combined[prop] = element;
       }
@@ -57,7 +59,7 @@ export function combineModules<TKeys extends string>(...modules: Array<Record<st
   return combined;
 }
 
-export function containsClassInModule(className: string, module: CombinedClassNamesModule<string>) {
+function containsClassInModule(className: string, module: CombinedClassNamesModule<string>) {
   return Object.values(module).some((value) => value === className);
 }
 
@@ -68,9 +70,9 @@ export function containsClassInModule(className: string, module: CombinedClassNa
  * @param className - The class name to search for (e.g., "disabled__07f91").
  * @returns The module object and the minimal array of keys to identify it.
  */
-export function findModuleWithMinimalKeys(className: string): { module: Record<string, string>; keys: string[] } | null {
+function findModuleWithMinimalKeys(className: string): { module: Record<string, string>; keys: string[] } | null {
   // Step 1: Find the module using the className
-  const module = Finder.findBySourceStrings<Record<string, string>>(className, { defaultExport: false });
+  const module = Finder.bySourceStrings<Record<string, string>>(className, { defaultExport: false });
   if (!module) {
     Logger.warn(`Module not found for className: ${className}`);
     return null;
@@ -83,7 +85,14 @@ export function findModuleWithMinimalKeys(className: string): { module: Record<s
     return null;
   }
 
-  // Step 3: Start with all keys and iteratively reduce them
+  // Step 3: Attempt if className's key is unique enough alone to identify the module
+  const classNameKey = Object.keys(module).find(key => module[key] === className);
+  const byClassNameKey = Finder.byKeys([classNameKey]);
+  
+  // If the module is found by the className key, return it as the only key
+  if (byClassNameKey === module) return { module, keys: [classNameKey] };
+  
+  // Step 4: Start with all keys and iteratively reduce them
   let minimalKeys = [...keys]; // Start with all keys
   for (const key of keys) {
     // Test if removing the current key still retrieves the same module
@@ -99,7 +108,7 @@ export function findModuleWithMinimalKeys(className: string): { module: Record<s
   return { module, keys: minimalKeys };
 }
 
-export const ColorClassNames: Record<(
+const ColorClassNames: Record<(
   `color${'Brand' | 'Danger' | 'Default' | 'Premium' | 'PremiumGradient' | 'Success'}`
 ), string> = Finder.byKeys(["colorDefault", "radioIcon"])
 
@@ -111,3 +120,5 @@ export const ClassNamesUtils = {
   findModuleWithMinimalKeys,
   ColorClassNames,
 };
+
+export default ClassNamesUtils;

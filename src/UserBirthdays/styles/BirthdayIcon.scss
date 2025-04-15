@@ -1,0 +1,9 @@
+@use '../../../packages/danho-lib/src/styles/utils.scss' as *;
+
+@include className('timestamp', 'span') {
+  color: var(--text-primary);
+}
+
+.space {
+  margin-right: .5ch;
+}

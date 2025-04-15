@@ -1,6 +1,6 @@
-import { Emoji, EmojiStore } from "@stores";
-import createPatcherCallback from "@danho-lib/Patcher/CreatePatcherCallback";
-import { Settings } from "../Settings";
+import { Emoji, EmojiStore } from "@discord/stores";
+import { createPatcherCallback } from "@injections";
+import { Settings } from "../settings/Settings";
 
 export const isFavorFavoriteFeatureEnabled = () => Settings.current.enableFavorFavoriteEmojis;
 

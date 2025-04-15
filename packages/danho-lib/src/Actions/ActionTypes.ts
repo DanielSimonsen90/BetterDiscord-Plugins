@@ -1,4 +1,4 @@
-import { MutualFriend, MutualGuild, VoiceStateUpdate } from "@stores";
+import { MutualFriend, MutualGuild, VoiceStateUpdate } from "@discord/stores";
 import { Snowflake, GuildMember, Message, User, Activity, UserStatus, ConnectedAccount, DisplayProfile, Role } from "@discord/types";
 import { UserProfileBadge } from "@discord/components";
 import { SpeakingFlags } from "@discord/types/channel/types";
@@ -9,7 +9,7 @@ type ActionProps = {
     guildId: Snowflake;
     jumpType?: undefined;
     messageId?: Snowflake | null;
-    preserveDrawerState: undefined;
+    preserveDrawerState?: undefined;
     source?: undefined;
   };
   GUILD_ROLE_UPDATE: {
@@ -75,6 +75,17 @@ type ActionProps = {
     userId: Snowflake;
     speakingFlags: SpeakingFlags
   };
+  USER_NOTE_LOAD_START: {
+    userId: Snowflake;
+  },
+  USER_NOTE_LOADED: {
+    userId: Snowflake;
+    note?: {
+      note: string;
+      note_user_id: Snowflake;
+      user_id: Snowflake;
+    };
+  },
   USER_PROFILE_FETCH_SUCCESS: {
     badges: Array<UserProfileBadge>;
     connected_accounts: Array<ConnectedAccount>
@@ -125,6 +136,7 @@ type ActionProps = {
 
 export type Actions = {
   [Key in keyof ActionProps]: [
-    action: ActionProps[Key] & { type: Key; }
+    // action: ActionProps[Key] & { type: Key; }
+    action: ActionProps[Key]
   ]
 };

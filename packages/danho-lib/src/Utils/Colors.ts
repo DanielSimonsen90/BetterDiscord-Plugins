@@ -1,8 +1,8 @@
-import Finder from "@danho-lib/dium/api/finder";
+import { Finder } from "../Injections/finder";
 
 export type RGB = [number, number, number];
 
-export function rgbToHex(rgb: RGB): string {
+function rgbToHex(rgb: RGB): string {
   const integer = (
     ((Math.round(rgb[0]) & 0xFF) << 16)
     + ((Math.round(rgb[1]) & 0xFF) << 8)
@@ -13,7 +13,7 @@ export function rgbToHex(rgb: RGB): string {
   return '000000'.substring(string.length) + string;
 }
 
-export function hexToRgb(hex: string): RGB {
+function hexToRgb(hex: string): RGB {
   if (!hex) return [0, 0, 0];
 
   const match = hex.match(/[a-f0-9]{6}|[a-f0-9]{3}/i);
@@ -31,7 +31,7 @@ export function hexToRgb(hex: string): RGB {
   return [r, g, b];
 }
 
-export const DiscordColors: Record<(
+const DiscordColors: Record<(
   | `${'BLACK' | 'BLUE' | 'BRAND' | 'GREEN' | 'ORANGE' | 'PRIMARY' | 'RED' | 'TEAL' | 'WHITE' | 'YELLOW'}${'' | `_${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}${0 | 3 | 6}0`}`
   | `${'BLUE' | 'BLUE__NEW' | 'BLURPLE' | 'GREEN' | 'GREEN_NEW' | 'NEUTRAL' | 'ORANGE_NEW' | 'PINK' | 'RED_NEW' | 'TEAL_NEW' | 'YELLOW_NEW'}_${`${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}${'' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}` | '100'}`
   | 'BUNGIE' | 'CRUNHYROLL' | 'EBAY' | 'EPIC_GAMES' | 'FACEBOOK' | 'GITHUB' | 'PAYPAL' | 'PLAYSTATION' | 'REDDIT' | 'RIOT_GAMES' | 'SAMSUNG' | 'SKYPE' | 'SPOTIFY' | 'STEAM' | 'TWITCH' | 'TWITCH_SECONDARY' | 'TWITTER' | 'XBOX' | 'YOUTUBE'
@@ -44,3 +44,5 @@ export const ColorUtils = {
   hexToRgb,
   DiscordColors,
 }
+
+export default ColorUtils;

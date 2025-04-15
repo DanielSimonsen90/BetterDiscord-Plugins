@@ -1,0 +1,14 @@
+.custom-badge-modify-container {
+  padding: .75em 0;
+  margin: 1em 0;
+  border: 1px solid var(--primary-500);
+  border-inline: none;
+
+  .searchable-list__items {
+    --min: 12rem;
+  }
+
+  .button-panel {
+    justify-content: end;
+  }
+}

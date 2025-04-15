@@ -1,0 +1,14 @@
+
+@forward '../../../packages/danho-lib/src/styles/index.scss';
+@forward '../../../packages/danho-lib/src/styles/PluginSettings.scss';
+@forward '../../../packages/danho-lib/src/styles/Form.scss';
+
+@forward '../../../packages/danho-lib/src/styles/components/Calendar.scss';
+@forward '../../../packages/danho-lib/src/styles/components/Modal.scss';
+@forward '../../../packages/danho-lib/src/styles/components/SearchableList.scss';
+@forward '../../../packages/danho-lib/src/styles/components/UserListItem.scss';
+
+@forward './BirthdayCalendarPage.scss';
+@forward './BirthdayChildIcon.scss';
+@forward './BirthdayIcon.scss';
+@forward './CalendarNavnItem.scss';

@@ -1,12 +1,12 @@
-export const SECOND = 1000;
-export const MINUTE = SECOND * 60;
-export const HOUR = MINUTE * 60;
-export const DAY = HOUR * 24;
-export const WEEK = DAY * 7;
-export const MONTH = DAY * 30;
-export const YEAR = DAY * 365;
+const SECOND = 1000;
+const MINUTE = SECOND * 60;
+const HOUR = MINUTE * 60;
+const DAY = HOUR * 24;
+const WEEK = DAY * 7;
+const MONTH = DAY * 30;
+const YEAR = DAY * 365;
 
-export function timeSpan(startTime: number, endTime: number, format: 'full' | 'short' | 'min' = 'full') {
+function timeSpan(startTime: number, endTime: number, format: 'full' | 'short' | 'min' = 'full') {
   const min = Math.min(startTime, endTime);
   const max = Math.max(startTime, endTime);
   const time = max - min;
@@ -42,7 +42,26 @@ export function timeSpan(startTime: number, endTime: number, format: 'full' | 's
   }
 }
 
-export function throttle<T>(callback: (...args: T[]) => void, delay: number) {
+function wait<T>(time: number): Promise<never>;
+function wait<T>(callback: (...args: any[]) => any, time: number): Promise<T>;
+function wait<T>(callbackOrTime: ((...args: any[]) => any) | number, time?: number) {
+  const callback = typeof callbackOrTime === 'function' ? callbackOrTime : (() => undefined);
+  time ??= callbackOrTime as number;
+
+  return new Promise<T>((resolve, reject) => {
+    try { setTimeout(() => resolve(callback()), time); }
+    catch (err) { reject(err); }
+  });
+}
+
+function getUnixTime(date: Date | string): number;
+function getUnixTime(timestamp: number): number;
+function getUnixTime(arg: Date | string | number): number {
+  const timestamp = typeof arg === 'number' ? arg : new Date(arg).getTime();
+  return Math.floor(timestamp / 1000);
+}
+
+function throttle<T>(callback: (...args: T[]) => void, delay: number) {
   let lastTime = 0;
   return function (...args: T[]) {
     const now = Date.now();
@@ -54,6 +73,9 @@ export function throttle<T>(callback: (...args: T[]) => void, delay: number) {
 }
 
 export const TimeUtils = {
-  timeSpan,
+  SECOND, MINUTE, HOUR, DAY, WEEK, MONTH, YEAR,
+  timeSpan, getUnixTime, wait,
   throttle,
 }
+
+export default TimeUtils;

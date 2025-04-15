@@ -5,7 +5,7 @@ export interface SelectOption<T> {
     value: T;
 }
 
-export interface SelectProps<T, O extends SelectOption<T>> {
+export interface SelectProps<T, O extends SelectOption<T> = SelectOption<T>> {
     options: O[];
     placeholder?: any;
     className?: string;

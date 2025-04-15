@@ -10,20 +10,32 @@
       "@discord/*": ["./packages/discord/*"],
 
       "@actions": ["./packages/danho-lib/src/Actions/index.js"],
-      "@actions/*": ["./packages/danho-lib/src/Actions/*"],
+      "@context-menus": ["./packages/danho-lib/src/ContextMenus/index.js"],
+      "@context-menus/*": ["./packages/danho-lib/src/ContextMenus/*"],
+      "@dom": ["./packages/danho-lib/src/DOM/index.js"],
+      
+      "@injections": ["./packages/danho-lib/src/Injections/index.js"],
+      "@injections/patched/*": ["./packages/danho-lib/src/Injections/patcher/modules/*"],
 
+      "@modals": ["./packages/danho-lib/src/Modals/index.js"],
+      
       "@react": ["./packages/danho-lib/src/React/index.js"],
-      "@components/*": ["./packages/danho-lib/src/React/components/*"],
       "@components": ["./packages/danho-lib/src/React/components/index.js"],
-      "@hooks/*": ["./packages/danho-lib/src/React/hooks/*"],
+      "@components/*": ["./packages/danho-lib/src/React/components/*"],
       "@hooks": ["./packages/danho-lib/src/React/hooks/index.js"],
+      "@hooks/*": ["./packages/danho-lib/src/React/hooks/*"],
 
       "@stores": ["./packages/danho-lib/src/Stores/index.js"],
       "@stores/*": ["./packages/danho-lib/src/Stores/*"],
 
+      "@utils": ["./packages/danho-lib/src/Utils/index.js"],
+      "@utils/*": ["./packages/danho-lib/src/Utils/*"],
+
+      "@danho-lib": ["./packages/danho-lib/src/index.js"],
+
       "@dium": ["./packages/dium/src/index.js"],
       "@dium/*": ["./packages/dium/src/*"],
-      "@danho-lib/*": ["./packages/danho-lib/src/*"],
+
     },
   }
 }

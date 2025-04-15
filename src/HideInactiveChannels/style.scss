@@ -1,0 +1,12 @@
+@use '../../packages/danho-lib/src/styles/utils.scss' as *;
+@forward '../../packages/danho-lib/src/styles/PluginSettings.scss';
+@forward '../../packages/danho-lib/src/styles/Form.scss';
+
+.danho-guild-channels-list {
+  max-height: calc(100vh - 10rem);
+  overflow-y: auto;
+}
+
+nav[class*=container] > div[class*=container][class*=clickable] {
+  z-index: 2;
+}

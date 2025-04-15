@@ -198,3 +198,5 @@ function formatStoreName(name: string): string {
     ? pascal
     : `${pascal}Store`;
 }
+
+export default DiumStore;

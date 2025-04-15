@@ -1,5 +1,5 @@
-import { React } from '../../React';
-import { UserStore } from "@stores";
+import React from '../../React';
+import { UserStore } from "@discord/stores";
 import { Snowflake } from "@discord/types";
 
 type Props = {

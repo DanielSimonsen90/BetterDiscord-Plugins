@@ -1,0 +1,17 @@
+@use '../../../packages/danho-lib/src/styles/utils.scss' as *;
+
+.danho-round-guild-icons {
+  [data-list-id=guildsnav] {
+    @include className('icon', '*') {
+      border-radius: 50% !important;
+    }
+
+    @include className('selected') {
+      @include className('icon', 'img') {
+        border-radius: 25% !important;
+        transition: border-radius 300ms;
+        transition-delay: 100ms;
+      }
+    }
+  }
+}

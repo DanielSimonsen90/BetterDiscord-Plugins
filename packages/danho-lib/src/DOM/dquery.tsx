@@ -3,7 +3,7 @@ import { Utils } from '@dium/index';
 import ElementSelector from './ElementSelector';
 import { If, PromisedReturn } from '../Utils/types';
 import { getFiber } from '@dium/utils';
-import { StringUtils } from '@danho-lib/Utils';
+import { StringUtils } from '@utils';
 
 type Fiber = any;
 
@@ -114,6 +114,7 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
   }
   public set style(value: Partial<CSSStyleDeclaration>) {
     for (const key in value) {
+      if (!isNaN(Number(key))) continue; // skip numeric keys if any
       this.element.style[key] = value[key];
     }
   }
@@ -182,8 +183,8 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     const children = this.children();
     return children[children.length - 1];
   }
-  public hasChildren() {
-    return this.element.children.length > 0;
+  public hasChildren<El extends HTMLElement = HTMLElement>(selector?: Selector<El>) {
+    return this.children(selector).length > 0
   }
 
   public grandChildren<
@@ -411,13 +412,15 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
   }
 
   public replaceWithComponent(component: JSX.Element): DQuery<El> {
-    BdApi.ReactDOM.render(component, this.element);
+    try {
+      BdApi.ReactDOM.render(component, this.element);
+    } catch {}
     return this;
   }
 
   public insertComponent(position: InsertPosition, component: JSX.Element): DQuery<El> {
     this.element.insertAdjacentElement(position, createElement("<></>"));
-    const wrapper = this.parent.children(".bdd-wrapper", true).element as HTMLElement;
+    const wrapper = this.parent.children("> .bdd-wrapper", true).element as HTMLElement;
 
     BdApi.ReactDOM.render(component, wrapper);
     return this;

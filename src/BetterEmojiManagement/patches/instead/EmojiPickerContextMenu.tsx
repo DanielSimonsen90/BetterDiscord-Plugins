@@ -1,4 +1,4 @@
-import PatchExpressionPicker from "@danho-lib/ContextMenus/ExpressionPickerItemOptions";
+import PatchExpressionPicker from "@context-menus/ExpressionPickerItemOptions";
 import { renderBanEmojiMenuItem, isBanFeatureEnabled } from "../../features/BanEmojis";
 
 export default function insteadEmojiPickerContextMenu() {

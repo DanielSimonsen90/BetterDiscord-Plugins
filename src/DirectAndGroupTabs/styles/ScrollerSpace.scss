@@ -1,0 +1,10 @@
+@use '../../../packages/danho-lib/src/styles/utils.scss' as *;
+
+@include className('privateChannels', nav) {
+  &:has(.danho-private-channel-list__space-enabler) {
+    @include className('scroller') {
+      --margin-addition: 1em;
+      margin-bottom: calc(var(--custom-app-panels-height, 0) + 8px + var(--margin-addition));
+    }
+  }
+}

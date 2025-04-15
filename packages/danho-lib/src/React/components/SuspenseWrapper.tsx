@@ -1,6 +1,8 @@
-import { Promiseable } from '@danho-lib/Utils/types';
+import { Promiseable } from '@utils/types';
 import { useEffect, useMemo, useState } from '../React';
-import { Logger } from '@danho-lib/dium/api/logger';
+import { createLogger } from '../../Injections/logger';
+
+const Logger = createLogger('SuspenseWrapper');
 
 type SuspenseWrapperProps = {
   defaultChild: JSX.Element | ((retry: () => void) => JSX.Element);
@@ -38,7 +40,7 @@ export function SuspenseWrapper({ defaultChild, render }: SuspenseWrapperProps) 
   try {
     return child;
   } catch (error) {
-    Logger.error('SuspenseWrapper error', { error, defaultChild, render });
+    Logger.error({ error, defaultChild, render });
     return initialChild;
   }
 }

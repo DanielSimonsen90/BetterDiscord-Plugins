@@ -1,0 +1,4 @@
+.danho-non-obnoxious-profile-effects [class*=profileEffects]:hover {
+  --opacity: 0.2;
+  opacity: var(--opacity);
+}

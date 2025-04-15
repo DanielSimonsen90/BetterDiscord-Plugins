@@ -1,4 +1,4 @@
-import Finder from "@danho-lib/dium/api/finder";
+import { Finder } from '@injections';
 import { Snowflake, User } from "@discord/types";
 
 export type RelationshipActions = {
@@ -25,4 +25,4 @@ type RelationshipThing = {
   captchaPayload: any;
 }
 
-export const RelationshipActions: RelationshipActions = Finder.findBySourceStrings("cancelFriendRequest", "addRelationship", "removeRelationship");
+export const RelationshipActions = Finder.bySourceStrings<RelationshipActions>("cancelFriendRequest", "addRelationship", "removeRelationship");

@@ -54,6 +54,7 @@ export type RenderedMenuItemWithGroup<id, label, groupName, action = (() => void
   group: groupName,
   id: id,
   label: label,
+  checked?: boolean
 }>
 
 export type RenderedMenuItemChildren<id, label, children> = JSX.BD.Rendered<{

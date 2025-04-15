@@ -1,0 +1,6 @@
+{
+  "name": "fix-relative-timestamps",
+  "version": "1.0.0",
+  "author": "danhosaur",
+  "description": "This plugin fixes wrongly rounded timestamps when using the RELATIVE format."
+}

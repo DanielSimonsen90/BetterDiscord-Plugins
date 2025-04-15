@@ -17,7 +17,7 @@ export function buildTextItem(id: string, label: string, action: () => void, pro
     ...props
   };
 }
-export function buildTextItemElement(id: string, label: string, action: () => void, props: Partial<ContextMenuItemProps> = {}): JSX.Element {
+export function buildTextItemElement(id: string, label: string, action: () => void, props: Partial<ContextMenuItemProps> = {}): JSX.Element | any {
   return BdApi.ContextMenu.buildItem(buildTextItem(id, label, action, props));
 }
 
@@ -42,13 +42,28 @@ export function buildCheckboxItem(id: string, label: React.ReactNode, checked: b
     id,
     label,
     checked,
-    action: () => action(!checked),
+    action: action as any,
     onClose: props.onClose ?? (() => { }),
     ...props
   };
 }
-export function buildCheckboxItemElement(id: string, label: React.ReactNode, checked: boolean, action: (checked: boolean) => void, props: Partial<ContextMenuItemProps> = {}): JSX.Element {
+export function buildCheckboxItemElement(id: string, label: React.ReactNode, checked: boolean, action: (checked: boolean) => void, props: Partial<ContextMenuItemProps> = {}): any {
   return BdApi.ContextMenu.buildItem(buildCheckboxItem(id, label, checked, action, props));
+}
+
+export function buildRadioItem(id: string, label: React.ReactNode, selected: boolean, action: (selected: boolean) => void, props: Partial<ContextMenuItemProps> = {}): ContextMenuItemProps {
+  return {
+    id,
+    label,
+    checked: selected,
+    type: 'radio',
+    action: action as any,
+    onClose: props.onClose ?? (() => { }),
+    ...props
+  }
+}
+export function buildRadioItemElement(id: string, label: React.ReactNode, selected: boolean, action: (selected: boolean) => void, props: Partial<ContextMenuItemProps> = {}): any {
+  return BdApi.ContextMenu.buildItem(buildRadioItem(id, label, selected, action, props));
 }
 
 export function buildGroup(items: Array<ContextMenuItemProps>): ContextMenuGroupProps {

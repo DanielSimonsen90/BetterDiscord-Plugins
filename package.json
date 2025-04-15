@@ -7,6 +7,8 @@
     "private": true,
     "scripts": {
         "build": "ts-node scripts/build.ts",
+        "build-md": "ts-node scripts/build-project-md.ts",
+        "create-plugin": "ts-node scripts/create-plugin.ts",
         
         "dev": "ts-node scripts/build.ts --dev --watch",
         "dev-once": "ts-node scripts/build.ts --dev",

@@ -1,6 +1,8 @@
 import {getMeta} from "../meta";
 
-const COLOR = "#3a71c1";
+// const COLOR = "#3a71c1";
+// https://colorffy.com/color-mixer?colors=3A70C2-FF5500
+const COLOR = "#e55f3a";
 
 /** Prints data to a custom output. */
 export const print = (output: (...data: any[]) => void, ...data: any[]): void => output(

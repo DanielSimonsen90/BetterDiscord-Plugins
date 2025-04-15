@@ -1,0 +1,6 @@
+{
+  "name": "lock-channels",
+  "version": "1.0.0",
+  "author": "danhosaur",
+  "description": "This plugin will lock your selected channels, so your snoopy friends, siblings, parents or partner won't look at the nsfw memes you're posting in general...\nOn a real note, this plugin will allow you to lock a channel behind your own password. Edit in settings or right click on the channel you wish to lock."
+}

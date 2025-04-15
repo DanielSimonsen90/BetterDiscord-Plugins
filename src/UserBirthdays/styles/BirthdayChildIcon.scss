@@ -1,0 +1,11 @@
+div:has(>.birthday-child-icon) {
+  position: relative;
+}
+
+.birthday-child-icon {
+  z-index: 1;
+  position: absolute;
+  top: -.3ch;
+  right: -.5ch;
+  font-size: 1.4ch;
+}

@@ -1,0 +1,11 @@
+@use '../../packages/danho-lib/src/styles/utils.scss' as *;
+
+.danho-expand-bio-again {
+  @include className('descriptionClamp') {
+    display: block !important;
+    max-height: unset !important;
+  }
+  @include className('viewFullBio', button) {
+    display: none !important;
+  }
+}
