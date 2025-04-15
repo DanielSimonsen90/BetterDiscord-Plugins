@@ -35,6 +35,7 @@
 
       "@dium": ["./packages/dium/src/index.js"],
       "@dium/*": ["./packages/dium/src/*"],
+
     },
   }
 }

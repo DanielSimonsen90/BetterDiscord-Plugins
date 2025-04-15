@@ -5,8 +5,8 @@
 @forward '../../../packages/danho-lib/src/styles/components/SearchableList.scss';
 @forward '../../../packages/danho-lib/src/styles/components/UserListItem.scss';
 
-@import './BadgeContextMenu.scss';
-@import './BadgeSettings.scss';
-@import './CustomBadgeModifyForm.scss';
-@import './PositionInput.scss';
-@import './PotentialUser.scss';
+@forward './BadgeContextMenu.scss';
+@forward './BadgeSettings.scss';
+@forward './CustomBadgeModifyForm.scss';
+@forward './PositionInput.scss';
+@forward './PotentialUser.scss';

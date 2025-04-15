@@ -1,19 +1,11 @@
 import { Meta } from "@dium";
 import path from "path";
 import fs from "fs";
-import chalk from "chalk";
 
-type ProjectInfo = {
-  repository: string;
-  bugs: string;
-}
+import { Logger, ProjectInfo } from '../packages/danho-lib/src/Utils/Script'
 
 const DanhoGithubUsername = "DanielSimonsen90";
 const ZerthoxGithubUsername = "Zerthox";
-
-const success = (msg: string) => console.log(chalk.green(msg));
-const warn = (msg: string) => console.warn(chalk.yellow(`Warn: ${msg}`));
-const error = (msg: string) => console.error(chalk.red(`Error: ${msg}`));
 
 export default function buildMd(inputPath: string, meta: Meta) {
   const readme = path.resolve(path.dirname(inputPath), "README.md");
@@ -25,9 +17,10 @@ export default function buildMd(inputPath: string, meta: Meta) {
   );
 
   let projectInfo: ProjectInfo | null = null;
-  if (!fs.existsSync(projectInfoPath)) error(`Project info file not found: ${projectInfoPath}`);
+  if (!fs.existsSync(projectInfoPath)) Logger.error(`Project info file not found: ${projectInfoPath}`);
   else projectInfo = JSON.parse(fs.readFileSync(projectInfoPath, 'utf-8'));
 
+  const readmeContent = fs.readFileSync(readme, 'utf-8');
   const md = [
     (projectInfo 
       ? `# [${meta.name} v${meta.version}](${projectInfo.repository}/dist/bd/${meta.name})` 
@@ -58,6 +51,8 @@ export default function buildMd(inputPath: string, meta: Meta) {
     )
   ].join('\n');
 
+  if (readmeContent === md) return; // No changes, skip
+
   fs.writeFileSync(readme, md, 'utf-8');
-  success(`Updated README.md for ${meta.name} v${meta.version} - ${readme}`);
+  Logger.success(`Updated README.md for ${meta.name} v${meta.version} - ${readme}`);
 }

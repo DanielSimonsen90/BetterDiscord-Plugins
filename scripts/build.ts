@@ -1,20 +1,19 @@
 import path from "path";
 import { readdirSync } from "fs";
 import minimist from "minimist";
-import chalk from "chalk";
+import { resolvePkg, readMetaFromPkg } from "bd-meta";
+
 import * as rollup from "rollup";
 import styleModules from "rollup-plugin-style-modules";
-import { resolvePkg, readMetaFromPkg } from "bd-meta";
 import bdMeta from "rollup-plugin-bd-meta";
 import bdWScript from "rollup-plugin-bd-wscript";
 import addMetaCode from "rollup-plugin-bd-meta-code";
 import rollupConfig from "../rollup.config";
-import { repository } from "../package.json";
-import buildMd from "./build-md";
 
-const success = (msg: string) => console.log(chalk.green(msg));
-const warn = (msg: string) => console.warn(chalk.yellow(`Warn: ${msg}`));
-const error = (msg: string) => console.error(chalk.red(`Error: ${msg}`));
+import { Logger } from '../packages/danho-lib/src/Utils/Script';
+import buildMd from "./build-plugin-md";
+import { repository } from "../package.json";
+
 
 // find sources
 const sourceFolder = path.resolve(__dirname, "../src");
@@ -33,14 +32,14 @@ if (args._.length === 0) {
     if (entry) {
       inputPaths.push(path.resolve(sourceFolder, entry.name));
     } else {
-      warn(`Unknown plugin "${name}"`);
+      Logger.warn(`Unknown plugin "${name}"`);
     }
   }
 }
 
 // check for inputs
 if (inputPaths.length === 0) {
-  error("No plugin inputs");
+  Logger.error("No plugin inputs");
   process.exit(1);
 }
 
@@ -85,7 +84,7 @@ async function build(inputPath: string, outputPath: string): Promise<void> {
   await bundle.write(config.output);
   
   buildMd(`${inputPath}/${meta.name}`, meta);
-  success(`Built ${meta.name} v${meta.version} to "${outputPath}"`);
+  Logger.success(`Built ${meta.name} v${meta.version} to "${outputPath}"`);
 
   await bundle.close();
 }
@@ -112,7 +111,7 @@ async function watch(inputPath: string, outputPath: string): Promise<void> {
   // close finished bundles
   watcher.on("event", (event) => {
     if (event.code === "BUNDLE_END") {
-      success(`Built ${meta.name} v${meta.version} to "${outputPath}" [${event.duration}ms]`);
+      Logger.success(`Built ${meta.name} v${meta.version} to "${outputPath}" [${event.duration}ms]`);
       event.result.close();
     }
   });

@@ -1,32 +1,11 @@
-import chalk from "chalk";
 import minimist from "minimist";
 import path from "path";
 import fs from 'fs';
 
-import { StringUtils } from "../packages/danho-lib/src/Utils/String";
-import { Arrayable } from "../packages/danho-lib/src/Utils/types";
+import { Logger, createMinimistBooleanArgs, hasMinimistBooleanArg, killIfTrue } from '../packages/danho-lib/src/Utils/Script'
 
-const success = (msg: string) => console.log(chalk.green(msg));
-const warn = (msg: string) => console.warn(chalk.yellow(`Warn: ${msg}`));
-const error = (msg: string) => console.error(chalk.red(`Error: ${msg}`));
-const killIfTrue = (condition: boolean, msg: string) => {
-  if (condition) {
-    error(msg);
-    process.exit(1);
-  }
-};
-const createMinimistBooleanArgs = (key: string, keyPlural: string) => [
-  `with${key.charAt(0).toUpperCase() + key.slice(1)}`,
-  `with-${key}`,
-  key
-].concat([
-  `with${keyPlural.charAt(0).toUpperCase() + keyPlural.slice(1)}`,
-  `with-${keyPlural}`,
-  keyPlural
-])
-const hasMinimistBooleanArg = (args: minimist.ParsedArgs, key: string, keyPlural: string) => {
-  return createMinimistBooleanArgs(key, keyPlural).some(arg => args[arg]);
-};
+import { StringUtils } from "@utils/String";
+import { Arrayable } from "@utils/types";
 
 type ValidFiles = {
   index: Arrayable<string>;
@@ -92,7 +71,7 @@ function writeFiles(directoryPath: string, files: Partial<ValidFiles>) {
     if (!fileContent) return;
 
     fs.writeFile(path.resolve(directoryPath, fileNameWithExtension), fileContent, { encoding: 'utf-8' }, (err) => {
-      if (err) error(`Error writing file ${path}: ${err}`);
+      if (err) Logger.error(`Error writing file ${path}: ${err}`);
     });
   });
 }
@@ -303,4 +282,4 @@ try {
   killIfTrue(true, `Error creating plugin folder: ${err}`);
 }
 
-success(`Plugin "${pluginName}" created successfully! - ${path.resolve(pluginFolder, 'index.tsx')}`);
+Logger.success(`Plugin "${pluginName}" created successfully! - ${path.resolve(pluginFolder, 'index.tsx')}`);

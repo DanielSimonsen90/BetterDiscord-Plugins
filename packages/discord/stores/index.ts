@@ -9,10 +9,10 @@ export * from './VoiceAndMediaStores';
 
 export const DiscordStores = (() => (
   Array.from(BdApi.Webpack
-    .getModules(m => m?._dispatchToken && m?.getName)
+    .getModules<Store>(m => m?._dispatchToken && m?.getName)
     .reduce<Map<string, Store>>((acc, store) => {
-      const storeName = store.constructor.displayName
-        ?? store.constructor.persistKey
+      const storeName = (store.constructor as any).displayName
+        ?? (store.constructor as any).persistKey
         ?? store.constructor.name
         ?? store.getName();
 

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { DanhoMeta } from '../../danho-lib/src/dium/meta';
+import { DanhoMeta } from '../../danho-lib/src/Injections/meta';
 
 export type Meta = DanhoMeta;
 

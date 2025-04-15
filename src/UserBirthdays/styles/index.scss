@@ -8,7 +8,7 @@
 @forward '../../../packages/danho-lib/src/styles/components/SearchableList.scss';
 @forward '../../../packages/danho-lib/src/styles/components/UserListItem.scss';
 
-@import './BirthdayCalendarPage.scss';
-@import './BirthdayChildIcon.scss';
-@import './BirthdayIcon.scss';
-@import './CalendarNavnItem.scss';
+@forward './BirthdayCalendarPage.scss';
+@forward './BirthdayChildIcon.scss';
+@forward './BirthdayIcon.scss';
+@forward './CalendarNavnItem.scss';
