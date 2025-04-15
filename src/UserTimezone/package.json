@@ -1,0 +1,6 @@
+{
+  "name": "user-timezone",
+  "version": "1.0.0",
+  "author": "danhosaur",
+  "description": "This plugin adds a simple timezone converter to a user's profile. Simply add [+1] or [-4] to a user's notes, and the current time will be displayed accordingly. This does not follow daylight savings, only simple mathematical calculations based on the hour-number in the square brackets."
+}

@@ -1,28 +1,16 @@
 import DanhoLibrary from '@danho-lib/index';
-import { Settings } from './Settings/Settings';
-import SettingsPanel from './Settings/Panel';
 
-import { Features, styles } from './features';
-import registerPatches from './patches';
-
+import { Settings, SettingsPanel } from './Settings';
 import { ActionsEmitter } from '@actions';
 
 export default DanhoLibrary({
   start() {
-    Features();
-    registerPatches();
 
-    test();
   },
   stop() {
     ActionsEmitter.removeAllListeners();
   },
 
-  styles,
   Settings,
   SettingsPanel,
 });
-
-function test() {
-
-}
