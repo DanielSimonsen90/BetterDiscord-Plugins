@@ -1,4 +1,4 @@
-import DanhoLibrary from '@danho-lib/index';
+import DanhoLibrary from '@danho-lib';
 
 import { Settings, SettingsPanel } from './Settings';
 import { ActionsEmitter } from '@actions';

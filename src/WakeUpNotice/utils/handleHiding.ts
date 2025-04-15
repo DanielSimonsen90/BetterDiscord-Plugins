@@ -1,9 +1,13 @@
 import { UserStatusActions } from "@actions";
-import { UserUtils } from "@danho-lib/Utils";
+import { UserUtils } from "@utils";
 
 import { Settings } from "../settings";
 
-export default function handleHiding() {
+export default function() {
+  setTimeout(handleHiding, 1000);
+}
+
+function handleHiding() {
   const status = UserUtils.me.status;
   const isHiding = status === 'invisible';
   const { isHidingOnPurpose } = Settings.current;

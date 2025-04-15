@@ -4,7 +4,7 @@ import {
   useCallback, useEffect, useMemo, useState 
 } from "../React";
 import { classNames } from "@dium/modules";
-import { Functionable } from "@danho-lib/Utils/types";
+import { Functionable } from "@utils/types";
 
 type Props<
   TTabKey extends string,

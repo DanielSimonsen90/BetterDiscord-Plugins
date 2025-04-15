@@ -1,6 +1,6 @@
+import { MediaEngineStore } from "@discord/stores";
 import { VoiceActions } from "@actions";
-import { MediaEngineStore } from "@stores";
-import { $ } from "@danho-lib/DOM";
+import { $ } from "@dom";
 
 export default function enableCamera() {
   const preferredWebcamId = MediaEngineStore.getVideoDeviceId();

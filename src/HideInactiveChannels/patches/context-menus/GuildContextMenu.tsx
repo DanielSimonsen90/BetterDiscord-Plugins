@@ -1,5 +1,5 @@
-import { buildCheckboxItemElement, PatchGuildContextMenu } from "@danho-lib/ContextMenus";
-import { ContextMenuUtils } from "@danho-lib/Utils";
+import { buildCheckboxItemElement, PatchGuildContextMenu } from "@context-menus";
+import { ContextMenuUtils } from "@utils";
 import HiddenChannelStore from "../../stores/HiddenChannelStore";
 
 export default function patchGuildContextMenu() {

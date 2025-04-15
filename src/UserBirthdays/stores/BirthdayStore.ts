@@ -1,11 +1,16 @@
 import { Dispatch, SetStateAction } from "@react";
-import { DanhoStores, UserStore, DiumStore, RelationshipStore } from "@stores";
+
+import { UserStore, RelationshipStore } from "@discord/stores";
 import { Snowflake, User } from "@discord/types";
+
 import { Logger } from "@dium";
-import { BIRTHDAY_REGEX, getBirthdate } from "../utils/constants";
-import { DateFormat, TimeUtils, UserUtils, wait } from "@danho-lib/Utils";
-import { Settings } from "../settings/Settings";
+
 import { UserNoteActions } from "@actions";
+import { DanhoStores, DiumStore } from "@stores";
+import { DateFormat, TimeUtils, UserUtils } from "@utils";
+
+import { BIRTHDAY_REGEX, getBirthdate } from "../utils/constants";
+import { Settings } from "../settings/Settings";
 
 type BirthdayStoreState = {
   birthdays: Record<Snowflake, string>;
@@ -175,7 +180,7 @@ const BirthdayStore = new class BirthdayStore extends DiumStore<BirthdayStoreSta
       const note = await UserNoteActions.getOrRequestNote(userId);
       if (note) this.getBirthdateFromNote(note, userId);
       else Logger.log(`No note found for ${displayName}`);
-      await wait(1000); // Prevent rate limiting
+      await TimeUtils.wait(1000); // Prevent rate limiting
     }
 
     Logger.log('Finished loading friendNotes');

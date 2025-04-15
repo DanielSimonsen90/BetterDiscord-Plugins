@@ -1,7 +1,7 @@
-import Finder from "@danho-lib/dium/api/finder";
+import Finder from "../Injections/finder";
 import { Snowflake } from "@discord/types";
 
-const InternalDiscordEndpoints: DiscordEndpoints = Finder.findBySourceStrings("ACCOUNT_NOTIFICATION_SETTINGS", "BADGE_ICON")
+const InternalDiscordEndpoints = Finder.bySourceStrings<DiscordEndpoints>("ACCOUNT_NOTIFICATION_SETTINGS", "BADGE_ICON")
 export const DiscordEndpoints = Object.assign({}, InternalDiscordEndpoints, {
   BADGE_ICON: (icon: string) => `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}${InternalDiscordEndpoints.BADGE_ICON(icon)}`,
 });

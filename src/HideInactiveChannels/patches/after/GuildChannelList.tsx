@@ -1,10 +1,10 @@
 import { React, Patcher } from "@dium";
-import Finder from "@danho-lib/dium/api/finder";
+import { Finder } from '@injections';
 import GuildList from "../../components/GuildList";
+import GuildChannelList from "@injections/patched/GuildChannelList";
 
 export default function afterGuildChannelList() {
-  const module = Finder.findBySourceStrings("GuildChannelList", { defaultExport: false });
-  Patcher.after(module, 'E', ({ result, args: [props] }) => {
+  Patcher.after(GuildChannelList, 'E', ({ result, args: [props] }) => {
     Patcher.after(result, 'type', ({ result, args: [props] }) => {
       const efParent = result.props.children.props.children;
       const efChild = result.props.children.props.children.props.children;

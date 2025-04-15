@@ -1,15 +1,15 @@
 import { MenuItem, MenuSeparator } from "@dium/components";
 import { React } from "@dium/modules";
 
-import { CustomEmoji, Emoji, EmojiStore } from "@stores";
-import createPatcherCallback, { createPatcherAfterCallback } from "@danho-lib/Patcher/CreatePatcherCallback";
-import { ExpressionPickerContextMenuFiber, ExpressionPickerContextMenuTargetProps } from "@danho-lib/ContextMenus/ExpressionPickerItemOptions";
-import { ExpressionPickerMenu } from "@danho-lib/Modals/ExpressionPicker";
-import { $ } from "@danho-lib/DOM";
+import { CustomEmoji, Emoji, EmojiStore } from "@discord/stores";
+import { createPatcherAfterCallback, createPatcherCallback } from "@injections";
+import { ExpressionPickerContextMenuFiber, ExpressionPickerContextMenuTargetProps } from "@context-menus/ExpressionPickerItemOptions";
+import { ExpressionPickerMenu } from "@modals";
+import { $ } from "@dom";
 
 import Bin from "@components/Icons/Bin";
 
-import { Settings } from "../Settings";
+import { Settings } from "../settings/Settings";
 
 const KNOWN_EXPRESSION_PICKER_CONTEXTMENU_ITEMS_COUNT = 2;
 

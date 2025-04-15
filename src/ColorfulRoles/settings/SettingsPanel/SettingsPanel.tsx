@@ -1,6 +1,7 @@
-import React, { Setting } from "@react";
+import React from "@react";
+import { Setting } from '@components'
+import { ColorUtils } from "@utils/Colors";
 import { Settings, titles } from "../Settings";
-import { hexToRgb, rgbToHex } from "@danho-lib/Utils/Colors";
 
 export default function SettingsPanel() {
 	const [settings, set] = Settings.useState();
@@ -13,8 +14,8 @@ export default function SettingsPanel() {
 	return (
 		<div className="danho-plugin-settings">
 			<Setting setting="defaultRoleColor" type="color" {...props}
-				formatValue={rgbString => "#" + rgbToHex(rgbString.split(',').map(Number) as [number, number, number])}
-				beforeChange={hex => hexToRgb(hex).join(',')}
+				formatValue={rgbString => "#" + ColorUtils.rgbToHex(rgbString.split(',').map(Number) as [number, number, number])}
+				beforeChange={hex => ColorUtils.hexToRgb(hex).join(',')}
 			/>
 			<Setting setting="groupRoles" {...props} />
 		</div>

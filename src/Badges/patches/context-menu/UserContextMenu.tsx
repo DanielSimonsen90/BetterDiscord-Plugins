@@ -1,15 +1,16 @@
 import { React } from '@react';
 import { BadgeId } from '@discord/components';
-import { UserProfileStore } from '@stores';
+import { UserProfileStore } from '@discord/stores';
 
 import {
   buildSubMenuElement,
   buildCheckboxItem, buildSubMenu, buildSeparator,
-  PatchUserContextMenu
-} from '@danho-lib/ContextMenus';
-import { Logger } from '@danho-lib/dium/api/logger';
-import { ContextMenuUtils, StringUtils, UrlUtils } from '@danho-lib/Utils';
-import { Unpatch } from '@danho-lib/ContextMenus/PatchTypes';
+  PatchUserContextMenu,
+} from '@context-menus';
+import { Unpatch } from '@context-menus/PatchTypes';
+
+import { Logger } from '@injections';
+import { ContextMenuUtils, StringUtils, UrlUtils } from '@utils';
 
 
 import { BadgeGroups, CustomBadgesStore, DiscordBadgeStore } from 'src/Badges/stores';

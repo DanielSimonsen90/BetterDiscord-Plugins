@@ -1,5 +1,5 @@
 import { createPlugin } from "@dium";
-import { $ } from "@danho-lib/DOM";
+import { $ } from "@dom";
 
 import patch from "./patches";
 import { Settings, SettingsPanel } from "./settings";

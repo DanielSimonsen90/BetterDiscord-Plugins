@@ -1,15 +1,16 @@
 import { React } from "@dium/modules";
-import Finder from "@danho-lib/dium/api/finder";
+import { createLogger, Finder } from '@injections';
 import { DiscordTimeFormat } from "@discord/types/time";
-import { Logger } from "@danho-lib/dium/api/logger";
 
-export const getNode = Finder.findBySourceStrings("timestamp", "format", "parsed", "full", { searchExports: true }) as (
+const Logger = createLogger("TimestampComponent");
+
+export const getNode = Finder.bySourceStrings<(
   unix: number,
   format: DiscordTimeFormat,
-) => object;
-export const Timestamp = Finder.findBySourceStrings(".timestampTooltip", { defaultExport: false, }).Z as React.FC<{
+) => object>("timestamp", "format", "parsed", "full", { searchExports: true });
+export const Timestamp = Finder.bySourceStrings<React.FC<{
   node: ReturnType<typeof getNode>;
-}>;
+}>, true>(".timestampTooltip", { module: true, }).Z;
 
 type Props = {
   unix: number;
@@ -25,6 +26,7 @@ type Props = {
    */
   format: DiscordTimeFormat;
 };
+
 export default function TimestampComponent({ unix, format }: Props) {
   if (isNaN(unix)) {
     Logger.error("TimestampComponent: Invalid unix timestamp", { unix, format });

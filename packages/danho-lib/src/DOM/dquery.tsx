@@ -3,7 +3,7 @@ import { Utils } from '@dium/index';
 import ElementSelector from './ElementSelector';
 import { If, PromisedReturn } from '../Utils/types';
 import { getFiber } from '@dium/utils';
-import { StringUtils } from '@danho-lib/Utils';
+import { StringUtils } from '@utils';
 
 type Fiber = any;
 

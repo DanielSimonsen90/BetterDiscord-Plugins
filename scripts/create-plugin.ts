@@ -30,7 +30,9 @@ const hasMinimistBooleanArg = (args: minimist.ParsedArgs, key: string, keyPlural
 
 type ValidFiles = {
   index: Arrayable<string>;
-  style: Arrayable<string>;
+  styles: Arrayable<string> | (() => {
+    index: ValidFiles['index'];
+  });
   package: Record<string, any>;
   readme: Arrayable<string>;
   settings: Arrayable<string> | (() => {
@@ -41,22 +43,27 @@ type ValidFiles = {
       SettingsPanel: Arrayable<string>;
     }),
   }),
-  patches: () => {
-    index: ValidFiles['index'];
-  };
+
   actions: () => {
     index: ValidFiles['index'];
     template: Arrayable<string>;
   },
+  components: () => {
+    index: ValidFiles['index'];
+  },
+  hooks: () => {
+    index: ValidFiles['index'];
+  },
+  patches: () => {
+    index: ValidFiles['index'];
+  };
   stores: () => {
     index: ValidFiles['index'];
     template: Arrayable<string>;
   };
-  components: () => {
-    index: ValidFiles['index'];
-  }
+  utils: () => {}
+  
 }
-
 function writeFiles(directoryPath: string, files: Partial<ValidFiles>) {
   Object.entries(files).forEach(([fileName, content]) => {
     const fileContent = (() => {
@@ -102,68 +109,69 @@ const minimistArgs = minimist(args, {
   boolean: [
     ...createMinimistBooleanArgs('action', 'actions'),
     ...createMinimistBooleanArgs('component', 'components'),
+    ...createMinimistBooleanArgs('hook', 'hooks'),
     ...createMinimistBooleanArgs('patch', 'patches'),
     ...createMinimistBooleanArgs('setting', 'settings'),
     ...createMinimistBooleanArgs('store', 'stores'),
     ...createMinimistBooleanArgs('style', 'styles'),
+    ...createMinimistBooleanArgs('util', 'utils'),
   ]
 });
 
-const addByDefault = false;
+const addByDefault = true;
 const addActions = addByDefault || hasMinimistBooleanArg(minimistArgs, 'action', 'actions');
 const addComponents = addByDefault || hasMinimistBooleanArg(minimistArgs, 'component', 'components');
+const addHooks = addByDefault || hasMinimistBooleanArg(minimistArgs, 'hook', 'hooks');
 const addPatches = addByDefault || hasMinimistBooleanArg(minimistArgs, 'patch', 'patches');
 const addSettings = addByDefault || hasMinimistBooleanArg(minimistArgs, 'setting', 'settings');
 const addStores = addByDefault || hasMinimistBooleanArg(minimistArgs, 'store', 'stores');
 const addStyle = addByDefault || hasMinimistBooleanArg(minimistArgs, 'style', 'styles');
+const addUtils = addByDefault || hasMinimistBooleanArg(minimistArgs, 'util', 'utils');
 
 const pluginFolder = path.resolve(sourceFolder, pluginName);
 fs.mkdirSync(pluginFolder, { recursive: true });
 
 try {
   writeFiles(pluginFolder, {
-    index: [
-      `import { createPlugin } from "@dium";`,
-      addActions ? `import { ActionsEmitter } from '@actions';` : undefined,
-      '',
-      addActions ? `import subscribeToActions from "./actions";` : undefined,
-      addPatches ? `import patch from "./patches";` : undefined,
-      addSettings ? `import { Settings, SettingsPanel } from "./settings";` : undefined,
-      addStores ? `import loadStores from "./stores";` : undefined,
-      addStyle ? `import styles from './style.scss';` : undefined,
-      ``,
-      `export default createPlugin({`,
-      `\tstart() {`,
-      addActions || addPatches || addStores ? undefined : '\t\t',
-      addActions ? '\t\tsubscribeToActions();' : undefined,
-      addPatches ? '\t\tpatch();' : undefined,
-      addStores ? '\t\tloadStores();' : undefined,
-      `\t},`,
-      ...(addActions ? [
-        '\t',
-        `\tstop() {`,
-        `\t\tActionsEmitter.removeAllListeners();`, 
-        `\t},`
-      ] : []),
-      addStyle || addSettings ? '\t' : undefined,
-      addStyle ? '\tstyles,' : undefined,
-      addSettings ? '\tSettings,' : undefined,
-      addSettings ? '\tSettingsPanel,' : undefined,
-      `});`
-    ],
-    style: addStyle ? [
-      `@use '../../packages/danho-lib/src/styles/utils.scss' as *;`,
-      ...(addSettings ? [
-        `@forward '../../packages/danho-lib/src/styles/PluginSettings.scss';`,
-        `@forward '../../packages/danho-lib/src/styles/Form.scss';`
-      ] : []),
-    ] : undefined,
-    package: {
-      name: StringUtils.kebabCaseFromPascalCase(pluginName),
-      version: "1.0.0",
-      author: 'danhosaur',
-      description: `Can you guess what ${pluginName} does? Danho didn't put a proper description, so we will both have to guess...`
-    },
+    actions: addActions ? () => ({
+      index: [
+        `import { Logger } from "@injections";`,
+        '',
+        `export default function subscribeToActions() {`,
+        `\tLogger.warn('Actions are not being registered yet');`,
+        `}`,
+      ],
+      template: [
+        `import { ActionsEmitter } from "@actions";`,
+        '',
+        `export default function onTemplate() {`,
+        `\tActionsEmitter.on('template', ({  }) => {`,
+        `\t\t// TODO`,
+        `\t});`,
+        `}`,
+      ]
+    }) : undefined,
+    components: addComponents ? () => ({
+      index: [
+        `import { Logger } from "@injections";`,
+        `Logger.warn('Components are not being registered yet');`,
+      ]
+    }) : undefined,
+    hooks: addHooks ? () => ({
+      index: [
+        `import { Logger } from "@injections";`,
+        `Logger.warn('Hooks are not being registered yet');`,
+      ]
+    }) : undefined,
+    patches: addPatches ? () => ({
+      index: [
+        `import { Logger } from "@injections";`,
+        '',
+        `export default function patch() {`,
+        `\tLogger.warn('Patches are not being registered yet');`,
+        `}`,
+      ],
+    }) : undefined,
     settings: addSettings ? () => ({
       index: [
         `export * from './Settings';`,
@@ -183,7 +191,8 @@ try {
       SettingsPanel: () => ({
         index: 'export { default } from "./SettingsPanel";',
         SettingsPanel: [
-          `import React, { Setting } from "@react";`,
+          `import React from "@react";`,
+          `import { Setting } from "@components";`,
           `import { Settings, titles } from "../Settings";`,
           '',
           `export default function SettingsPanel() {`,
@@ -202,33 +211,6 @@ try {
           `}`,
         ]
       })
-    }) : undefined,
-    patches: addPatches ? () => ({
-      index: [
-        `import { Logger } from "@danho-lib/dium/api/logger";`,
-        '',
-        `export default function patch() {`,
-        `\tLogger.warn('Patches are not being registered yet');`,
-        `}`,
-      ],
-    }) : undefined,
-    actions: addActions ? () => ({
-      index: [
-        `import { Logger } from "@danho-lib/dium/api/logger";`,
-        '',
-        `export default function subscribeToActions() {`,
-        `\tLogger.warn('Actions are not being registered yet');`,
-        `}`,
-      ],
-      template: [
-        `import { ActionsEmitter } from "@actions";`,
-        '',
-        `export default function onTemplate() {`,
-        `\tActionsEmitter.on('template', ({  }) => {`,
-        `\t\t// TODO`,
-        `\t});`,
-        `}`,
-      ]
     }) : undefined,
     stores: addStores ? () => ({
       index: [
@@ -263,12 +245,59 @@ try {
         'export default TemplateStore;',
       ],
     }) : undefined,
-    components: addComponents ? () => ({
+    // styles: addStyle ? [
+    //   `@use '../../packages/danho-lib/src/styles/utils.scss' as *;`,
+    //   ...(addSettings ? [
+    //     `@forward '../../packages/danho-lib/src/styles/PluginSettings.scss';`,
+    //     `@forward '../../packages/danho-lib/src/styles/Form.scss';`
+    //   ] : []),
+    // ] : undefined,
+    styles: addStyle ? () => ({
       index: [
-        `import { Logger } from "@danho-lib/dium/api/logger";`,
-        `Logger.warn('Components are not being registered yet');`,
+        `@use '../../../packages/danho-lib/src/styles/utils.scss' as *;`,
+        ...(addSettings ? [
+          `@forward '../../../packages/danho-lib/src/styles/PluginSettings.scss';`,
+          `@forward '../../../packages/danho-lib/src/styles/Form.scss';`
+        ] : []),
       ]
     }) : undefined,
+    utils: addUtils ? () => ({}) : undefined,
+
+    index: [
+      `import { createPlugin } from "@dium";`,
+      addActions ? `import { ActionsEmitter } from '@actions';` : undefined,
+      '',
+      addActions ? `import subscribeToActions from "./actions";` : undefined,
+      addPatches ? `import patch from "./patches";` : undefined,
+      addSettings ? `import { Settings, SettingsPanel } from "./settings";` : undefined,
+      addStores ? `import loadStores from "./stores";` : undefined,
+      addStyle ? `import styles from './styles.scss';` : undefined,
+      ``,
+      `export default createPlugin({`,
+      `\tstart() {`,
+      addActions || addPatches || addStores ? undefined : '\t\t',
+      addActions ? '\t\tsubscribeToActions();' : undefined,
+      addPatches ? '\t\tpatch();' : undefined,
+      addStores ? '\t\tloadStores();' : undefined,
+      `\t},`,
+      ...(addActions ? [
+        '\t',
+        `\tstop() {`,
+        `\t\tActionsEmitter.removeAllListeners();`, 
+        `\t},`
+      ] : []),
+      addStyle || addSettings ? '\t' : undefined,
+      addStyle ? '\tstyles,' : undefined,
+      addSettings ? '\tSettings,' : undefined,
+      addSettings ? '\tSettingsPanel,' : undefined,
+      `});`
+    ],
+    package: {
+      name: StringUtils.kebabCaseFromPascalCase(pluginName),
+      version: "1.0.0",
+      author: 'danhosaur',
+      description: `Can you guess what ${pluginName} does? Danho didn't put a proper description, so we will both have to guess...`
+    },
   });
 } catch (err) {
   killIfTrue(true, `Error creating plugin folder: ${err}`);

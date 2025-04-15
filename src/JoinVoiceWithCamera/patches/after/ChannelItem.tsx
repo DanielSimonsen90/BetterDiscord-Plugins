@@ -1,5 +1,5 @@
-import { $ } from "@danho-lib/DOM";
-import ChannelItem from "@danho-lib/Patcher/ChannelItem";
+import { $ } from "@dom";
+import ChannelItem from "@injections/patched/ChannelItem";
 import { Channel } from "@discord/types";
 import { Patcher } from "@dium";
 import joinWithCamera from "src/JoinVoiceWithCamera/utils/joinWithCamera";

@@ -1,8 +1,9 @@
-import { Snowflake, Emoji } from '@discord/types';
-import { React } from '../../React';
-import { ChannelUtils, GuildUtils } from '@danho-lib/Utils';
-import Finder from '@danho-lib/dium/api/finder';
-import { EmojiStore } from '@danho-lib/Stores';
+import React from '../../React';
+import { Snowflake } from '@discord/types';
+import { EmojiStore } from '@discord/stores';
+
+import ChannelUtils from '../../../Utils/Channel';
+import Finder from '../../../Injections/finder';
 
 type EmojiMentionProps = {
   id: Snowflake;
@@ -11,7 +12,7 @@ type EmojiMentionProps = {
   onClick?: (event: React.MouseEvent) => void;
 }
 
-const InternalEmojiMentions = Finder.findBySourceStrings(
+const InternalEmojiMentions = Finder.bySourceStrings(
   "node", "enableClick", "jumbo", "emojiName:", "messageId", 
   { defaultExport: false }
 ) as {

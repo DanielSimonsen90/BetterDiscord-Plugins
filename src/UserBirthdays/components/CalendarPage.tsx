@@ -1,16 +1,13 @@
-import React, {
-  classNames, useState, useRef,
-  UserListItem, Calendar,
-  useClickOutside,
-  useKeybind,
-} from "@react";
+import React, { classNames, useState, useRef } from "@react";
+import { UserListItem, Calendar } from '@components';
+import { useClickOutside, useKeybind } from '@hooks';
 import { Text } from '@dium/components';
 
-import { UserNoteActions } from "@actions";
-import { QuickSwitcherStore } from "@stores";
+import { QuickSwitcherStore } from "@discord/stores";
 
-import { buildTextItem } from "@danho-lib/ContextMenus";
-import { ClassNamesUtils, ContextMenuUtils, StringUtils, UserUtils } from "@danho-lib/Utils";
+import { UserNoteActions } from "@actions";
+import { buildTextItem } from "@context-menus";
+import { ClassNamesUtils, ContextMenuUtils, StringUtils, UserUtils } from "@utils";
 
 import { MarkedUserModal, ModifyDateModal, ModifyUserModal } from "./modals";
 import BirthdayStore from "../stores/BirthdayStore";

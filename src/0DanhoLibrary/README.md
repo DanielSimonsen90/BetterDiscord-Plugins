@@ -1,4 +1,4 @@
-# [0DanhoLibrary v2.3.0](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/dist/bd/0DanhoLibrary)
+# [0DanhoLibrary v3.0.0](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/dist/bd/0DanhoLibrary)
 by danielsimonsen90
 
 ## What does it do?

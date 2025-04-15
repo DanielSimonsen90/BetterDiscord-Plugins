@@ -1,6 +1,8 @@
-import Finder from "@danho-lib/dium/api/finder";
-import { ClassNamesUtils } from "@danho-lib/Utils";
 import { ForwardRefExoticComponent, ReactNode } from "@react";
+import { Finder } from "@injections";
+import { ClassNamesUtils } from "@utils";
+import { PropsFromFC } from "@utils/types";
+import { UserStatus } from "@discord/types";
 
 export type AvatarWithText = ForwardRefExoticComponent<{
   selected?: boolean;
@@ -15,10 +17,54 @@ export type AvatarWithText = ForwardRefExoticComponent<{
   innerClassName?: string;
 }>;
 
-export const AvatarWithText: AvatarWithText = Finder.findBySourceStrings("AvatarWithText");
+export const AvatarWithText = Finder.bySourceStrings<AvatarWithText>("AvatarWithText");
+
+export type AvatarWithTextBD = JSX.BD.FRC<PropsFromFC<AvatarWithText>, {
+  children: [
+    avatar: JSX.BD.Rendered<{
+      className: 'avatar__...';
+      children: Avatar;
+    }>,
+    content: [
+      nameAndDecorators: JSX.BD.Rendered<{
+        name: JSX.BD.Rendered<{
+          className: 'name__...';
+          children: Name;
+        }>,
+        decoration: null;
+      }>,
+      subText: JSX.BD.Rendered<{
+        className: 'subtext__...';
+        children: JSX.BD.Rendered<{
+          children: string;
+          className: 'subtext__...';
+        }>;
+      }>,
+    ]
+  ];
+}>;
+export const AvatarWithTextBD = Finder.bySourceStrings<AvatarWithTextBD>("AvatarWithText");
 export default AvatarWithText;
 
 export const AvatarWithTextClassNameModule = ClassNamesUtils.combineModuleByKeys<(
   | 'avatarWithText'
   | 'link'
-)>(["avatarWithText"])
+)>(["avatarWithText"]);
+
+type Avatar = JSX.BD.Rendered<{
+  'aria-label': string;
+  avatarDecoration?: string;
+  isMobile: boolean;
+  isTyping: boolean;
+  onMouseEnter(): void;
+  onMouseLeave(): void;
+  size: `SIZE_32`;
+  src?: string;
+  status: UserStatus;
+  statusTooltip: boolean;
+}>
+
+type Name = JSX.BD.Rendered<{
+  children: string;
+  tooltipClassName: `overflowtooltip__...`;
+}>;

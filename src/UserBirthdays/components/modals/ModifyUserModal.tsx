@@ -1,10 +1,10 @@
-import { UserUtils, ClassNamesUtils } from '@danho-lib/Utils';
+import React, { useState } from '@react';
+import { FormItemFromModel, Modal } from '@components';
+
 import { Button } from '@discord/components';
 import { User } from '@discord/types';
-import React, {
-  FormItemFromModel, Modal, 
-  useState
-} from '@react';
+
+import { UserUtils, ClassNamesUtils } from '@utils';
 
 type Form = {
   day: number;
@@ -14,7 +14,7 @@ type Form = {
 
 type BirthdateData = {
   birthdate: Date;
-}
+};
 
 type Props = {
   open: boolean;
@@ -40,7 +40,7 @@ export function ModifyUserModal({
 
   return (
     <Modal open={open} onClose={onClose}
-      title={`Edit ${displayName}'s birthday`} 
+      title={`Edit ${displayName}'s birthday`}
       className="modify-user-modal"
     >
       <form className='modify-user-form' onSubmit={e => {

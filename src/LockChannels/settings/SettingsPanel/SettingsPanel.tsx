@@ -1,5 +1,7 @@
-import React, { Setting } from "@react";
+import React from "@react";
+import { Setting } from "@components";
 import { FormSection } from '@dium/components';
+
 import { Settings, titles } from "../Settings";
 import LockedChannelsSettings from "./LockedChannelsSettings";
 

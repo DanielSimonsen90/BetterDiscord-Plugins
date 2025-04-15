@@ -1,10 +1,10 @@
 import { createPlugin } from "@dium";
+import { ActionsEmitter } from "@actions";
 
 import subscribeToActions from "./actions";
 import patch from "./patches";
 import { Settings, SettingsPanel } from "./settings";
 import styles from './style.scss';
-import { ActionsEmitter } from "@actions";
 
 export default createPlugin({
 	start() {

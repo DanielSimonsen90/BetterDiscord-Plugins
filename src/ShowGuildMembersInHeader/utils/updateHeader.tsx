@@ -1,9 +1,9 @@
 import { React } from "@dium";
 import { Text } from "@dium/components";
-import { GuildMemberStore, GuildStore, PresenceStore } from "@stores";
+import { GuildMemberStore, GuildStore, PresenceStore } from "@discord/stores";
 
-import { $ } from "@danho-lib/DOM";
-import { GuildUtils } from "@danho-lib/Utils";
+import { $ } from "@dom";
+import { GuildUtils } from "@utils";
 
 const HEADER_MEMBERS_CLASSNAME = 'danho-lib__header-members';
 

@@ -1,8 +1,11 @@
-import { UserUtils, ClassNamesUtils } from '@danho-lib/Utils';
+import React from '@react';
+import { Modal } from '@components';
+
+import { Text } from '@dium/components';
 import { Button } from '@discord/components';
 import { User } from '@discord/types';
-import { Text } from '@dium/components';
-import React, { Modal } from '@react';
+
+import { UserUtils, ClassNamesUtils } from '@utils';
 
 type Props = {
   open: boolean;

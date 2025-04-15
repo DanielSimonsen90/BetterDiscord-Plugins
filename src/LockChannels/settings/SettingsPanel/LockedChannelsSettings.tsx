@@ -1,9 +1,10 @@
-import React, { Collapsible, GuildListItem, SearchableList } from '@react';
+import React from '@react';
+import { Collapsible, GuildListItem, SearchableList } from '@components';
 import { Snowflake } from '@discord/types';
 import { Setter } from '@dium/settings';
 
-import { EditLockedChannelState, LockedChannelsStore } from 'src/LockChannels/stores';
-import { ChannelLockEditForm } from 'src/LockChannels/components/ChannelLockForm';
+import { EditLockedChannelState, LockedChannelsStore } from '../../stores';
+import { ChannelLockEditForm } from '../../components/ChannelLockForm';
 import { Settings, titles } from '../Settings';
 
 type Props = {

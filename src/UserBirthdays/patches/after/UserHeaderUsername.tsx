@@ -1,10 +1,9 @@
 import { Logger, Patcher, React } from "@dium";
-import { UserHeaderUsernameModule } from "@danho-lib/Patcher/UserHeaderUsername";
-import { UserNoteStore } from "@stores";
+import { UserNoteStore } from "@discord/stores";
+import { UserHeaderUsernameModule } from "@injections/patched/UserHeaderUsername";
 
 import { BirthdayContainer } from "../../components";
 import BirthdayStore from "../../stores/BirthdayStore";
-import { BIRTHDAY_REGEX, getBirthdate } from "../../utils/constants";
 
 export default function afterUserHeaderUsername() {
   Patcher.after(UserHeaderUsernameModule, 'Z', ({ result, args: [props] }) => {

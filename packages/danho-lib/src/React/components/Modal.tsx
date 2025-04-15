@@ -1,5 +1,5 @@
 import { Button, Text } from "@discord/components";
-import { ColorClassNames } from "@danho-lib/Utils/ClassNames";
+import { ClassNamesUtils } from "@utils/ClassNames";
 
 import React, { ReactNode, useRef } from "../React";
 import { classNames } from "../utils";
@@ -28,7 +28,7 @@ export function Modal({ children, open, onClose, title, ...props }: Props) {
             <Text variant="heading-xl/bold" className="danho-modal__title">
               {title}
             </Text>
-            <Button look={Button.Looks.BLANK} className={classNames(ColorClassNames.colorDefault, 'danho-modal__close')} onClick={onClose}>&times;</Button>
+            <Button look={Button.Looks.BLANK} className={classNames(ClassNamesUtils.ColorClassNames.colorDefault, 'danho-modal__close')} onClick={onClose}>&times;</Button>
           </div>
           <div className="danho-modal__content">
             {children}

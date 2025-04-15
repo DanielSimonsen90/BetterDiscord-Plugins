@@ -1,6 +1,6 @@
 import { createPlugin } from "@dium";
 import styles from './style.scss';
-import { $ } from "@danho-lib/DOM";
+import { $ } from "@dom";
 
 export default createPlugin({
   start() {

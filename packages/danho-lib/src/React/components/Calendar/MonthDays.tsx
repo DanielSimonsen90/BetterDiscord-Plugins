@@ -2,7 +2,7 @@ import React from '../../React';
 import { classNames } from '../../utils';
 import { Text } from '@dium/components';
 import { ScrollerAuto, ScrollerLooks } from '@discord/components';
-import { StringUtils } from '@danho-lib/Utils';
+import { StringUtils } from '@utils';
 
 type MonthDaysProps = {
   currentDate: Date;

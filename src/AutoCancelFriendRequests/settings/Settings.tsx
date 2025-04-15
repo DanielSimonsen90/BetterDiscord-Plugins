@@ -1,6 +1,6 @@
 import { Snowflake } from "@discord/types";
+import { SortedGuildStore } from "@discord/stores";
 import { SettingsStore } from "@dium/settings";
-import { SortedGuildStore } from "@stores";
 
 type Settings = {
 	folderIds: Array<number>,

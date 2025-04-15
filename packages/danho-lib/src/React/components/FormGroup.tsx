@@ -1,6 +1,6 @@
 import { FormSwitch, TextInput, Select, SingleSelect, Text } from '@dium/components';
-import { ClassNamesUtils } from '@danho-lib/Utils/ClassNames';
-import { StringUtils } from '@danho-lib/Utils';
+import { ClassNamesUtils } from '@utils/ClassNames';
+import { StringUtils } from '@utils';
 
 import React, {
   HTMLInputTypeAttribute, MutableRefObject, ForwardedRef,

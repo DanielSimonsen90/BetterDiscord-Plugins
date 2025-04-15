@@ -1,8 +1,10 @@
-import { Patcher } from "@dium/api";
-import { EmojiStore } from "@stores";
+import { EmojiStore } from "@discord/stores";
+import { Patcher } from "@injections";
+
 import { isBanFeatureEnabled } from "../../features/BanEmojis";
 import { isFavorFavoriteFeatureEnabled } from "../../features/FavorFavoriteEmojis";
-import { Settings } from "src/BetterEmojiManagement/Settings";
+
+import { Settings } from "../../settings/Settings";
 
 export default function insteadGetSearchResultsOrder() {
   if (!isBanFeatureEnabled() && !isFavorFavoriteFeatureEnabled()) return;

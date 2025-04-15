@@ -1,4 +1,5 @@
-import React, { Collapsible, CollapsibleRef, useRef } from '@react';
+import React, { useRef } from '@react';
+import { Collapsible, CollapsibleRef } from '@components';
 import { Channel } from "@discord/types";
 
 import { EditLockedChannelState, LockedChannelsStore } from '../stores';

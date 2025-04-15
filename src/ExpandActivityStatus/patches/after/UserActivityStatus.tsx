@@ -1,7 +1,7 @@
 import { ActivityIndexes } from "@discord/types";
 import { Logger, Patcher, React } from "@dium";
-import UserActivityStatus from "@danho-lib/Patcher/UserActivityStatus";
-import { StringUtils } from "@danho-lib/Utils";
+import UserActivityStatus from "@injections/patched/UserActivityStatus";
+import { StringUtils } from "@utils";
 
 export default function afterUserActivityStatus() {
   Patcher.after(UserActivityStatus, 'Z', ({ result, args: [props] }) => {

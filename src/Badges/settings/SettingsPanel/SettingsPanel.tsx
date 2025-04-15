@@ -1,4 +1,6 @@
-import React, { Setting } from "@react";
+import React from "@react";
+import { Setting } from '@components';
+
 import { Settings, titles } from "../Settings";
 import CustomBadgesSettingsGroup from "./BadgesSettings";
 

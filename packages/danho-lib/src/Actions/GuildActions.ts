@@ -1,7 +1,7 @@
-import type { PresenceStoreState } from "@stores";
+import type { PresenceStoreState } from "@discord/stores";
 import type { Snowflake, Channel, Guild, Role } from "@discord/types";
 
-import { Finder } from "@dium/api";
+import Finder from "../Injections/finder";
 import type { Arrayable } from "../Utils/types";
 
 export interface GuildActions {
@@ -45,5 +45,5 @@ export interface GuildActions {
     updateRole(guildId: Snowflake, roleId: Snowflake, update: Role): void;
     updateRolePermissions(guildId: Snowflake, roleId: Snowflake, permissions: Array<bigint>): void;
 }
-export const GuildActions: GuildActions = Finder.byKeys(["requestMembers"]);
+export const GuildActions = Finder.byKeys<GuildActions>(["requestMembers"]);
 export default GuildActions;

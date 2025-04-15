@@ -1,11 +1,10 @@
-import { UserUtils, ClassNamesUtils } from '@danho-lib/Utils';
+import React, { useState, classNames } from '@react';
+import { EmptyFormGroup, Modal, SearchableList, UserListItem } from '@components';
+
 import { Button } from '@discord/components';
-import React, {
-  classNames,
-  EmptyFormGroup, Modal, SearchableList, UserListItem,
-  useState
-} from '@react';
-import { UserStore } from '@stores';
+import { UserStore } from '@discord/stores';
+
+import { UserUtils, ClassNamesUtils } from '@utils';
 
 type BirthdateData = {
   userId?: string;

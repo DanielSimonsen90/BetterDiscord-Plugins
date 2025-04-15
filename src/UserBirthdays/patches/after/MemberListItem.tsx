@@ -1,6 +1,6 @@
 import { Patcher, React } from "@dium";
 import { Tooltip } from "@discord/components";
-import MemberListItem from "@danho-lib/Patcher/MemberListItem";
+import MemberListItem from "@injections/patched/MemberListItem";
 import BirthdayStore from "../../stores/BirthdayStore";
 
 export default function afterMemberListItem() {

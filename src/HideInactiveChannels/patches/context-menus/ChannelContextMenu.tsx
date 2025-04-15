@@ -1,5 +1,5 @@
-import { buildTextItemElement, PatchChannelContextMenu } from "@danho-lib/ContextMenus";
-import { ContextMenuUtils } from "@danho-lib/Utils";
+import { buildTextItemElement, PatchChannelContextMenu } from "@context-menus";
+import { ContextMenuUtils } from "@utils";
 import HiddenChannelStore from "../../stores/HiddenChannelStore";
 
 const menuItemIds = [

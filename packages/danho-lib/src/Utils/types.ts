@@ -1,5 +1,3 @@
-import { Store } from '@dium/modules/flux';
-
 export * from './ComponentTypes';
 
 export type BetterOmit<Type, Properties extends keyof Type> = Omit<Type, Properties>;
@@ -20,8 +18,5 @@ export type PromisedReturn<
 export type Promiseable<T> = T | Promise<T>;
 
 export type Functionable<T, Parameters extends any[] = any[]> = ((...args: Parameters) => T) | T;
-
-// Pick properties from T if key is not in Store
-export type FilterStore<T extends Store> = Pick<T, Exclude<keyof T, keyof Store>>;
 
 export type PropsFromFC<T extends (props: any) => any> = T extends (props: infer Props) => any ? Props : unknown;

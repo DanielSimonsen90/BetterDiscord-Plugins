@@ -1,7 +1,8 @@
-import RolesListModule from "@danho-lib/Patcher/RolesList";
+import RolesListModule from "@injections/patched/RolesList";
 import { Patcher } from "@dium";
-import applyRoleColors from "src/ColorfulRoles/utils/applyRoleColors";
-import { ColorfulRolesManager } from "src/ColorfulRoles/utils/ColorfulRolesManager";
+
+import applyRoleColors from "../../utils/applyRoleColors";
+import { ColorfulRolesManager } from "../../utils/ColorfulRolesManager";
 
 export default function afterRolesList() {
   Patcher.after(RolesListModule, 'RolesList', ({ result }) => {

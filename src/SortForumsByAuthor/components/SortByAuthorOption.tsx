@@ -1,7 +1,7 @@
 import { renderChildren, React, useReducer } from "@react";
-import { Finder } from "@dium/api";
+import { Finder } from "@injections";
 
-const { focused } = Finder.byKeys(['focused', 'item', 'labelContainer']) as Record<string, string>;
+const { focused } = Finder.byKeys<Record<string, string>>(['focused', 'item', 'labelContainer']);
 
 type Props = {
   sortOptionClone: HTMLElement;

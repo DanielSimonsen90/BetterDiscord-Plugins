@@ -1,6 +1,6 @@
-import { DanhoStores, DiumStore } from "@danho-lib/Stores";
-import { GuildUtils } from "@danho-lib/Utils";
 import { Snowflake } from "@discord/types";
+import { DanhoStores, DiumStore } from "@stores";
+import { GuildUtils } from "@utils";
 
   const ScrollerStore = new class GuildChannelListScrollerStore extends DiumStore<Record<Snowflake, number>> {
     constructor() {

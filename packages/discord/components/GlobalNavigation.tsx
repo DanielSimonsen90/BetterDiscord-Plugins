@@ -1,5 +1,5 @@
-import Finder from "@danho-lib/dium/api/finder";
-import { Autocomplete } from "@danho-lib/Utils/types";
+import { Finder } from '@injections';
+import { Autocomplete } from "@utils/types";
 import { Channel, Snowflake } from "@discord/types";
 
 type NavigationItem<Key> = JSX.BD.Rendered<{
@@ -37,5 +37,5 @@ export type GlobalNavigation = JSX.BD.FC<{
   }>
 }>
 
-export const GlobalNavigation: { Z: GlobalNavigation } = Finder.findBySourceStrings("ConnectedPrivateChannelsList", { defualtExport: false });
+export const GlobalNavigation = Finder.bySourceStrings<GlobalNavigation, true>("ConnectedPrivateChannelsList", { module: true });
 export default GlobalNavigation;

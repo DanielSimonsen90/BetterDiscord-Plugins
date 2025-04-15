@@ -1,19 +1,18 @@
 import React, { 
   useState, useMemo, useEffect,
   Dispatch, SetStateAction, 
-  EmptyFormGroup, FormItem, FormItemFromModel, SearchableList,
-  useFormTab,
-} from '@react'
+} from '@react';
+import { EmptyFormGroup, FormItem, FormItemFromModel, SearchableList } from '@components';
+import { useFormTab } from '@hooks';
 
 import { Button, Text } from '@discord/components';
-import { ObjectUtils, UserUtils } from '@danho-lib/Utils';
-
-import { CustomBadgeData } from 'src/Badges/components/CustomBadge';
+import { ObjectUtils, UserUtils } from '@utils';
 
 import { PotentialUser } from './PotentialUser';
 import PositionInput from './PositionInput';
 
-import { CustomBadgesStore, BadgePositionsStore } from 'src/Badges/stores';
+import { CustomBadgeData } from '../../../components/CustomBadge';
+import { CustomBadgesStore, BadgePositionsStore } from '../../../stores';
 
 export type ModifyBadgeData = Partial<Pick<CustomBadgeData, 'id' | 'name' | 'iconUrl' | 'href' | 'userTags' | 'size'>>;
 

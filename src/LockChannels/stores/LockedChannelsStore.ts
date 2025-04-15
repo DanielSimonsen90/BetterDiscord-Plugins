@@ -1,8 +1,9 @@
 import { Snowflake } from "@discord/types";
+import { ChannelStore } from "@discord/stores";
 
 import { ActionsEmitter } from "@actions";
-import { ChannelStore, DanhoStores, DiumStore } from "@stores";
-import { GuildUtils } from "@danho-lib/Utils";
+import { DanhoStores, DiumStore } from "@stores";
+import { GuildUtils } from "@utils";
 
 import { Settings } from "../settings/Settings";
 

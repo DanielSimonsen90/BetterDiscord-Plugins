@@ -1,8 +1,8 @@
 import { useEffect, useState } from '@react';
-import { $ } from "@danho-lib/DOM";
-import * as ObjectUtils from '@danho-lib/Utils/Object';
-import { ClassNamesUtils, wait } from '@danho-lib/Utils';
+
 import { AppActions } from '@actions';
+import { $ } from "@dom";
+import { ClassNamesUtils, ObjectUtils, TimeUtils } from '@utils';
 
 type Props = {
   onClick: (e: React.MouseEvent) => void;
@@ -68,7 +68,7 @@ export default function useBirthdayNavProps(props: Props): BirthdayNavProps {
   
         onClick: async (e: React.MouseEvent) => {
           AppActions.navigate('/channels/@me');
-          await wait(100);
+          await TimeUtils.wait(100);
           globalNav.children('li').forEach(listItem => {
             SelectedClassNames.forEach(className => (
               listItem.children(`.${className}`).forEach(child => child.removeClass(className))

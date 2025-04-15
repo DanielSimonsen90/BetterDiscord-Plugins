@@ -1,8 +1,8 @@
-import { User } from "@discord/types";
-import { Logger } from "@dium";
-
 import { ActionsEmitter, RelationshipActions } from "@actions";
-import { UserProfileStore } from "@stores";
+import { Logger } from "@injections";
+
+import { User } from "@discord/types";
+import { UserProfileStore } from "@discord/stores";
 
 import { Settings } from "../settings/Settings";
 

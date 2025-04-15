@@ -1,6 +1,6 @@
 import { ActionsEmitter, createActionCallback } from "@actions";
 import { DanhoStores, DiumStore } from "@stores";
-import { BadgeId, BadgeList, UserProfileBadge } from "@discord/components";
+import { BadgeId, UserProfileBadgeList, UserProfileBadge } from "@discord/components";
 
 type State = Partial<Record<BadgeId | (string & {}), UserProfileBadge>>;
 
@@ -39,7 +39,7 @@ export const DiscordBadgeStore = new class DiscordBadgeStore extends DiumStore<S
       }));
     });
 
-  public findBadgeByUrl(url: string, instance?: ReturnType<BadgeList>['props']['children'][0]): UserProfileBadge | null {
+  public findBadgeByUrl(url: string, instance?: ReturnType<UserProfileBadgeList>['props']['children'][0]): UserProfileBadge | null {
     if (!url && !instance) return null;
     let found = url ? Object.values(this.current).find(badge => url.includes(badge.icon)) : null;
     found ??= !instance || typeof instance.props.text === 'string' ? null : instance.props.text.props.profileBadge;

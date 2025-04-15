@@ -11,4 +11,4 @@ export * from './SearchableList';
 export * from './Setting';
 export * from './SuspenseWrapper';
 export * from './TabBar';
-export * from './User';
+export * from './UserListItem';

@@ -1,8 +1,8 @@
 import { sleep } from "@dium/utils";
 
-import { Logger } from "@danho-lib/dium/api/logger";
-import { $ } from "@danho-lib/DOM";
-import { hexToRgb, RGB, rgbToHex } from "@danho-lib/Utils/Colors";
+import { Logger } from "@injections";
+import { $ } from "@dom";
+import { ColorUtils, RGB } from "@utils";
 
 import { ColorfulRolesManager } from "./ColorfulRolesManager";
 import { DEFAULT_DISCORD_ROLE_COLOR } from "./constants";
@@ -19,9 +19,9 @@ export default async function applyRoleColors() {
     if (!role) return Logger.warn('Role not found', roleId);
 
     el.setStyleProperty('--role-color',
-      hexToRgb(role.colorString 
+      ColorUtils.hexToRgb(role.colorString 
         ??  role.colorStrings?.primaryColor
-        ?? rgbToHex(DEFAULT_DISCORD_ROLE_COLOR.split(',').map(Number) as RGB)).join(',')
+        ?? ColorUtils.rgbToHex(DEFAULT_DISCORD_ROLE_COLOR.split(',').map(Number) as RGB)).join(',')
     );
 
     if (Settings.current.groupRoles) {

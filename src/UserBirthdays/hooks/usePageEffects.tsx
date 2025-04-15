@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "@react";
 import { Logger } from "@dium";
-import { $ } from "@danho-lib/DOM";
+import { $ } from "@dom";
 
 import CalendarPage from "../components/CalendarPage";
 import { useTimedCheck } from "@hooks/useTimedCheck";

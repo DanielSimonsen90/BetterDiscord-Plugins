@@ -1,5 +1,5 @@
 import { createPlugin } from "@dium";
-import { $ } from "@danho-lib/DOM";
+import { $ } from "@dom";
 
 import styles from './style.scss';
 import { Settings, SettingsPanel } from './Settings';

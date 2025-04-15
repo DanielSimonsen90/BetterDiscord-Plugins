@@ -1,10 +1,11 @@
-import { Utils } from '@danho-lib/Utils/index';
-import * as Stores from '@stores';
-import * as Actions from '@actions';
-import * as DOM from '@danho-lib/DOM';
+import * as Actions from './Actions';
+import * as DOM from './DOM';
+import { Finder, Patcher } from './Injections';
+import * as Stores from './Stores';
+import { Utils } from './Utils';
 
-import { createPlugin, Plugin, Filters } from '@dium/index';
-import * as Finder from '@danho-lib/dium/api/finder';
+import { createPlugin, Plugin, Filters } from '@dium';
+import * as DiscordStores from '@discord/stores';
 
 import styles from './styles/index.scss';
 
@@ -12,10 +13,11 @@ class DanhoLibrary implements Plugin<{}> {
   public Utils = Utils;
   public DOM = DOM;
 
-  public Stores = Stores;
+  public Stores = Object.assign({}, DiscordStores, Stores);
   public Actions = Actions;
   public Finder = Finder;
   public Filters = Filters;
+  public Patcher = Patcher;
 
   public styles = styles;
 };

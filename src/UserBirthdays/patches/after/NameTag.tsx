@@ -1,11 +1,10 @@
 import { Patcher, React } from "@dium";
-import { Tooltip } from "@discord/components";
-import { UserStore } from "@stores";
-import NameTag from "@danho-lib/Patcher/NameTag";
+import { Tooltip, AvatarWithTextBD } from "@discord/components";
+import { UserStore } from "@discord/stores";
 import BirthdayStore from "../../stores/BirthdayStore";
 
 export default function afterNameTag() {
-  Patcher.after(NameTag, 'render', ({ result, args: [props] }) => {
+  Patcher.after(AvatarWithTextBD, 'render', ({ result, args: [props] }) => {
     if (!props.avatar.props.src) return result;
 
     // userId: src: https://cdn.discordapp.com/avatars/<userId>/<avatar>.webp

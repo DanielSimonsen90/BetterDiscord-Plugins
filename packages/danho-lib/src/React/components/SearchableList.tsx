@@ -1,4 +1,4 @@
-import { Functionable } from '@danho-lib/Utils/types';
+import { Functionable } from '@utils/types';
 import { React, ReactNode, useState, useCallback, useMemo, forwardRef } from '../React';
 import { classNames } from '../utils';
 import { ScrollerAuto, ScrollerLooks } from '@discord/components';

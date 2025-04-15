@@ -1,5 +1,5 @@
-import WaitForEmojiPicker from "@danho-lib/Modals/ExpressionPicker";
-import { Patcher } from "@dium/api";
+import { WaitForEmojiPicker } from "@modals";
+import { Patcher } from "@injections";
 import { addBannedDataTagToEmojiElement, addBannedTagToEmoji, isBanFeatureEnabled } from "../../features/BanEmojis";
 
 export default function afterEmojiPicker() {
@@ -9,6 +9,6 @@ export default function afterEmojiPicker() {
     Patcher.after(emojiPicker, key, data => {
       addBannedTagToEmoji(data);
       addBannedDataTagToEmojiElement(data);
-    }, { name: 'EmojiPicker' });
+    });
   });
 }

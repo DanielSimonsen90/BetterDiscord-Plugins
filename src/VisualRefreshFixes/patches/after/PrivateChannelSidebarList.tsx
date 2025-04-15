@@ -1,7 +1,7 @@
 import React from '@react';
-import PrivateChannelSidebarList from "@danho-lib/Patcher/PrivateChannelSidebarList";
 import { Patcher } from "@dium";
 
+import PrivateChannelSidebarList from '@injections/patched/PrivateChannelSidebarList';
 import { Settings } from '../../settings';
 
 export default function afterPrivateChannelSidebarList() {

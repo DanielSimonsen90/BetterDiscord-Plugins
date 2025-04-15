@@ -1,5 +1,5 @@
 import { Snowflake, Channel, Message, Attachment, User } from "@discord/types";
-import { Finder } from "@dium/api";
+import Finder from "../Injections/finder";
 
 type MessageActions = {
   clearChannel(channelId: Snowflake): void;
@@ -58,7 +58,7 @@ type MessageActions = {
   _tryFetchMessagesCached(props: FetchingProps): void;
 }
 
-export const MessageActions: MessageActions = Finder.byKeys(["sendMessage"]);
+export const MessageActions = Finder.byKeys<MessageActions>(["sendMessage"]);
 
 type ChannelAndMessageIds = {
   channelId: Snowflake;

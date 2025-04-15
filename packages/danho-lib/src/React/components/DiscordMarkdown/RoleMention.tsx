@@ -1,9 +1,9 @@
-import Finder from "@danho-lib/dium/api/finder";
-import { ChannelUtils, GuildUtils } from "@danho-lib/Utils";
+import { Finder } from '@injections';
+import { ChannelUtils, GuildUtils } from "@utils";
 import { Snowflake } from "@discord/types";
 import { React } from "../../React";
 
-const DiscordRoleMention = Finder.findBySourceStrings(
+const DiscordRoleMention = Finder.bySourceStrings(
   "roleColor:", "roleId:", "roleName:", "channelId:", "roleStyle",
 ) as React.FC<{
   channelId: Snowflake;

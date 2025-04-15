@@ -1,4 +1,4 @@
-import { ClassNamesUtils, StringUtils } from '@danho-lib/Utils';
+import { ClassNamesUtils, StringUtils } from '@utils';
 import { useEffect } from '../React'
 
 type Callback = (event: MouseEvent) => void;

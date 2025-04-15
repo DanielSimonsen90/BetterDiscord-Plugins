@@ -1,4 +1,6 @@
-import { FormItem, React, useKeybind, useState } from '@react';
+import React, { useState } from "@react";
+import { FormItem } from "@components";
+import { useKeybind } from "@hooks";
 import { Button, Text } from "@dium/components";
 
 export const LOGIN_ID = 'locked-channel-login';

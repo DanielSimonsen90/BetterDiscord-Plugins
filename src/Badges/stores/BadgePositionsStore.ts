@@ -2,7 +2,7 @@ import { CSSProperties, useState, useCallback, useEffect } from "@react";
 import { Logger } from "@dium";
 import { BadgeId } from "@discord/components";
 import { DanhoStores, DiumStore } from "@stores";
-import { UrlUtils } from "@danho-lib/Utils";
+import { UrlUtils } from "@utils";
 
 import { Settings } from "../settings/Settings";
 

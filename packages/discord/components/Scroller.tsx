@@ -1,4 +1,4 @@
-import Finder from "@danho-lib/dium/api/finder";
+import { Finder } from '@injections';
 import { forwardRef } from "@react";
 
 export const ScrollerLooks = Finder.byKeys(['thin', 'fade']) as Record<
@@ -10,7 +10,7 @@ export const ScrollerLooks = Finder.byKeys(['thin', 'fade']) as Record<
   string
 >;
 
-const ScrollerWrapper = Finder.findBySourceStrings<() => typeof ScrollerAuto>("paddingFix", "getScrollerState");
+const ScrollerWrapper = Finder.bySourceStrings<() => typeof ScrollerAuto>("paddingFix", "getScrollerState");
 
 export const ScrollerAuto: React.ForwardRefExoticComponent<{
   children: React.ReactNode;

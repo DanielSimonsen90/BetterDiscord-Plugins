@@ -4,10 +4,10 @@
 @forward '../../packages/danho-lib/src/styles/PluginSettings.scss';
 @forward '../../packages/danho-lib/src/styles/Form.scss';
 
-@forward '../../packages/danho-lib/src/styles/components/User.scss';
 @forward '../../packages/danho-lib/src/styles/components/Calendar.scss';
 @forward '../../packages/danho-lib/src/styles/components/Modal.scss';
 @forward '../../packages/danho-lib/src/styles/components/SearchableList.scss';
+@forward '../../packages/danho-lib/src/styles/components/UserListItem.scss';
 
 @include className('timestamp', 'span') {
   color: var(--text-primary);

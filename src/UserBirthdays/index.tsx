@@ -4,7 +4,7 @@ import patch from "./patches";
 import { Settings, SettingsPanel } from "./settings";
 import loadStores from "./stores";
 import styles from './style.scss';
-import { $ } from "@danho-lib/DOM";
+import { $ } from "@dom";
 
 const updateNode = () => $(s => s.ariaLabel("Private channels", 'nav'))?.forceUpdate();
 

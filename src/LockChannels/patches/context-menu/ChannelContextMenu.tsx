@@ -1,8 +1,8 @@
 import React from '@react';
 import { Logger } from '@dium';
 
-import { buildTextItemElement, PatchChannelContextMenu } from "@danho-lib/ContextMenus";
-import { ContextMenuUtils } from "@danho-lib/Utils";
+import { buildTextItemElement, PatchChannelContextMenu } from "@context-menus";
+import { ContextMenuUtils } from "@utils";
 
 import { LockedChannelsStore } from 'src/LockChannels/stores';
 import { ChannelLockModalContent } from 'src/LockChannels/components';

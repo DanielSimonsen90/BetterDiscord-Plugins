@@ -703,7 +703,7 @@ const BDFDB_Finder = {
     BDFDB_findByStrings
 };
 
-function findBySourceStrings(...keywords) {
+function bySourceStrings(...keywords) {
     const searchOptions = keywords.find(k => typeof k === 'object');
     if (searchOptions)
         keywords.splice(keywords.indexOf(searchOptions), 1);
@@ -713,19 +713,19 @@ function findBySourceStrings(...keywords) {
     if (backupIdKeywordIndex > -1)
         keywords.splice(backupIdKeywordIndex, 1);
     if (backupId)
-        debugLog(`[findBySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
+        debugLog(`[bySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
     const showMultiple = keywords.find(k => k === 'showMultiple=true');
     const showMultipleIndex = keywords.indexOf(showMultiple);
     if (showMultipleIndex > -1)
         keywords.splice(showMultipleIndex, 1);
     if (showMultiple)
-        debugLog(`[findBySourceStrings] Showing multiple results - [${keywords.join(',')}]`, keywords);
+        debugLog(`[bySourceStrings] Showing multiple results - [${keywords.join(',')}]`, keywords);
     const lazy = keywords.find(k => k === 'lazy=true');
     const lazyIndex = keywords.indexOf(lazy);
     if (lazyIndex > -1)
         keywords.splice(lazyIndex, 1);
     if (lazy)
-        debugLog(`[findBySourceStrings] Using lazy search - [${keywords.join(',')}]`, keywords);
+        debugLog(`[bySourceStrings] Using lazy search - [${keywords.join(',')}]`, keywords);
     const _keywords = keywords;
     const moduleCallback = (exports, _, id) => {
         if (!exports || exports === window)
@@ -761,7 +761,7 @@ function findBySourceStrings(...keywords) {
             || eIsClassAsE
             || eIsObjectWithKeywords) : eIsFunctionAndHasKeywords;
         if ((filter && backupId && id !== backupId) || !filter && id === backupId)
-            debugWarn(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, {
+            debugWarn(`[bySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, {
                 exports,
                 internal: {
                     eIsFunctionAndHasKeywords,
@@ -794,7 +794,7 @@ function findBySourceStrings(...keywords) {
             ];
             if (err instanceof Error && expectedErrorMessages.some(message => err.message.includes(message)))
                 return undefined;
-            error(`[findBySourceStrings] Error in moduleCallback`, err);
+            error(`[bySourceStrings] Error in moduleCallback`, err);
         }
     };
     if (lazy)
@@ -802,10 +802,10 @@ function findBySourceStrings(...keywords) {
             signal: controller.signal,
             ...searchOptions
         }).then(module => {
-            debugLog(`[findBySourceStrings] Found lazy module for [${keywords.join(',')}]`, module);
+            debugLog(`[bySourceStrings] Found lazy module for [${keywords.join(',')}]`, module);
             return module;
         }).catch(err => {
-            error(`[findBySourceStrings] Error in lazy search`, err);
+            error(`[bySourceStrings] Error in lazy search`, err);
             return undefined;
         });
     const moduleSearchOptions = searchOptions ?? { searchExports: true };
@@ -853,7 +853,7 @@ const findModuleById = (id, options) => {
     return BdApi.Webpack.getModule((_, __, _id) => _id === id.toString(), options);
 };
 function findUnpatchedModuleBySourceStrings(...keywords) {
-    const module = findBySourceStrings(...keywords);
+    const module = bySourceStrings(...keywords);
     if (!module) {
         log(`[findUnpatchedModuleBySourceStrings] Module not found for keywords: [${keywords.join(',')}]`);
         return undefined;
@@ -865,7 +865,7 @@ function findUnpatchedModuleBySourceStrings(...keywords) {
 const Finder = {
     ...DiumFinder,
     ...BDFDB_Finder,
-    findBySourceStrings,
+    bySourceStrings,
     findComponentBySourceStrings,
     findModuleById,
     findUnpatchedModuleBySourceStrings,
@@ -1250,7 +1250,7 @@ function containsClassInModule(className, module) {
     return Object.values(module).some((value) => value === className);
 }
 function findModuleWithMinimalKeys(className) {
-    const module = Finder.findBySourceStrings(className, { defaultExport: false });
+    const module = Finder.bySourceStrings(className, { defaultExport: false });
     if (!module) {
         warn(`Module not found for className: ${className}`);
         return null;
@@ -1344,7 +1344,7 @@ const UserUtils = {
     },
 };
 
-const useGuildFeatures = Finder.findBySourceStrings("hasFeature", "GUILD_SCHEDULED_EVENTS");
+const useGuildFeatures = Finder.bySourceStrings("hasFeature", "GUILD_SCHEDULED_EVENTS");
 const GuildUtils = {
     ...GuildStore,
     ...GuildMemberStore,
@@ -1642,7 +1642,7 @@ var Colors;
     Colors[Colors["WHITE"] = 8] = "WHITE";
     Colors[Colors["YELLOW"] = 9] = "YELLOW";
 })(Colors || (Colors = {}));
-const Button = Finder.findBySourceStrings("FILLED", "BRAND", "MEDIUM", "button", "buttonRef");
+const Button = Finder.bySourceStrings("FILLED", "BRAND", "MEDIUM", "button", "buttonRef");
 
 function SearchableList(props) {
     const { items, renderItem, onSearch } = props;

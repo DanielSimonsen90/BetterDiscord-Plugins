@@ -1,4 +1,4 @@
-import { buildTextItemElement, PatchChannelContextMenu } from "@danho-lib/ContextMenus";
+import { buildTextItemElement, PatchChannelContextMenu } from "@context-menus";
 import joinWithCamera from "../../utils/joinWithCamera";
 
 export default function patchChannelContextMenu() {

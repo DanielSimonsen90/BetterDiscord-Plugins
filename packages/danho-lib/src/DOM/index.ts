@@ -1,4 +1,5 @@
 export * from './dquery';
+export * from './ElementSelector';
 export * from './Events';
 export * from './Injections';
 

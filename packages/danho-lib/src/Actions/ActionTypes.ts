@@ -1,4 +1,4 @@
-import { MutualFriend, MutualGuild, VoiceStateUpdate } from "@stores";
+import { MutualFriend, MutualGuild, VoiceStateUpdate } from "@discord/stores";
 import { Snowflake, GuildMember, Message, User, Activity, UserStatus, ConnectedAccount, DisplayProfile, Role } from "@discord/types";
 import { UserProfileBadge } from "@discord/components";
 import { SpeakingFlags } from "@discord/types/channel/types";

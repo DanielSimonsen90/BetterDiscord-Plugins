@@ -1,6 +1,6 @@
 import { Snowflake } from "@discord/types";
+import { RTCConnectionStore } from "@discord/stores";
 import { VoiceActions } from "@actions";
-import { RTCConnectionStore } from "@stores";
 
 import JoinWithCameraManager from "./JoinWithCameraManager";
 import enableCamera from "./enableCamera";

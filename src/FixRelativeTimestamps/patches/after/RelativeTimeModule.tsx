@@ -1,6 +1,6 @@
 import { Patcher } from "@dium";
-import { RelativeTimeModule } from "@danho-lib/Patcher/TimeModule";
-import { TimeUtils } from "@danho-lib/Utils";
+import { RelativeTimeModule } from "@injections/patched/TimeModule";
+import { TimeUtils } from "@utils";
 
 export default function afterRelativeTimeModule() {
   Patcher.after(RelativeTimeModule, 'Z', ({ result, args: [args] }) => {

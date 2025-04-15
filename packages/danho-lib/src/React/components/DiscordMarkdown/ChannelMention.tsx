@@ -1,6 +1,6 @@
+import React from '../../React';
 import { Snowflake } from '@discord/types';
-import { ChannelStore } from '@stores';
-import { React } from '../../React';
+import { ChannelStore } from '@discord/stores';
 
 type ChannelMentionProps = {
   id: Snowflake;

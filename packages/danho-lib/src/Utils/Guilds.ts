@@ -1,70 +1,19 @@
 import {
   GuildStore,
   GuildMemberStore,
-  GuildChannelStore,
-  GuildEmojiStore,
   SelectedGuildStore,
   SortedGuildStore,
-  VoiceStore,
-  
+
   UserStore,
-} from '@stores';
+} from '@discord/stores';
+import { Guild, GuildMember, Role, Snowflake, User } from '@discord/types';
 
-import GuildActions from "@actions/GuildActions";
-import { User } from '@discord/types';
-import { Snowflake } from "@discord/types/base";
-import { Guild, Role } from "@discord/types/guild";
-import { GuildMember } from "@discord/types/guild/member";
+import { GuildActions } from "../Actions";
 
-import { BetterOmit, FilterStore } from "./types";
-import Finder from '@danho-lib/dium/api/finder';
-import UserUtils from './Users';
+import UserUtils from './User';
 
-const useGuildFeatures = Finder.findBySourceStrings("hasFeature", "GUILD_SCHEDULED_EVENTS") as (guild: Guild) => Array<string>;
-
-type CompiledGuildUtils = BetterOmit<
-  & FilterStore<GuildStore>
-  & FilterStore<GuildMemberStore>
-  & FilterStore<GuildChannelStore>
-  & FilterStore<GuildEmojiStore>
-  & FilterStore<SelectedGuildStore>
-  & FilterStore<SortedGuildStore>
-  & FilterStore<VoiceStore>
-
-  & typeof GuildActions
-  , '__getLocalVars' | 'getState'> & {
-    useGuildFeatures(guild: Guild): Array<string>;
-  } & {
-    get current(): Guild | null;
-    get currentId(): Snowflake | null;
-    get me(): GuildMember | null;
-
-    meFor(guildId: Snowflake): GuildMember;
-    getSelectedGuildTimestamps(): ReturnType<SelectedGuildStore['getState']>["selectedGuildTimestampMillis"];
-    getIconUrl(guild: Guild): string;
-    getGuildByName(name: string): Guild | null;
-    getGuildRoleWithoutGuildId(roleId: Snowflake): Role | null;
-    getEmojiIcon(emojiId: Snowflake, size?: number): string;
-    getMemberAvatar(memberId: Snowflake, guildId: Snowflake, size?: number): string;
-    getOwner(guildId?: Snowflake): User | null;
-    
-    getSortedGuilds(): Record<Snowflake, Guild>;
-  };
-
-export const GuildUtils: CompiledGuildUtils = {
-  ...GuildStore,
-  ...GuildMemberStore,
-  ...GuildChannelStore,
-  ...GuildEmojiStore,
-  ...SortedGuildStore,
-  ...SelectedGuildStore,
-  ...VoiceStore,
-
+export const GuildUtils = {
   ...GuildActions,
-
-  useGuildFeatures(guild) {
-    return useGuildFeatures(guild) || [];
-  },
 
   get current() {
     return GuildStore.getGuild(SelectedGuildStore.getGuildId());
@@ -83,26 +32,26 @@ export const GuildUtils: CompiledGuildUtils = {
   getSelectedGuildTimestamps() {
     return SelectedGuildStore.getState().selectedGuildTimestampMillis;
   },
-  getIconUrl(guild) {
+  getIconUrl(guild: Guild) {
     return guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp` : 'https://cdn.discordapp.com/embed/avatars/0.png';
   },
-  getEmojiIcon(emojiId, size = 128) {
+  getEmojiIcon(emojiId: Snowflake, size: number = 128) {
     return `https://cdn.discordapp.com/emojis/${emojiId}.webp?size=${size}&quality=lossless`;
   },
 
-  getMembers(guild) {
-    return GuildMemberStore.getMembers(guild);
+  getMembers(guildId: Snowflake) {
+    return GuildMemberStore.getMembers(guildId);
   },
-  getGuildByName(name) {
+  getGuildByName(name: string) {
     return Object.values(GuildStore.getGuilds()).find(guild => guild.name === name) || null;
   },
-  getGuildRoleWithoutGuildId(roleId) {
+  getGuildRoleWithoutGuildId(roleId: Snowflake) {
     return GuildStore.getRole(SelectedGuildStore.getGuildId(), roleId);
   },
-  getMemberAvatar(memberId, guildId, size) {
+  getMemberAvatar(memberId: Snowflake, guildId: Snowflake, size?: number) {
     const avatar = GuildMemberStore.getMember(guildId, memberId).avatar;
     if (avatar) return `https://cdn.discordapp.com/guilds/${guildId}/users/${memberId}/avatars/${avatar}.webp?size=${size}`;
-    return 
+    return;
   },
   getOwner(guildId?: Snowflake, openModal = false, showGuildProfile = true) {
     const guild = guildId ? GuildStore.getGuild(guildId) : GuildUtils.current;

@@ -1,6 +1,8 @@
 import { Actions } from './ActionTypes';
-import { Logger } from '@danho-lib/dium/api/logger';
+import { createLogger } from '@injections';
 import { Dispatcher, EventEmitter } from '@dium/modules';
+
+const Logger = createLogger('ActionsEmitter');
 
 export const ActionsEmitter = new class ActionsEmitter extends EventEmitter<Actions> {
   private _events = new Map<string, Array<[original: (...args: any[]) => void, wrapped: (...args: any[]) => void]>>();
@@ -26,7 +28,7 @@ export const ActionsEmitter = new class ActionsEmitter extends EventEmitter<Acti
     );
 
     Dispatcher.subscribe(eventName as string, callback as any);
-    Logger.log(`[ActionsEmitter] Subscribed to ${eventName}`);
+    Logger.log(`Subscribed to ${eventName}`);
 
     return super.on(eventName, callback as any);
   };
@@ -49,7 +51,7 @@ export const ActionsEmitter = new class ActionsEmitter extends EventEmitter<Acti
       Dispatcher.unsubscribe(eventName as string, callback as any);
       this._events.set(eventName as string, this._events.get(eventName as string)!.filter(([l]) => l !== listener));
     });
-    Logger.log(`[ActionsEmitter] Subscribed to ${eventName}`);
+    Logger.log(`Subscribed to ${eventName}`);
 
     return super.once(eventName, callback as any);
   }
@@ -58,7 +60,7 @@ export const ActionsEmitter = new class ActionsEmitter extends EventEmitter<Acti
     const existing = this._events.get(eventName as string) ?? [];
     this._events.set(eventName as string, existing.filter(([l]) => l !== listener));
 
-    Logger.log(`[ActionsEmitter] Unsubscribed from ${eventName}`);
+    Logger.log(`Unsubscribed from ${eventName}`);
     return super.off(eventName, listener as any);
   }
 
@@ -68,20 +70,21 @@ export const ActionsEmitter = new class ActionsEmitter extends EventEmitter<Acti
     });
     this._events.clear();
 
-    Logger.log(`[ActionsEmitter] Unsubscribed from all events`);
+    Logger.log(`Unsubscribed from all events`);
     return super.removeAllListeners(event);
   }
 
   emit<K>(eventName: keyof Actions | K, ...args: K extends keyof Actions ? Actions[K] extends unknown[] ? Omit<Actions[K], 'type'> : [object] : [object]): boolean {
-    Logger.log(`[ActionsEmitter] Emitting ${eventName}`, { args });
+    Logger.log(`Emitting ${eventName}`, { args });
     const actionProps: any = args.shift();
     if (args.length) Logger.warn(`The following arguments were not used:`, { args });
 
     const payload = Object.assign({ type: eventName }, actionProps);
-    Logger.log(`[ActionsEmitter] Dispatching ${eventName}`, { payload });
+    Logger.log(`Dispatching ${eventName}`, { payload });
     Dispatcher.dispatch(payload);
 
     this._events.get(eventName as string)?.forEach(([_, wrapped]) => wrapped(...args as any));
     return super.emit(eventName, ...args as any);
   }
 };
+export default ActionsEmitter;

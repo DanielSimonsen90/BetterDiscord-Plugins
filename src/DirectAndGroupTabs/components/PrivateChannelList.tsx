@@ -1,12 +1,12 @@
 import { React } from '@react';
 
 import { Button, NotificationBadge } from '@discord/components';
+import { ReadStateStore } from '@discord/stores';
 import { Channel, Snowflake } from '@discord/types';
 
 import { ActionsEmitter, createActionCallback } from '@actions';
-import { ReadStateStore } from '@stores';
+import { Finder } from '@injections';
 
-import Finder from '@danho-lib/dium/api/finder';
 import { Settings } from '../settings/Settings';
 
 type Props = {

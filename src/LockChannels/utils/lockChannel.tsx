@@ -2,8 +2,8 @@ import { React } from '@react';
 import { Snowflake } from "@discord/types";
 import { Logger } from "@dium";
 
-import { $ } from "@danho-lib/DOM";
-import { wait } from "@danho-lib/Utils";
+import { $ } from "@dom";
+import { TimeUtils } from "@utils";
 
 import { Login, LOGIN_ID } from "../components";
 import { LockedChannelsStore } from '../stores';
@@ -17,7 +17,7 @@ export default async function lockChannel(channelId: Snowflake) {
     return;
   }
 
-  await wait(1);
+  await TimeUtils.wait(1);
 
   const contentContainer = $(s => s.className('content').directChild().and.className('page'));
   if (!contentContainer) return Logger.error(`Could not find content container`, {

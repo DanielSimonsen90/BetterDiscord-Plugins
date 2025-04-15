@@ -1,5 +1,5 @@
 import { React } from '@react';
-import TextModule from "@danho-lib/Patcher/Text";
+import TextModule from "@injections/patched/Text";
 import { Patcher } from '@dium';
 
 export default function afterTextModule() {

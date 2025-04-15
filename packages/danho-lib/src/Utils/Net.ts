@@ -1,4 +1,4 @@
-import Finder from "@danho-lib/dium/api/finder";
+import Finder from "../Injections/finder";
 import { Snowflake } from "@discord/types";
 
 export const RatelimitProtector = new class RatelimitProtector {
@@ -39,8 +39,8 @@ type DiscordRequester = Record<'post' | 'get' | 'put' | 'patch' | 'del', <T>(dat
   body: T;
   status: number;
 }>>
-export const DiscordRequesterModule: Record<'tn', DiscordRequester> = Finder.findBySourceStrings("API_ENDPOINT", "API_VERSION", { defaultExport: false });
-export const DiscordRequester = DiscordRequesterModule.tn;
+const DiscordRequesterModule: Record<'tn', DiscordRequester> = Finder.bySourceStrings("API_ENDPOINT", "API_VERSION", { module: true });
+const DiscordRequester = DiscordRequesterModule.tn;
 
 export const NetUtils = {
   DiscordRequester,

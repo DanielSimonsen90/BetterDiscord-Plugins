@@ -1,19 +1,19 @@
-import Finder from "@danho-lib/dium/api/finder";
 import { Snowflake } from "@discord/types";
+import Finder from '../Injections/finder';
 
-const InternalVoiceActions = Finder.findBySourceStrings<{
+const InternalVoiceActions = Finder.bySourceStrings<{
   setVideoEnabled: (enabled: boolean) => void;
   setVideoDevice: (deviceId: string) => void;
 }>("setVideoEnabled", "setVideoDevice");
 
-const handleVoiceConnect = Finder.findBySourceStrings<(
+const handleVoiceConnect = Finder.bySourceStrings<(
   props: {
     channelId?: Snowflake,
     bypassChangeModal?: boolean,
   }
 ) => void>("handleVoiceConnect");
 
-const ChannelSettingsActions: {
+const ChannelSettingsActions = Finder.byKeys<{
   close(): void;
   deleteChannel(channelId: Snowflake): void;
   init(e: any, t: any, n: any): void;
@@ -24,10 +24,10 @@ const ChannelSettingsActions: {
   setSection(section: any): void;
   updateChannel(e: any): void;
   updateVoiceChannelStatus(channelId: Snowflake, status: string): Promise<any>;
-} = Finder.byKeys(["open", "saveChannel", "updateVoiceChannelStatus"]);
+}>(["open", "saveChannel", "updateVoiceChannelStatus"]);
 type ChannelSettingsActions = typeof ChannelSettingsActions;
 
-const StageChannelActions: {
+const StageChannelActions = Finder.byKeys<{
   rebuildRTCActiveChannels(): void;
   selectParticipant(channelId: Snowflake, participantId: Snowflake): void;
   toggleParticipants(channelId: Snowflake, participantsOpen: boolean): void;
@@ -37,7 +37,7 @@ const StageChannelActions: {
   updateLayout(channelId: Snowflake, videoLayout: any, appContext?: any): void;
   updateStageStreamSize(channelId: Snowflake, large: boolean): void;
   updateStageVideoLimitBoostUpsellDismissed(channelId: Snowflake, dismissed: boolean): void;
-} = Finder.byKeys(["updateChatOpen"]);
+}>(["updateChatOpen"]);
 type StageChannelActions = typeof StageChannelActions;
 
 export const VoiceActions = Object.assign({},

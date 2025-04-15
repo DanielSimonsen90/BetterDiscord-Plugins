@@ -1,6 +1,6 @@
-import { BadgeTypes, BadgeList } from "@discord/components";
+import { BadgeTypes, UserProfileBadgeList } from "@discord/components";
 
-type Props = ReturnType<BadgeList>['props']
+type Props = ReturnType<UserProfileBadgeList>['props']
 
 export function movePremiumBeforeBoost(props: Props): Props {
   const nitroBadge = props.children.find(badge => badge.props.children.props.href?.includes(BadgeTypes.NITRO_ANY));

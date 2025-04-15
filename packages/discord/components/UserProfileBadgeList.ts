@@ -1,7 +1,7 @@
-import Finder from "@danho-lib/dium/api/finder";
+import { Finder } from '@injections';
 import { DisplayProfile } from "@discord/types";
 
-export type BadgeList = JSX.BD.FC<{
+export type UserProfileBadgeList = JSX.BD.FC<{
   badges: Array<UserProfileBadge>;
   displayProfile?: DisplayProfile;
   onClose: (e: React.MouseEvent) => void;
@@ -30,7 +30,7 @@ export type BadgeList = JSX.BD.FC<{
         tenureReqNumMonths: number;
         hasWideArt: boolean;
         nameUnformatted(n: any): string;
-      }
+      };
     }>;
     tooltipClassName: undefined;
   }, true>>;
@@ -38,8 +38,8 @@ export type BadgeList = JSX.BD.FC<{
   role: 'group';
 }>;
 
-export const BadgeList: Record<'Z', BadgeList> = Finder.findBySourceStrings("badges", "badgeClassName", "displayProfile", "QUEST_CONTENT_VIEWED", { defaultExport: false });
-export default BadgeList;
+export const UserProfileBadgeList = Finder.bySourceStrings<UserProfileBadgeList, true>("badges", "badgeClassName", "displayProfile", "QUEST_CONTENT_VIEWED", { module: true });
+export default UserProfileBadgeList;
 
 export type UserProfileBadge = {
   id: BadgeId;

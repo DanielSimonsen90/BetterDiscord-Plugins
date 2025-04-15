@@ -1,9 +1,10 @@
-import React, { useForceUpdate } from "@react";
+import React from "@react";
+import { useForceUpdate } from "@hooks";
 
-import { buildContextMenu, buildTextItem } from "@danho-lib/ContextMenus";
+import { buildContextMenu, buildTextItem } from "@context-menus";
 
-import { CustomBadge, CustomBadgeData } from "src/Badges/components/CustomBadge";
-import { BadgePositionsStoreEditor } from "src/Badges/stores";
+import { CustomBadge, CustomBadgeData } from "../../../components/CustomBadge";
+import { BadgePositionsStoreEditor } from "../../../stores";
 
 import { ModifyBadgeData } from "./CustomBadgeModifyForm";
 

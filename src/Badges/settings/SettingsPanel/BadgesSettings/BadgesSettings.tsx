@@ -1,21 +1,12 @@
-import React, {
-  useState,
-
-  // React utils
-  classNames,
-
-  // Custom components
-  SearchableList, UserListItem as UserComponent,
-  ErrorBoundary,
-
-  useForceUpdate,
-} from "@react";
+import React, { useState, classNames } from "@react";
+import { SearchableList, UserListItem, ErrorBoundary } from '@components'
+import { useForceUpdate } from "@hooks";
 
 import { Button, Tooltip } from "@discord/components";
 import { FormSection, Text } from "@dium/components";
 
-import { buildContextMenu, buildTextItem } from '@danho-lib/ContextMenus';
-import { ObjectUtils, StringUtils, UserUtils } from "@danho-lib/Utils";
+import { buildContextMenu, buildTextItem } from '@context-menus';
+import { ObjectUtils, StringUtils, UserUtils } from "@utils";
 
 import { CustomBadge } from "../../../components/CustomBadge";
 import { CustomBadgesStore, BadgePositionsStore } from "../../../stores";
@@ -68,7 +59,7 @@ export default function CustomBadgesSettingsGroup() {
                       const user = UserUtils.getUserByUsername(userTag);
                       const onClick = () => modifyUserToBadge(badge.id, userTag, 'remove');
                       const child = user
-                        ? <UserComponent user={user} onClick={onClick} />
+                        ? <UserListItem user={user} onClick={onClick} />
                         : <Text variant="text-md/normal">{userTag}</Text>;
 
                       return (
@@ -96,7 +87,7 @@ export default function CustomBadgesSettingsGroup() {
                         const onClick = () => modifyUserToBadge(badge.id, user.username, 'add');
                         return (
                           <div {...props} className="user-tooltip" onClick={onClick}>
-                            <UserComponent user={user} onClick={onClick} />
+                            <UserListItem user={user} onClick={onClick} />
                           </div>
                         );
                       }}

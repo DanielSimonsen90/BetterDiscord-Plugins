@@ -1,5 +1,6 @@
-import React, { Setting } from "@react";
-import { GuildStore, SortedGuildStore } from "@stores";
+import React from "@react";
+import { Setting } from '@components';
+import { GuildStore, SortedGuildStore } from "@discord/stores";
 import { Settings, titles } from "../Settings";
 
 export default function SettingsPanel() {

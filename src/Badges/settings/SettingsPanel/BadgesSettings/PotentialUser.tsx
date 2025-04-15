@@ -1,22 +1,21 @@
 import React, {
-  Dispatch,
-  SetStateAction,
   useMemo,
-  UserListItem as UserComponent,
+  Dispatch, SetStateAction,
   classNames,
 } from "@react";
+import { UserListItem } from "@components";
 
 import { User } from "@discord/types";
 import { Tooltip, UserProfileBadge } from "@discord/components";
+import { UserProfileStore } from "@discord/stores";
 
-import { UserProfileStore } from "@stores";
-import { Logger } from "@danho-lib/dium/api/logger";
-import { UrlUtils, UserUtils } from "@danho-lib/Utils";
+import { Logger } from "@injections";
+import { UrlUtils, UserUtils } from "@utils";
 
-import { CustomBadge, CustomBadgeData } from "src/Badges/components/CustomBadge";
+import { CustomBadge, CustomBadgeData } from "../../../components/CustomBadge";
+import { BadgePositionsStoreEditor, CustomBadgesStore, DiscordBadgeStore } from "../../../stores";
 
 import { ModifyBadgeData } from "./CustomBadgeModifyForm";
-import { BadgePositionsStoreEditor, CustomBadgesStore, DiscordBadgeStore } from "src/Badges/stores";
 
 type Props = {
   user: User;
@@ -91,7 +90,7 @@ export const PotentialUser = (props: Props) => {
     <Tooltip text={`Give ${modifyBadge.name} to ${UserUtils.getUsernames(user).shift()}`}>
       {props => (
         <div className='tooltip-inner' {...props}>
-          <UserComponent user={user} 
+          <UserListItem user={user} 
             className={classNames(
               'potential-user',
               modifyBadge.userTags?.includes(user.username) && 'border-success'
@@ -100,7 +99,7 @@ export const PotentialUser = (props: Props) => {
             <div className="danho-user-badge-list">
               {compiledBadges.map(badge => <CustomBadge key={badge.id} {...badge} />)}
             </div>
-          </UserComponent>
+          </UserListItem>
         </div>
       )}
     </Tooltip>

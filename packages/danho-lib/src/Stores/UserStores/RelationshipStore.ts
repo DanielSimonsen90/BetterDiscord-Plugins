@@ -1,1 +1,0 @@
-export { RelationshipStore } from '@dium/modules/user';

@@ -1,6 +1,6 @@
-import Finder from "@danho-lib/dium/api/finder";
+import { Finder } from '@injections';
 import { Snowflake } from "@discord/types";
-import { Application } from "@danho-lib/Stores/AppStores/ApplicationStore";
+import { Application } from "@discord/stores/AppStores/ApplicationStore";
 
 export type ApplicationActions = {
   createApplication(e: any): Application
@@ -10,5 +10,5 @@ export type ApplicationActions = {
   transferApplication(e: any): any;
 };
 
-export const ApplicationActions = Finder.findBySourceStrings<ApplicationActions>("fetchApplications", "createApplication");
+export const ApplicationActions = Finder.bySourceStrings<ApplicationActions>("fetchApplications", "createApplication");
 export default ApplicationActions;

@@ -1,11 +1,12 @@
-import Finder from "@danho-lib/dium/api/finder";
 import { Snowflake } from "@discord/types/base";
-import { UserNoteStore } from "@stores";
-import { ActionsEmitter } from "./ActionsEmitter";
+import { UserNoteStore } from "@discord/stores";
 
-import NetUtils from '@danho-lib/Utils/Net';
-import UrlUtils from '@danho-lib/Utils/Url';
-import TimeUtils, { wait } from '@danho-lib/Utils/Time';
+import ActionsEmitter from "./ActionsEmitter";
+import Finder from '../Injections/finder';
+
+import NetUtils from '../Utils/Net'
+import UrlUtils from '../Utils/Url';
+import TimeUtils from '../Utils/Time';
 
 import { Actions } from "./ActionTypes";
 
@@ -32,7 +33,7 @@ export default UserNoteActions;
 
 /**
  * Internal Discord API function to update a user's note.
- * Found using Finder.findBySourceStrings(".getNote(", "useEffect")
+ * Found using Finder.bySourceStrings(".getNote(", "useEffect")
  */
 async function requestNote(userId: Snowflake) {
   ActionsEmitter.emit('USER_NOTE_LOAD_START', { userId });
@@ -54,10 +55,10 @@ async function requestNote(userId: Snowflake) {
  */
 async function updateNote(userId: Snowflake, note: string) {
   const InternalUserNoteActions = await new Promise<InternalUserNoteActions | undefined>((resolve, reject) => {
-    Finder.findBySourceStrings(".NOTE(", "note:", 'lazy=true')
+    Finder.bySourceStrings(".NOTE(", "note:", { lazy: true })
       .then(resolve)
       .catch(reject);
-    wait(2000).then(reject);
+    TimeUtils.wait(2000).then(reject);
   })
 
   if (InternalUserNoteActions?.updateNote) return InternalUserNoteActions.updateNote(userId, note);

@@ -1,4 +1,4 @@
-import { DQuery, $ } from "@danho-lib/DOM";
+import { DQuery, $ } from "@dom";
 import { Logger } from "@dium/api";
 
 export default function orderPostsByAuthor() {

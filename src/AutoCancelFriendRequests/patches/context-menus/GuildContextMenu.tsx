@@ -1,4 +1,4 @@
-import { buildTextItemElement, PatchGuildContextMenu } from "@danho-lib/ContextMenus";
+import { buildTextItemElement, PatchGuildContextMenu } from "@context-menus";
 import { Settings } from "../../settings/Settings";
 
 export default function patchGuildContextMenu() {

@@ -1,6 +1,6 @@
 import { Patcher, React } from "@dium";
-import { UserNoteStore } from "@stores";
-import { UserHeaderUsernameModule } from "@danho-lib/Patcher/UserHeaderUsername";
+import { UserNoteStore } from "@discord/stores";
+import { UserHeaderUsernameModule } from "@injections/patched/UserHeaderUsername";
 import { TimezoneContainer } from "../../components";
 
 export default function afterUserHeaderUsernameModule() {

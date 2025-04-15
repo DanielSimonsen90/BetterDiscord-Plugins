@@ -1,5 +1,5 @@
-import { React } from '../React';
-import { GuildStore } from "@stores";
+import React from '../React';
+import { GuildStore } from "@discord/stores";
 import { Snowflake, Guild } from "@discord/types";
 
 type GuildListItemProps = (

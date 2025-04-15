@@ -653,7 +653,7 @@ const Logger = {
     debugLog,
 };
 
-function findBySourceStrings(...keywords) {
+function bySourceStrings(...keywords) {
     const searchOptions = keywords.find(k => typeof k === 'object');
     if (searchOptions)
         keywords.splice(keywords.indexOf(searchOptions), 1);
@@ -663,19 +663,19 @@ function findBySourceStrings(...keywords) {
     if (backupIdKeywordIndex > -1)
         keywords.splice(backupIdKeywordIndex, 1);
     if (backupId)
-        debugLog(`[findBySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
+        debugLog(`[bySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
     const showMultiple = keywords.find(k => k === 'showMultiple=true');
     const showMultipleIndex = keywords.indexOf(showMultiple);
     if (showMultipleIndex > -1)
         keywords.splice(showMultipleIndex, 1);
     if (showMultiple)
-        debugLog(`[findBySourceStrings] Showing multiple results - [${keywords.join(',')}]`, keywords);
+        debugLog(`[bySourceStrings] Showing multiple results - [${keywords.join(',')}]`, keywords);
     const lazy = keywords.find(k => k === 'lazy=true');
     const lazyIndex = keywords.indexOf(lazy);
     if (lazyIndex > -1)
         keywords.splice(lazyIndex, 1);
     if (lazy)
-        debugLog(`[findBySourceStrings] Using lazy search - [${keywords.join(',')}]`, keywords);
+        debugLog(`[bySourceStrings] Using lazy search - [${keywords.join(',')}]`, keywords);
     const _keywords = keywords;
     const moduleCallback = (exports, _, id) => {
         if (!exports || exports === window)
@@ -711,7 +711,7 @@ function findBySourceStrings(...keywords) {
             || eIsClassAsE
             || eIsObjectWithKeywords) : eIsFunctionAndHasKeywords;
         if ((filter && backupId && id.toString() !== backupId) || !filter && id.toString() === backupId)
-            debugWarn(`[findBySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, {
+            debugWarn(`[bySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, {
                 exports,
                 internal: {
                     eIsFunctionAndHasKeywords,
@@ -744,7 +744,7 @@ function findBySourceStrings(...keywords) {
             ];
             if (err instanceof Error && expectedErrorMessages.some(message => err.message.includes(message)))
                 return undefined;
-            error(`[findBySourceStrings] Error in moduleCallback`, err);
+            error(`[bySourceStrings] Error in moduleCallback`, err);
         }
     };
     const moduleSearchOptions = searchOptions ?? { searchExports: true };
@@ -758,10 +758,10 @@ function findBySourceStrings(...keywords) {
             signal: controller.signal,
             ...searchOptions
         }).then(module => {
-            debugLog(`[findBySourceStrings] Found lazy module for [${keywords.join(',')}]`, module);
+            debugLog(`[bySourceStrings] Found lazy module for [${keywords.join(',')}]`, module);
             return module;
         }).catch(err => {
-            error(`[findBySourceStrings] Error in lazy search`, err);
+            error(`[bySourceStrings] Error in lazy search`, err);
             return undefined;
         });
 }
@@ -805,7 +805,7 @@ const findModuleById = (id, options) => {
     return BdApi.Webpack.getModule((_, __, _id) => _id === id.toString(), options);
 };
 function findUnpatchedModuleBySourceStrings(...keywords) {
-    const module = findBySourceStrings(...keywords);
+    const module = bySourceStrings(...keywords);
     if (!module) {
         log(`[findUnpatchedModuleBySourceStrings] Module not found for keywords: [${keywords.join(',')}]`);
         return undefined;
@@ -817,7 +817,7 @@ function findUnpatchedModuleBySourceStrings(...keywords) {
 const Finder = {
     ...DiumFinder,
     ...BDFDB_Finder,
-    findBySourceStrings,
+    bySourceStrings,
     findComponentBySourceStrings,
     findModuleById,
     findUnpatchedModuleBySourceStrings,
@@ -1069,7 +1069,7 @@ function containsClassInModule(className, module) {
     return Object.values(module).some((value) => value === className);
 }
 function findModuleWithMinimalKeys(className) {
-    const module = Finder.findBySourceStrings(className, { defaultExport: false });
+    const module = Finder.bySourceStrings(className, { defaultExport: false });
     if (!module) {
         warn(`Module not found for className: ${className}`);
         return null;
@@ -1117,7 +1117,7 @@ const RatelimitProtector = new class RatelimitProtector {
         return result;
     }
 };
-const DiscordRequesterModule = Finder.findBySourceStrings("API_ENDPOINT", "API_VERSION", { defaultExport: false });
+const DiscordRequesterModule = Finder.bySourceStrings("API_ENDPOINT", "API_VERSION", { defaultExport: false });
 const DiscordRequester = DiscordRequesterModule.tn;
 const NetUtils = {
     DiscordRequester,
@@ -1167,7 +1167,7 @@ const StringUtils = {
     generateRandomId,
 };
 
-const InternalDiscordEndpoints = Finder.findBySourceStrings("ACCOUNT_NOTIFICATION_SETTINGS", "BADGE_ICON");
+const InternalDiscordEndpoints = Finder.bySourceStrings("ACCOUNT_NOTIFICATION_SETTINGS", "BADGE_ICON");
 const DiscordEndpoints = Object.assign({}, InternalDiscordEndpoints, {
     BADGE_ICON: (icon) => `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}${InternalDiscordEndpoints.BADGE_ICON(icon)}`,
 });
@@ -1340,7 +1340,7 @@ async function requestNote(userId) {
 }
 async function updateNote(userId, note) {
     const InternalUserNoteActions = await new Promise((resolve, reject) => {
-        Finder.findBySourceStrings(".NOTE(", "note:", 'lazy=true')
+        Finder.bySourceStrings(".NOTE(", "note:", 'lazy=true')
             .then(resolve)
             .catch(reject);
         wait(2000).then(reject);
@@ -1355,8 +1355,8 @@ async function updateNote(userId, note) {
     });
 }
 
-const navigate = Finder.findBySourceStrings("transitionTo -", { defaultExport: false, searchExports: true });
-const navigateToGuild = Finder.findBySourceStrings("transitionToGuild -", { defaultExport: false, searchExports: true });
+const navigate = Finder.bySourceStrings("transitionTo -", { defaultExport: false, searchExports: true });
+const navigateToGuild = Finder.bySourceStrings("transitionToGuild -", { defaultExport: false, searchExports: true });
 const AppActions = {
     navigate,
     navigateToGuild,
@@ -1432,7 +1432,7 @@ const UserUtils = {
     },
 };
 
-const AvatarWithText = Finder.findBySourceStrings("AvatarWithText");
+const AvatarWithText = Finder.bySourceStrings("AvatarWithText");
 const AvatarWithTextClassNameModule = ClassNamesUtils.combineModuleByKeys(["avatarWithText"]);
 
 var ButtonLooks;
@@ -1465,16 +1465,16 @@ var Colors$1;
     Colors[Colors["TRANSPARENT"] = 7] = "TRANSPARENT";
     Colors[Colors["WHITE"] = 8] = "WHITE";
 })(Colors$1 || (Colors$1 = {}));
-const Button = Finder.findBySourceStrings("FILLED", "BRAND", "MEDIUM", "button", "buttonRef");
+const Button = Finder.bySourceStrings("FILLED", "BRAND", "MEDIUM", "button", "buttonRef");
 
-const GlobalNavigation = Finder.findBySourceStrings("ConnectedPrivateChannelsList", { defualtExport: false });
+const GlobalNavigation = Finder.bySourceStrings("ConnectedPrivateChannelsList", { defualtExport: false });
 
 const ScrollerLooks = Finder.byKeys(['thin', 'fade']);
-const ScrollerWrapper = Finder.findBySourceStrings("paddingFix", "getScrollerState");
+const ScrollerWrapper = Finder.bySourceStrings("paddingFix", "getScrollerState");
 const ScrollerAuto = ScrollerWrapper();
 
-const getNode = Finder.findBySourceStrings("timestamp", "format", "parsed", "full", { searchExports: true });
-const Timestamp = Finder.findBySourceStrings(".timestampTooltip", { defaultExport: false, }).Z;
+const getNode = Finder.bySourceStrings("timestamp", "format", "parsed", "full", { searchExports: true });
+const Timestamp = Finder.bySourceStrings(".timestampTooltip", { defaultExport: false, }).Z;
 function TimestampComponent({ unix, format }) {
     if (isNaN(unix)) {
         Logger.error("TimestampComponent: Invalid unix timestamp", { unix, format });
@@ -1858,7 +1858,7 @@ function Birthday(props) {
         : React.createElement(BirthdateComponent, null));
 }
 
-const CalendarIcon = Finder.findBySourceStrings("M7 1a1 1 0 0 1 1 1v.75c0");
+const CalendarIcon = Finder.bySourceStrings("M7 1a1 1 0 0 1 1 1v.75c0");
 
 class ElementSelector {
     constructor() {
@@ -2832,7 +2832,7 @@ function afterGlobalNavigation() {
     }, { name: 'GlobalNavigation' });
 }
 
-const MemberListItem = Finder.findBySourceStrings("ownerTooltipText", "onClickPremiumGuildIcon:", { defaultExport: false });
+const MemberListItem = Finder.bySourceStrings("ownerTooltipText", "onClickPremiumGuildIcon:", { defaultExport: false });
 
 function afterMemberListItem() {
     after(MemberListItem, 'Z', ({ result: _result, args: [props] }) => {
@@ -2852,7 +2852,7 @@ function afterMemberListItem() {
     }, { name: 'MemberListItem' });
 }
 
-const NameTag = Finder.findBySourceStrings(`nameAndDecorators`, `AvatarWithText`);
+const NameTag = Finder.bySourceStrings(`nameAndDecorators`, `AvatarWithText`);
 
 function afterNameTag() {
     after(NameTag, 'render', ({ result, args: [props] }) => {

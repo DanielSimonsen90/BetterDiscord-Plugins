@@ -1,7 +1,11 @@
-import React, { Setting } from "@react";
-import { Settings, titles } from "../Settings";
+import React from "@react";
+import { Setting } from "@components";
+
 import { DiscordTimeFormat } from "@discord/types";
 import TimestampComponent from "@discord/components/Timestamp";
+
+import { Settings, titles } from "../Settings";
+
 export default function SettingsPanel() {
 	const [settings, set] = Settings.useState();
 	const { timestampStyle } = Settings.useSelector(s => ({

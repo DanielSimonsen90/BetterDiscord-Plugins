@@ -1,6 +1,6 @@
 import { createPlugin } from "@dium";
 import { ActionsEmitter } from '@actions';
-import { ChannelUtils } from "@danho-lib/Utils";
+import { ChannelUtils } from "@utils";
 
 import subscribeToActions from "./actions";
 import patch from "./patches";

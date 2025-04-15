@@ -1,14 +1,14 @@
-import { Snowflake, ChannelTypes } from "@discord/types";
-import { ActionsEmitter, createActionCallback } from "@actions";
 import { 
   ChannelListStore, ChannelStore, SelectedChannelStore,
-  DanhoStores, DiumStore, 
   GuildChannelStore, ReadStateStore, VoiceStore 
-} from "@stores";
-import { GuildUtils } from "@danho-lib/Utils";
+} from "@discord/stores";
+import { Snowflake, ChannelTypes } from "@discord/types";
+
+import { ActionsEmitter, createActionCallback } from "@actions";
+import { DanhoStores, DiumStore } from "@stores";
+import { GuildUtils } from "@utils";
 
 import { Settings } from "../settings/Settings";
-import { $ } from "@danho-lib/DOM";
 
 type ChannelState = {
   hidden: boolean;

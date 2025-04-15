@@ -1,10 +1,11 @@
 import React from '@react';
 import { Channel } from '@discord/types';
 import { ScrollerLooks } from '@discord/components';
-import { ChannelListStore } from '@stores';
+import { useGuildFeatures } from '@discord/hooks';
+import { ChannelListStore } from '@discord/stores';
 
-import { GuildUtils } from '@danho-lib/Utils';
-import { $ } from '@danho-lib/DOM';
+import { GuildUtils } from '@utils';
+import { $ } from '@dom';
 
 import HiddenChannelStore from '../stores/HiddenChannelStore';
 import ScrollerStore from '../stores/ScrollerStore';
@@ -22,7 +23,7 @@ type RowData = {
 const DISCORD_HEADER_CHANNEL_NAV_SECTION_ID = 1;
 export default function GuildList(ListClass: typeof React.PureComponent<any, any>) {
   const guild = GuildUtils.current;
-  const guildFeatures = GuildUtils.useGuildFeatures(guild);
+  const guildFeatures = useGuildFeatures(guild);
 
   return class DanhoGuildChannelList extends ListClass {
     private instanceRef = React.createRef<HTMLDivElement>();

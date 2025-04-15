@@ -1,7 +1,10 @@
-import React, { useState, useMemo, FormItemFromModel } from '@react';
+import React, { useState, useMemo } from '@react';
+import { FormItemFromModel } from '@components';
+
 import { Channel } from '@discord/types';
 import { Button } from '@discord/components';
-import { ObjectUtils } from '@danho-lib/Utils';
+
+import { ObjectUtils } from '@utils';
 
 import { LockedChannelsStore, EditLockedChannelState } from '../stores';
 import { Settings } from '../settings/Settings';
