@@ -7,7 +7,7 @@ import {
   UserTypingStore,
   UserMentionStore,
   PresenceStore,
-  UserStore, 
+  UserStore,
   RelationshipStore,
   MessageStore,
   SelectedGuildStore,
@@ -39,6 +39,7 @@ type CompiledUserUtils = BetterOmit<
   getUsersPrioritizingFriends(byName?: string): Array<User>;
   openModal(userId: string, showGuildProfile?: boolean): void;
   getUsernames(user: User, lowered?: boolean): string[];
+  getDisplayName(user: User): string;
 };
 
 export const UserUtils: CompiledUserUtils = {
@@ -55,6 +56,8 @@ export const UserUtils: CompiledUserUtils = {
   get me() {
     const user = UserStore.getCurrentUser();
     return Object.assign(user, {
+      getAvatarURL: user.getAvatarURL.bind(user),
+    }, {
       get status() {
         return PresenceStore.getStatus(user.id);
       }
@@ -62,6 +65,7 @@ export const UserUtils: CompiledUserUtils = {
   },
 
   getPresenceState: () => PresenceStore.getState(),
+  getCurrentUser: () => UserStore.getCurrentUser(),
   getUserByUsername(username) {
     return Object.values(UserStore.getUsers()).find(user => user.username === username);
   },
@@ -81,8 +85,8 @@ export const UserUtils: CompiledUserUtils = {
       index === self.findIndex(u => u.id === user.id)
     ));
 
-    return byName 
-      ? result.filter(user => getUsername(user).includes(byName.toLowerCase())) 
+    return byName
+      ? result.filter(user => getUsername(user).includes(byName.toLowerCase()))
       : result;
   },
   openModal(userId, showGuildProfile = false) {
@@ -101,7 +105,7 @@ export const UserUtils: CompiledUserUtils = {
         "bite size profile popout",
         "avatar"
       ]
-    })
+    });
   },
   getUsernames(user, lowered = false) {
     return [
@@ -109,8 +113,11 @@ export const UserUtils: CompiledUserUtils = {
       user.username,
       user.tag
     ]
-    .filter(Boolean)
-    .map(name => lowered ? name.toLowerCase() : name);
+      .filter(Boolean)
+      .map(name => lowered ? name.toLowerCase() : name);
+  },
+  getDisplayName(user) {
+    return this.getUsernames(user).shift();
   },
 };
 export default UserUtils;

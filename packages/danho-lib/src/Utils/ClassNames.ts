@@ -83,7 +83,14 @@ export function findModuleWithMinimalKeys(className: string): { module: Record<s
     return null;
   }
 
-  // Step 3: Start with all keys and iteratively reduce them
+  // Step 3: Attempt if className's key is unique enough alone to identify the module
+  const classNameKey = Object.keys(module).find(key => module[key] === className);
+  const byClassNameKey = Finder.byKeys([classNameKey]);
+  
+  // If the module is found by the className key, return it as the only key
+  if (byClassNameKey === module) return { module, keys: [classNameKey] };
+  
+  // Step 4: Start with all keys and iteratively reduce them
   let minimalKeys = [...keys]; // Start with all keys
   for (const key of keys) {
     // Test if removing the current key still retrieves the same module

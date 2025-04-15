@@ -49,7 +49,7 @@ const patch = () => PatchUserContextMenu((menu, props, unpatch) => {
                 <div className='badge-context-option-container'>
                   <CustomBadge
                     name={name}
-                    iconUrl={UrlUtils.badgeIcon(badge.icon)}
+                    iconUrl={UrlUtils.DiscordEndpoints.BADGE_ICON(badge.icon)}
                     href={badge.link}
                     key={badgeId}
                   />

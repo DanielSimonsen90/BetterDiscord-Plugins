@@ -29,3 +29,7 @@ export const DISPATCH_ACTIONS = (() => {
 export function find(action: string) {
   return DISPATCH_ACTIONS.filter(key => key.toLowerCase().includes(action.toLowerCase()));
 }
+export function findHandlers(action: string) {
+  return Object.values(Dispatcher._actionHandlers._dependencyGraph.nodes)
+    .filter(node => Object.keys(node.actionHandler).some(key => key.toLowerCase().includes(action.toLowerCase())))
+}

@@ -28,8 +28,27 @@ export function generateRandomId() {
   return Math.random().toString(36).substring(2, 9);
 }
 
+
+type DateSeperation = '-' | '/';
+export type DateFormat = (
+  | `YYYY${DateSeperation}MM${DateSeperation}DD`
+  | `MM${DateSeperation}DD${DateSeperation}YYYY`
+  | `DD${DateSeperation}MM${DateSeperation}YYYY`
+)
+export function formatDate(date: Date, format: DateFormat = 'YYYY-MM-DD'): string {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const withZero = (num: number) => String(num).padStart(2, '0');
+
+  return format
+    .replace('YYYY', String(year))
+    .replace('MM', withZero(month))
+    .replace('DD', withZero(day));
+}
+
 export const StringUtils = {
-  join, 
+  join, formatDate,
   kebabCaseFromCamelCase, kebabCaseFromPascalCase,
   pascalCaseFromSnakeCase, pascalCaseFromCamelCase,
   generateRandomId,

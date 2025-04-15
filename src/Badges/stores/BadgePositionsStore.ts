@@ -123,7 +123,7 @@ export const BadgePositionsStore = new class BadgePositionsStore extends DiumSto
     return {
       id: badgeId,
       name: discordBadge?.description ?? customBadge.name,
-      iconUrl: discordBadge?.icon ? UrlUtils.badgeIcon(discordBadge.icon) : customBadge.iconUrl,
+      iconUrl: discordBadge?.icon ? UrlUtils.DiscordEndpoints.BADGE_ICON(discordBadge.icon) : customBadge.iconUrl,
       url: discordBadge?.link ?? customBadge?.href,
       style: customBadge?.size ? {
         width: customBadge.size,

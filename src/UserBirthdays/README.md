@@ -1,8 +1,8 @@
-# [0DanhoLibrary v2.3.0](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/dist/bd/0DanhoLibrary)
-by danielsimonsen90
+# [UserBirthdays v1.0.0](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/dist/bd/UserBirthdays)
+by danhosaur
 
 ## What does it do?
-Library for Danho's plugins
+Never forget your friends' birthdays! With this plugin, you can add their birthdays using your notes, view all the birthdays in the new calendar page, and even get a small 🎂 on a birthday person's avatar!
 
 ## Found a bug?
 If you found a bug, please report it [here](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/issues) and I will see to it when I can. Make sure you include the following information:

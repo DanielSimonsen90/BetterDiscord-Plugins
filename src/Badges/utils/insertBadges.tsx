@@ -45,7 +45,7 @@ export default function insertBadges(props: PropsFromFC<BadgeList>, result: Retu
 
     const discordBadge = badgeId in DiscordBadgeStore.current ? DiscordBadgeStore.current[badgeId] : null;
     if (discordBadge) return <CustomBadge key={badgeId}
-      iconUrl={UrlUtils.badgeIcon(discordBadge.icon)}
+      iconUrl={UrlUtils.DiscordEndpoints.BADGE_ICON(discordBadge.icon)}
       name={DiscordBadgeStore.getBadgeName(badgeId as BadgeId)}
       href={discordBadge.link}
     />;

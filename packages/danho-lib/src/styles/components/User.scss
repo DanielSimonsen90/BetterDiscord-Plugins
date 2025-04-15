@@ -1,3 +1,5 @@
+@use '../partials.scss';
+
 .danho-discord-user {
   display: flex;
   align-items: center;
@@ -19,12 +21,13 @@
   }
 
   &__displayName {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    @extend %text-ellipsis;
+    text-align: left;
   }
 
   &__username {
+    @extend %text-ellipsis;
+    text-align: left;
     color: var(--text-normal);
   }
 }

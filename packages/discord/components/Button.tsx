@@ -1,9 +1,9 @@
 import Finder from '@danho-lib/dium/api/finder';
 import { React } from '@dium/modules';
 
-enum ButtonLooks { BLANK, FILLED, INVERTED, LINK, OUTLINED }
-enum ButtonSizes { ICON, LARGE, MAX, MEDIUM, MIN, NONE, SMALL, TINY, XLARGE }
-enum Colors { BLACK, BRAND, BRAND_NEW, GREEN, LINK, PRIMARY, RED, TRANSPARENT, WHITE, YELLOW }
+enum ButtonLooks { BLANK, FILLED, LINK, OUTLINED }
+enum ButtonSizes { ICON, LARGE, MAX, MEDIUM, MIN, NONE, SMALL, TINY }
+enum Colors { BRAND, BRAND_INVERTED, CUSTOM, GREEN, LINK, PRIMARY, RED, TRANSPARENT, WHITE }
 
 type ButtonProps = {
     look?: ButtonLooks;

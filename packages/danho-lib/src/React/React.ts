@@ -47,6 +47,8 @@ export {
   CSSProperties,
   RefObject,
   MutableRefObject, 
+  ForwardedRef,
+  ForwardRefExoticComponent,
   ChangeEvent,
   KeyboardEvent,
   MouseEvent,

@@ -42,6 +42,25 @@ export function timeSpan(startTime: number, endTime: number, format: 'full' | 's
   }
 }
 
+export function wait<T>(time: number): Promise<never>;
+export function wait<T>(callback: (...args: any[]) => any, time: number): Promise<T>;
+export function wait<T>(callbackOrTime: ((...args: any[]) => any) | number, time?: number) {
+  const callback = typeof callbackOrTime === 'function' ? callbackOrTime : (() => undefined);
+  time ??= callbackOrTime as number;
+
+  return new Promise<T>((resolve, reject) => {
+    try { setTimeout(() => resolve(callback()), time); }
+    catch (err) { reject(err); }
+  });
+}
+
+export function getUnixTime(date: Date | string): number;
+export function getUnixTime(timestamp: number): number;
+export function getUnixTime(arg: Date | string | number): number {
+  const timestamp = typeof arg === 'number' ? arg : new Date(arg).getTime();
+  return Math.floor(timestamp / 1000);
+}
+
 export function throttle<T>(callback: (...args: T[]) => void, delay: number) {
   let lastTime = 0;
   return function (...args: T[]) {
@@ -55,6 +74,8 @@ export function throttle<T>(callback: (...args: T[]) => void, delay: number) {
 
 export const TimeUtils = {
   SECOND, MINUTE, HOUR, DAY, WEEK, MONTH, YEAR,
-  timeSpan,
+  timeSpan, getUnixTime, wait,
   throttle,
 }
+
+export default TimeUtils;

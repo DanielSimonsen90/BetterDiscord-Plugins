@@ -6,6 +6,8 @@ export const Settings = createSettings({
 	birthdateTimestampStyle: 'd',
 	showBirthdayCalendar: true,
 	showBirthdayOnNameTag: true,
+	updateNotesOnCalendarChange: true,
+	dateFormat: 'DD/MM/YYYY',
 })
 
 export const titles: Record<keyof typeof Settings.current, string> = {
@@ -14,4 +16,6 @@ export const titles: Record<keyof typeof Settings.current, string> = {
 	birthdateTimestampStyle: `Birthdate timestamp style`,
 	showBirthdayCalendar: `Show birthday calendar in global navigation`,
 	showBirthdayOnNameTag: `Show birthday on name tag`,
+	updateNotesOnCalendarChange: `Update notes for users when adding their birthday to the calendar`,
+	dateFormat: `Preferred date format`,
 }

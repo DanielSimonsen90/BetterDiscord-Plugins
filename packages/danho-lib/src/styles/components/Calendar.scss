@@ -1,0 +1,72 @@
+.danho-calendar {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--app-border-frame);
+
+  $content-padding: 1em;
+  $day-names-padding: .5em;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: var(--primary-930);
+    border-bottom: 1px solid var(--app-border-frame);
+  }
+
+  &__content {
+    padding: #{$content-padding};
+    background-color: var(--primary-900);
+    height: 100%;
+  }
+
+  &__day-names {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    padding: #{$day-names-padding};
+    padding-bottom: calc(#{$day-names-padding} + #{$content-padding});
+    place-items: center;
+  }
+
+  &__month-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: .5rem;
+  }
+
+  &__day {
+    box-sizing: border-box;
+    height: 7rem;
+    overflow: hidden;
+    
+    border-radius: .25rem;
+    text-align: center;
+    background-color: var(--primary-830);
+    transition: background-color 300ms, transform 200ms;
+
+    &:hover {
+      background-color: var(--primary-760);
+    }
+
+    &--today {
+      background-color: var(--brand-500);
+
+      &:hover {
+        background-color: var(--brand-430);
+      }
+    }
+
+    &--empty {
+      visibility: hidden;
+    }
+
+    &-content {
+      height: 5rem;
+    }
+
+    &-number {
+      padding-top: .7rem;
+    }
+  }
+}

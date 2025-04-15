@@ -137,7 +137,7 @@ export default function PrivateChannelList(ListClass: typeof React.PureComponent
           <Button
             size={Button.Sizes.TINY}
             look={look}
-            color={Button.Colors.BLACK}
+            color={Button.Colors.TRANSPARENT}
             data-selected={state === selectedTab}
             onClick={() => setSelectedTab(state)}
           >

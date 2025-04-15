@@ -12,16 +12,8 @@ export default function afterUserHeaderUsername() {
     if (!noteData?.note) return result;
 
     const { note } = noteData;
-
-    const match = note.match(BIRTHDAY_REGEX);
-    if (!match) return result;
-
-    const [birthdate] = match;
-
-    if (BirthdayStore.current[props.user.id]?.toString() !== getBirthdate(birthdate).toString()) {
-      BirthdayStore.update({ [props.user.id]: getBirthdate(birthdate).toString() });
-      Logger.log(`[BirthdayStore afterUserHeaderUsername] Added birthday for ${props.user.id}`);
-    }
+    const birthdate = BirthdayStore.getBirthdateFromNote(note, props.user.id);
+    if (!birthdate) return result;
 
     const children = result.props.children[1].props.children;
     children.splice(children.length, 0, <BirthdayContainer birthdate={birthdate} /> as any);

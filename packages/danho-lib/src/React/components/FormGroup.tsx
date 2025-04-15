@@ -3,13 +3,12 @@ import { ClassNamesUtils } from '@danho-lib/Utils/ClassNames';
 import { StringUtils } from '@danho-lib/Utils';
 
 import React, {
-  HTMLInputTypeAttribute, MutableRefObject, ChangeEvent,
-  useRef, useCallback,
+  HTMLInputTypeAttribute, MutableRefObject, ForwardedRef,
+  useRef, forwardRef, useCallback,
   useState,
-  useImperativeHandle
 } from '../React';
 import { classNames } from '../utils';
-import { useDebounce, useDebounceCallback } from '../hooks';
+import { useDebounceCallback } from '../hooks';
 import { EphemeralEye, EphemeralEyeSize } from './Icons';
 
 const InputModule = ClassNamesUtils.combineModuleByKeys<(
@@ -53,6 +52,10 @@ type OptionalProps<T extends InputValueType> = Partial<{
 } & ({} | {
   type: 'password',
   ephemeralEyeSize?: EphemeralEyeSize;
+} | {
+  type: 'number',
+  min: number;
+  max: number;
 })>;
 
 type SpreadProps<T extends InputValueType> = (
@@ -135,7 +138,10 @@ type FormGroupProps<T extends string | number | boolean> = {
   errorText?: string;
   defaultValue?: T extends boolean ? never : T;
   debounce?: number;
+  
   ephemeralEyeSize?: EphemeralEyeSize;
+  min?: number;
+  max?: number;
 };
 
 function FormGroup<T extends string | number | boolean>(props: FormGroupProps<T>) {
@@ -157,8 +163,8 @@ function FormGroup<T extends string | number | boolean>(props: FormGroupProps<T>
     InputModule.inputDefault,
   );
 
-  const toggleInputType = (ref: MutableRefObject<HTMLInputElement>) => () => {
-    if (ref.current) {
+  const toggleInputType = (ref: ForwardedRef<HTMLInputElement>) => () => {
+    if (ref && 'current' in ref && ref.current) {
       // Save the current cursor position
       const cursorPosition = ref.current.selectionStart;
 
@@ -196,6 +202,8 @@ function FormGroup<T extends string | number | boolean>(props: FormGroupProps<T>
               defaultValue={props.defaultValue}
               checked={typeof internal === 'boolean' ? internal : undefined}
               value={typeof internal === 'boolean' ? undefined : internal}
+              min={props.inputType === 'number' ? props.min : undefined}
+              max={props.inputType === 'number' ? props.max : undefined}
               onChange={e => {
                 const newValue = props.inputType === 'checkbox'
                   ? e.currentTarget.checked
@@ -219,26 +227,25 @@ function FormGroup<T extends string | number | boolean>(props: FormGroupProps<T>
 }
 
 type EmptyFormGroupProps = Pick<FormGroupProps<any>, 'name' | 'label'> & {
-  ref?: MutableRefObject<HTMLInputElement>;
-  children: (ref: MutableRefObject<HTMLInputElement>) => JSX.Element;
+  children: (ref: ForwardedRef<HTMLInputElement>) => JSX.Element;
   onClick?: () => void;
 };
-export function EmptyFormGroup(props: EmptyFormGroupProps) {
+export const EmptyFormGroup = forwardRef<HTMLInputElement, EmptyFormGroupProps>((props, ref) => {
   const internalRef = useRef<HTMLInputElement>(null);
-  const ref = props.ref ?? internalRef;
+  const mergedRef = ref || internalRef;
 
   return (
     <div className="danho-form-group" onClick={() => {
-      if (ref.current) ref.current.focus();
+      if (mergedRef && 'current' in mergedRef && mergedRef.current) mergedRef.current.focus();
       props.onClick?.();
     }}>
       <label className={classNames("danho-form-group__label", InputModule.title)} htmlFor={props.name}>
         {props.label}
       </label>
-      {props.children(ref)}
+      {props.children(mergedRef)}
     </div>
   );
-}
+});
 
 function getInputType(value: InputValueType): HTMLInputTypeAttribute {
   if (typeof value === 'boolean') return 'checkbox';

@@ -24,6 +24,8 @@ export interface TooltipComponent extends React.FunctionComponent<{
   clickableOnMobile?: boolean,
   hideOnClick?: boolean,
   tooltipPointerClassName?: string,
+  forceOpen?: boolean,
+  shouldShow?: boolean,
 }> {
   TooltipColors: Record<keyof typeof Colors, Colors>,
   TooltipContainer: TooltipContainer,

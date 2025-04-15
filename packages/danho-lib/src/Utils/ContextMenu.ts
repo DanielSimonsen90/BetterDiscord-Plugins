@@ -1,4 +1,7 @@
-import { RenderedMenuItem } from "@danho-lib/ContextMenus/Builder.types";
+import { ContextMenuConfig } from "betterdiscord";
+import { MouseEvent } from "@react";
+import { RenderedMenuItem, ContextMenuItemProps } from "@danho-lib/ContextMenus/Builder.types";
+import * as ContextMenus from "@danho-lib/ContextMenus";
 
 type BaseMenu = {
   props: {
@@ -28,8 +31,13 @@ export function getGroupContaining(itemId: string, menu: any): Array<RenderedMen
   return findItem(menu);
 }
 
+export function openContextMenu(items: Array<ContextMenuItemProps>, config?: ContextMenuConfig) {
+  return (e: MouseEvent) => BdApi.ContextMenu.open(e as any, ContextMenus.buildContextMenu(...items), config);
+}
+
 export const ContextMenuUtils = {
   getGroupContaining,
+  openContextMenu,
 }
 
 export default ContextMenuUtils;

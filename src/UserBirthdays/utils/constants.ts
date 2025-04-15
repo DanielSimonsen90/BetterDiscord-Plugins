@@ -1,9 +1,12 @@
 export const DanhoBirthdayCalendarKey = "danho-birthday-calendar";
+export const CALENDAR_PAGE_CLASSNAME = 'calendar-page';
 
 // \d{1,2}/\d{1,2}(/\d{2|4})? - Matches a date in the format DD/MM/YYYY
 export const BIRTHDAY_REGEX = /\d{1,2}\/\d{1,2}(\/(\d{4}|\d{2}))?/; // [(0-9){1,2}/(0-9){1,2}/(2|20)(0-9){2}]
 
 export function getBirthdate(birthdate: string) {
+  if (!BIRTHDAY_REGEX.test(birthdate)) return new Date(birthdate);
+  
   const now = new Date();
   const [day, month, year] = birthdate
     .split('/')

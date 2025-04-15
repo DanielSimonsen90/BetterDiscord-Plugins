@@ -142,7 +142,7 @@ export function findBySourceStrings<TResult = any>(...keywords: FindBySourceStri
   const module = showMultiple
     ? BdApi.Webpack.getModules(moduleCallbackBoundary, moduleSearchOptions)
     : BdApi.Webpack.getModule(moduleCallbackBoundary, moduleSearchOptions);
-  if (module) return module;
+  if (module) return lazy ? Promise.resolve(module) : module;
 
   if (lazy) return BdApi.Webpack.waitForModule(moduleCallbackBoundary, {
     signal: DiumFinder.controller.signal,

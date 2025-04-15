@@ -76,7 +76,7 @@ export default function CustomBadgeModifyForm(props: Props) {
         <Button type="reset" color={Button.Colors.RED} look={Button.Looks.OUTLINED} onClick={() => setSelectedBadgeId(null)}>
           Deselect {modifyBadge.name || selectedBadge.name} without saving
         </Button>
-        <Button type="submit" color={isNewBadge ? Button.Colors.GREEN : Button.Colors.YELLOW} look={Button.Looks.FILLED} disabled={!hasChanges} onClick={() => {
+        <Button type="submit" color={isNewBadge ? Button.Colors.GREEN : Button.Colors.PRIMARY} look={Button.Looks.FILLED} disabled={!hasChanges} onClick={() => {
           // Invalid badge object
           if (!modifyBadge.iconUrl || !modifyBadge.name || !modifyBadge.id) return;
 

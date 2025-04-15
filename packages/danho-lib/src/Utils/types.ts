@@ -6,6 +6,7 @@ export type BetterOmit<Type, Properties extends keyof Type> = Omit<Type, Propert
 
 export type If<Condition extends boolean, Then, Else> = Condition extends true ? Then : Else;
 export type Arrayable<T> = T | T[];
+export type Autocomplete<T> = T | (string & {});
 
 // Make a typescript type that takes in a function as a generic and the function's new return type
 export type NewReturnType<

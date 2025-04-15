@@ -2,7 +2,7 @@ import React, {
   Dispatch,
   SetStateAction,
   useMemo,
-  User as UserComponent,
+  UserListItem as UserComponent,
   classNames,
 } from "@react";
 
@@ -67,7 +67,7 @@ export const PotentialUser = (props: Props) => {
       if (badge) return {
         id: badge.id,
         name: badgeIdsInTooltip ? badge.id : badge.description,
-        iconUrl: UrlUtils.badgeIcon(badge.icon),
+        iconUrl: UrlUtils.DiscordEndpoints.BADGE_ICON(badge.icon),
         href: badge.link,
       };
 

@@ -75,6 +75,17 @@ type ActionProps = {
     userId: Snowflake;
     speakingFlags: SpeakingFlags
   };
+  USER_NOTE_LOAD_START: {
+    userId: Snowflake;
+  },
+  USER_NOTE_LOADED: {
+    userId: Snowflake;
+    note?: {
+      note: string;
+      note_user_id: Snowflake;
+      user_id: Snowflake;
+    };
+  },
   USER_PROFILE_FETCH_SUCCESS: {
     badges: Array<UserProfileBadge>;
     connected_accounts: Array<ConnectedAccount>

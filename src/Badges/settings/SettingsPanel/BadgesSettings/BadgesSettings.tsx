@@ -5,7 +5,7 @@ import React, {
   classNames,
 
   // Custom components
-  SearchableList, User as UserComponent,
+  SearchableList, UserListItem as UserComponent,
   ErrorBoundary,
 
   useForceUpdate,

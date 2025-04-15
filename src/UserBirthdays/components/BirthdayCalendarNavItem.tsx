@@ -1,13 +1,15 @@
-import { React, classNames, useState } from "@react";
+import { React, classNames } from "@react";
 import CalendarIcon from '@discord/components/Icons/CalendarIcon';
-import { Clickable, Text } from '@dium/components';
+import { AvatarWithText, AvatarWithTextClassNameModule } from "@discord/components";
+import { Clickable } from '@dium/components';
 
 import useBirthdayNavProps from "../hooks/useBirthdayNavProps";
 import { DanhoBirthdayCalendarKey } from "../utils/constants";
 import usePageEffects from "../hooks/usePageEffects";
+import BirthdayStore from "../stores/BirthdayStore";
 
 export function BirthdayCalendarNavItem() {
-  const [selected, setSelected] = useState(false);
+  const [selected, setSelected] = BirthdayStore.usePageStateSelector('show');
   const props = useBirthdayNavProps({
     onClick: () => setSelected(true),
     onSiblingClick: () => setSelected(false)
@@ -17,13 +19,17 @@ export function BirthdayCalendarNavItem() {
     selected ? props?.selectedClassName : props?.listItemProps.className.replace(props?.selectedClassName ?? '', ''), 
   );
   
-  usePageEffects(selected);
+  usePageEffects(selected, setSelected);
 
   return (
     <li key={DanhoBirthdayCalendarKey} {...props?.listItemProps ?? {}} className={className}>
       <Clickable {...props?.clickableProps}>
-        <CalendarIcon />
-        <Text>Birthdays</Text>
+        <a className={AvatarWithTextClassNameModule.link} href="#" onClick={e => e.preventDefault()}>
+          <AvatarWithText innerClassName={AvatarWithTextClassNameModule.avatarWithText}
+            avatar={<CalendarIcon />}
+            name='Birthdays'
+          />
+        </a>
       </Clickable>
     </li>
   );

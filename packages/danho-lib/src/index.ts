@@ -28,6 +28,7 @@ declare global {
   interface Window {
     DL: DanhoLibrary;
     Finder: DanhoLibrary['Finder'];
+    GLOBAL_ENV: Record<string, any>;
   }
 }
 

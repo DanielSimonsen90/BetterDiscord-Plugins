@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from "@react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "@react";
 import { Logger } from "@dium";
 import { $ } from "@danho-lib/DOM";
 
 import CalendarPage from "../components/CalendarPage";
+import { useTimedCheck } from "@hooks/useTimedCheck";
+import BirthdayStore from "../stores/BirthdayStore";
+import { CALENDAR_PAGE_CLASSNAME } from "../utils/constants";
 
 export default function usePageEffects<TInitialStyle extends object>(
   selected: boolean,
+  setSelected: Dispatch<SetStateAction<boolean>>,
 ) {
   const [initialStyle, setInitialStyle] = useState({});
 
@@ -22,27 +26,31 @@ export default function usePageEffects<TInitialStyle extends object>(
     });
   }, []);
 
-  useEffect(() => {
+  useTimedCheck(() => {
     const sidebar = $(s => s.className('base').className('content').className('sidebar'));
     const content = sidebar.parent;
     const children = content.children();
 
     try {
-      if (selected) {
+      if (selected || BirthdayStore.current.page.show) {
         children[1].style = {
-          ...(sidebar.style ?? {}),
           display: 'none',
           position: 'absolute',
         };
-        children[2] ? children[2].show() : content.appendComponent(<CalendarPage />, {
+        if (children[2] && !children[2].children(`.${CALENDAR_PAGE_CLASSNAME}`)) {
+          children[2].unmount();
+          delete children[2];
+        }
+        if (!children[2]) content.appendComponent(<CalendarPage onClose={() => setSelected(false)} />, {
           className: children[1].classes
         });
       } else {
         children[1].style = initialStyle;
-        children[2]?.hide();
+        children[2]?.unmount();
+        delete children[2];
       }
     } catch (error) {
       Logger.error(error);
     }
-  }, [selected]);
+  }, 500, [selected, initialStyle]);
 }

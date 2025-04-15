@@ -15,6 +15,7 @@ import { ChannelUtils } from './Channels';
 import { ClassNamesUtils } from "./ClassNames";
 import { ContextMenuUtils } from "./ContextMenu";
 import { GuildUtils } from './Guilds';
+import { NetUtils } from './Net';
 import { UserUtils } from './Users'
 import { StringUtils } from './String';
 import { ObjectUtils } from './Object';
@@ -60,7 +61,7 @@ export const Utils = {
   get currentGuildMembers() { return currentGuildMembers(); },
   get currentUser() { return currentUser(); },
 
-  StringUtils, ObjectUtils, UrlUtils, TimeUtils,
+  StringUtils, ObjectUtils, UrlUtils, TimeUtils, NetUtils,
   ClassNamesUtils, ContextMenuUtils,
   ChannelUtils, GuildUtils, UserUtils,
 };
