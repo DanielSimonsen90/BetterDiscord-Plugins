@@ -8,6 +8,11 @@ const DanhoGithubUsername = "DanielSimonsen90";
 const ZerthoxGithubUsername = "Zerthox";
 
 export default function buildMd(inputPath: string, meta: Meta) {
+  if (meta.description.includes("Can you guess")) {
+    Logger.warn(`Description for ${meta.name} is not configured - ${path.resolve(inputPath, 'package.json')}`);
+    return;
+  }
+
   const readme = path.resolve(path.dirname(inputPath), "README.md");
   if (fs.existsSync(readme)) fs.writeFileSync(readme, ``);
 

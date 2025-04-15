@@ -3,10 +3,11 @@ import fs from 'fs';
 import { Logger, ProjectInfo } from '../packages/danho-lib/src/Utils/Script';
 import { DanhoMeta } from '../packages/danho-lib/src/Injections/meta';
 
+const packagePath = path.resolve(__dirname, "../package.json");
+const projectPackage = JSON.parse(fs.readFileSync(packagePath, 'utf-8')) as ProjectInfo;
+
 const sourceFolder = path.resolve(__dirname, "../src");
 const readmePath = path.resolve(sourceFolder, "README.md");
-const packagePath = path.resolve(sourceFolder, "package.json");
-const projectPackage = JSON.parse(fs.readFileSync(packagePath, 'utf-8')) as ProjectInfo;
 
 // Find .gitignore
 const gitignorePath = path.resolve(__dirname, "../.gitignore");
@@ -35,11 +36,13 @@ const md = plugins.reduce((acc, plugin) => {
 
   const md = [
     (projectPackage
-      ? `## [${meta.name} v${meta.version}](${projectPackage.repository}/dist/bd/${meta.name})`
-      : `## ${meta.name} v${meta.version}`),
+      ? `## [${plugin} v${meta.version}](${projectPackage.repository}/dist/bd/${plugin})`
+      : `## ${plugin} v${meta.version}`),
     '',
     meta.description,
-    ''
+    '',
+    '<br>',
+    '',
   ].join('\n');
 
   acc.push(md);
@@ -48,11 +51,13 @@ const md = plugins.reduce((acc, plugin) => {
 
 fs.writeFileSync(readmePath, [
   `# BetterDiscord Plugins`,
-  `## Forked from [Zerthox/BetterDiscord-Plugins](https://github.com/Zerthox/BetterDiscord-Plugins)`,
+  `Forked from [Zerthox/BetterDiscord-Plugins](https://github.com/Zerthox/BetterDiscord-Plugins)`,
   '',
   md,
   '<br>',
+  '',
   '---',
+  '',
   '<br>',
   '',
   `## Building from source`,

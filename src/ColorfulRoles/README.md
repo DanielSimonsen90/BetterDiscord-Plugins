@@ -2,7 +2,8 @@
 by danhosaur
 
 ## What does it do?
-Can you guess what ColorfulRoles does? Danho didn't put a proper description, so we will both have to guess...
+Roles were once colorful to your server profile, but now they're just gray containers with colored circles... Let's bring them back.
+Additionally, you can also group roles 👀
 
 ## Found a bug?
 If you found a bug, please report it [here](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/issues) and I will see to it when I can. Make sure you include the following information:
