@@ -1,6 +1,6 @@
 {
   "name": "0danho-library",
-  "description": "Library for Danho's plugins",
+  "description": "This plugin helps Danho develop other plugins. It is not intended for external use but purely for development purposes.",
   "author": "danielsimonsen90",
   "version": "2.3.0",
   "development": true,

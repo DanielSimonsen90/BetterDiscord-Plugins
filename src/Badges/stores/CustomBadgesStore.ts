@@ -3,7 +3,7 @@ import { Snowflake } from "@discord/types";
 import { DanhoStores, DiumStore } from "@stores";
 
 import { CustomBadgeData } from "../components/CustomBadge";
-import { USER_TAGS } from "src/0DanhoLibrary/constants";
+import { USER_TAGS } from "../utils/constants";
 
 type State = {
   customBadges: Record<string, CustomBadgeData>;

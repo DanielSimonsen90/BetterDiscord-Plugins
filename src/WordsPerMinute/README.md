@@ -1,8 +1,8 @@
-# [0DanhoLibrary v2.3.0](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/dist/bd/0DanhoLibrary)
+# [WordsPerMinute v1.2.0](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/dist/bd/WordsPerMinute)
 by danielsimonsen90
 
 ## What does it do?
-This plugin helps Danho develop other plugins. It is not intended for external use but purely for development purposes.
+View your words per minute while typing your message
 
 ## Found a bug?
 If you found a bug, please report it [here](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/issues) and I will see to it when I can. Make sure you include the following information:

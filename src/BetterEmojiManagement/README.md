@@ -1,8 +1,8 @@
-# [0DanhoLibrary v2.3.0](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/dist/bd/0DanhoLibrary)
-by danielsimonsen90
+# [BetterEmojiManagement v1.0.2](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/dist/bd/BetterEmojiManagement)
+by DanielSimonsen90
 
 ## What does it do?
-This plugin helps Danho develop other plugins. It is not intended for external use but purely for development purposes.
+Handle emojis better like favoring favorite emojis on search, removing your bad emojis, and more.
 
 ## Found a bug?
 If you found a bug, please report it [here](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/issues) and I will see to it when I can. Make sure you include the following information:
