@@ -11,6 +11,9 @@ export * from './Scroller';
 export * from './SelectMenu';
 export { default as Timestamp } from './Timestamp';
 export * from './Tooltip';
+export * from './UserActivity';
+export * from './UserAvatar';
+export * from './UserPopout';
 export * from './UserProfileBadgeList';
 
 export { Button } from './Button';

@@ -1,0 +1,15 @@
+@use '../../../packages/danho-lib/src/styles/utils.scss' as *;
+@forward '../../../packages/danho-lib/src/styles/PluginSettings.scss';
+@forward '../../../packages/danho-lib/src/styles/Form.scss';
+
+.danho-discord-user.top-member {
+  margin: 1ch;
+  margin-top: 0;
+  padding: 0 1em;
+  border-radius: 6px;
+
+  &:hover {
+    background-color: var(--primary-800);
+    cursor: pointer;
+  }
+}

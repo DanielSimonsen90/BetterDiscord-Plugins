@@ -38,6 +38,12 @@ Split your direct messages into a tab-bar component with tabs for DMs and group 
 
 <br>
 
+## [EnhancedChannelMembers v1.0.0](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/dist/bd/EnhancedChannelMembers)
+
+This plugin allows you to hide activities from the channel members list and also push you to the very top for easy find.
+
+<br>
+
 ## [ExpandActivityStatus v1.0.0](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/dist/bd/ExpandActivityStatus)
 
 Expand "Listening to Spotify" statuses into the details of the song being listened to.

@@ -67,7 +67,7 @@ export const UserUtils = {
         "username",
         "bite size profile popout",
         "avatar"
-      ]
+      ],
     });
   },
   getUsernames(user: User, lowered = false) {

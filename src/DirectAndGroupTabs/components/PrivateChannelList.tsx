@@ -2,7 +2,7 @@ import { React } from '@react';
 
 import { Button, NotificationBadge } from '@discord/components';
 import { ReadStateStore } from '@discord/stores';
-import { Channel, Snowflake } from '@discord/types';
+import { Channel, RowData, Snowflake } from '@discord/types';
 
 import { ActionsEmitter, createActionCallback } from '@actions';
 import { Finder } from '@injections';
@@ -22,16 +22,6 @@ type State = {
   preRenderedChildren: number;
 } & {
   selectedTab: 'direct' | 'group';
-};
-
-type RowData = {
-  anchorId: undefined;
-  listIndex: number;
-  offsetTop: number;
-  row: number;
-  rowIndex: number;
-  section: number;
-  type: string;
 };
 
 const classModule: Record<'sectionDivider', string> = Finder.byKeys(["sectionDivider", "themedSearchBarMobile"]);

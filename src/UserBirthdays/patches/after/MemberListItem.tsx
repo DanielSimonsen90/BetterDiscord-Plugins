@@ -4,10 +4,8 @@ import MemberListItem from "@injections/patched/MemberListItem";
 import BirthdayStore from "../../stores/BirthdayStore";
 
 export default function afterMemberListItem() {
-  Patcher.after(MemberListItem, 'Z', ({ result: _result, args: [props] }) => {
-    const result = _result as any as ReturnType<typeof _result>;
-
-    const isBirthdayChild = BirthdayStore.isBirthdayChild(props.user);
+  Patcher.after(MemberListItem, 'type', ({ result, args: [props] }) => {
+    const isBirthdayChild = 'user' in props && BirthdayStore.isBirthdayChild(props.user);
     if (!isBirthdayChild) return result;
 
     Patcher.after(result.props, 'children', ({ result }) => {

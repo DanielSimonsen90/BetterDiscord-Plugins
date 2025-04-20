@@ -37,7 +37,8 @@ export const {
 export {
   ComponentClass,
   FunctionComponent,
-  MouseEventHandler,
+  MemoExoticComponent,
+
   DependencyList,
   Dispatch,
   SetStateAction,
@@ -45,14 +46,23 @@ export {
   HTMLInputTypeAttribute,
   ErrorInfo,
   CSSProperties,
+  
   RefObject,
   MutableRefObject, 
   Ref,
   ForwardedRef,
   ForwardRefExoticComponent,
+  
+  MouseEventHandler,
+  
   ChangeEvent,
   KeyboardEvent,
   MouseEvent,
+  UIEvent,
+
+  PropsWithRef,
+  PropsWithoutRef,
+  PropsWithChildren,
 } from 'react';
 
 export { React };

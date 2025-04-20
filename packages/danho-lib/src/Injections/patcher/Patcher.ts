@@ -1,10 +1,13 @@
 import * as DiumPatcher from '@dium/api/patcher';
+import patchComponentBySourceStrings from './patchComponentBySourceStrings';
 
 interface PatchOptions extends DiumPatcher.Options {
 
 }
 
 class DanhoPatcher {
+  patchComponentBySourceStrings = patchComponentBySourceStrings;
+
   public after<TModule, TKey extends keyof TModule>(
     module: TModule,
     key: TKey,

@@ -3,9 +3,8 @@ import path from "path";
 import fs from 'fs';
 
 import { Logger, createMinimistBooleanArgs, hasMinimistBooleanArg, killIfTrue } from '../packages/danho-lib/src/Utils/Script'
-
-import { StringUtils } from "@utils/String";
-import { Arrayable } from "@utils/types";
+import { StringUtils } from "../packages/danho-lib/src/Utils/String";
+import { Arrayable } from "../packages/danho-lib/src/Utils/types";
 
 type ValidFiles = {
   index: Arrayable<string>;
@@ -38,7 +37,7 @@ type ValidFiles = {
   };
   stores: () => {
     index: ValidFiles['index'];
-    template: Arrayable<string>;
+    TemplateStore: Arrayable<string>;
   };
   utils: () => {}
   
@@ -59,8 +58,10 @@ function writeFiles(directoryPath: string, files: Partial<ValidFiles>) {
     })();
 
     const fileNameWithExtension = (() => {
+      if (directoryPath.includes('style')) return `${fileName}.scss`;
+
       switch (fileName) {
-        case 'style': return 'style.scss';
+        // case 'style': return 'style.scss';
         // case 'index': return 'index.tsx';
         case 'package': return 'package.json';
         case 'readme': return 'README.md';
@@ -204,7 +205,7 @@ try {
         `\tTemplateStore.load();`,
         `}`,
       ],
-      template: [
+      TemplateStore: [
         `import { DanhoStores, DiumStore } from "@stores";`,
         '',
         'type State = {',
@@ -219,7 +220,7 @@ try {
         '\t',
         '}',
         '',
-        'DanhoStores.registerStore(TemplateStore);',
+        'DanhoStores.register(TemplateStore);',
         '',
         'export default TemplateStore;',
       ],
@@ -250,7 +251,7 @@ try {
       addPatches ? `import patch from "./patches";` : undefined,
       addSettings ? `import { Settings, SettingsPanel } from "./settings";` : undefined,
       addStores ? `import loadStores from "./stores";` : undefined,
-      addStyle ? `import styles from './styles.scss';` : undefined,
+      addStyle ? `import styles from './styles/index.scss'` : undefined,
       ``,
       `export default createPlugin({`,
       `\tstart() {`,

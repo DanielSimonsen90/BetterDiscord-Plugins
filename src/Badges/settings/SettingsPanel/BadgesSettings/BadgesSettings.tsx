@@ -59,7 +59,7 @@ export default function CustomBadgesSettingsGroup() {
                       const user = UserUtils.getUserByUsername(userTag);
                       const onClick = () => modifyUserToBadge(badge.id, userTag, 'remove');
                       const child = user
-                        ? <UserListItem user={user} onClick={onClick} />
+                        ? <UserListItem user={user} onClick={onClick}  />
                         : <Text variant="text-md/normal">{userTag}</Text>;
 
                       return (

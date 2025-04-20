@@ -3,8 +3,8 @@ import { Finder } from "@injections";
 import { Store } from "@dium/modules/flux";
 
 export interface PresenceStore extends Store {
-  findActivity(userId: Snowflake, callback: (activity: Activity) => boolean, n?: UntypedT): ActivityTypes[number] | undefined;
-  getActivities(userId: Snowflake, t?: UntypedT): ActivityTypes[number][];
+  findActivity(userId: Snowflake, callback: (activity: Activity) => boolean, guildId?: Snowflake): ActivityTypes[number] | undefined;
+  getActivities(userId: Snowflake, guildId?: Snowflake): ActivityTypes[number][];
   getActivityMetadata(e: any): any;
   getAllApplicationActivities(activityId: Snowflake): Array<{ userId: Snowflake, activity: Activity }>;
   getApplicationActivity(activityId: Snowflake, applicationId: Snowflake, n?: any): ReturnType<typeof PresenceStore["findActivity"]>;
@@ -39,5 +39,3 @@ export interface PresenceStoreState {
     };
   };
 }
-
-type UntypedT = any;

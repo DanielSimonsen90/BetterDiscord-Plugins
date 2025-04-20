@@ -1,0 +1,7 @@
+{
+  "name": "enhanced-channel-members",
+  "version": "1.0.0",
+  "author": "danhosaur",
+  "description": "This plugin allows you to hide activities from the channel members list and also push you to the very top for easy find.",
+  "development": true
+}

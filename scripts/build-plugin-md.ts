@@ -25,7 +25,7 @@ export default function buildMd(inputPath: string, meta: Meta) {
   if (!fs.existsSync(projectInfoPath)) Logger.error(`Project info file not found: ${projectInfoPath}`);
   else projectInfo = JSON.parse(fs.readFileSync(projectInfoPath, 'utf-8'));
 
-  const readmeContent = fs.readFileSync(readme, 'utf-8');
+  const readmeContent = fs.existsSync(readme) ? fs.readFileSync(readme, 'utf-8') : undefined;
   const md = [
     (projectInfo 
       ? `# [${meta.name} v${meta.version}](${projectInfo.repository}/dist/bd/${meta.name})` 

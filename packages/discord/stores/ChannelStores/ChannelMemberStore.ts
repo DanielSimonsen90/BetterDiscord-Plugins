@@ -13,7 +13,7 @@ export interface ChannelMemberStore extends Store {
 }
 export const ChannelMemberStore = Finder.byName<ChannelMemberStore>('ChannelMemberStore');
 
-type ChannelMemberGroup = {
+export type ChannelMemberGroup = {
   count: number;
   id: string;
   index: number;
@@ -22,7 +22,7 @@ type ChannelMemberGroup = {
   type: 'GROUP';
 };
 
-type ChannelMemberRow = GuildMember & {
+export type ChannelMemberRow = GuildMember & {
   activities: ActivityTypes[number][];
   isMobileOnline: boolean;
   isOwner: boolean;

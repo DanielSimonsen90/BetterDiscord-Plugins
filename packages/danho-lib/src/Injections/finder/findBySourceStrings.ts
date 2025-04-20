@@ -146,7 +146,7 @@ export function bySourceStrings<TResult extends any, TModule extends boolean = f
   const module = multiple
     ? BdApi.Webpack.getModules(moduleCallbackBoundary, moduleSearchOptions)
     : BdApi.Webpack.getModule(moduleCallbackBoundary, moduleSearchOptions);
-  if (module) return lazy ? Promise.resolve(module) as any : module;
+  if (module) return lazy ? Promise.resolve(module) as any : module as any;
   if (lazy) return BdApi.Webpack.waitForModule(moduleCallbackBoundary, {
     signal: DiumFinder.controller.signal,
     ...searchOptions

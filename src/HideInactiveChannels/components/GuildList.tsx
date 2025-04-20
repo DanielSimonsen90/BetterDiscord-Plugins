@@ -1,5 +1,5 @@
 import React from '@react';
-import { Channel } from '@discord/types';
+import { Channel, RowData } from '@discord/types';
 import { ScrollerLooks } from '@discord/components';
 import { useGuildFeatures } from '@discord/hooks';
 import { ChannelListStore } from '@discord/stores';
@@ -9,16 +9,6 @@ import { $ } from '@dom';
 
 import HiddenChannelStore from '../stores/HiddenChannelStore';
 import ScrollerStore from '../stores/ScrollerStore';
-
-type RowData = {
-  anchorId: undefined;
-  listIndex: number;
-  offsetTop: number;
-  row: number;
-  rowIndex: number;
-  section: number;
-  type: string;
-};
 
 const DISCORD_HEADER_CHANNEL_NAV_SECTION_ID = 1;
 export default function GuildList(ListClass: typeof React.PureComponent<any, any>) {

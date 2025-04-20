@@ -2,7 +2,7 @@ import { Activity, Channel, Snowflake, User, UserStatus } from "@discord/types";
 import { AvatarWithTextBD } from "@discord/components";
 import Finder from "../../finder";
 
-export type MemberListItem = Record<'Z', JSX.BD.FCF<{
+export type MemberListItem = JSX.BD.Memo<{
   activities: Array<Activity>;
   channel: Channel;
   colorRoleName: string;
@@ -25,7 +25,7 @@ export type MemberListItem = Record<'Z', JSX.BD.FCF<{
 }, {
   children: ReturnType<AvatarWithTextBD['render']>;
   renderPopout(e: any): void;
-}>>;
+}>;
 
-export const MemberListItem: MemberListItem = Finder.bySourceStrings("ownerTooltipText", "onClickPremiumGuildIcon:", { module: true });
+export const MemberListItem: MemberListItem = Finder.bySourceStrings("ownerTooltipText", "onClickPremiumGuildIcon:");
 export default MemberListItem;

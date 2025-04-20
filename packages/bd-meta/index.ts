@@ -30,6 +30,8 @@ export async function resolvePkg(dir: string): Promise<string> {
             }
         }
     }
+
+    console.error(`Could not find package.json in "${dir}"`);
     return undefined;
 }
 

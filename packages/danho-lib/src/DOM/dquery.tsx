@@ -448,7 +448,7 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
   }
 
   public async forceUpdate() {
-    return Utils.forceFullRerender(getFiber(this.element));
+    return Utils.forceFullRerender(this.fiber);
     // return BdApi.ReactUtils.getOwnerInstance(this.element).forceUpdate();
   }
 }
