@@ -50,7 +50,7 @@ export function createSlashCommand(options: SlashCommandCreationOptions) {
   const pluginName = getMeta().name;
 
   // @ts-expect-error
-  return BdApi.Commands.register(pluginName, {
+  return () => BdApi.Commands.register(pluginName, {
     id: `${pluginName}-${options.name}`,
     ...options,
   }) as () => void;
@@ -65,7 +65,7 @@ export function deleteAllSlashCommands() {
 
 export const SlashCommandUtils = {
   createSlashCommand,
-  deleteAllSlashCommands,
+  unregisterAllSlashCommands: deleteAllSlashCommands,
   SlashCommandOptionType,
 }
 
