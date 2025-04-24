@@ -9,7 +9,7 @@ import { Settings } from "../settings/Settings";
 export default function onRelationshipAdd() {
 	const cancelFriendRequest = (user: User) => {
 		RelationshipActions.cancelFriendRequest(user.id, 'friends');
-		const message = `Blocked friend request from ${user.username} (${user.id}) because they are in a blocked folder`;
+		const message = `Blocked friend request from ${user.username} (${user.id}) because they are in a blocked folder or server.`;
 		Logger.log(message);
 		BdApi.UI.showToast(message, { type: 'success' });
 	};
