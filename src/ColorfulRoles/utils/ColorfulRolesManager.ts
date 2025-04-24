@@ -2,7 +2,7 @@ import type { Snowflake, Role } from '@discord/types';
 import { RolesListModule } from '@injections/patched/RolesList';
 import { GuildUtils } from '@utils';
 
-export const ColorfulRolesManager = new class PrettyRolesManager {
+export const ColorfulRolesManager = new class ColorfulRolesManager {
   context: ReturnType<RolesListModule['RolesList']>['props'] | undefined;
   role: Role;
 
