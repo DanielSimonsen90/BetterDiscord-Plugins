@@ -13,11 +13,15 @@ export default function afterRelativeTimeModule() {
       const result = Math.floor(diff / value);
       return result > 0 ? `${result} ${time}${result > 1 ? 's' : ''} ago` : null;
     };
+    const getTimeMonth = () => {
+      const isMonthAgo = date.getDate() === now.getDate() && date.getFullYear() === now.getFullYear();
+      return isMonthAgo ? getTime(TimeUtils.MONTH, 'month') : null;
+    }
 
     return (
       diff < 0 && result
       || getTime(TimeUtils.YEAR, 'year')
-      || getTime(TimeUtils.MONTH, 'month')
+      || getTimeMonth()
       || getTime(TimeUtils.WEEK, 'week')
       || getTime(TimeUtils.DAY, 'day')
       || getTime(TimeUtils.HOUR, 'hour')

@@ -1,6 +1,6 @@
 /**
  * @name FixRelativeTimestamps
- * @version 1.0.0
+ * @version 1.0.1
  * @author danhosaur
  * @authorLink https://github.com/danhosaur
  * @description This plugin fixes wrongly rounded timestamps when using the RELATIVE format.
@@ -52,7 +52,7 @@ WScript.Quit();
 
 let meta = {
   "name": "fix-relative-timestamps",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "danhosaur",
   "description": "This plugin fixes wrongly rounded timestamps when using the RELATIVE format."
 };
@@ -149,16 +149,16 @@ const mappedProxy = (target, mapping) => {
     });
 };
 
-const find$1 = (filter, { resolve = true, entries = false } = {}) => BdApi.Webpack.getModule(filter, {
+const find = (filter, { resolve = true, entries = false } = {}) => BdApi.Webpack.getModule(filter, {
     defaultExport: resolve,
     searchExports: entries
 });
-const query = (query, options) => find$1(query$1(query), options);
-const byEntries = (...filters) => find$1(join$1(...filters.map((filter) => byEntry(filter))));
-const byName = (name, options) => find$1(byName$1(name), options);
-const byKeys = (keys, options) => find$1(byKeys$1(...keys), options);
-const byProtos = (protos, options) => find$1(byProtos$1(...protos), options);
-const bySource = (contents, options) => find$1(bySource$1(...contents), options);
+const query = (query, options) => find(query$1(query), options);
+const byEntries = (...filters) => find(join$1(...filters.map((filter) => byEntry(filter))));
+const byName = (name, options) => find(byName$1(name), options);
+const byKeys = (keys, options) => find(byKeys$1(...keys), options);
+const byProtos = (protos, options) => find(byProtos$1(...protos), options);
+const bySource = (contents, options) => find(bySource$1(...contents), options);
 const all = {
     find: (filter, { resolve = true, entries = false } = {}) => BdApi.Webpack.getModule(filter, {
         first: false,
@@ -172,10 +172,10 @@ const all = {
     bySource: (contents, options) => all.find(bySource$1(...contents), options)
 };
 const resolveKey = (target, filter) => [target, Object.entries(target ?? {}).find(([, value]) => filter(value))?.[0]];
-const findWithKey = (filter) => resolveKey(find$1(byEntry(filter)), filter);
+const findWithKey = (filter) => resolveKey(find(byEntry(filter)), filter);
 const demangle = (mapping, required, proxy = false) => {
     const req = required ?? Object.keys(mapping);
-    const found = find$1((target) => (checkObjectValues(target)
+    const found = find((target) => (checkObjectValues(target)
         && req.every((req) => Object.values(target).some((value) => mapping[req](value)))));
     return proxy ? mappedProxy(found, Object.fromEntries(Object.entries(mapping).map(([key, filter]) => [
         key,
@@ -207,18 +207,32 @@ const DiumFinder = {
     bySource,
     get controller () { return controller; },
     demangle,
-    find: find$1,
+    find,
     findWithKey,
     query,
     resolveKey,
     waitFor
 };
 
-const COLOR = "#3a71c1";
+const COLOR = "#e55f3a";
 const print = (output, ...data) => output(`%c[${getMeta().name}] %c${getMeta().version ? `(v${getMeta().version})` : ""}`, `color: ${COLOR}; font-weight: 700;`, "color: #666; font-size: .8em;", ...data);
 const log = (...data) => print(console.log, ...data);
 const warn = (...data) => print(console.warn, ...data);
 const error = (...data) => print(console.error, ...data);
+const group = (label, ...data) => print(console.group, label, ...data);
+const groupCollapsed = (label, ...data) => print(console.groupCollapsed, label, ...data);
+const groupEnd = () => console.groupEnd();
+
+const diumLogger = {
+    __proto__: null,
+    error,
+    group,
+    groupCollapsed,
+    groupEnd,
+    log,
+    print,
+    warn
+};
 
 const patch$1 = (type, object, method, callback, options) => {
     const original = object?.[method];
@@ -260,7 +274,7 @@ const clear = () => BdApi.DOM.removeStyle(getMeta().name);
 
 const { React } = BdApi;
 const { ReactDOM } = BdApi;
-const classNames = /* @__PURE__ */ find$1((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
+const classNames = /* @__PURE__ */ find((exports) => exports instanceof Object && exports.default === exports && Object.keys(exports).length === 1);
 
 const Button = /* @__PURE__ */ byKeys(["Colors", "Link"], { entries: true });
 
@@ -366,321 +380,29 @@ const createPlugin = (plugin) => (meta) => {
     };
 };
 
-class GlobalReq {
-    static get instance() {
-        if (!GlobalReq._instance) {
-            const id = "WebModules_" + Math.floor(Math.random() * 1000000000000);
-            let req;
-            window.webpackChunkdiscord_app.push([[id], {}, r => { if (r.c)
-                    req = r; }]);
-            delete req.m[id];
-            delete req.c[id];
-            GlobalReq._instance = req;
-        }
-        return GlobalReq._instance;
-    }
-    constructor() { }
-}
-const Cache = {
-    modules: {}
-};
-function BDFDB_findByStrings(strings, config = {}) {
-    strings = strings.flat(10);
-    return findModule("string", JSON.stringify(strings), m => checkModuleStrings(m, strings) && m, config);
-}
-function checkModuleStrings(module, strings, config = {}) {
-    const check = (s1, s2) => {
-        s1 = config.ignoreCase ? s1.toString().toLowerCase() : s1.toString();
-        return config.hasNot ? s1.indexOf(s2) == -1 : s1.indexOf(s2) > -1;
-    };
-    return [strings].flat(10).filter(n => typeof n == "string").map(config.ignoreCase ? (n => n.toLowerCase()) : (n => n)).every(string => module && ((typeof module == "function" || typeof module == "string") && (check(module, string) || typeof module.__originalFunction == "function" && check(module.__originalFunction, string)) || typeof module.type == "function" && check(module.type, string) || (typeof module == "function" || typeof module == "object") && module.prototype && Object.keys(module.prototype).filter(n => n.indexOf("render") == 0).some(n => check(module.prototype[n], string))));
-}
-function findModule(type, cacheString, filter, config = {}) {
-    if (!isObject(Cache.modules[type]))
-        Cache.modules[type] = { module: {}, export: {} };
-    let defaultExport = typeof config.defaultExport != "boolean" ? true : config.defaultExport;
-    if (!config.all && defaultExport && Cache.modules[type].export[cacheString])
-        return Cache.modules[type].export[cacheString];
-    else if (!config.all && !defaultExport && Cache.modules[type].module[cacheString])
-        return Cache.modules[type].module[cacheString];
-    else {
-        let m = find(filter, config);
-        if (m) {
-            if (!config.all) {
-                if (defaultExport)
-                    Cache.modules[type].export[cacheString] = m;
-                else
-                    Cache.modules[type].module[cacheString] = m;
-            }
-            return m;
-        }
-        else if (!config.noWarnings)
-            warn(`${cacheString} [${type}] not found in WebModules`);
-    }
-}
-function find(filter, config = {}) {
-    let defaultExport = typeof config.defaultExport != "boolean" ? true : config.defaultExport;
-    let onlySearchUnloaded = typeof config.onlySearchUnloaded != "boolean" ? false : config.onlySearchUnloaded;
-    let all = typeof config.all != "boolean" ? false : config.all;
-    const req = GlobalReq.instance;
-    const found = [];
-    if (!onlySearchUnloaded)
-        for (let i in req.c)
-            if (req.c.hasOwnProperty(i) && req.c[i].exports != window) {
-                let m = req.c[i].exports, r = null;
-                if (m && (typeof m == "object" || typeof m == "function")) {
-                    if (!!(r = filter(m))) {
-                        if (all)
-                            found.push(defaultExport ? r : req.c[i]);
-                        else
-                            return defaultExport ? r : req.c[i];
-                    }
-                    else if (Object.keys(m).length < 400)
-                        for (let key of Object.keys(m))
-                            try {
-                                if (m[key] && !!(r = filter(m[key]))) {
-                                    if (all)
-                                        found.push(defaultExport ? r : req.c[i]);
-                                    else
-                                        return defaultExport ? r : req.c[i];
-                                }
-                            }
-                            catch (err) { }
-                }
-                if (config.moduleName && m && m[config.moduleName] && (typeof m[config.moduleName] == "object" || typeof m[config.moduleName] == "function")) {
-                    if (!!(r = filter(m[config.moduleName]))) {
-                        if (all)
-                            found.push(defaultExport ? r : req.c[i]);
-                        else
-                            return defaultExport ? r : req.c[i];
-                    }
-                    else if (m[config.moduleName].type && (typeof m[config.moduleName].type == "object" || typeof m[config.moduleName].type == "function") && !!(r = filter(m[config.moduleName].type))) {
-                        if (all)
-                            found.push(defaultExport ? r : req.c[i]);
-                        else
-                            return defaultExport ? r : req.c[i];
-                    }
-                }
-                if (m && m.__esModule && m.default && (typeof m.default == "object" || typeof m.default == "function")) {
-                    if (!!(r = filter(m.default))) {
-                        if (all)
-                            found.push(defaultExport ? r : req.c[i]);
-                        else
-                            return defaultExport ? r : req.c[i];
-                    }
-                    else if (m.default.type && (typeof m.default.type == "object" || typeof m.default.type == "function") && !!(r = filter(m.default.type))) {
-                        if (all)
-                            found.push(defaultExport ? r : req.c[i]);
-                        else
-                            return defaultExport ? r : req.c[i];
-                    }
-                }
-            }
-    for (let i in req.m)
-        if (req.m.hasOwnProperty(i)) {
-            let m = req.m[i];
-            if (m && typeof m == "function") {
-                if (req.c[i] && !onlySearchUnloaded && filter(m)) {
-                    if (all)
-                        found.push(defaultExport ? req.c[i].exports : req.c[i]);
-                    else
-                        return defaultExport ? req.c[i].exports : req.c[i];
-                }
-                if (!req.c[i] && onlySearchUnloaded && filter(m)) {
-                    const resolved = {}, resolved2 = {};
-                    m(resolved, resolved2, req);
-                    const trueResolved = resolved2 && Object.getOwnPropertyNames(resolved2).length == 0 ? resolved : resolved2;
-                    if (all)
-                        found.push(defaultExport ? trueResolved.exports : trueResolved);
-                    else
-                        return defaultExport ? trueResolved.exports : trueResolved;
-                }
-            }
-        }
-    if (all)
-        return found;
-}
-function isObject(obj) {
-    return obj && typeof obj === "object" && obj.constructor === Object;
-}
-
-const BDFDB_Finder = {
-    __proto__: null,
-    BDFDB_findByStrings
-};
-
 const debugLog = (...data) => getMeta().development ? log(...data) : undefined;
 const debugWarn = (...data) => getMeta().development ? warn(...data) : undefined;
-
-function bySourceStrings(...keywords) {
-    const searchOptions = keywords.find(k => typeof k === 'object');
-    if (searchOptions)
-        keywords.splice(keywords.indexOf(searchOptions), 1);
-    const backupIdKeyword = keywords.find(k => k.toString().startsWith('backupId='));
-    const backupId = backupIdKeyword ? backupIdKeyword.toString().split('=')[1] : null;
-    const backupIdKeywordIndex = keywords.indexOf(backupIdKeyword);
-    if (backupIdKeywordIndex > -1)
-        keywords.splice(backupIdKeywordIndex, 1);
-    if (backupId)
-        debugLog(`[bySourceStrings] Using backupId: ${backupId} - [${keywords.join(',')}]`, keywords);
-    const showMultiple = keywords.find(k => k === 'showMultiple=true');
-    const showMultipleIndex = keywords.indexOf(showMultiple);
-    if (showMultipleIndex > -1)
-        keywords.splice(showMultipleIndex, 1);
-    if (showMultiple)
-        debugLog(`[bySourceStrings] Showing multiple results - [${keywords.join(',')}]`, keywords);
-    const lazy = keywords.find(k => k === 'lazy=true');
-    const lazyIndex = keywords.indexOf(lazy);
-    if (lazyIndex > -1)
-        keywords.splice(lazyIndex, 1);
-    if (lazy)
-        debugLog(`[bySourceStrings] Using lazy search - [${keywords.join(',')}]`, keywords);
-    const _keywords = keywords;
-    const moduleCallback = (exports, _, id) => {
-        if (!exports || exports === window)
-            return false;
-        const eIsFunctionAndHasKeywords = typeof exports === 'function'
-            && _keywords.every(keyword => exports.toString().includes(keyword));
-        if (eIsFunctionAndHasKeywords)
-            return true;
-        const eIsObject = Object.keys(exports).length > 0;
-        const moduleIsMethodOrFunctionComponent = Object.keys(exports).some(k => typeof exports[k] === 'function'
-            && _keywords.every(keyword => exports[k].toString().includes(keyword)));
-        const eIsObjectAsE = _keywords.every(keyword => Object.keys(exports).reduce((acc, k) => acc += exports[k]?.toString?.(), '').includes(keyword));
-        const moduleIsObjectFromE = Object.keys(exports).some(k => exports[k] && typeof exports[k] === 'object'
-            && _keywords.every(keyword => Object.keys(exports[k])
-                .reduce((acc, key) => acc += exports[k][key]?.toString?.(), '')
-                .includes(keyword)));
-        const moduleIsClassComponent = Object.keys(exports).some(k => typeof exports[k] === 'function'
-            && exports[k].prototype
-            && 'render' in exports[k].prototype
-            && _keywords.every(keyword => exports[k].prototype.render.toString().includes(keyword)));
-        const moduleIsObjectOfObjects = Object.keys(exports).some(k => exports[k] && typeof exports[k] === 'object'
-            && Object.keys(exports[k]).some(k2 => exports[k][k2] && typeof exports[k][k2] === 'object'
-                && _keywords.every(keyword => Object.keys(exports[k][k2])
-                    .reduce((acc, k3) => exports[k][k2] === window ? acc : acc += exports[k][k2][k3]?.toString?.(), '')
-                    .includes(keyword))));
-        const eIsClassAsE = typeof exports === 'object' && 'constructor' in exports && _keywords.every(keyword => exports.constructor.toString().includes(keyword));
-        const eIsObjectWithKeywords = _keywords.every(keyword => Object.keys(exports).reduce((acc, k) => acc += k + exports[k]?.toString?.(), '').includes(keyword));
-        const filter = eIsObject ? (moduleIsMethodOrFunctionComponent
-            || eIsObjectAsE
-            || moduleIsClassComponent
-            || moduleIsObjectFromE
-            || moduleIsObjectOfObjects
-            || eIsClassAsE
-            || eIsObjectWithKeywords) : eIsFunctionAndHasKeywords;
-        if ((filter && backupId && id !== backupId) || !filter && id === backupId)
-            debugWarn(`[bySourceStrings] Filter failed for keywords: [${keywords.join(',')}]`, {
-                exports,
-                internal: {
-                    eIsFunctionAndHasKeywords,
-                    moduleIsMethodOrFunctionComponent,
-                    eIsObjectAsE,
-                    moduleIsClassComponent,
-                    moduleIsObjectFromE,
-                    moduleIsObjectOfObjects,
-                    eIsClassAsE,
-                },
-                strings: {
-                    exports: JSON.stringify(exports),
-                    keys: Object.keys(exports).map(k => `${k}: ${JSON.stringify(exports[k])}`),
-                }
-            });
-        if (backupId && backupId === id)
-            debugLog('Found by id', { exports, id });
-        return filter;
-    };
-    const moduleCallbackBoundary = (exports, _, id) => {
-        try {
-            return moduleCallback(exports, _, id);
-        }
-        catch (err) {
-            const expectedErrorMessages = [
-                `TypedArray`,
-                `from 'Window'`,
-                `Cannot convert a Symbol value to a string`,
-                '$$baseObject',
-            ];
-            if (err instanceof Error && expectedErrorMessages.some(message => err.message.includes(message)))
-                return undefined;
-            error(`[bySourceStrings] Error in moduleCallback`, err);
-        }
-    };
-    if (lazy)
-        return BdApi.Webpack.waitForModule(moduleCallbackBoundary, {
-            signal: controller.signal,
-            ...searchOptions
-        }).then(module => {
-            debugLog(`[bySourceStrings] Found lazy module for [${keywords.join(',')}]`, module);
-            return module;
-        }).catch(err => {
-            error(`[bySourceStrings] Error in lazy search`, err);
-            return undefined;
-        });
-    const moduleSearchOptions = searchOptions ?? { searchExports: true };
-    return showMultiple
-        ? BdApi.Webpack.getModules(moduleCallbackBoundary, moduleSearchOptions)
-        : BdApi.Webpack.getModule(moduleCallbackBoundary, moduleSearchOptions);
-}
-const findComponentBySourceStrings = async (...keywords) => {
-    const jsxModule = Finder.byKeys(['jsx']);
-    const ReactModule = Finder.byKeys(['createElement', 'cloneElement']);
-    keywords = keywords.map(keyword => keyword.replace(/\s+/g, ''));
-    const component = await new Promise((resolve, reject) => {
-        try {
-            const cancelJsx = after(jsxModule, 'jsx', ({ args: [component] }) => {
-                if (typeof component === 'function' && keywords.every(keyword => component.toString().includes(keyword))) {
-                    cancelJsx();
-                    cancelCE();
-                    resolve(component);
-                }
-            }, { name: `findComponentBySourceStrings([${keywords.join(',')}])`, });
-            const cancelCE = after(ReactModule, 'createElement', ({ args: [component] }) => {
-                if (typeof component === 'function' && keywords.every(keyword => component.toString().includes(keyword))) {
-                    cancelJsx();
-                    cancelCE();
-                    resolve(component);
-                }
-            }, { name: `findComponentBySourceStrings([${keywords.join(',')}])`, });
-        }
-        catch (err) {
-            reject(err);
-        }
-    });
-    if (typeof component !== 'object')
-        return component;
-    if ('prototype' in component
-        && typeof component.prototype === 'object'
-        && 'render' in component.prototype
-        && typeof component.prototype.render === 'function') {
-        component.prototype.render = component.prototype.render.bind(component);
-        return component;
+const debugError = (...data) => getMeta().development ? error(...data) : undefined;
+const createLogger = (name) => {
+    if (name) {
+        const prefix = `[${name}]`;
+        return {
+            ...diumLogger,
+            log: (...data) => log(prefix, ...data),
+            warn: (...data) => warn(prefix, ...data),
+            error: (...data) => error(prefix, ...data),
+            debugLog: (...data) => debugLog(prefix, ...data),
+            debugWarn: (...data) => debugWarn(prefix, ...data),
+            debugError: (...data) => debugError(prefix, ...data),
+        };
     }
-    return component;
+    return {
+        ...diumLogger,
+        debugLog,
+        debugWarn,
+        debugError,
+    };
 };
-const findModuleById = (id, options) => {
-    return BdApi.Webpack.getModule((_, __, _id) => _id === id.toString(), options);
-};
-function findUnpatchedModuleBySourceStrings(...keywords) {
-    const module = bySourceStrings(...keywords);
-    if (!module) {
-        log(`[findUnpatchedModuleBySourceStrings] Module not found for keywords: [${keywords.join(',')}]`);
-        return undefined;
-    }
-    if (typeof module === 'function')
-        return module['__originalFunction'];
-    return module;
-}
-const Finder = {
-    ...DiumFinder,
-    ...BDFDB_Finder,
-    bySourceStrings,
-    findComponentBySourceStrings,
-    findModuleById,
-    findUnpatchedModuleBySourceStrings,
-};
-
-const RelativeTimeModule = Finder.bySourceStrings('"R"!==e.format', { defaultExport: false });
 
 function join(args, separator = ',', includeAnd = true) {
     const validArgs = args?.filter(arg => arg !== undefined && arg !== null && arg !== '');
@@ -708,12 +430,274 @@ function pascalCaseFromCamelCase(str) {
 function generateRandomId() {
     return Math.random().toString(36).substring(2, 9);
 }
+function formatDate(date, format = 'YYYY-MM-DD') {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const withZero = (num) => String(num).padStart(2, '0');
+    return format
+        .replace('YYYY', String(year))
+        .replace('MM', withZero(month))
+        .replace('DD', withZero(day));
+}
 const StringUtils = {
-    join,
+    join, formatDate,
     kebabCaseFromCamelCase, kebabCaseFromPascalCase,
     pascalCaseFromSnakeCase, pascalCaseFromCamelCase,
     generateRandomId,
 };
+
+function pick(from, ...properties) {
+    if (!from)
+        throw new Error("Cannot pick from undefined!");
+    return properties.reduce((acc, prop) => {
+        acc[prop] = from[prop];
+        if (acc[prop] === undefined)
+            delete acc[prop];
+        return acc;
+    }, {});
+}
+function exclude(from, ...properties) {
+    if (!from)
+        return from;
+    return Object.keys(from).reduce((acc, key) => {
+        if (!properties.includes(key))
+            acc[key] = from[key];
+        return acc;
+    }, {});
+}
+function difference(source, target, exclude) {
+    const diffKeys = new Set([...Object.keys(source), ...Object.keys(target)]);
+    exclude?.forEach(key => diffKeys.delete(key));
+    return [...diffKeys.values()].reduce((acc, key, i, arr) => {
+        const sourceValue = JSON.stringify(source[key]);
+        const targetValue = JSON.stringify(target[key]);
+        if (sourceValue !== targetValue)
+            acc[key] = target[key];
+        return acc;
+    }, {});
+}
+function combine(...objects) {
+    return objects.reduce((acc, obj) => {
+        if (!obj)
+            return acc;
+        for (const key in obj) {
+            if (typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+                acc[key] = combine(acc[key], obj[key]);
+            }
+            else if (obj[key] !== undefined && obj[key] !== null && obj[key] !== '') {
+                acc[key] = obj[key];
+            }
+        }
+        return acc;
+    }, {});
+}
+function combineModules(...modules) {
+    const Logger = createLogger('ObjectUtils.combineModules');
+    return modules.reduce((combined, sourceStrings) => {
+        const module = byKeys(sourceStrings);
+        if (!module) {
+            Logger.warn(`Module not found for source strings: ${sourceStrings.join(', ')}`);
+            return combined;
+        }
+        if (typeof module !== 'object')
+            throw new Error(`Module is not an object: ${module}`);
+        for (const key in module) {
+            let prop = key;
+            if (key in combined) {
+                const duplicateIndex = Object.keys(combined).filter(k => k.startsWith(`${key}--`)).length;
+                prop = `${key}--${duplicateIndex}`;
+            }
+            const element = module[key];
+            if (typeof element === 'object' && !Array.isArray(element)) {
+                combined[prop] = combine(combined[prop], element);
+            }
+            else if (element !== undefined && element !== null && element !== '') {
+                combined[prop] = element;
+            }
+        }
+        return combined;
+    }, {});
+}
+function isEqual(a, b) {
+    return JSON.stringify(a) === JSON.stringify(b);
+}
+const ObjectUtils = {
+    pick, exclude, isEqual,
+    difference, combine, combineModules,
+};
+
+const Logger = createLogger('bySourceStrings');
+function bySourceStrings(...keywords) {
+    const searchOptions = keywords.find(k => typeof k === 'object');
+    if (searchOptions)
+        keywords.splice(keywords.indexOf(searchOptions), 1);
+    const { backupId, lazy, multiple } = searchOptions ?? {};
+    if (backupId || lazy || multiple) {
+        const loggedMessage = `Using search options: ${StringUtils.join([
+            backupId ? `backupId: ${backupId}` : null,
+            lazy ? `lazy: ${lazy}` : null,
+            multiple ? `multiple: ${multiple}` : null,
+        ].filter(Boolean))} - [${keywords.join(',')}]`;
+        Logger.debugLog(loggedMessage, { keywords, searchOptions });
+    }
+    const moduleCallback = (exports, _, id) => {
+        if (!exports || exports === window)
+            return false;
+        const eIsFunctionAndHasKeywords = typeof exports === 'function'
+            && keywords.every(keyword => exports.toString().includes(keyword));
+        if (eIsFunctionAndHasKeywords)
+            return true;
+        const eIsObject = Object.keys(exports).length > 0;
+        const moduleIsMethodOrFunctionComponent = Object.keys(exports).some(k => typeof exports[k] === 'function'
+            && keywords.every(keyword => exports[k].toString().includes(keyword)));
+        const eIsObjectAsE = keywords.every(keyword => Object.keys(exports).reduce((acc, k) => acc += exports[k]?.toString?.(), '').includes(keyword));
+        const moduleIsObjectFromE = Object.keys(exports).some(k => exports[k] && typeof exports[k] === 'object'
+            && keywords.every(keyword => Object.keys(exports[k])
+                .reduce((acc, key) => acc += exports[k][key]?.toString?.(), '')
+                .includes(keyword)));
+        const moduleIsClassComponent = Object.keys(exports).some(k => typeof exports[k] === 'function'
+            && exports[k].prototype
+            && 'render' in exports[k].prototype
+            && keywords.every(keyword => exports[k].prototype.render.toString().includes(keyword)));
+        const moduleIsObjectOfObjects = Object.keys(exports).some(k => exports[k] && typeof exports[k] === 'object'
+            && Object.keys(exports[k]).some(k2 => exports[k][k2] && typeof exports[k][k2] === 'object'
+                && keywords.every(keyword => Object.keys(exports[k][k2])
+                    .reduce((acc, k3) => exports[k][k2] === window ? acc : acc += exports[k][k2][k3]?.toString?.(), '')
+                    .includes(keyword))));
+        const eIsClassAsE = typeof exports === 'object' && 'constructor' in exports && keywords.every(keyword => exports.constructor.toString().includes(keyword));
+        const eIsObjectWithKeywords = keywords.every(keyword => Object.keys(exports).reduce((acc, k) => acc += k + exports[k]?.toString?.(), '').includes(keyword));
+        const filter = eIsObject ? (moduleIsMethodOrFunctionComponent
+            || eIsObjectAsE
+            || moduleIsClassComponent
+            || moduleIsObjectFromE
+            || moduleIsObjectOfObjects
+            || eIsClassAsE
+            || eIsObjectWithKeywords) : eIsFunctionAndHasKeywords;
+        if ((filter && backupId && id.toString() !== backupId) || !filter && id.toString() === backupId)
+            Logger.debugWarn(`Filter failed for keywords: [${keywords.join(',')}]`, {
+                exports,
+                internal: {
+                    eIsFunctionAndHasKeywords,
+                    moduleIsMethodOrFunctionComponent,
+                    eIsObjectAsE,
+                    moduleIsClassComponent,
+                    moduleIsObjectFromE,
+                    moduleIsObjectOfObjects,
+                    eIsClassAsE,
+                },
+                strings: {
+                    exports: JSON.stringify(exports),
+                    keys: Object.keys(exports).map(k => `${k}: ${JSON.stringify(exports[k])}`),
+                }
+            });
+        if (backupId && backupId === id.toString())
+            Logger.debugLog('Found by id', { exports, id });
+        return filter;
+    };
+    const moduleCallbackBoundary = (exports, _, id) => {
+        try {
+            return moduleCallback(exports, _, id.toString());
+        }
+        catch (err) {
+            const expectedErrorMessages = [
+                `TypedArray`,
+                `from 'Window'`,
+                `Cannot convert a Symbol value to a string`,
+                '$$baseObject',
+            ];
+            if (err instanceof Error && expectedErrorMessages.some(message => err.message.includes(message)))
+                return undefined;
+            Logger.error(`Error in moduleCallback`, err);
+        }
+    };
+    const moduleSearchOptions = (() => {
+        const defaultOptions = ObjectUtils.pick(searchOptions ?? { searchExports: true }, 'defaultExport', 'searchExports', 'first');
+        if (searchOptions && 'module' in searchOptions)
+            return Object.assign(defaultOptions, { defaultExport: !searchOptions.module });
+        return defaultOptions;
+    })();
+    const module = multiple
+        ? BdApi.Webpack.getModules(moduleCallbackBoundary, moduleSearchOptions)
+        : BdApi.Webpack.getModule(moduleCallbackBoundary, moduleSearchOptions);
+    if (module)
+        return lazy ? Promise.resolve(module) : module;
+    if (lazy)
+        return BdApi.Webpack.waitForModule(moduleCallbackBoundary, {
+            signal: controller.signal,
+            ...searchOptions
+        }).then(module => {
+            Logger.debugLog(`[bySourceStrings] Found lazy module for [${keywords.join(',')}]`, module);
+            return module;
+        }).catch(err => {
+            Logger.error(`[bySourceStrings] Error in lazy search`, err);
+            return undefined;
+        });
+}
+
+const findComponentBySourceStrings = async (...keywords) => {
+    const jsxModule = byKeys(['jsx']);
+    const ReactModule = byKeys(['createElement', 'cloneElement']);
+    keywords = keywords.map(keyword => keyword.replace(/\s+/g, ''));
+    const [component, result] = await new Promise((resolve, reject) => {
+        try {
+            const cancelJsx = after(jsxModule, 'jsx', ({ result, args: [component] }) => {
+                if (typeof component === 'function' && keywords.every(keyword => component.toString().includes(keyword))) {
+                    cancelJsx();
+                    cancelCE();
+                    resolve([component, result]);
+                }
+            }, { name: `findComponentBySourceStrings([${keywords.join(',')}])`, });
+            const cancelCE = after(ReactModule, 'createElement', ({ result, args: [component] }) => {
+                if (typeof component === 'function' && keywords.every(keyword => component.toString().includes(keyword))) {
+                    cancelJsx();
+                    cancelCE();
+                    resolve([component, result]);
+                }
+            }, { name: `findComponentBySourceStrings([${keywords.join(',')}])`, });
+        }
+        catch (err) {
+            reject(err);
+        }
+    });
+    if (typeof component !== 'object')
+        return [component, result];
+    if ('prototype' in component
+        && typeof component.prototype === 'object'
+        && 'render' in component.prototype
+        && typeof component.prototype.render === 'function') {
+        component.prototype.render = component.prototype.render.bind(component);
+        return [component, result];
+    }
+    return [component, result];
+};
+
+const findModuleById = (id, options) => {
+    return BdApi.Webpack.getModule((_, __, _id) => _id === id.toString(), options);
+};
+
+function findUnpatchedModuleBySourceStrings(...keywords) {
+    const module = bySourceStrings(...keywords);
+    if (!module) {
+        log(`[findUnpatchedModuleBySourceStrings] Module not found for keywords: [${keywords.join(',')}]`);
+        return undefined;
+    }
+    if (typeof module === 'function')
+        return module['__originalFunction'];
+    return module;
+}
+
+const Finder = {
+    ...DiumFinder,
+    bySourceStrings: bySourceStrings,
+    byId: findModuleById,
+    findComponentBySourceStrings,
+    findUnpatchedModuleBySourceStrings,
+    byName: (name, options) => byName(name, options),
+    byKeys: (keys, options) => byKeys(keys, options)
+};
+
+const RelativeTimeModule = Finder.bySourceStrings('"R"!==e.format', { module: true });
 
 const SECOND = 1000;
 const MINUTE = SECOND * 60;
@@ -752,6 +736,22 @@ function timeSpan(startTime, endTime, format = 'full') {
         time, min, max,
     };
 }
+function wait(callbackOrTime, time) {
+    const callback = typeof callbackOrTime === 'function' ? callbackOrTime : (() => undefined);
+    time ??= callbackOrTime;
+    return new Promise((resolve, reject) => {
+        try {
+            setTimeout(() => resolve(callback()), time);
+        }
+        catch (err) {
+            reject(err);
+        }
+    });
+}
+function getUnixTime(arg) {
+    const timestamp = typeof arg === 'number' ? arg : new Date(arg).getTime();
+    return Math.floor(timestamp / 1000);
+}
 function throttle(callback, delay) {
     let lastTime = 0;
     return function (...args) {
@@ -764,7 +764,7 @@ function throttle(callback, delay) {
 }
 const TimeUtils = {
     SECOND, MINUTE, HOUR, DAY, WEEK, MONTH, YEAR,
-    timeSpan,
+    timeSpan, getUnixTime, wait,
     throttle,
 };
 
@@ -779,9 +779,13 @@ function afterRelativeTimeModule() {
             const result = Math.floor(diff / value);
             return result > 0 ? `${result} ${time}${result > 1 ? 's' : ''} ago` : null;
         };
+        const getTimeMonth = () => {
+            const isMonthAgo = date.getDate() === now.getDate() && date.getFullYear() === now.getFullYear();
+            return isMonthAgo ? getTime(TimeUtils.MONTH, 'month') : null;
+        };
         return (diff < 0 && result
             || getTime(TimeUtils.YEAR, 'year')
-            || getTime(TimeUtils.MONTH, 'month')
+            || getTimeMonth()
             || getTime(TimeUtils.WEEK, 'week')
             || getTime(TimeUtils.DAY, 'day')
             || getTime(TimeUtils.HOUR, 'hour')
@@ -845,6 +849,10 @@ class ElementSelector {
     }
     directChild(tagName) {
         this.result += `> ${tagName ?? '*'} `;
+        return this;
+    }
+    lastChild(tagName) {
+        this.result += `${tagName ?? ''}:last-child `;
         return this;
     }
     get and() {
@@ -964,6 +972,8 @@ class DQuery {
     }
     set style(value) {
         for (const key in value) {
+            if (!isNaN(Number(key)))
+                continue;
             this.element.style[key] = value[key];
         }
     }
@@ -1030,8 +1040,8 @@ class DQuery {
         const children = this.children();
         return children[children.length - 1];
     }
-    hasChildren() {
-        return this.element.children.length > 0;
+    hasChildren(selector) {
+        return this.children(selector).length > 0;
     }
     grandChildren(selector, single) {
         const grandChildren = this.children().map(child => child.children(selector, single)).flat();
@@ -1244,12 +1254,15 @@ class DQuery {
         return this;
     }
     replaceWithComponent(component) {
-        BdApi.ReactDOM.render(component, this.element);
+        try {
+            BdApi.ReactDOM.render(component, this.element);
+        }
+        catch { }
         return this;
     }
     insertComponent(position, component) {
         this.element.insertAdjacentElement(position, createElement("<></>"));
-        const wrapper = this.parent.children(".bdd-wrapper", true).element;
+        const wrapper = this.parent.children("> .bdd-wrapper", true).element;
         BdApi.ReactDOM.render(component, wrapper);
         return this;
     }
@@ -1272,7 +1285,7 @@ class DQuery {
         return this;
     }
     async forceUpdate() {
-        return forceFullRerender(getFiber(this.element));
+        return forceFullRerender(this.fiber);
     }
 }
 function createElement(html, props = {}, target) {
