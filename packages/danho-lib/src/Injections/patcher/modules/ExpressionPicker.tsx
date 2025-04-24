@@ -57,7 +57,7 @@ type ExpressionPickerMenuFiber = {
 type Callback = (data: ExpressionPickerMenu, key: keyof ExpressionPickerMenu) => any;
 export async function WaitForEmojiPicker(callback: Callback) {
   return Finder.waitFor(Filters.bySource('ExpressionPickerMenu'), { resolve: false }).then(module => {
-    const key = 'default' in module ? 'default' : Object.keys(module)[0];
+    const key = module && 'default' in module ? 'default' : Object.keys(module)[0];
     return callback(module, key);
   });
 }

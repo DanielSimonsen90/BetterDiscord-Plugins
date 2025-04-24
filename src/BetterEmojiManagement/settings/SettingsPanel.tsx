@@ -8,6 +8,7 @@ import { Collapsible, Setting, GuildListItem } from '@components';
 
 import { Settings, titles } from './Settings';
 import { BannedEmojiTag } from '../components';
+import { Logger } from '@injections';
 
 type Props = {
   updatePatches(): void;
@@ -39,6 +40,13 @@ function BannedEmojiSection() {
   const [current, set] = Settings.useState();
   const emojiStoreContext = EmojiStore.getDisambiguatedEmojiContext();
   const bannedEmojis = current.bannedEmojis.map(({ id }) => emojiStoreContext.getById(id));
+  const badIndexes = bannedEmojis
+    .map((bannedEmoji, index) => bannedEmoji === undefined ? index : -1)
+    .filter(index => index !== -1);
+  if (badIndexes.length) {
+    set({ bannedEmojis: current.bannedEmojis.filter((_, index) => !badIndexes.includes(index)) });
+  }
+
   const guilds = useMemo(() => bannedEmojis.map(({ guildId }) => ({
     id: guildId,
     guild: GuildStore.getGuild(guildId),

@@ -84,8 +84,6 @@ export const renderBanEmojiMenuItem = function (menu: ExpressionPickerContextMen
       icon={isBanned ? undefined : Bin}
     />
   </>));
-
-  // return menu;
 };
 
 export const replaceEmojiStore_getDisambiguatedEmojiContext = createPatcherCallback<EmojiStore['getDisambiguatedEmojiContext'], any>(({ args, original: getDisambiguatedEmojiContext }) => {
