@@ -9,13 +9,10 @@
         "build": "ts-node scripts/build.ts",
         "build-md": "ts-node scripts/build-project-md.ts",
         "create-plugin": "ts-node scripts/create-plugin.ts",
-        
         "dev": "ts-node scripts/build.ts --dev --watch",
         "dev-once": "ts-node scripts/build.ts --dev",
-
         "dev-lib": "npm run dev -- 0DanhoLibrary",
         "dev-lib-once": "npm run dev-once -- 0DanhoLibrary",
-
         "check": "tsc --noemit",
         "lint": "eslint . -f node_modules/eslint-friendly-formatter",
         "lint-fix": "eslint . -f node_modules/eslint-friendly-formatter --fix"
@@ -29,11 +26,13 @@
     ],
     "dependencies": {
         "@types/betterdiscord": "github:zerthox/betterdiscord-types",
-        "@types/node": "^20.15.0",
-        "@types/react": "^18.0.37",
-        "@types/react-dom": "^18.0.11",
+        "@types/node": "^20.15.16",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
         "danho-lib": "*",
-        "dium": "*"
+        "dium": "*",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
     },
     "devDependencies": {
         "@rollup/plugin-json": "^6.0.0",

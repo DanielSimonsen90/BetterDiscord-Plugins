@@ -1,7 +1,7 @@
 import { Snowflake } from "@discord/types";
 import Finder from "../../finder";
 
-export type PrivateChannelSidebarList = JSX.BD.FC<{}, {
+export type PrivateChannelSidebarList = React.JSX.BD.FC<{}, {
   theme: string,
   showLibrary: boolean,
   hasLibraryApplication: boolean,
@@ -15,21 +15,21 @@ export type PrivateChannelSidebarList = JSX.BD.FC<{}, {
   shouldShowQuickLauncherRow: boolean,
   selectedChannelId: null | Snowflake,
   path: null;
-}, JSX.BD.Memo<{
+}, React.JSX.BD.Memo<{
   'aria-label': "Private channels",
   className: 'privateChannels__...',
   children: [
-    searchButton: JSX.BD.Rendered,
-    nav: JSX.BD.Rendered<{
+    searchButton: React.JSX.BD.Rendered,
+    nav: React.JSX.BD.Rendered<{
       children: [
-        friends: JSX.BD.Rendered,
+        friends: React.JSX.BD.Rendered,
         null,
         null,
-        premium: JSX.BD.Rendered,
-        discordShop: JSX.BD.Rendered,
+        premium: React.JSX.BD.Rendered,
+        discordShop: React.JSX.BD.Rendered,
         null,
         null,
-        sectionDivider: JSX.BD.Rendered,
+        sectionDivider: React.JSX.BD.Rendered,
         null,
       ],
       theme: string,

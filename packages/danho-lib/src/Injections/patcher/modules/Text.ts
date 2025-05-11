@@ -1,6 +1,6 @@
 import Finder from "../../finder";
 
-export type TextModule = JSX.BD.FRC<{
+export type TextModule = React.JSX.BD.FRC<{
   'data-text-variant': TextVairants,
   children: React.ReactNode,
   className?: string,

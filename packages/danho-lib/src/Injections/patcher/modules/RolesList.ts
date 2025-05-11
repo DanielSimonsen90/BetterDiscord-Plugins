@@ -2,7 +2,7 @@ import { Role, User, Guild, GuildMember } from '@discord/types';
 import { Filters, Finder } from '@dium/api';
 
 export type RolesListModule = {
-  RolesList: (props: RolesListModule['RolesListProps']) => JSX.BD.Rendered<{
+  RolesList: (props: RolesListModule['RolesListProps']) => React.JSX.BD.Rendered<{
     canManageRoles: boolean;
     currentUser: User;
     guild: Guild;

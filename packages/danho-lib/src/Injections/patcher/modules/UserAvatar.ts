@@ -1,7 +1,7 @@
 import Finder from "../../finder";
 import { UserStatus } from "@discord/types";
 
-export type UserAvatar = JSX.BD.FC<{
+export type UserAvatar = React.JSX.BD.FC<{
   'aria-label': string;
   className: 'avatar_...';
   isMobile: boolean;
@@ -11,7 +11,7 @@ export type UserAvatar = JSX.BD.FC<{
 }, {
   'aria-label': string;
   ariaHidden: boolean;
-  children: JSX.BD.Rendered;
+  children: React.JSX.BD.Rendered;
   className: 'avatar_...';
   isMobile: boolean;
   size: 'SIZE_24';

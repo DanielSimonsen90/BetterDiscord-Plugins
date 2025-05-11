@@ -40,8 +40,8 @@ export function TabBar<TTabKey extends string>({ tabs, ...props }: Props<TTabKey
   const getKeyName = useCallback((key: any) => props.id ? `#${props.id}-${key}` : key, [props.id]);
   const TabContent = useCallback(function TabContent() {
     const contentChildren = internalTabs.map(([tab]) => [tab, typeof props[tab as keyof typeof props] === 'function'
-      ? props[tab as keyof typeof props] as () => JSX.Element
-      : () => props[tab as keyof typeof props] as JSX.Element] as const);
+      ? props[tab as keyof typeof props] as () => React.JSX.Element
+      : () => props[tab as keyof typeof props] as React.JSX.Element] as const);
 
     return (<>{contentChildren.map(([tab, Content], key) => (
       <div key={getKeyName(`content-${key}`)} className={classNames("tab-bar__content-page", tab === (props.tab ?? activeTab) && 'tab-bar__content-page--active')}>

@@ -1,7 +1,7 @@
 import { Fiber } from '@dium';
 import { React } from './React';
 import { $, ElementSelector } from '@dom';
-export const renderChildren = (children: Element[], props = {}): Array<JSX.Element> => children.map(child => React.createElement(
+export const renderChildren = (children: Element[], props = {}): Array<React.JSX.Element> => children.map(child => React.createElement(
   child.tagName,
   Array.from(child.attributes).reduce((acc, { name, value }) => ({ ...acc, [name]: value }), props),
   child.outerHTML.match(/</g).length > 2 ? renderChildren(Array.from(child.children)) : child.textContent

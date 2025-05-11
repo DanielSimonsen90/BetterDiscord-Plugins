@@ -8,7 +8,7 @@ const DiscordRoleMention = Finder.bySourceStrings(
 ) as React.FC<{
   channelId: Snowflake;
   // children: [
-  //   tag: JSX.BD.Rendered<{
+  //   tag: React.JSX.BD.Rendered<{
   //     children: `@${string}`;
   //   }>
   // ],

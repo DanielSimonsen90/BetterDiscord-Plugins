@@ -9,7 +9,7 @@ export type AvatarWithText = ForwardRefExoticComponent<{
   muted?: boolean;
   highlighted?: boolean;
   wrapContent?: boolean;
-  avatar: JSX.Element;
+  avatar: React.JSX.Element;
   decorators?: unknown;
   name: ReactNode;
   subText?: ReactNode;
@@ -19,23 +19,23 @@ export type AvatarWithText = ForwardRefExoticComponent<{
 
 export const AvatarWithText = Finder.bySourceStrings<AvatarWithText>("AvatarWithText");
 
-export type AvatarWithTextBD = JSX.BD.FRC<PropsFromFC<AvatarWithText>, {
+export type AvatarWithTextBD = React.JSX.BD.FRC<PropsFromFC<AvatarWithText>, {
   children: [
-    avatar: JSX.BD.Rendered<{
+    avatar: React.JSX.BD.Rendered<{
       className: 'avatar__...';
       children: Avatar;
     }>,
     content: [
-      nameAndDecorators: JSX.BD.Rendered<{
-        name: JSX.BD.Rendered<{
+      nameAndDecorators: React.JSX.BD.Rendered<{
+        name: React.JSX.BD.Rendered<{
           className: 'name__...';
           children: Name;
         }>,
         decoration: null;
       }>,
-      subText: JSX.BD.Rendered<{
+      subText: React.JSX.BD.Rendered<{
         className: 'subtext__...';
-        children: JSX.BD.Rendered<{
+        children: React.JSX.BD.Rendered<{
           children: string;
           className: 'subtext__...';
         }>;
@@ -51,7 +51,7 @@ export const AvatarWithTextClassNameModule = ClassNamesUtils.combineModuleByKeys
   | 'link'
 )>(["avatarWithText"]);
 
-type Avatar = JSX.BD.Rendered<{
+type Avatar = React.JSX.BD.Rendered<{
   'aria-label': string;
   avatarDecoration?: string;
   isMobile: boolean;
@@ -64,7 +64,7 @@ type Avatar = JSX.BD.Rendered<{
   statusTooltip: boolean;
 }>
 
-type Name = JSX.BD.Rendered<{
+type Name = React.JSX.BD.Rendered<{
   children: string;
   tooltipClassName: `overflowtooltip__...`;
 }>;

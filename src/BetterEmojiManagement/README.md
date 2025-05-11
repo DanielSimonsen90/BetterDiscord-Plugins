@@ -1,4 +1,4 @@
-# [BetterEmojiManagement v1.0.2](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/dist/bd/BetterEmojiManagement)
+# [BetterEmojiManagement v1.0.3](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/dist/bd/BetterEmojiManagement)
 by DanielSimonsen90
 
 ## What does it do?

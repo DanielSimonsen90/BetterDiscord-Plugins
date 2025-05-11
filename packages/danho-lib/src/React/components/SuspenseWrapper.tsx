@@ -5,8 +5,8 @@ import { createLogger } from '../../Injections/logger';
 const Logger = createLogger('SuspenseWrapper');
 
 type SuspenseWrapperProps = {
-  defaultChild: JSX.Element | ((retry: () => void) => JSX.Element);
-  render: () => Promiseable<JSX.Element | undefined>;
+  defaultChild: React.JSX.Element | ((retry: () => void) => React.JSX.Element);
+  render: () => Promiseable<React.JSX.Element | undefined>;
 };
 
 export function SuspenseWrapper({ defaultChild, render }: SuspenseWrapperProps) {
@@ -16,7 +16,7 @@ export function SuspenseWrapper({ defaultChild, render }: SuspenseWrapperProps) 
       ? defaultChild(() => setRetries((prev) => prev + 1))
       : defaultChild
   ), [defaultChild, setRetries]);
-  const [child, setChild] = useState<JSX.Element>(initialChild);
+  const [child, setChild] = useState<React.JSX.Element>(initialChild);
 
   useEffect(() => {
     let isMounted = true;

@@ -7,10 +7,10 @@ type UserContextMenuFiber = {
   props: {
     "aria-label": "User Settings Actions",
     children: [
-      main: JSX.BD.Rendered<{
+      main: React.JSX.BD.Rendered<{
         children: [
-          unknownCouldBeMarkAsRead: JSX.BD.Rendered<{ children: null; }>,
-          userActions: JSX.BD.Rendered<{
+          unknownCouldBeMarkAsRead: React.JSX.BD.Rendered<{ children: null; }>,
+          userActions: React.JSX.BD.Rendered<{
             // children: [
             //   RenderedMenuItem<"user-profile", "Profile">,
             //   RenderedMenuItem<"message-user", "Message"> | RenderedMenuItem<"mention", "Mention">,
@@ -41,10 +41,10 @@ type UserContextMenuFiber = {
           }>,
           listenAlong: false | [
             listen: RenderedMenuItem<"invite-to-listen", "Invite to Listen Along">,
-            unknown: JSX.BD.Rendered<{}>
+            unknown: React.JSX.BD.Rendered<{}>
           ],
-          guildActions: JSX.BD.Rendered<{ children: []; }> | JSX.BD.Rendered<{ children: [
-            disableSelf: JSX.BD.Rendered<{ children: [
+          guildActions: React.JSX.BD.Rendered<{ children: []; }> | React.JSX.BD.Rendered<{ children: [
+            disableSelf: React.JSX.BD.Rendered<{ children: [
               RenderedMenuItem<"self-mute", "Mute">,
               RenderedMenuItem<"soundboard-sound-mute", "Mute Soundboard">,
               RenderedMenuItem<"disable-video", "Disable Video">,
@@ -54,7 +54,7 @@ type UserContextMenuFiber = {
             changeNickname: RenderedMenuItem<"change-nickname", "Change Nickname">,
             apps: RenderedMenuItemChildren<"apps", "Apps", any>,
           ]; }>,
-          userDangerzone: JSX.BD.Rendered<{
+          userDangerzone: React.JSX.BD.Rendered<{
             children: [
               false,
               RenderedMenuItemChildren<"invite-to-server", "Invite to Server", RenderedMenuItem<"<guildId>", "<guildName>">>,
@@ -62,7 +62,7 @@ type UserContextMenuFiber = {
               RenderedMenuItem<"block", "Block">,
             ]
           }>,
-          moderation: JSX.BD.Rendered<{
+          moderation: React.JSX.BD.Rendered<{
             children: [
               RenderedMenuItem<"mod-view", "Mod View">,
               RenderedMenuItem<"unverify-member", "Unverify Member">,
@@ -73,8 +73,8 @@ type UserContextMenuFiber = {
           }>,
         ];
       }>,
-      dev: JSX.BD.Rendered<{
-        children: JSX.BD.Rendered<RenderedMenuItem<"devmode-copy-id-<userId>", "Copy User ID"> & {
+      dev: React.JSX.BD.Rendered<{
+        children: React.JSX.BD.Rendered<RenderedMenuItem<"devmode-copy-id-<userId>", "Copy User ID"> & {
           focusedClassName?: string;
           icon: (e: any) => any;
           iconLeft: undefined;
@@ -102,7 +102,7 @@ export type Callback = (menu: UserContextMenuFiber, targetProps: UserContextMenu
 
 export function PatchUserContextMenu(callback: Callback) {
   const unpatch = BdApi.ContextMenu.patch('user-context', (tree, props) => {
-    return callback(tree, props, unpatch);
+    return callback(tree as UserContextMenuFiber, props, unpatch);
   });
 
   return unpatch;

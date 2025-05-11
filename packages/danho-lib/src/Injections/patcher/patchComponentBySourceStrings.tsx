@@ -7,11 +7,11 @@ import { Patcher } from '@dium';
 const Logger = createLogger('patchComponentBySourceStrings');
 
 type TComponentProps<TProps, TRenderedProps> = {
-  result: JSX.BD.Rendered<TRenderedProps>;
+  result: React.JSX.BD.Rendered<TRenderedProps>;
   component: typeof Component;
   props: TProps;
 };
-type Callback<TComponentProps> = (props: TComponentProps) => JSX.Element;
+type Callback<TComponentProps> = (props: TComponentProps) => React.JSX.Element;
 type SourceStringsArgs<TComponentProps> = [...string[], callback: Callback<TComponentProps>];
 
 export function patchComponentBySourceStrings<TProps = any, TRenderedProps = any>(...args: SourceStringsArgs<TComponentProps<TProps, TRenderedProps>>): void {

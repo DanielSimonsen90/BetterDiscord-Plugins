@@ -1,9 +1,11 @@
-import { Arrayable } from '../Utils/types';
+import { JSX } from '@react';
 import { Utils } from '@dium/index';
-import ElementSelector from './ElementSelector';
-import { If, PromisedReturn } from '../Utils/types';
 import { getFiber } from '@dium/utils';
 import { StringUtils } from '@utils';
+
+import ElementSelector from './ElementSelector';
+import { Arrayable } from '../Utils/types';
+import { If, PromisedReturn } from '../Utils/types';
 
 type Fiber = any;
 
@@ -405,24 +407,24 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     });
     return this;
   }
-  public appendComponent(component: JSX.Element, wrapperProps?: any): DQuery<El> {
+  public appendComponent(component: React.JSX.Element, wrapperProps?: any): DQuery<El> {
     const wrapper = this.element.appendChild(createElement("<></>", wrapperProps)) as HTMLElement;
-    BdApi.ReactDOM.render(component, wrapper);
+    BdApi.ReactDOM.createRoot(wrapper).render(component);
     return this;
   }
 
-  public replaceWithComponent(component: JSX.Element): DQuery<El> {
+  public replaceWithComponent(component: React.JSX.Element): DQuery<El> {
     try {
-      BdApi.ReactDOM.render(component, this.element);
+      BdApi.ReactDOM.createRoot(this.element).render(component);
     } catch {}
     return this;
   }
 
-  public insertComponent(position: InsertPosition, component: JSX.Element): DQuery<El> {
+  public insertComponent(position: InsertPosition, component: React.JSX.Element): DQuery<El> {
     this.element.insertAdjacentElement(position, createElement("<></>"));
     const wrapper = this.parent.children("> .bdd-wrapper", true).element as HTMLElement;
 
-    BdApi.ReactDOM.render(component, wrapper);
+    BdApi.ReactDOM.createRoot(wrapper).render(component);
     return this;
   }
 
@@ -430,11 +432,11 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
     this.element.insertAdjacentHTML('afterbegin', html);
     return this;
   }
-  public prependComponent(component: JSX.Element): DQuery<El> {
+  public prependComponent(component: React.JSX.Element): DQuery<El> {
     this.element.insertAdjacentElement('afterbegin', createElement("<></>"));
     const wrapper = this.element.firstChild as HTMLElement;
 
-    BdApi.ReactDOM.render(component, wrapper);
+    BdApi.ReactDOM.createRoot(wrapper).render(component);
     return this;
   }
 
@@ -449,7 +451,6 @@ export class DQuery<El extends HTMLElement = HTMLElement> {
 
   public async forceUpdate() {
     return Utils.forceFullRerender(this.fiber);
-    // return BdApi.ReactUtils.getOwnerInstance(this.element).forceUpdate();
   }
 }
 export default $;

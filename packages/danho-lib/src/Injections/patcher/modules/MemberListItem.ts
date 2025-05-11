@@ -2,7 +2,7 @@ import { Activity, Channel, Snowflake, User, UserStatus } from "@discord/types";
 import { AvatarWithTextBD } from "@discord/components";
 import Finder from "../../finder";
 
-export type MemberListItem = JSX.BD.Memo<{
+export type MemberListItem = React.JSX.BD.Memo<{
   activities: Array<Activity>;
   channel: Channel;
   colorRoleName: string;

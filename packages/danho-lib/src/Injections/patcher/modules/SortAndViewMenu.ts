@@ -2,11 +2,11 @@ import { Channel } from "@discord/types";
 import { RenderedMenuItemWithGroup, RenderedMenuItemChildren } from "@context-menus";
 import Finder from "../../finder";
 
-export type SortAndViewMenu = JSX.BD.FC<{
+export type SortAndViewMenu = React.JSX.BD.FC<{
   channel: Channel;
   closePopout(e: any): void;
 }, {
-  children: JSX.BD.Rendered<{
+  children: React.JSX.BD.Rendered<{
     'aria-label': "Set sort or view",
     children: [
       SortBy: RenderedMenuItemChildren<never, 'Sort by', [

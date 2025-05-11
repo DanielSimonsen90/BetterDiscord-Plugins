@@ -2,11 +2,17 @@ import { ReactDOM } from "@dium";
 
 export const {
   createPortal,
-  render,
-  findDOMNode,
+  createRoot,
+  preconnect,
+  prefetchDNS,
   flushSync,
-  hydrate,
-  unmountComponentAtNode
+  preinit,
+  preinitModule,
+  preload,
+  preloadModule,
+  useFormStatus,
+  requestFormReset,
+  useFormState,
 } = ReactDOM;
 
-export { ReactDOM}
+export { ReactDOM }

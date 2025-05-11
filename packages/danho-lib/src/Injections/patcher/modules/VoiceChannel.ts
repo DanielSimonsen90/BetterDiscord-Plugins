@@ -2,7 +2,7 @@ import Finder from "../../finder";
 import { VoiceState } from "@discord/stores";
 import { ActivityIndexes, Channel, Guild, GuildMember, User } from "@discord/types";
 
-export type VoiceChannel = JSX.BD.FC<{
+export type VoiceChannel = React.JSX.BD.FC<{
   channel: Channel;
   collapsed: boolean;
   connected: boolean;

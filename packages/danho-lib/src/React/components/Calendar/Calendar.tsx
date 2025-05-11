@@ -3,7 +3,7 @@ import MonthDays from './MonthDays';
 import { Button, ScrollerAuto, ScrollerLooks, Text } from '@discord/components';
 
 type CalendarProps = {
-  children: (string: string, date: Date) => JSX.Element;
+  children: (string: string, date: Date) => React.JSX.Element;
   onDateClick?: (string: string, date: Date) => void;
 
   startDate?: Date;

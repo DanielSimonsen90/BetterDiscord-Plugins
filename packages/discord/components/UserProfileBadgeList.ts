@@ -1,16 +1,16 @@
 import { Finder } from '@injections';
 import { DisplayProfile } from "@discord/types";
 
-export type UserProfileBadgeList = JSX.BD.FC<{
+export type UserProfileBadgeList = React.JSX.BD.FC<{
   badges: Array<UserProfileBadge>;
   displayProfile?: DisplayProfile;
   onClose: (e: React.MouseEvent) => void;
 }, {
   'aria-label': 'User Badges';
-  children: Array<JSX.BD.Rendered<{
+  children: Array<React.JSX.BD.Rendered<{
     'aria-label': string;
-    children: JSX.BD.Rendered<{
-      children: JSX.BD.Rendered<{
+    children: React.JSX.BD.Rendered<{
+      children: React.JSX.BD.Rendered<{
         alt: ' ';
         'aria-hidden': true;
         className: 'badge_...';
@@ -23,7 +23,7 @@ export type UserProfileBadgeList = JSX.BD.FC<{
     delay: 300;
     onTooltipHide: () => void;
     onTooltipShow: () => void;
-    text: string | JSX.BD.Rendered<{
+    text: string | React.JSX.BD.Rendered<{
       profileBadge: UserProfileBadge;
       tenureBadge: {
         id: BadgeId;

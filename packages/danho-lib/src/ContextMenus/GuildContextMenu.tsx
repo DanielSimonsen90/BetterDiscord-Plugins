@@ -1,3 +1,4 @@
+import { JSX } from '@react';
 import { Guild } from '@discord/types';
 import { RenderedMenuItem, RenderedMenuItemChildren, RenderedMenuItemWithGroup } from './Builder.types';
 import { Unpatch } from './PatchTypes';
@@ -6,11 +7,11 @@ type FolderMenuFiber = {
   props: {
     'aria-label': "Server Actions";
     children: [
-      MarkAsRead: JSX.BD.Rendered<{
+      MarkAsRead: React.JSX.BD.Rendered<{
         children: RenderedMenuItem<"mark-folder-read", "Mark Folder as Read">;
       }>,
       null,
-      FolderOptions: JSX.BD.Rendered<{
+      FolderOptions: React.JSX.BD.Rendered<{
         children: [
           folderSettings: RenderedMenuItem<"folder-settings", "Folder Settings">,
           closeAllFolders: RenderedMenuItem<"folder-collapse", "Close All Folders">,
@@ -27,42 +28,42 @@ type GuildMenuFiber = {
   props: {
     'aria-label': "Server Actions";
     children: [
-      MarkAsRead: JSX.BD.Rendered<{
+      MarkAsRead: React.JSX.BD.Rendered<{
         children: RenderedMenuItem<"mark-guild-read", "Mark as Read">;
       }>,
-      Invite: JSX.BD.Rendered<{
+      Invite: React.JSX.BD.Rendered<{
         children: RenderedMenuItem<"invite-people", "Invite People">;
       }>,
-      ChannelListOptions: JSX.BD.Rendered<{
+      ChannelListOptions: React.JSX.BD.Rendered<{
         children: [
           mute: RenderedMenuItem<"mute-guild", "Mute Server">,
           notifications: RenderedMenuItemChildren<
             "guild-notifications",
-            JSX.BD.Rendered<{ children: [false, "Notification Settings"]; }>,
-            JSX.BD.Rendered<{
+            React.JSX.BD.Rendered<{ children: [false, "Notification Settings"]; }>,
+            React.JSX.BD.Rendered<{
               children: [
-                options: JSX.BD.Rendered<{
+                options: React.JSX.BD.Rendered<{
                   children: [
                     all: RenderedMenuItemWithGroup<"0", "All Messages", "guild-notifications">,
                     mentions: RenderedMenuItemWithGroup<"1", [
                       "Only",
-                      mentions: JSX.BD.Rendered<{
+                      mentions: React.JSX.BD.Rendered<{
                         children: '@mentions';
                       }, 'strong'>
                     ], "guild-notifications">,
                     nothing: RenderedMenuItemWithGroup<"2", "Nothing", "guild-notifications">,
                   ];
                 }>,
-                unknown: JSX.BD.Rendered<{ children: false; }>,
-                suppress: JSX.BD.Rendered<{
+                unknown: React.JSX.BD.Rendered<{ children: false; }>,
+                suppress: React.JSX.BD.Rendered<{
                   children: [
                     everyoneAndHere: RenderedMenuItem<"suppress-everyone", [
                       "Suppress",
-                      JSX.BD.Rendered<{
+                      React.JSX.BD.Rendered<{
                         children: ['@everyone'];
                       }, 'strong'>,
                       ' and ',
-                      JSX.BD.Rendered<{
+                      React.JSX.BD.Rendered<{
                         children: ['@here'];
                       }, 'strong'>
                     ]>,
@@ -71,7 +72,7 @@ type GuildMenuFiber = {
                     muteEvents: RenderedMenuItem<"mute-events", "Mute New Events">,
                   ];
                 }>,
-                mobile: JSX.BD.Rendered<{
+                mobile: React.JSX.BD.Rendered<{
                   children: RenderedMenuItem<"mobile-push", "Mobile Push Notifications">;
                 }>
               ];
@@ -119,7 +120,7 @@ export type Callback = (menu: GuildContextMenuFiber, targetProps: GuildContextMe
 
 export function PatchGuildContextMenu(callback: Callback) {
   const unpatch = BdApi.ContextMenu.patch('guild-context', (tree, props) => {
-    return callback(tree, props, unpatch)
+    return callback(tree as GuildContextMenuFiber, props, unpatch)
   });
   return unpatch;
 }

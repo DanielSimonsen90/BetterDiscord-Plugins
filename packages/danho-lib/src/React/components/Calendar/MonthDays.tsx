@@ -6,7 +6,7 @@ import { StringUtils } from '@utils';
 
 type MonthDaysProps = {
   currentDate: Date;
-  children: (string: string, date: Date) => JSX.Element;
+  children: (string: string, date: Date) => React.JSX.Element;
   onDateClick?: (string: string, date: Date) => void;
 };
 
@@ -22,7 +22,7 @@ export default function MonthDays({ currentDate, children, onDateClick }: MonthD
   const daysInMonth = getDaysInMonth(month, year);
   const firstDay = getShiftedDay(new Date(year, month, 1).getDay()); // Adjust the first day
 
-  const days = new Array<JSX.Element>();
+  const days = new Array<React.JSX.Element>();
   for (let i = 0; i < firstDay; i++) {
     days.push(<div key={`empty-${i}`} className='danho-calendar__day--empty'></div>);
   }

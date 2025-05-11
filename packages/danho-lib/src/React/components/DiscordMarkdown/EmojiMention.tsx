@@ -31,7 +31,7 @@ const InternalEmojiMentions = Finder.bySourceStrings(
     }
    }>,
   // Default Emoji mention
-  c: JSX.BD.FC<{ children: any[]; }>,
+  c: React.JSX.BD.FC<{ children: any[]; }>,
 };
 
 export default function EmojiMention({ id, name, messageId, onClick }: EmojiMentionProps) {

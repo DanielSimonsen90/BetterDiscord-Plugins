@@ -16,7 +16,7 @@ export default function afterPrivateChannelSidebarList() {
 
         const replacedChildren = [
           <div className='danho-nav-group' >
-            {navOptions as Array<JSX.Element>}
+            {navOptions as Array<React.JSX.Element>}
           </div>,
           divider
         ];

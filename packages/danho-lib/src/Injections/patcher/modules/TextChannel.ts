@@ -1,7 +1,7 @@
 import { Channel, Guild, Snowflake } from "@discord/types";
 import Finder from "../../finder";
 
-export type TextChannel = JSX.BD.FC<{
+export type TextChannel = React.JSX.BD.FC<{
   canBeNewChannel: boolean;
   channel: Channel;
   disableManageChannels: undefined;

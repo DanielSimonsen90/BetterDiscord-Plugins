@@ -1,7 +1,7 @@
 import { Activity } from "@discord/types";
 import Finder from "../../finder";
 
-export type UserActivityStatus = JSX.BD.FC<{
+export type UserActivityStatus = React.JSX.BD.FC<{
   activity: Activity;
   hideIcon: boolean;
   hideText: boolean;
@@ -9,12 +9,12 @@ export type UserActivityStatus = JSX.BD.FC<{
   textVairant: 'text-sm/medium';
 }, {
   children: [
-    icon: JSX.BD.Rendered<{
-      icon: (e: any) => JSX.BD.Rendered<unknown>;
+    icon: React.JSX.BD.Rendered<{
+      icon: (e: any) => React.JSX.BD.Rendered<unknown>;
       tooltip: undefined;
     }>,
-    text: JSX.BD.Rendered<{
-      children: Array<JSX.BD.Rendered<any> | string>;
+    text: React.JSX.BD.Rendered<{
+      children: Array<React.JSX.BD.Rendered<any> | string>;
       className: 'text__...',
       variant: 'text-sm/medium';
     }>,

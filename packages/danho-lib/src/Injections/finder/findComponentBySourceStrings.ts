@@ -1,12 +1,12 @@
 import { Patcher } from '@dium/api';
 import * as DiumFinder from '@dium/api/finder';
 
-export const findComponentBySourceStrings = async <TResult = JSX.BD.FC, RenderedProps = any>(...keywords: string[]): Promise<[TResult, JSX.BD.Rendered<RenderedProps>]> => {
+export const findComponentBySourceStrings = async <TResult = React.JSX.BD.FC, RenderedProps = any>(...keywords: string[]): Promise<[TResult, React.JSX.BD.Rendered<RenderedProps>]> => {
   const jsxModule = DiumFinder.byKeys(['jsx']);
   const ReactModule = DiumFinder.byKeys(['createElement', 'cloneElement']);
   keywords = keywords.map(keyword => keyword.replace(/\s+/g, ''));
 
-  const [component, result] = await new Promise<[TResult, JSX.BD.Rendered<RenderedProps>]>((resolve, reject) => {
+  const [component, result] = await new Promise<[TResult, React.JSX.BD.Rendered<RenderedProps>]>((resolve, reject) => {
     try {
       // According to actual plugin developers, custom comonents are rendered using the `jsx` module
       const cancelJsx = Patcher.after(jsxModule, 'jsx', ({ result, args: [component] }) => {

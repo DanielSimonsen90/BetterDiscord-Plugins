@@ -2,7 +2,7 @@ import { Channel, Guild, Snowflake } from "@discord/types";
 import { VoiceChannelVoiceState } from "./VoiceChannel";
 import Finder from "../../finder";
 
-export type StageChannel = JSX.BD.FC<{
+export type StageChannel = React.JSX.BD.FC<{
   channel: Channel;
   collapsed: boolean;
   connected: boolean;

@@ -6,14 +6,14 @@ type ChannelContextMenuFiber = {
   props: {
     'aria-label': "Channel Actions";
     children: [
-      blank: JSX.BD.Rendered,
-      MarkAsReadOrFavorite: JSX.BD.Rendered<{
+      blank: React.JSX.BD.Rendered,
+      MarkAsReadOrFavorite: React.JSX.BD.Rendered<{
         children: [
           null | RenderedMenuItem<"mark-channel-read", "Mark as Read">,
           null | RenderedMenuItem<"favorite-channel", "Favorite Channel">,
         ]
       }>,
-      ChannelActions: JSX.BD.Rendered<{
+      ChannelActions: React.JSX.BD.Rendered<{
         children: [
           InvitePeople: RenderedMenuItem<"invite-people", "Invite People"> & {
             props: {
@@ -22,7 +22,7 @@ type ChannelContextMenuFiber = {
           },
           InviteToSpotifySession: [
             InviteToListenAlong: RenderedMenuItem<"invite-to-listen", "Invite to Listen Along">,
-            SpotifyText: JSX.BD.Rendered
+            SpotifyText: React.JSX.BD.Rendered
           ],
           OptChannelStructure: [
             FavoirteChannel: RenderedMenuItem<"opt-in-favorite-channel", "Favorite">,
@@ -34,7 +34,7 @@ type ChannelContextMenuFiber = {
           CopyLink: RenderedMenuItem<"channel-copy-link", "Copy Link">,
         ]
       }>,
-      VoiceActions: JSX.BD.Rendered<{
+      VoiceActions: React.JSX.BD.Rendered<{
         children: [
           null,
           OpenChat: RenderedMenuItem<"open-chat", "Open Chat">,
@@ -48,7 +48,7 @@ type ChannelContextMenuFiber = {
           null,
         ]
       }>,
-      Notifications: JSX.BD.Rendered<{
+      Notifications: React.JSX.BD.Rendered<{
         children: [
           MuteChannel: RenderedMenuItemChildren<"mute-channel", "Mute Channel", [
             FifteenMinutes: RenderedMenuItem<"900", "For 15 Minutes">,
@@ -60,8 +60,8 @@ type ChannelContextMenuFiber = {
           ]>
         ]
       }>,
-      anotherBlank: JSX.BD.Rendered,
-      AdminActions: JSX.BD.Rendered<{
+      anotherBlank: React.JSX.BD.Rendered,
+      AdminActions: React.JSX.BD.Rendered<{
         children: [
           Edit: RenderedMenuItem<"edit-channel", "Edit Channel">,
           Duplicate: RenderedMenuItem<"clone-channel", "Duplicate Channel">,
@@ -73,11 +73,11 @@ type ChannelContextMenuFiber = {
           },
         ]
       }>,
-      DeveloperActions: JSX.BD.Rendered<{
+      DeveloperActions: React.JSX.BD.Rendered<{
         children: [
           CopyChannelId: RenderedMenuItem<`devmode-copy-id-${Snowflake}`, "Copy Channel ID"> & {
             props: {
-              icon: JSX.BD.FC
+              icon: React.JSX.BD.FC
             }
           }
         ]
@@ -104,7 +104,7 @@ export type Callback = (menu: ChannelContextMenuFiber, targetProps: ChannelConte
 
 export function PatchChannelContextMenu(callback: Callback) {
   const unpatch = BdApi.ContextMenu.patch('channel-context', (tree, props) => {
-    return callback(tree, props, unpatch);
+    return callback(tree as ChannelContextMenuFiber, props, unpatch);
   });
 
   return unpatch;

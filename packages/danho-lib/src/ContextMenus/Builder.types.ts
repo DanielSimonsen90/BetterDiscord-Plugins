@@ -42,14 +42,14 @@ export type ContextMenuItemProps = BaseContextMenuItemProps & {
   extended?: boolean;
 }
 
-export type RenderedMenuItem<id, label, action = (() => void)> = JSX.BD.Rendered<{
+export type RenderedMenuItem<id, label, action = (() => void)> = React.JSX.BD.Rendered<{
   action: action,
   id: id,
   label: label,
   checked?: undefined | boolean,
 }>;
 
-export type RenderedMenuItemWithGroup<id, label, groupName, action = (() => void)> = JSX.BD.Rendered<{
+export type RenderedMenuItemWithGroup<id, label, groupName, action = (() => void)> = React.JSX.BD.Rendered<{
   action: action,
   group: groupName,
   id: id,
@@ -57,7 +57,7 @@ export type RenderedMenuItemWithGroup<id, label, groupName, action = (() => void
   checked?: boolean
 }>
 
-export type RenderedMenuItemChildren<id, label, children> = JSX.BD.Rendered<{
+export type RenderedMenuItemChildren<id, label, children> = React.JSX.BD.Rendered<{
   children: children,
   id: id,
   label: label,

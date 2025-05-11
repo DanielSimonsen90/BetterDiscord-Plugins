@@ -17,7 +17,7 @@ export function buildTextItem(id: string, label: string, action: () => void, pro
     ...props
   };
 }
-export function buildTextItemElement(id: string, label: string, action: () => void, props: Partial<ContextMenuItemProps> = {}): JSX.Element | any {
+export function buildTextItemElement(id: string, label: string, action: () => void, props: Partial<ContextMenuItemProps> = {}): React.JSX.Element | any {
   return BdApi.ContextMenu.buildItem(buildTextItem(id, label, action, props));
 }
 
@@ -32,7 +32,7 @@ export function buildSubMenu(id: string, label: string, items: Array<Partial<Con
     ...props
   };
 }
-export function buildSubMenuElement(id: string, label: string, items: Array<Partial<ContextMenuItemProps>>, props: Partial<ContextMenuItemProps> = {}): JSX.Element {
+export function buildSubMenuElement(id: string, label: string, items: Array<Partial<ContextMenuItemProps>>, props: Partial<ContextMenuItemProps> = {}): React.JSX.Element {
   return BdApi.ContextMenu.buildItem(buildSubMenu(id, label, items, props));
 }
 
@@ -69,7 +69,7 @@ export function buildRadioItemElement(id: string, label: React.ReactNode, select
 export function buildGroup(items: Array<ContextMenuItemProps>): ContextMenuGroupProps {
   return { type: 'group', items };
 }
-export function buildGroupElement(items: Array<ContextMenuItemProps>): JSX.Element {
+export function buildGroupElement(items: Array<ContextMenuItemProps>): React.JSX.Element {
   return BdApi.ContextMenu.buildMenuChildren(items);
 }
 

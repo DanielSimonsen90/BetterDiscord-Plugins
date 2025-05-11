@@ -114,7 +114,7 @@ export default function GuildList(ListClass: typeof React.PureComponent<any, any
     }
 
     declare public renderSection: (data: RowData) => any;
-    private __originalRenderSection: (data: RowData) => JSX.BD.Rendered;
+    private __originalRenderSection: (data: RowData) => React.JSX.BD.Rendered;
     public patchedRenderSection(data: RowData) {
       const rendered = this.__originalRenderSection(data);
       if (!rendered.key.includes('category')) return rendered;

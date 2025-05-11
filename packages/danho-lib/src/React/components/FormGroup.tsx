@@ -90,7 +90,7 @@ type ModelProps<
 
 // #endregion
 
-export function FormItem<T extends InputValueType>(props: SpreadProps<T>): JSX.Element {
+export function FormItem<T extends InputValueType>(props: SpreadProps<T>): React.JSX.Element {
   // Required
   const { value, label, type } = props;
 
@@ -104,7 +104,7 @@ export function FormItemFromModel<
   TRecord extends BaseModel,
   TKey extends keyof TRecord,
   T extends TRecord[TKey]
->(props: ModelProps<TRecord, TKey, T>): JSX.Element {
+>(props: ModelProps<TRecord, TKey, T>): React.JSX.Element {
   // Required
   const { model, property } = props;
   // Partially required
@@ -227,7 +227,7 @@ function FormGroup<T extends string | number | boolean>(props: FormGroupProps<T>
 }
 
 type EmptyFormGroupProps = Pick<FormGroupProps<any>, 'name' | 'label'> & {
-  children: (ref: ForwardedRef<HTMLInputElement>) => JSX.Element;
+  children: (ref: ForwardedRef<HTMLInputElement>) => React.JSX.Element;
   onClick?: () => void;
 };
 export const EmptyFormGroup = forwardRef<HTMLInputElement, EmptyFormGroupProps>((props, ref) => {

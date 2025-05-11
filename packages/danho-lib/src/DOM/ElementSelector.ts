@@ -98,11 +98,12 @@ export function getElementFromReactInstance<Element extends HTMLElement, Multipl
   if (instance.type && !instance.type.toString().includes("function")) selector.tagName(instance.type.toString() as keyof HTMLElementTagNameMap).and;
   if (instance.props) {
     const { props } = instance;
-    if (props.id) selector.id(props.id).and;
-    if (props.className) selector.className(props.className).and;
-    if (props.ariaLabel) selector.ariaLabel(props.ariaLabel).and;
-    if (props.role) selector.role(props.role).and;
-    if (props.data) {
+    if (typeof props !== 'object') return null;
+    if ('id' in props && props.id && typeof props.id === 'string') selector.id(props.id).and;
+    if ('className' in props && props.className && typeof props.className === 'string') selector.className(props.className).and;
+    if ('ariaLabel' in props && props.ariaLabel && typeof props.ariaLabel === 'string') selector.ariaLabel(props.ariaLabel).and;
+    if ('role' in props && props.role && typeof props.role === 'string') selector.role(props.role as AriaRole).and;
+    if ('data' in props && props.data && typeof props.data === 'object') {
       for (const prop in props.data) {
         selector.data(prop, props.data[prop]).and;
       }

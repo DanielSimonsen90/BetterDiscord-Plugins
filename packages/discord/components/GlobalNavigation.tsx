@@ -2,14 +2,14 @@ import { Finder } from '@injections';
 import { Autocomplete } from "@utils/types";
 import { Channel, Snowflake } from "@discord/types";
 
-type NavigationItem<Key> = JSX.BD.Rendered<{
+type NavigationItem<Key> = React.JSX.BD.Rendered<{
   selected: boolean
-}, (e: any) => JSX.BD.Rendered> & {
+}, (e: any) => React.JSX.BD.Rendered> & {
   key: Autocomplete<Key>,
 }
 
-export type GlobalNavigation = JSX.BD.FC<{
-  children: JSX.BD.Rendered<{
+export type GlobalNavigation = React.JSX.BD.FC<{
+  children: React.JSX.BD.Rendered<{
     channels: Array<Channel>
     children: [
       friends: NavigationItem<'friends'>,

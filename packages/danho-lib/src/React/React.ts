@@ -20,7 +20,6 @@ export const {
   createRef,
   createContext,
   createElement,
-  createFactory,
 
   forwardRef,
   cloneElement,
@@ -35,6 +34,8 @@ export const {
 
 // Export types
 export {
+  JSX,
+
   ComponentClass,
   FunctionComponent,
   MemoExoticComponent,

@@ -1,12 +1,12 @@
 import { GuildMember, Snowflake } from "@discord/types";
 import Finder from "../../finder";
 
-type ListSpacer = JSX.BD.Rendered<{
+type ListSpacer = React.JSX.BD.Rendered<{
   'aria-hidden': true,
   style: React.CSSProperties,
 }>;
-type WhosOnline = JSX.BD.Rendered<{
-  children: JSX.BD.Rendered<{
+type WhosOnline = React.JSX.BD.Rendered<{
+  children: React.JSX.BD.Rendered<{
     count: number;
     guildId: Snowflake;
     index: number;
@@ -23,9 +23,9 @@ type WhosOnline = JSX.BD.Rendered<{
   position: 'left',
   tutorialId: 'whos-online';
 }>;
-type MemberItem = JSX.BD.Rendered<GuildMember>
+type MemberItem = React.JSX.BD.Rendered<GuildMember>
 
-export type MemberList = JSX.BD.FRC<{
+export type MemberList = React.JSX.BD.FRC<{
   className: 'members_...',
   customTheme: boolean,
   'data-jump-section': 'global',
@@ -36,19 +36,19 @@ export type MemberList = JSX.BD.FRC<{
   onKeyDown: (event: KeyboardEvent) => void,
   onScroll: (event: Event) => void,
   paddingTop: number,
-  renderRow: (e: any) => JSX.BD.Rendered;
-  renderSection: (e: any) => JSX.BD.Rendered;
+  renderRow: (e: any) => React.JSX.BD.Rendered;
+  renderSection: (e: any) => React.JSX.BD.Rendered;
   rowHeight: number;
   sectionHeight: number;
   sections: Array<number>;
   tabIndex: number;
 }, {
   children: [
-    JSX.BD.Rendered<{
+    React.JSX.BD.Rendered<{
       'aria-label': 'Members',
       'aria-multiseectable': undefined,
       'aria-orientation': undefined,
-      children: JSX.BD.Rendered<{
+      children: React.JSX.BD.Rendered<{
         containerRef: React.RefObject<HTMLElement>;
         children: Array<ListSpacer | WhosOnline | MemberItem>;
       }>,

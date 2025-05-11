@@ -2,41 +2,41 @@ import type { Snowflake, User, DisplayProfile } from "@discord/types";
 import { Finder } from "@dium/api";
 import type { TextVairants } from '@injections/patched/Text';
 
-export type UserHeaderUsername = JSX.BD.FC<UserHeaderUsernameProps, {
+export type UserHeaderUsername = React.JSX.BD.FC<UserHeaderUsernameProps, {
   className: 'container_...';
   children: [
-    usernameRow: JSX.BD.Rendered<{
+    usernameRow: React.JSX.BD.Rendered<{
       className: 'usernameRow_...';
       children: [
-        clickableUsername: JSX.BD.Rendered<{
+        clickableUsername: React.JSX.BD.Rendered<{
           className: 'clickableUsername_...';
           onCilck: (e: any) => any;
           role: 'button';
           tabIndex: 0;
           tag: 'div';
-          children: JSX.BD.Rendered<{
+          children: React.JSX.BD.Rendered<{
             children: string;
             className: 'nickname_... panel_...';
             variant: Extract<TextVairants, 'heading-lg/bold'>;
           }>;
         }>,
         false,
-        nicknameIconsPanel: JSX.BD.Rendered<{
+        nicknameIconsPanel: React.JSX.BD.Rendered<{
           className: 'nicknameIcons_... panel_...';
           children: UserHeaderUsernameProps['nicknameIcons']['props']['children'];
         }>
       ];
     }>,
-    tagsPanelPronouns: JSX.BD.Rendered<{
+    tagsPanelPronouns: React.JSX.BD.Rendered<{
       className: 'tags__... panel__... pronouns__...';
       children: [
-        tag: JSX.BD.Rendered<{
+        tag: React.JSX.BD.Rendered<{
           className: 'clickableUsername__...',
           onClick: (e: any) => any;
           role: 'button';
           tabIndex: 0;
           tag: 'div';
-          children: JSX.BD.Rendered<{
+          children: React.JSX.BD.Rendered<{
             className: 'userTag__...';
             discriminatorClass: 'userTagDiscriminator__...';
             forcePomelo: undefined;
@@ -48,12 +48,12 @@ export type UserHeaderUsername = JSX.BD.FC<UserHeaderUsernameProps, {
           }>;
         }>,
         pronounsContainer: [
-          dotSpacer: JSX.BD.Rendered<{}>,
-          pronounsTooltip: JSX.BD.Rendered<{
+          dotSpacer: React.JSX.BD.Rendered<{}>,
+          pronounsTooltip: React.JSX.BD.Rendered<{
             className: 'pronounsTooltip__...';
             delay: 300;
             text: 'Pronouns';
-            children: JSX.BD.Rendered<{
+            children: React.JSX.BD.Rendered<{
               children: string;
               className: 'pronounsText__... userTag__...';
               color: 'header-primary';
@@ -61,12 +61,12 @@ export type UserHeaderUsername = JSX.BD.FC<UserHeaderUsernameProps, {
             }>;
           }>,
         ],
-        clanTagContainer: JSX.BD.Rendered<{
+        clanTagContainer: React.JSX.BD.Rendered<{
           className: 'clanTag__...';
           containerClassName: 'clanTagContainer__...';
           userId: Snowflake;
         }>,
-        displayProfileBadges: JSX.BD.Rendered<{
+        displayProfileBadges: React.JSX.BD.Rendered<{
           displayProfile: DisplayProfile;
           profileType: 'PANEL';
         }>
@@ -85,12 +85,12 @@ export default UserHeaderUsernameModule;
 
 type UserHeaderUsernameProps = {
   nickanme: string;
-  nicknameIcons: JSX.BD.Rendered<{
+  nicknameIcons: React.JSX.BD.Rendered<{
     children: [
-      JSX.BD.Rendered<{
+      React.JSX.BD.Rendered<{
         userId: Snowflake;
       }>,
-      JSX.BD.Rendered<{
+      React.JSX.BD.Rendered<{
         isHovering: boolean;
         onOpenProfile(e: any): any;
         userId: Snowflake;
@@ -100,7 +100,7 @@ type UserHeaderUsernameProps = {
   onOpenProfile(e: any): any;
   profileType: 'PANEL';
   pronouns: string;
-  tags: JSX.BD.Rendered<{
+  tags: React.JSX.BD.Rendered<{
     displayProfile: DisplayProfile;
     profileType: 'PANEL';
   }>;

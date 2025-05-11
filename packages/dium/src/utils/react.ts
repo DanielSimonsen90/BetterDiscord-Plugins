@@ -12,14 +12,14 @@ interface FCHookProps<P> {
 /** Utility component hooking into a function component. */
 const FCHook = <P>({children: {type, props}, callback}: FCHookProps<P>): React.ReactNode => {
     const result = type(props);
-    return callback(result, props) as JSX.Element ?? result;
+    return callback(result, props) as React.JSX.Element ?? result;
 };
 
 /** Hooks into a function component, allowing to modify the rendered elements. */
 export const hookFunctionComponent = <P>(
     target: React.ReactElement<P, React.FunctionComponent<P>>,
     callback: FCHookCallback<P>,
-): JSX.Element => {
+): React.JSX.Element => {
     // replace original with hook component, move target element to children
     const props: FCHookProps<P> = {
         children: {...target},
@@ -38,7 +38,7 @@ type ReactTree = React.ReactNode | React.ReactNode[];
 /**
  * Replaces a React element with another.
  */
-export const replaceElement = (target: JSX.Element, replace: JSX.Element): void => {
+export const replaceElement = (target: React.JSX.Element, replace: React.JSX.Element): void => {
     target.type = replace.type;
     target.key = replace.key ?? target.key;
     target.props = replace.props;
@@ -49,7 +49,7 @@ export const replaceElement = (target: JSX.Element, replace: JSX.Element): void 
  *
  * This uses a breadth first search (BFS).
  */
-export const queryTree = (node: ReactTree, predicate: Predicate<JSX.Element>): JSX.Element | null => {
+export const queryTree = (node: ReactTree, predicate: Predicate<React.JSX.Element>): React.JSX.Element | null => {
     // TODO: queue impl?
     const worklist = [node].flat();
 
@@ -62,7 +62,7 @@ export const queryTree = (node: ReactTree, predicate: Predicate<JSX.Element>): J
             }
 
             // add children to worklist
-            const children = node?.props?.children;
+            const children = (node?.props as any)?.children;
             if (children) {
                 worklist.push(...[children].flat());
             }
@@ -77,7 +77,7 @@ export const queryTree = (node: ReactTree, predicate: Predicate<JSX.Element>): J
 *
 * This uses a breadth first search (BFS).
 */
-export const queryTreeAll = (node: ReactTree, predicate: Predicate<JSX.Element>): JSX.Element[] => {
+export const queryTreeAll = (node: ReactTree, predicate: Predicate<React.JSX.Element>): React.JSX.Element[] => {
     const result = [];
     const worklist = [node].flat();
 
@@ -90,7 +90,7 @@ export const queryTreeAll = (node: ReactTree, predicate: Predicate<JSX.Element>)
             }
 
             // add children to worklist
-            const children = node?.props?.children;
+            const children = (node?.props as any)?.children;
             if (children) {
                 worklist.push(...[children].flat());
             }
@@ -100,14 +100,14 @@ export const queryTreeAll = (node: ReactTree, predicate: Predicate<JSX.Element>)
     return result;
 };
 
-type ElementWithChildren = React.ReactElement<{children: JSX.Element[]} & Record<string, any>>;
+type ElementWithChildren = React.ReactElement<{ children: React.JSX.Element[]} & Record<string, any>>;
 
 /**
  * Searches a React element tree for an element whose children are in an array and one child matches the predicate.
  *
  * Returns the parent node and the index.
  */
-export const queryTreeForParent = (tree: ReactTree, predicate: Predicate<JSX.Element>): [ElementWithChildren | null, number] => {
+export const queryTreeForParent = (tree: ReactTree, predicate: Predicate<React.JSX.Element>): [ElementWithChildren | null, number] => {
     let childIndex = -1;
 
     const parent = queryTree(tree, (node) => {
