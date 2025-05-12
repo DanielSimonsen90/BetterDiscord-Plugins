@@ -1,28 +1,29 @@
 import * as Patcher from "../api/patcher";
-import {React} from "../modules";
-import {ReactDOMInternals, Fiber, OwnerFiber} from "../react-internals";
+import { React } from "../modules";
+import type { JSX, ReactElement, ReactNode } from "react";
+import type { Fiber, OwnerFiber } from "../react-internals";
 
-export type FCHookCallback<P> = (result: React.ReactNode, targetProps: P) => React.ReactNode | void;
+export type FCHookCallback<P> = (result: ReactNode, targetProps: P) => ReactNode | void;
 
 interface FCHookProps<P> {
-    children: React.ReactElement<P, React.FunctionComponent<P>>;
+    children: ReactElement<P, React.FunctionComponent<P>>;
     callback: FCHookCallback<P>;
 }
 
 /** Utility component hooking into a function component. */
-const FCHook = <P>({children: {type, props}, callback}: FCHookProps<P>): React.ReactNode => {
-    const result = type(props);
-    return callback(result, props) as React.JSX.Element ?? result;
+const FCHook = <P>({ children: { type, props }, callback }: FCHookProps<P>): ReactNode => {
+    const result = type(props) as ReactNode;
+    return callback(result, props) as ReactNode ?? result;
 };
 
 /** Hooks into a function component, allowing to modify the rendered elements. */
 export const hookFunctionComponent = <P>(
-    target: React.ReactElement<P, React.FunctionComponent<P>>,
+    target: ReactElement<P, React.FunctionComponent<P>>,
     callback: FCHookCallback<P>,
 ): React.JSX.Element => {
     // replace original with hook component, move target element to children
     const props: FCHookProps<P> = {
-        children: {...target},
+        children: { ...target },
         callback
     };
     target.props = props as any;
@@ -33,12 +34,12 @@ export const hookFunctionComponent = <P>(
 
 export type Predicate<Arg> = (arg: Arg) => boolean;
 
-type ReactTree = React.ReactNode | React.ReactNode[];
+export type ReactTree = ReactNode | ReactNode[] | Promise<ReactNode>;
 
 /**
  * Replaces a React element with another.
  */
-export const replaceElement = (target: React.JSX.Element, replace: React.JSX.Element): void => {
+export const replaceElement = (target: JSX.Element, replace: JSX.Element): void => {
     target.type = replace.type;
     target.key = replace.key ?? target.key;
     target.props = replace.props;
@@ -49,7 +50,7 @@ export const replaceElement = (target: React.JSX.Element, replace: React.JSX.Ele
  *
  * This uses a breadth first search (BFS).
  */
-export const queryTree = (node: ReactTree, predicate: Predicate<React.JSX.Element>): React.JSX.Element | null => {
+export const queryTree = (node: ReactTree, predicate: Predicate<JSX.Element>): JSX.Element | null => {
     // TODO: queue impl?
     const worklist = [node].flat();
 
@@ -62,7 +63,7 @@ export const queryTree = (node: ReactTree, predicate: Predicate<React.JSX.Elemen
             }
 
             // add children to worklist
-            const children = (node?.props as any)?.children;
+            const children = (node as ReactElement<any>)?.props?.children;
             if (children) {
                 worklist.push(...[children].flat());
             }
@@ -77,7 +78,7 @@ export const queryTree = (node: ReactTree, predicate: Predicate<React.JSX.Elemen
 *
 * This uses a breadth first search (BFS).
 */
-export const queryTreeAll = (node: ReactTree, predicate: Predicate<React.JSX.Element>): React.JSX.Element[] => {
+export const queryTreeAll = (node: ReactTree, predicate: Predicate<JSX.Element>): JSX.Element[] => {
     const result = [];
     const worklist = [node].flat();
 
@@ -90,7 +91,7 @@ export const queryTreeAll = (node: ReactTree, predicate: Predicate<React.JSX.Ele
             }
 
             // add children to worklist
-            const children = (node?.props as any)?.children;
+            const children = (node as ReactElement<any>)?.props?.children;
             if (children) {
                 worklist.push(...[children].flat());
             }
@@ -100,18 +101,18 @@ export const queryTreeAll = (node: ReactTree, predicate: Predicate<React.JSX.Ele
     return result;
 };
 
-type ElementWithChildren = React.ReactElement<{ children: React.JSX.Element[]} & Record<string, any>>;
+export type ElementWithChildren = ReactElement<{ children?: ReactElement[]; } & Record<string, any>>;
 
 /**
  * Searches a React element tree for an element whose children are in an array and one child matches the predicate.
  *
  * Returns the parent node and the index.
  */
-export const queryTreeForParent = (tree: ReactTree, predicate: Predicate<React.JSX.Element>): [ElementWithChildren | null, number] => {
+export const queryTreeForParent = (tree: ReactTree, predicate: Predicate<JSX.Element>): [ElementWithChildren | null, number] => {
     let childIndex = -1;
 
     const parent = queryTree(tree, (node) => {
-        const children = node?.props?.children;
+        const children = (node as ReactElement<any>)?.props?.children;
         if (children instanceof Array) {
             const index = children.findIndex(predicate);
 
@@ -126,7 +127,10 @@ export const queryTreeForParent = (tree: ReactTree, predicate: Predicate<React.J
 };
 
 /** Returns the React fiber node corresponding to a DOM node. */
-export const getFiber = (node: Node): Fiber => ReactDOMInternals.getInstanceFromNode(node ?? {} as Node);
+export const getFiber = (node: Node): Fiber => {
+    const key = Object.keys(node).find((key) => key.startsWith("__reactFiber"));
+    return node?.[key];
+};
 
 export const enum Direction {
     None = "",
@@ -211,10 +215,10 @@ export const forceFullRerender = (fiber: Fiber): Promise<boolean> => new Promise
     // find owner
     const owner = findOwner(fiber);
     if (owner) {
-        const {stateNode} = owner;
+        const { stateNode } = owner;
 
         // render no elements in next render
-        Patcher.instead(stateNode, "render", () => null, {once: true, silent: true});
+        Patcher.instead(stateNode, "render", () => null, { once: true, silent: true });
 
         // force update twice
         stateNode.forceUpdate(() => stateNode.forceUpdate(() => resolve(true)));

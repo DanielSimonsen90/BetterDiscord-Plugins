@@ -1,4 +1,4 @@
-# [ColorfulRoles v1.0.0](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/dist/bd/ColorfulRoles)
+# [ColorfulRoles v1.0.1](https://github.com/DanielSimonsen90/BetterDiscord-Plugins/dist/bd/ColorfulRoles)
 by danhosaur
 
 ## What does it do?

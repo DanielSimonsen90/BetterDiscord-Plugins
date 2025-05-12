@@ -10,7 +10,7 @@ import { Settings } from "../settings";
 export default async function applyRoleColors() {
   await sleep(100); // Wait for the roles to load
 
-  $(s => s.role('list', 'div').and.ariaLabelContains('Roles'))?.children().forEach(el => {
+  $(s => s.role('list', 'div').and.ariaLabelContains('Role'))?.children().forEach(el => {
     const roleId = el.attr('data-list-item-id')?.split('_').pop();
     if (!roleId) return;
 
