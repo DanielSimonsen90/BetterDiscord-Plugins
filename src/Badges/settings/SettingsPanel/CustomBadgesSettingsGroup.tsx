@@ -1,5 +1,5 @@
 import React, { useState, classNames } from "@react";
-import { SearchableList, UserListItem, ErrorBoundary } from '@components'
+import { SearchableList, UserListItem, ErrorBoundary, SearchableListProps } from '@components';
 import { useForceUpdate } from "@hooks";
 
 import { Button, Tooltip } from "@discord/components";
@@ -8,46 +8,56 @@ import { FormSection, Text } from "@dium/components";
 import { buildContextMenu, buildTextItem } from '@context-menus';
 import { ObjectUtils, StringUtils, UserUtils } from "@utils";
 
-import { CustomBadge } from "../../../components/CustomBadge";
-import { CustomBadgesStore, BadgePositionsStore } from "../../../stores";
-import CustomBadgeModifyForm from "./CustomBadgeModifyForm";
+import { CustomBadge, CustomBadgeData } from "../../components/CustomBadge";
+import { CustomBadgesStore } from "../../stores";
+import CustomBadgeModifyForm from "./CustomClientBadgesSettings/CustomBadgeModifyForm";
+import { Logger } from "@injections";
 
-export default function CustomBadgesSettingsGroup() {
+type Props<TItem> = Pick<SearchableListProps<TItem>, 'items' | 'onSearch'> & {
+  type: 'remove' | 'delete';
+  allowCreateNew?: boolean;
+  allowEdit?: boolean;
+  onUserBadgesUpdate: (badge: CustomBadgeData, userTag: string, state: 'add' | 'remove') => void;
+  onRemoveOrDelete?: (badgeId: string) => void;
+};
+
+export default function CustomBadgesSettingsGroup<TItem extends CustomBadgeData>({
+  items, onSearch,
+  type, onRemoveOrDelete, onUserBadgesUpdate,
+  allowEdit, allowCreateNew
+}: Props<TItem>) {
   const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(null);
 
   const forceUpdate = useForceUpdate();
-  const modifyUserToBadge = useModifyUserToBadge(forceUpdate);
+  const modifyUserToBadge = useModifyUserToBadge(forceUpdate, onUserBadgesUpdate);
   CustomBadgesStore.useListener(forceUpdate);
 
   return (
-    <FormSection title="Custom Badges">
+    <FormSection title="Your Custom Badges">
       {selectedBadgeId && <CustomBadgeModifyForm
-        selectedBadgeId={selectedBadgeId} 
-        setSelectedBadgeId={setSelectedBadgeId} 
+        selectedBadgeId={selectedBadgeId}
+        setSelectedBadgeId={setSelectedBadgeId}
       />}
 
-      <SearchableList items={CustomBadgesStore.customBadges} className="custom-badge-list"
-        onSearch={(search, item) => [item.name, item.id, item.href].some(value => value?.toLowerCase().includes(search.toLowerCase()))}
+      <SearchableList items={items} className="custom-badge-list"
+        onSearch={onSearch}
         placeholder="Search for a badge to modify..."
         renderItem={(badge, i) => (
           <section className={classNames('custom-badge-container', i % 2 === 0 && 'custom-badge-container--alternate')} key={badge.id}>
             <CustomBadge key={badge.id} {...ObjectUtils.exclude(badge, 'size')} onContextMenu={e => {
               BdApi.ContextMenu.open(e as any, createCustomBadgeContextMenu({
-                onEdit: () => setSelectedBadgeId(badge.id),
-                onDelete: () => {
-                  BdApi.UI.showConfirmationModal(`Delete ${badge.name}?`, (
+                onEdit: allowEdit ? () => setSelectedBadgeId(badge.id) : undefined,
+                onDelete: onRemoveOrDelete ? () => {
+                  BdApi.UI.showConfirmationModal(`${StringUtils.pascalCaseFromCamelCase(type)} ${badge.name}?`, (
                     <div>
-                      <Text variant="text-md/normal">Are you sure you want to delete {badge.name}?</Text>
+                      <Text variant="text-md/normal">Are you sure you want to {type} {badge.name}?</Text>
                       <Text variant="text-sm/normal">This action cannot be undone.</Text>
                     </div>
                   ), {
-                    confirmText: `Delete ${badge.name}`,
-                    onConfirm() {
-                      BadgePositionsStore.deleteBadgePosition(badge.id);
-                      CustomBadgesStore.deleteCustomBadge(badge.id);
-                    }
-                  })
-                }
+                    confirmText: `${StringUtils.pascalCaseFromCamelCase(type)} ${badge.name}`,
+                    onConfirm: () => onRemoveOrDelete(badge.id)
+                  });
+                } : undefined
               }));
             }} />
 
@@ -57,13 +67,14 @@ export default function CustomBadgesSettingsGroup() {
                   {badge.userTags
                     ? badge.userTags.map(userTag => {
                       const user = UserUtils.getUserByUsername(userTag);
-                      const onClick = () => modifyUserToBadge(badge.id, userTag, 'remove');
+                      if (!user) Logger.warn(`User "${userTag}" not found`);
+                      const onClick = () => modifyUserToBadge(badge, userTag, 'remove');
                       const child = user
-                        ? <UserListItem user={user} onClick={onClick}  />
+                        ? <UserListItem user={user} onClick={onClick} />
                         : <Text variant="text-md/normal">{userTag}</Text>;
 
                       return (
-                        <Tooltip text={`Remove ${badge.name} from ${UserUtils.getUsernames(user).shift()}`}>
+                        <Tooltip text={`Remove ${badge.name} from ${user ? UserUtils.getUsernames(user).shift() : userTag}`}>
                           {props => (
                             <div {...props} className="user-tooltip" onClick={onClick}>
                               {child}
@@ -84,7 +95,7 @@ export default function CustomBadgesSettingsGroup() {
                   renderItem={user => (
                     <Tooltip text={`Give ${badge.name} to ${UserUtils.getUsernames(user).shift()}`}>
                       {props => {
-                        const onClick = () => modifyUserToBadge(badge.id, user.username, 'add');
+                        const onClick = () => modifyUserToBadge(badge, user.username, 'add');
                         return (
                           <div {...props} className="user-tooltip" onClick={onClick}>
                             <UserListItem user={user} onClick={onClick} />
@@ -99,11 +110,13 @@ export default function CustomBadgesSettingsGroup() {
           </section>
         )}
       >
-        <Button type="button" className="create-new-badge-button"
-          look={Button.Looks.FILLED} color={Button.Colors.GREEN} size={Button.Sizes.SMALL}
-          onClick={() => setSelectedBadgeId(`custom-badge__${StringUtils.generateRandomId()}`)}>
-          Create new badge
-        </Button>
+        {allowCreateNew ? (
+          <Button type="button" className="create-new-badge-button"
+            look={Button.Looks.FILLED} color={Button.Colors.GREEN} size={Button.Sizes.SMALL}
+            onClick={() => setSelectedBadgeId(`custom-badge__${StringUtils.generateRandomId()}`)}>
+            Create new badge
+          </Button>
+        ) : null}
       </SearchableList>
     </FormSection>
   );
@@ -113,7 +126,7 @@ export default function CustomBadgesSettingsGroup() {
 type CustomBadgeContextMenuProps = {
   onEdit: () => void;
   onDelete: () => void;
-}
+};
 function createCustomBadgeContextMenu({ onEdit, onDelete }: CustomBadgeContextMenuProps) {
   return buildContextMenu(
     buildTextItem('badge-edit', 'Edit', onEdit),
@@ -123,18 +136,16 @@ function createCustomBadgeContextMenu({ onEdit, onDelete }: CustomBadgeContextMe
   );
 }
 
-function useModifyUserToBadge(forceUpdate: () => void) {
-  return function modifyUserToBadge(badgeId: string, userTag: string, state: 'add' | 'remove') {
-    const badge = CustomBadgesStore.current.customBadges[badgeId];
-    if (!badge) return;
+function useModifyUserToBadge(
+  forceUpdate: () => void, 
+  onUpdate: (badge: CustomBadgeData, userTag: string, state: 'add' | 'remove') => void
+) {
+  return function modifyUserToBadge(badge: CustomBadgeData, userTag: string, state: 'add' | 'remove') {
     if (badge.userTags && badge.userTags.includes(userTag) && state === 'add') return;
     if (badge.userTags && !badge.userTags.includes(userTag) && state === 'remove') return;
 
-    badge.userTags = badge.userTags || [];
-    if (state === 'add') badge.userTags.push(userTag);
-    else badge.userTags = badge.userTags.filter(tag => tag !== userTag);
+    onUpdate(badge, userTag, state);
 
-    CustomBadgesStore.upsetCustomBadge(badge);
     forceUpdate();
   };
 }

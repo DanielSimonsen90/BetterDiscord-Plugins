@@ -11,6 +11,7 @@ import {
 
 import { ActionsEmitter, UserNoteActions } from "@actions";
 import { Snowflake } from "@discord/types";
+import { Logger } from '@injections';
 
 type MyUser = User & {
   get status(): UserStatus;
@@ -31,9 +32,17 @@ export const UserUtils = {
   },
 
   getPresenceState: () => PresenceStore.getState(),
-  getUserByUsername: (username: string) => Object.values(UserStore.getUsers()).find(user => user.username === username),
+  getUserByUsername: (username: string) => Object
+    .values(UserStore.getUsers())
+    .find(user => {
+      if (user.id === UserUtils.me.id) Logger.log({
+        usernames: UserUtils.getUsernames(user),
+        username,
+      })
+      return UserUtils.getUsernames(user).some((value: string) => username === value)
+    }) as User | undefined,
   getUsersPrioritizingFriends(byName?: string) {
-    const getUsername = (user: User) => this.getUsernames(user, true).shift();
+    const getUsername = (user: User) => UserUtils.getUsernames(user, true).shift();
     const sort = (a: User, b: User) => getUsername(a).localeCompare(getUsername(b));
 
     const friends = RelationshipStore
@@ -70,17 +79,13 @@ export const UserUtils = {
       ],
     });
   },
-  getUsernames(user: User, lowered = false) {
-    return [
-      user.globalName,
-      user.username,
-      user.tag
-    ]
-      .filter(Boolean)
-      .map(name => lowered ? name.toLowerCase() : name);
-  },
-  getDisplayName(user: User) {
-    return this.getUsernames(user).shift();
-  },
+  getUsernames: (user: User, lowered = false) => [
+    user.globalName,
+    user.username,
+    user.tag
+  ]
+    .filter(Boolean)
+    .map(name => lowered ? name.toLowerCase() : name),
+  getDisplayName: (user: User) => UserUtils.getUsernames(user).shift(),
 };
 export default UserUtils;

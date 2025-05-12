@@ -128,4 +128,5 @@ CustomBadgesStore.addListener(() => {
   if (Settings.current.useClientCustomBadges) PatchUserContextMenu(patch());
 });
 
-export default patch();
+// export default patch();
+export default function() {} // Patching user-context-menu no longer works

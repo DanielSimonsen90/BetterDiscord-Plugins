@@ -1,4 +1,4 @@
-import { BadgeTypes } from "@discord/components";
+import { BadgeId, BadgeTypes } from "@discord/components";
 import { Snowflake } from "@discord/types";
 import { DanhoStores, DiumStore } from "@stores";
 
@@ -7,7 +7,7 @@ import { USER_TAGS } from "../utils/constants";
 
 type State = {
   customBadges: Record<string, CustomBadgeData>;
-  users: Record<Snowflake, Array<string>>;
+  users: Record<Snowflake, Array<BadgeId>>;
 }
 
 const DEFAULT_STATE: State = {
@@ -51,7 +51,7 @@ const DEFAULT_STATE: State = {
     }
   } as Record<string, CustomBadgeData>,
 
-  users: {} as Record<Snowflake, Array<string>>
+  users: {} as Record<Snowflake, Array<BadgeId>>
 }
 
 export const CustomBadgesStore = new class CustomBadgesStore extends DiumStore<State> {
@@ -66,7 +66,7 @@ export const CustomBadgesStore = new class CustomBadgesStore extends DiumStore<S
     return Object.values(this.current.customBadges);
   }
 
-  public upsetCustomBadge(badge: CustomBadgeData) {
+  public upsertCustomBadge(badge: CustomBadgeData) {
     this.update(current => ({
       ...current,
       customBadges: {
@@ -89,12 +89,15 @@ export const CustomBadgesStore = new class CustomBadgesStore extends DiumStore<S
     });
   }
 
-  public updateCustomUser(userId: Snowflake, badgeId: string) {
+  public updateCustomUser(userId: Snowflake, badgeId: BadgeId, state: 'add' | 'remove') {
     this.update(current => ({
       ...current,
       users: {
         ...current.users,
-        [userId]: [...(current.users[userId] || []), badgeId]
+        [userId]: [
+          ...(current.users[userId] || []).filter(bId => state === 'remove' ? badgeId !== bId : true), 
+          state === 'add' ? badgeId : undefined
+        ].filter(Boolean)
       }
     }));
   }

@@ -68,3 +68,4 @@ function SearchableListInner<TItem>(
 export const SearchableList = forwardRef(SearchableListInner) as <TItem>(
   props: Props<TItem> & { ref?: React.ForwardedRef<HTMLInputElement>; }
 ) => ReturnType<typeof SearchableListInner>;
+export { Props as SearchableListProps };

@@ -90,7 +90,7 @@ export default function CustomBadgeModifyForm(props: Props) {
             BadgePositionsStore.deleteBadgePosition(selectedBadge.id);
           }
 
-          CustomBadgesStore.upsetCustomBadge(modifyBadge as CustomBadgeData);
+          CustomBadgesStore.upsertCustomBadge(modifyBadge as CustomBadgeData);
           setSelectedBadgeId(null);
         }}>
           {isNewBadge ? 'Create' : 'Save'} {modifyBadge.name || selectedBadge.name}
