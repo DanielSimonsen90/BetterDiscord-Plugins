@@ -14,13 +14,7 @@ export const ActionsEmitter = new class ActionsEmitter extends EventEmitter<Acti
     : never
     : (...args: any[]) => void
   ): this {
-    const callback = (...args: any[]) => {
-      try {
-        listener(...args as any);
-      } catch (error) {
-        console.error(error, { eventName, args });
-      }
-    };
+    const callback = this.createCallback<K>(eventName, listener);
     const existing = this._events.get(eventName as string) ?? [];
     this._events.set(
       eventName as string,
@@ -33,13 +27,7 @@ export const ActionsEmitter = new class ActionsEmitter extends EventEmitter<Acti
     return super.on(eventName, callback as any);
   };
   once<K>(eventName: keyof Actions | K, listener: K extends keyof Actions ? Actions[K] extends unknown[] ? (...args: Actions[K]) => void : never : never): this {
-    const callback = (...args: any[]) => {
-      try {
-        listener(...args as any);
-      } catch (error) {
-        console.error(error, { eventName, args });
-      }
-    };
+    const callback = this.createCallback<K>(eventName, listener);
     const existing = this._events.get(eventName as string) ?? [];
     this._events.set(
       eventName as string,
@@ -85,6 +73,25 @@ export const ActionsEmitter = new class ActionsEmitter extends EventEmitter<Acti
 
     this._events.get(eventName as string)?.forEach(([_, wrapped]) => wrapped(...args as any));
     return super.emit(eventName, ...args as any);
+  }
+
+  createCallback<K>(
+    eventName: keyof Actions | K,
+    listener: K extends keyof Actions
+      ? Actions[K] extends unknown[]
+      ? (...args: Actions[K]) => void
+      : never
+      : (...args: any[]) => void
+  ): (...args: any[]) => void {
+    const callback = (...args: any[]) => {
+      try {
+        listener(...args as any);
+      } catch (error) {
+        console.error(error, { eventName, args });
+      }
+    };
+
+    return callback;
   }
 };
 export default ActionsEmitter;

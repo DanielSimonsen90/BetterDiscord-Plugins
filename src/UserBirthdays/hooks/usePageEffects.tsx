@@ -1,9 +1,9 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "@react";
 import { Logger } from "@dium";
 import { $ } from "@dom";
+import { useTimedCheck } from "@hooks/useTimedCheck";
 
 import CalendarPage from "../components/CalendarPage";
-import { useTimedCheck } from "@hooks/useTimedCheck";
 import BirthdayStore from "../stores/BirthdayStore";
 import { CALENDAR_PAGE_CLASSNAME } from "../utils/constants";
 

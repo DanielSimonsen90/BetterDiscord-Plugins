@@ -1,4 +1,4 @@
-import { GuildMemberStore } from '@discord/stores';
+import { GuildMemberCountStore } from '@discord/stores';
 
 import { ChannelUtils } from './Channel';
 import { ClassNamesUtils } from "./ClassNames";

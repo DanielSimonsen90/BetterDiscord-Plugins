@@ -1,6 +1,6 @@
 import {
   GuildStore,
-  GuildMemberStore,
+  GuildMemberCountStore,
   SelectedGuildStore,
   SortedGuildStore,
 

@@ -3,12 +3,12 @@ import { Finder } from "@injections";
 import { Store } from "@dium/modules/flux";
 
 export interface GuildMemberStore extends Store {
-  getCommunicationDisabledUserMap();
-  getCommunicationDisabledVersion();
+  getCommunicationDisabledUserMap(): unknown;
+  getCommunicationDisabledVersion(): unknown;
   getMember(guild: Snowflake, user: Snowflake): GuildMember;
   getMemberIds(guild: Snowflake): Snowflake[];
   getMembers(guild: Snowflake): GuildMember[];
-  getMutableAllGuildsAndMembers();
+  getMutableAllGuildsAndMembers(): unknown;
   getNick(guild: Snowflake, user: Snowflake): string;
   getNicknameGuildsMapping(user: Snowflake): Record<string, Snowflake[]>;
   getNicknames(user: Snowflake): string[];

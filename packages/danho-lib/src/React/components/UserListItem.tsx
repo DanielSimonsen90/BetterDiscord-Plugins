@@ -1,5 +1,5 @@
 import { Snowflake, User } from "@discord/types";
-import { GuildMemberStore, PresenceStore, VoiceStore } from "@discord/stores";
+import { GuildMemberCountStore, PresenceStore, VoiceStore } from "@discord/stores";
 import { UserActivity, UserAvatar, Text, AvatarWithText, UserPopout } from '@discord/components';
 import { MouseEvent, React, ReactNode, PropsWithChildren, useMemo, useState } from "../React";
 import { classNames } from "../utils";

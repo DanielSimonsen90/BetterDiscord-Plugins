@@ -1,6 +1,6 @@
 import { React } from "@dium";
 import { Text } from "@dium/components";
-import { GuildMemberStore, GuildStore, PresenceStore } from "@discord/stores";
+import { GuildMemberCountStore, GuildStore } from "@discord/stores";
 
 import { $ } from "@dom";
 import { GuildUtils } from "@utils";
@@ -14,15 +14,14 @@ export default function updateHeader() {
   const guild = GuildStore.getGuild(GuildUtils.currentId);
   if (!guild) return;
 
-  const members = GuildMemberStore.getMembers(guild.id);
-  const presenceState = PresenceStore.getState();
-  const nonOfflineMembers = members.filter(member => presenceState.statuses[member.userId] && presenceState.statuses[member.userId] !== 'offline');
+  const onlineCount = GuildMemberCountStore.getOnlineCount(guild.id);
+  const memberCount = GuildMemberCountStore.getMemberCount(guild.id);
   const header = $(s => s.className('container', 'nav').and.ariaLabel(`${guild.name} (server)`)
     .className('header', 'header'));
   if (!header) return;
 
   header.appendComponent(
-    <Text variant="heading-md/normal">{nonOfflineMembers.length}/{members.length}</Text>,
+    <Text variant="heading-md/normal">{onlineCount}/{memberCount}</Text>,
     { className: HEADER_MEMBERS_CLASSNAME }
   );
 

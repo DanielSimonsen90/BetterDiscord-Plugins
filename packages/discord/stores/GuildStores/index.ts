@@ -1,5 +1,6 @@
 export * from './ExpandedGuildFolderStore';
 export * from './GuildEmojiStore';
+export * from './GuildMemberCountStore';
 export * from './GuildMemberStore';
 export * from './GuildStore';
 export * from './MemberSafetyStore';

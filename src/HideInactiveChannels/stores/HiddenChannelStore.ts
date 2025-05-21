@@ -124,8 +124,10 @@ const HiddenChannelStore = new class HiddenChannelStore extends DiumStore<Hidden
     const { guildChannels } = ChannelListStore.getGuild(GuildUtils.currentId) ?? {};
     const channel = ChannelStore.getChannel(channelId);
 
-    const isHidden = this.isHidden(channelId);
     const isUnread = ReadStateStore.hasUnread(channelId);
+    this.stayVisisbleTimeout(channelId, isUnread);
+
+    const isHidden = this.isHidden(channelId);
     const hasVoiceActivity = !!VoiceStore.getVoiceStateForChannel(channelId);
 
     const optInEnabled = guildChannels?.optInEnabled ?? false;
@@ -139,7 +141,6 @@ const HiddenChannelStore = new class HiddenChannelStore extends DiumStore<Hidden
       && guildChannels.hideMutedChannels
     );
 
-    this.stayVisisbleTimeout(channelId, isUnread);
 
     const shouldRender = isHidden 
       ? isUnread || hasVoiceActivity 

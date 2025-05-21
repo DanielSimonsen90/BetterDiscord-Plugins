@@ -8,6 +8,7 @@ import { ActionsEmitter, createActionCallback } from '@actions';
 import { Finder } from '@injections';
 
 import { Settings } from '../settings/Settings';
+import { useForceUpdate } from '@hooks';
 
 type Props = {
   privateChannelIds: Array<Snowflake>;
@@ -29,19 +30,22 @@ const classModule: Record<'sectionDivider', string> = Finder.byKeys(["sectionDiv
 export default function PrivateChannelList(ListClass: typeof React.PureComponent<Props, State>) {
   const defaultTab = Settings.useSelector(s => s.defaultDirectAndGroupTab as State['selectedTab']);
   const [selectedTab, setSelectedTab] = React.useState(defaultTab);
+  const [channelIds, setChannelIds] = React.useState<Array<Snowflake>>([]);
+
+  React.useEffect(() => {
+    const onNewMessage = ActionsEmitter.createCallback('MESSAGE_CREATE', ({ channelId }) => {
+      if (channelIds.includes(channelId)) setChannelIds(current => [channelId, ...current.filter(id => id !== channelId)]);
+    })
+    ActionsEmitter.on('MESSAGE_CREATE', onNewMessage);
+    ActionsEmitter.on('MESSAGE_ACK', onNewMessage);
+
+    return () => {
+      ActionsEmitter.off('MESSAGE_CREATE', onNewMessage);
+      ActionsEmitter.off('MESSAGE_ACK', onNewMessage);
+    }
+  }, [])
 
   return class DanhoPrivateChannelList extends ListClass {
-    componentDidMount(): void {
-      super.componentDidMount();
-
-      ActionsEmitter.on('MESSAGE_CREATE', this.onMessageCreate);
-      ActionsEmitter.on('MESSAGE_ACK', this.onMessageAck);
-    }
-    componentWillUnmount(): void {
-      ActionsEmitter.off('MESSAGE_CREATE', this.onMessageCreate);
-      ActionsEmitter.off('MESSAGE_ACK', this.onMessageAck);
-    }
-
     constructor(props: any) {
       super(props);
 
@@ -135,14 +139,6 @@ export default function PrivateChannelList(ListClass: typeof React.PureComponent
           </Button>
         </div>
       );
-    }
-
-    public onMessageCreate = createActionCallback('MESSAGE_CREATE', ({ channelId }) => this.onNewMessage(channelId)).bind(this);
-    public onMessageAck = createActionCallback('MESSAGE_ACK', ({ channelId }) => this.onNewMessage(channelId)).bind(this);
-    private onNewMessage(channelId: Snowflake) {
-      if (this.props.privateChannelIds.includes(channelId)) {
-        this.forceUpdate();
-      }
     }
   };
 }
